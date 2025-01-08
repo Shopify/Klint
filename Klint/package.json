@@ -1,0 +1,12 @@
+{
+    "name": "klint",
+    "version": "1.0.0",
+    "main": "dist/index.js",
+    "module": "dist/index.mjs",
+    "types": "dist/index.d.ts",
+    "files": ["dist"],
+    "peerDependencies": {
+      "react": ">=16.8.0",
+      "react-dom": ">=16.8.0"
+    }
+  }
