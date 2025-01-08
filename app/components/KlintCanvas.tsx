@@ -1,11 +1,9 @@
-import { KlintContext } from "~/components/KlintTypes";
-import Klint from "~/components/Klint";
-import useKlint from "~/hooks/useKlint";
-import State from "~/components/plugins/State";
-import Vector from "~/components/plugins/Vector";
-import Text from "~/components/plugins/Text";
-// import { useLibrary } from "~/hooks/useLibrary";
-// import BitmapText from "~/components/plugins/BitmapText";
+import { KlintContext } from "../../Klint/src/component/KlintTypes";
+import Klint from "../../Klint/src/component/Klint";
+import useKlint from "../../Klint/src/hooks/useKlint";
+import State from "../../Klint/src/plugins/State";
+import Vector from "../../Klint/src/plugins/Vector";
+import Text from "../../Klint/src/plugins/Text";
 
 export function KlintCanvas() {
   const cols = ["#F00", "#0F0", "#00F"];
@@ -24,7 +22,7 @@ export function KlintCanvas() {
     Klint.extend("createVector", (x: number, y: number): Vector => {
       return new Vector(x, y);
     });
-    console.log(Klint.opentype);
+    // console.log(Klint.opentype);
     Klint.extend("state", new State());
 
     Klint.extend("ease", (t: number): number => {

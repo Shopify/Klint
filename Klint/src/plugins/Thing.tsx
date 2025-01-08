@@ -1,17 +1,17 @@
-import { KlintCoreContext, KlintContext } from "../KlintTypes";
+import { KlintCoreContext, KlintContext } from "../component/KlintTypes";
 
-interface BezierType {
+interface ThingType {
   context: KlintContext | KlintCoreContext;
 }
 
-class Bezier implements BezierType {
+class Thing implements ThingType {
   context: KlintContext | KlintCoreContext;
   constructor(ctx: KlintContext | KlintCoreContext) {
     this.context = ctx;
   }
   log = () => {
-    console.log(this.context);
+    console.log(this);
   };
 }
 
-export default Bezier;
+export default Thing;

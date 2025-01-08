@@ -37,9 +37,7 @@ export interface KlintContext extends CanvasRenderingContext2D {
   __currentContours: number[][][] | null;
   __currentContour: number[][] | null;
   __isReadyToDraw: boolean;
-  // to do in preparation for offscreen
   __isMainContext: boolean;
-
   __imageOrigin: "corner" | "center";
   __rectangleOrigin: "corner" | "center";
   __canvasOrigin: "corner" | "center";

@@ -84,7 +84,7 @@ npm run dev
 - [ ] Pixels array : load, set, copy & update => ! set Canvas to willReadOften if loaded, needs to happen at preload stage
 
 ## DEV
-- [ ] getKlintPlugins() hook : to finish
+- [ ] Add loading state if external libs are imported in the Klint lifecycle
 - [ ] Figuring out bundles of plugins
 - [ ] Refresh GTP prompt
 

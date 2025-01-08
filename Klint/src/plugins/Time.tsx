@@ -1,4 +1,4 @@
-import { KlintCoreContext, KlintContext } from "../KlintTypes";
+import { KlintCoreContext, KlintContext } from "../component/KlintTypes";
 
 interface KlintTime {
   context: KlintContext | KlintCoreContext;

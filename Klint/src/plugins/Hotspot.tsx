@@ -1,4 +1,4 @@
-import { KlintCoreContext, KlintMouse } from "../KlintTypes";
+import { KlintCoreContext, KlintMouse } from "../component/KlintTypes";
 
 type HotspotShape = "circle" | "rectangle";
 
