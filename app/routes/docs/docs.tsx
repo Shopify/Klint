@@ -14,11 +14,12 @@ export default function DocsLayout() {
             <NavLink to="/docs">Introduction</NavLink>
             <NavLink to="/docs/installation">Installation</NavLink>
             <NavLink to="/docs/quickstart">Quick Start</NavLink>
+            <NavLink to="/docs/examples/basic">Test Link</NavLink>
           </Section>
 
           <Section title="Core Concepts">
             <NavLink to="/docs/canvas">Canvas</NavLink>
-            <NavLink to="/docs/typography">Typography</NavLink>
+            <NavLink to="/doc/typography">Typography</NavLink>
             <NavLink to="/docs/colors">Colors</NavLink>
           </Section>
 

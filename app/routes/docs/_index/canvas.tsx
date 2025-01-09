@@ -1,10 +1,10 @@
 // import { KlintContext } from "~/components/KlintTypes";
-import Klint, { KlintContext } from "../../Klint/src/component/Klint";
-import useKlint from "../..//Klint/src/hooks/useKlint";
+import Klint, { KlintContext } from "../../../../Klint/src/component/Klint";
+import useKlint from "../../../../Klint/src/hooks/useKlint";
 // import Vector from "~/components/plugins/Vector";
-import Text from "../../Klint/src/plugins/Text";
-import Time from "../../Klint/src/plugins/Time";
-import Easing from "../../Klint/src/plugins/Easing";
+import Text from "../../../../Klint/src/plugins/Text";
+import Time from "../../../../Klint/src/plugins/Time";
+import Easing from "../../../../Klint/src/plugins/Easing";
 export function KlintCanvas() {
   const klint = useKlint();
 
@@ -57,7 +57,7 @@ export function KlintCanvas() {
         P.timeline("sub-01")
           .use(_progress * 2)
           .for(1)
-          .stagger(10, 0.25, (progress, id) => {
+          .stagger(10, 0.5, (progress, id) => {
             const t = s ? E.inout(progress) : 1 - E.inout(progress);
             K.push();
             K.translate(300 + t * (K.width - 600), K.height / 2);
@@ -111,7 +111,7 @@ export function KlintCanvas() {
       setup={setup}
       options={{
         origin: "corner",
-        static: "true",
+        static: "false",
       }}
     />
   );

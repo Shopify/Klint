@@ -8,7 +8,7 @@
 
 ### Participants
 - 🔑 Arthur Cloche — @ac
-- 👩‍💻 Carolyne McNeilly — @Carolyn McNeillie
+- 👩‍💻 Carolyn McNeillie — @Carolyn McNeillie
 - 👨‍💻 John Bogan — @bogan
 - 👨‍💻 Dane Sun - @Dane
 - 👨‍💻 Eric Johnson - @Eric Johnson

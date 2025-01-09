@@ -4,8 +4,8 @@ import {
   KlintConfig,
   KlintContext,
   KlintCanvasOptions,
-} from "../components/KlintTypes";
-import { CONFIG_PROPS, KlintFunctions } from "../components/Klint";
+} from "../component/KlintTypes";
+import { CONFIG_PROPS, KlintFunctions } from "../component/Klint";
 
 // Klint Core Functions
 export type KlintCoreFunctions = {
