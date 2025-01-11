@@ -44,6 +44,8 @@ export const CONFIG_PROPS = [
   "textAlign",
   "textBaseline",
   "textRendering",
+  "wordSpacing",
+  "letterSpacing",
   "globalAlpha",
   "globalCompositeOperation",
   "origin",
@@ -154,6 +156,27 @@ export const KlintFunctions = {
       ctx.ellipse(x, y, radius, radius2 || radius, 0, 0, Math.PI * 2);
       ctx.drawIfVisible();
     },
+  disk:
+    (ctx: KlintContext) =>
+    (
+      x: number,
+      y: number,
+      radius: number,
+      startAngle = 0,
+      endAngle = Math.PI * 2,
+      closed = true
+    ) => {
+      ctx.beginPath();
+      if (closed) {
+        ctx.moveTo(x, y);
+        ctx.arc(x, y, radius, startAngle, endAngle);
+        ctx.lineTo(x, y);
+      } else {
+        ctx.arc(x, y, radius, startAngle, endAngle);
+      }
+      ctx.drawIfVisible();
+    },
+
   rectangle:
     (ctx: KlintContext) =>
     (x: number, y: number, width: number, height?: number) => {
@@ -300,19 +323,15 @@ export const KlintFunctions = {
 
   textFont: (ctx: KlintContext) => (font: string) => {
     ctx.__textFont = font;
-    ctx.computeTextStyle();
   },
   textSize: (ctx: KlintContext) => (size: number) => {
     ctx.__textSize = size * ctx.__dpr || ctx.__textSize;
-    ctx.computeTextStyle();
   },
   textStyle: (ctx: KlintContext) => (style: string) => {
     ctx.__textStyle = style || "normal";
-    ctx.computeTextStyle();
   },
   textWeight: (ctx: KlintContext) => (weight: string) => {
     ctx.__textWeight = weight || "normal";
-    ctx.computeTextStyle();
   },
   textQuality:
     (ctx: KlintContext) =>
@@ -326,6 +345,10 @@ export const KlintFunctions = {
       } else if (quality === "precision") {
         ctx.textRendering = "geometricPrecision";
       }
+    },
+  textSpacing:
+    (ctx: KlintContext) => (kind: "letter" | "word", value: number) => {
+      ctx[`${kind}Spacing`] = `${value}px`;
     },
   // TO DO : add variable axis handling
   computeTextStyle: (ctx: KlintContext) => () => {
@@ -341,7 +364,12 @@ export const KlintFunctions = {
     ctx.lineHeight = `${spacing}px`;
   },
   computeFont: (ctx: KlintContext) => () => {
+    ctx.computeTextStyle();
     if (ctx.font !== ctx.__computedTextFont) ctx.font = ctx.__computedTextFont;
+  },
+  textWidth: (ctx: KlintContext) => (text: string) => {
+    ctx.computeFont();
+    return ctx.measureText(text).width;
   },
   text:
     (ctx: KlintContext) =>
@@ -485,12 +513,7 @@ export const KlintFunctions = {
       const canvas = ctx.canvas;
       return canvas.toDataURL(type, quality);
     },
-  textWidth: (ctx: KlintContext) => (text: string) => {
-    if (ctx.font !== ctx.__computedTextFont) {
-      ctx.font = ctx.__computedTextFont;
-    }
-    return ctx.measureText(text).width;
-  },
+
   resizeCanvas: (ctx: KlintContext) => (width: number, height: number) => {
     // Ignore if this is the main canvas
     if (ctx.__isMainContext) return;

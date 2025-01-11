@@ -27,6 +27,12 @@ export type KlintConfig = Partial<
 >;
 export type KlintImageInput = HTMLImageElement | undefined | HTMLCanvasElement;
 
+export type VertexType = "linear" | "bezier" | "curve" | "catmull" | "arc";
+export type VertexPoint = {
+  type: VertexType;
+  points: number[][]; // [x,y] for linear, [[x1,y1], [x2,y2], [x,y]] for bezier, etc.
+};
+
 export interface KlintContext extends CanvasRenderingContext2D {
   width: number;
   height: number;

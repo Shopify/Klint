@@ -43,7 +43,7 @@ npm run dev
 - [x] describe => HTMLElement
 - [x] Points => strokeRect(x,y,1,1)
 - [x] Lines 
-- [ ] Arcs
+- [x] Arcs
 - [x] Better mouse & touch listeners
 - [x] Custom shape + contours
 - [ ] Add other types of vertices

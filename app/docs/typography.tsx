@@ -1,10 +1,10 @@
 // import { KlintContext } from "~/components/KlintTypes";
-import Klint, { KlintContext } from "../../Klint/src/component/Klint";
-import useKlint from "../../Klint/src/hooks/useKlint";
+import Klint, { KlintContext } from "../Klint/src/component/Klint";
+import useKlint from "../Klint/src/hooks/useKlint";
 // import Vector from "~/components/plugins/Vector";
-import Text from "../../Klint/src/plugins/Text";
-import Time from "../../Klint/src/plugins/Time";
-import Easing from "../../Klint/src/plugins/Easing";
+import Text from "../Klint/src/plugins/Text";
+import Time from "../Klint/src/plugins/Time";
+import Easing from "../Klint/src/plugins/Easing";
 export function KlintCanvas() {
   const klint = useKlint();
 

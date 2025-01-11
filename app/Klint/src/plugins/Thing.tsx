@@ -1,10 +1,10 @@
 import { KlintCoreContext, KlintContext } from "../component/KlintTypes";
 
-interface ThingType {
+interface KlintThing {
   context: KlintContext | KlintCoreContext;
 }
 
-class Thing implements ThingType {
+class Thing implements KlintThing {
   context: KlintContext | KlintCoreContext;
   constructor(ctx: KlintContext | KlintCoreContext) {
     this.context = ctx;

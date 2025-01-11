@@ -1,4 +1,4 @@
-import { KlintCanvas } from "../examples/typography";
+import { KlintCanvas } from "../docs/typography";
 import { useState } from "react";
 //import { loadPlugins } from "../components/addPlugins.server";
 // import useKlintPlugins from "~/components/useKlintPlugins";

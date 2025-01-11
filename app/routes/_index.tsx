@@ -1,31 +1,74 @@
-// import { KlintContext } from "~/components/KlintTypes";
-import Klint, { KlintContext } from "../../Klint/src/component/Klint";
-import useKlint from "../..//Klint/src/hooks/useKlint";
-// import Vector from "~/components/plugins/Vector";
-import Text from "../../Klint/src/plugins/Text";
-import Time from "../../Klint/src/plugins/Time";
-import Easing from "../../Klint/src/plugins/Easing";
+import Klint, { KlintContext } from "~/Klint/src/component/Klint";
+import useKlint from "~/Klint/src/hooks/useKlint";
+import Text from "~/Klint/src/plugins/Text";
+import Time from "~/Klint/src/plugins/Time";
+import Easing from "~/Klint/src/plugins/Easing";
+import Color from "~/Klint/src/plugins/Color";
+import { useState } from "react";
+
 export function KlintCanvas() {
   const klint = useKlint();
-
+  const fontSize = 20;
   const preload = async (K: KlintContext) => {
     K.extend("T", new Text(K));
     K.extend("P", new Time(K));
     K.extend("E", new Easing(K));
+    K.extend("C", new Color(K));
   };
   const setup = (K: KlintContext) => {
-    K.textSize(180);
+    K.textSize(fontSize);
     K.alignText("center", "middle");
     K.textFont("Inter");
     K.noStroke();
   };
 
   const draw = (K: KlintContext) => {
-    K.background("#222");
-    K.fillColor("#fff");
-    const P = K.P as Time;
-    const E = K.E as Easing;
+    const { E, C } = K as unknown as { E: Easing; C: Color };
+
+    K.background("#111");
+    K.fillColor("#FF0");
+    // const P = K.P as Time;
+    // const E = K.E as Easing;
+    // const C = K.C as Color;
+
+    K.fillColor(C.olive);
+    // K.push();
+    // const side = 200;
+    // K.translate(K.width / 2, K.height / 2);
+    // K.beginShape();
+    // K.vertex(-side, -side);
+    // K.vertex(side, -side);
+    // K.vertex(side, side);
+    // K.vertex(-side, side);
+    // K.beginContour();
+    // for (let i = Math.PI * 2; i > 0; i -= Math.PI * 0.01) {
+    //   K.vertex(Math.sin(i) * side * 0.66, Math.cos(i) * side * 0.66);
+    // }
+    // K.endContour(true);
+    // K.endShape();
+    // K.pop();
+
     K.push();
+    K.translate(K.width / 2, 0);
+    const nums = Math.floor(K.height / fontSize) - 4;
+    const str = "KLINT KLINT KLINT";
+
+    for (let i = 0; i < nums; i++) {
+      const progress = E.normalize(Math.sin(K.frame * 0.03 + i)) * 400;
+      K.push();
+      K.textSpacing("word", progress * 0.5);
+      K.textSpacing("letter", (progress * 2) / 10);
+      K.translate(0, i * (fontSize * 1.5));
+      K.text(str, 0, 0);
+      K.pop();
+    }
+
+    K.pop();
+
+    // const off = E.normalize(Math.sin(K.frame / 4)) * 0.25 * Math.PI;
+    // K.disk(0, 0, 250, off, Math.PI * 2 - off, true);
+
+    // K.push();
     // let offset = 0;
     // let offset2 = 0;
     /*
@@ -49,23 +92,23 @@ export function KlintCanvas() {
       .progress();
       */
 
-    P.timeline("default")
-      .use(K.frame)
-      .for(8 * 60)
-      .between(0, 1, (_progress) => {
-        const s = _progress < 0.5;
-        P.timeline("sub-01")
-          .use(_progress * 2)
-          .for(1)
-          .stagger(10, 0.25, (progress, id) => {
-            const t = s ? E.inout(progress) : 1 - E.inout(progress);
-            K.push();
-            K.translate(300 + t * (K.width - 600), K.height / 2);
-            K.fillColor(`rgba(${(1 - id) * 255},0,0,255)`);
-            K.circle(0, 0, 200);
-            K.pop();
-          });
-      });
+    // P.timeline("default")
+    //   .use(K.frame)
+    //   .for(8 * 60)
+    //   .between(0, 1, (_progress) => {
+    //     const s = _progress < 0.5;
+    //     P.timeline("sub-01")
+    //       .use(_progress * 2)
+    //       .for(1)
+    //       .stagger(10, 0.25, (progress, id) => {
+    //         const t = s ? E.inout(progress) : 1 - E.inout(progress);
+    //         K.push();
+    //         K.translate(300 + t * (K.width - 600), K.height / 2);
+    //         K.fillColor(`rgba(${(1 - id) * 255},0,0,255)`);
+    //         K.circle(0, 0, 200);
+    //         K.pop();
+    //       });
+    //   });
 
     // const x = 100 + p * (K.width - 200);
     // const y = K.height / 2 + offset;
@@ -111,8 +154,28 @@ export function KlintCanvas() {
       setup={setup}
       options={{
         origin: "corner",
-        static: "true",
+        noloop: "true",
       }}
     />
+  );
+}
+
+export default function Index() {
+  const [count, setCount] = useState(0);
+
+  // const { colors } = useKlint();
+
+  return (
+    <div className="flex h-screen items-center justify-center flex-col gap-4">
+      <button
+        onClick={() => setCount((c) => c + 1)}
+        className="px-4 py-2 bg-white rounded"
+      >
+        Count: {count}
+      </button>
+      <div className="w-4/5 h-4/5 flex justify-center items-center bg-[#398575] overflow-hidden rounded-[8px]">
+        <KlintCanvas />
+      </div>
+    </div>
   );
 }
