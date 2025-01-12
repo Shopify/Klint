@@ -50,7 +50,7 @@ npm run dev
 - [x] Text measurement 
 - [x] distance, clamp, lerp, wrap, remap
 - [x] blending operations
-- [ ] better text options
+- [x] better text options
 - [x] line joints and caps
 - [ ] clip
 - [x] pixels array data but considering removing it
@@ -75,11 +75,12 @@ npm run dev
 ## ESSENTIALS PLUGINS
 ### will be in the main lib
 - [ ] Hotspot : note ( Path 2D circle and square : ctx.isPointInPath()) 
-- [ ] Colors : Lerp color, grayscale, gradients & Color Modes 
+- [x] Colors : Lerp color, grayscale, gradients & Color Modes 
 - [ ] Grids : 2D, responsive, radial 
 - [x] Text helper : paragraph, precise bounding, text directions, circular text, text on a path & wrap ( char || words )
 - [ ] Vector2D & Matrix
 - [ ] Noise
+- [ ] Video
 - [ ] Loading State fallback
 - [ ] Pixels array : load, set, copy & update => ! set Canvas to willReadOften if loaded, needs to happen at preload stage
 
@@ -98,7 +99,6 @@ npm run dev
 - [ ] Vector3D
 - [ ] Vector4D
 - [ ] Projector 
-- [ ] Stagger 
 - [x] Timeline 
 - [ ] Polyline 2D
 - [x] Text Animation

@@ -654,30 +654,45 @@ export default function Klint({
 
     const container = containerRef.current;
     if (!container) return;
+
+    // Mouse events (non-passive)
     container.addEventListener("mousemove", handlePointerMove);
-    container.addEventListener("touchmove", handlePointerMove);
-    container.addEventListener("touchstart", handlePointerMove);
     container.addEventListener("mousedown", handlePointerDown);
     container.addEventListener("mouseup", handlePointerUp);
-    container.addEventListener("touchstart", handlePointerDown);
-    container.addEventListener("touchend", handlePointerUp);
     container.addEventListener("mouseenter", handlePointerEnter);
     container.addEventListener("mouseleave", handlePointerLeave);
 
-    // Also handle pointer up outside the canvas
+    // Touch events (passive)
+    container.addEventListener("touchmove", handlePointerMove, {
+      passive: false,
+    });
+    container.addEventListener("touchstart", handlePointerMove, {
+      passive: true,
+    });
+    container.addEventListener("touchstart", handlePointerDown, {
+      passive: true,
+    });
+    container.addEventListener("touchend", handlePointerUp, { passive: true });
+
+    // Document-level events
     document.addEventListener("mouseup", handlePointerUp);
-    document.addEventListener("touchend", handlePointerUp);
+    document.addEventListener("touchend", handlePointerUp, { passive: true });
 
     return () => {
+      // Mouse cleanup
       container.removeEventListener("mousemove", handlePointerMove);
-      container.removeEventListener("touchmove", handlePointerMove);
-      container.removeEventListener("touchstart", handlePointerMove);
       container.removeEventListener("mousedown", handlePointerDown);
       container.removeEventListener("mouseup", handlePointerUp);
-      container.removeEventListener("touchstart", handlePointerDown);
-      container.removeEventListener("touchend", handlePointerUp);
       container.removeEventListener("mouseenter", handlePointerEnter);
       container.removeEventListener("mouseleave", handlePointerLeave);
+
+      // Touch cleanup
+      container.removeEventListener("touchmove", handlePointerMove);
+      container.removeEventListener("touchstart", handlePointerMove);
+      container.removeEventListener("touchstart", handlePointerDown);
+      container.removeEventListener("touchend", handlePointerUp);
+
+      // Document cleanup
       document.removeEventListener("mouseup", handlePointerUp);
       document.removeEventListener("touchend", handlePointerUp);
     };
@@ -732,7 +747,7 @@ export default function Klint({
     updateCanvasSize();
     if (options.ignoreresize !== "true") {
       resizeObserverRef.current = new ResizeObserver(() =>
-        updateCanvasSize(true)
+        updateCanvasSize(context.__isReadyToDraw)
       );
       if (container) {
         resizeObserverRef.current.observe(container);
@@ -850,7 +865,7 @@ export default function Klint({
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, [animate, isVisible, __options.noloop, draw, isReady]);
+  }, [animate, isVisible]);
 
   return (
     <div ref={containerRef} style={{ width: "100%", height: "100%" }}>

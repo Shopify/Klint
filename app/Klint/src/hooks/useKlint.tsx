@@ -103,6 +103,14 @@ export const KlintCoreFunctions = {
         img.src = url;
       });
     },
+  passImage: () => (element: HTMLImageElement) => {
+    if (!element.complete) {
+      console.warn("Image passed to passImage() is not fully loaded");
+      return null;
+    }
+    return element;
+  },
+
   saveConfig: (ctx: KlintCoreContext) => (from?: KlintCoreContext) => {
     return Object.fromEntries(
       CONFIG_PROPS.map((key) => [
@@ -120,13 +128,7 @@ export const KlintCoreFunctions = {
   describe: (ctx: KlintCoreContext) => (description: string) => {
     ctx.__description = description;
   },
-  passImage: () => (element: HTMLImageElement) => {
-    if (!element.complete) {
-      console.warn("Image passed to passImage() is not fully loaded");
-      return null;
-    }
-    return element;
-  },
+
   createOffscreen:
     (ctx: KlintCoreContext) =>
     (
