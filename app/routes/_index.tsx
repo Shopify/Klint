@@ -1,41 +1,32 @@
 import Klint, { KlintContext } from "~/Klint/src/component/Klint";
 import useKlint from "~/Klint/src/hooks/useKlint";
-import { useVideo } from "~/Klint/src/hooks/useVideo";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export function KlintCanvas() {
   const klint = useKlint();
-  const { video, load } = useVideo(
-    "https://cdn.shopify.com/videos/c/o/v/61c02cdf1fba42d18b0cf577a3733895.mp4"
+  const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(
+    null
   );
 
   const preload = async (K: KlintContext) => {
-    await load();
-    console.log(video());
+    const video = document.createElement("video");
+    video.src =
+      "https://cdn.shopify.com/videos/c/o/v/61c02cdf1fba42d18b0cf577a3733895.mp4";
+    video.autoplay = true;
+    video.loop = true;
+    video.muted = true;
+    await video.play();
+    setVideoElement(video);
   };
-
-  const setup = () => {};
 
   const draw = (K: KlintContext) => {
-    // video().play();
     K.background("#111");
     K.fillColor("#FFF");
-    // console.log("hey");
-    K.image(video(), 0, 0, K.width, K.height);
+    if (videoElement) {
+      K.image(videoElement, 0, 0, K.width, K.height);
+    }
   };
-
-  // useEffect(() => {
-  //   // Pause after 5 seconds
-  //   setTimeout(() => {
-  //     video?.pause();
-  //   }, 5000);
-
-  //   // Resume after 7 seconds
-  //   setTimeout(() => {
-  //     video?.play();
-  //   }, 7000);
-  // }, []);
 
   return (
     <Klint
