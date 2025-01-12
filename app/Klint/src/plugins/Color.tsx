@@ -92,6 +92,29 @@ class Color implements KlintColor {
     return hex.length === 1 ? "0" + hex : hex;
   }
 
+  private parseHex(hex: string): [number, number, number, number] {
+    // Remove # if present
+    hex = hex.replace("#", "");
+
+    // Handle shorthand hex (#RGB or #RGBA)
+    if (hex.length <= 4) {
+      hex = hex
+        .split("")
+        .map((c) => c + c)
+        .join("");
+    }
+
+    // Pad with FF for alpha if needed
+    if (hex.length === 6) hex += "FF";
+
+    return [
+      parseInt(hex.slice(0, 2), 16),
+      parseInt(hex.slice(2, 4), 16),
+      parseInt(hex.slice(4, 6), 16),
+      parseInt(hex.slice(6, 8), 16),
+    ];
+  }
+
   rgb(r: number, g: number, b: number) {
     return this.rgba(r, g, b, 1);
   }
@@ -141,52 +164,50 @@ class Color implements KlintColor {
     );
   }
 
-  lab(l: number, a: number, b: number, alpha?: number) {
-    // LAB to XYZ
-    const y = (l + 16) / 116;
-    const x = a / 500 + y;
-    const z = y - b / 200;
-
-    const xyz2rgb = (t: number) => {
-      return t > 0.008856 ? Math.pow(t, 1 / 3) : 7.787 * t + 16 / 116;
-    };
-
-    const [xr, yr, zr] = [x, y, z].map(xyz2rgb);
-
-    // XYZ to RGB
-    const r = xr * 3.2406 + yr * -1.5372 + zr * -0.4986;
-    const g = xr * -0.9689 + yr * 1.8758 + zr * 0.0415;
-    const _b = xr * 0.0557 + yr * -0.204 + zr * 1.057;
-
-    return this.rgba(
-      Math.round(r * 255),
-      Math.round(g * 255),
-      Math.round(_b * 255),
-      alpha ?? 1
+  blendColors(
+    A: string,
+    B: string,
+    factor: number
+    //colorspace: "rgb" | "lab" | "hsl" | "oklch" = "rgb"
+  ): string {
+    const cA = this.parseHex(A);
+    const cB = this.parseHex(B);
+    // console.log("colorA", cA);
+    // console.log("colorB", cB);
+    // Clamp factor between 0 and 1
+    const t = Math.max(0, Math.min(1, factor));
+    console.log(
+      this.rgba(
+        cA[0] * (1 - t) + cB[0] * t,
+        cA[1] * (1 - t) + cB[1] * t,
+        cA[2] * (1 - t) + cB[2] * t,
+        (cA[3] / 255) * (1 - t) + (cB[3] / 255) * t
+      )
     );
-  }
-
-  oklab(l: number, a: number, b: number, alpha?: number) {
-    // OKLAB to linear RGB
-    const l_ = l + 0.3963377774 * a + 0.2158037573 * b;
-    const m_ = l - 0.1055613458 * a - 0.0638541728 * b;
-    const s_ = l - 0.0894841775 * a - 1.291485548 * b;
-
-    const l2 = l_ * l_ * l_;
-    const m2 = m_ * m_ * m_;
-    const s2 = s_ * s_ * s_;
-
-    // Linear RGB to sRGB
-    const r = 4.0767416621 * l2 - 3.3077115913 * m2 + 0.2309699292 * s2;
-    const g = -1.2684380046 * l2 + 2.6097574011 * m2 - 0.3413193965 * s2;
-    const _b = -0.0041960863 * l2 - 0.7034186147 * m2 + 1.707614701 * s2;
-
     return this.rgba(
-      Math.round(r * 255),
-      Math.round(g * 255),
-      Math.round(_b * 255),
-      alpha ?? 1
+      cA[0] * (1 - t) + cB[0] * t,
+      cA[1] * (1 - t) + cB[1] * t,
+      cA[2] * (1 - t) + cB[2] * t,
+      (cA[3] / 255) * (1 - t) + (cB[3] / 255) * t
     );
+    /*
+    switch (colorspace) {
+      case "rgb":
+        // Linear interpolation in RGB space
+        return this.rgba(
+          cA[0] * (1 - t) + cB[0] * t,
+          cA[1] * (1 - t) + cB[1] * t,
+          cA[2] * (1 - t) + cB[2] * t,
+          cA[3] * (1 - t) + cB[3] * t
+        );
+
+      case "hsl":
+      case "lab":
+      case "oklch":
+        // Fallback to RGB blending for now
+        return this.blendColors(A, B, factor, "rgb");
+    }
+    */
   }
 }
 

@@ -27,11 +27,37 @@ export function KlintCanvas() {
 
     K.background("#111");
     K.fillColor("#FF0");
-    // const P = K.P as Time;
-    // const E = K.E as Easing;
-    // const C = K.C as Color;
 
+    const a = (K.frame * 0.005) % 1;
+    const b = E.normalize(Math.cos(K.frame * 0.03));
+    const c = E.normalize(Math.sin(K.frame * 0.03 + Math.PI));
+    const d = C.blendColors(C.olive, C.crimson, b);
+
+    K.push();
     K.fillColor(C.olive);
+    K.rectangle(0, 0, K.width, K.height / 8);
+    K.pop();
+
+    K.push();
+    K.fillColor(C.rgb(124, 109, 204));
+    K.rectangle(0, K.height / 8, K.width, K.height / 8);
+    K.pop();
+
+    K.push();
+    K.fillColor(C.hsl(360 * a, 50, 50));
+    K.rectangle(0, (K.height / 8) * 2, K.width, K.height / 8);
+    K.pop();
+
+    K.push();
+    K.fillColor(d);
+    K.rectangle(0, (K.height / 8) * 3, K.width, K.height / 8);
+    K.pop();
+
+    K.push();
+    K.fillColor(C.gray(c * 255));
+    K.rectangle(0, (K.height / 8) * 4, K.width, K.height / 8);
+    K.pop();
+
     // K.push();
     // const side = 200;
     // K.translate(K.width / 2, K.height / 2);
@@ -48,22 +74,22 @@ export function KlintCanvas() {
     // K.endShape();
     // K.pop();
 
-    K.push();
-    K.translate(K.width / 2, 0);
-    const nums = Math.floor(K.height / fontSize) - 4;
-    const str = "KLINT KLINT KLINT";
+    // K.push();
+    // K.translate(K.width / 2, 0);
+    // const nums = Math.floor(K.height / fontSize) - 4;
+    // const str = "KLINT KLINT KLINT";
 
-    for (let i = 0; i < nums; i++) {
-      const progress = E.normalize(Math.sin(K.frame * 0.03 + i)) * 400;
-      K.push();
-      K.textSpacing("word", progress * 0.5);
-      K.textSpacing("letter", (progress * 2) / 10);
-      K.translate(0, i * (fontSize * 1.5));
-      K.text(str, 0, 0);
-      K.pop();
-    }
+    // for (let i = 0; i < nums; i++) {
+    //   const progress = E.normalize(Math.sin(K.frame * 0.03 + i)) * 400;
+    //   K.push();
+    //   K.textSpacing("word", progress * 0.5);
+    //   K.textSpacing("letter", (progress * 2) / 10);
+    //   K.translate(0, i * (fontSize * 1.5));
+    //   K.text(str, 0, 0);
+    //   K.pop();
+    // }
 
-    K.pop();
+    // K.pop();
 
     // const off = E.normalize(Math.sin(K.frame / 4)) * 0.25 * Math.PI;
     // K.disk(0, 0, 250, off, Math.PI * 2 - off, true);
@@ -154,7 +180,7 @@ export function KlintCanvas() {
       setup={setup}
       options={{
         origin: "corner",
-        noloop: "true",
+        noloop: "false",
       }}
     />
   );
