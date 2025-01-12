@@ -176,14 +176,7 @@ class Color implements KlintColor {
     // console.log("colorB", cB);
     // Clamp factor between 0 and 1
     const t = Math.max(0, Math.min(1, factor));
-    console.log(
-      this.rgba(
-        cA[0] * (1 - t) + cB[0] * t,
-        cA[1] * (1 - t) + cB[1] * t,
-        cA[2] * (1 - t) + cB[2] * t,
-        (cA[3] / 255) * (1 - t) + (cB[3] / 255) * t
-      )
-    );
+
     return this.rgba(
       cA[0] * (1 - t) + cB[0] * t,
       cA[1] * (1 - t) + cB[1] * t,

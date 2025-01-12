@@ -551,6 +551,8 @@ export default function Klint({
     vx: 0,
     vy: 0,
     angle: 0,
+    isPressed: false,
+    isHover: false,
   });
   const __options = useMemo(() => {
     return {
@@ -596,6 +598,7 @@ export default function Klint({
       mouse.angle = Number(
         ((Math.atan2(mouse.vy, mouse.vx) * 180) / Math.PI).toFixed(4)
       );
+
       contextRef.current.mouse = mouse;
     }
   };
@@ -622,6 +625,30 @@ export default function Klint({
     }
   }, []);
 
+  const handlePointerDown = useCallback(() => {
+    if (mouseRef.current) {
+      mouseRef.current.isPressed = true;
+    }
+  }, []);
+
+  const handlePointerUp = useCallback(() => {
+    if (mouseRef.current) {
+      mouseRef.current.isPressed = false;
+    }
+  }, []);
+
+  const handlePointerEnter = useCallback(() => {
+    if (mouseRef.current) {
+      mouseRef.current.isHover = true;
+    }
+  }, []);
+
+  const handlePointerLeave = useCallback(() => {
+    if (mouseRef.current) {
+      mouseRef.current.isHover = false;
+    }
+  }, []);
+
   useEffect(() => {
     if (__options.ignoremouse === "true") return;
 
@@ -630,12 +657,38 @@ export default function Klint({
     container.addEventListener("mousemove", handlePointerMove);
     container.addEventListener("touchmove", handlePointerMove);
     container.addEventListener("touchstart", handlePointerMove);
+    container.addEventListener("mousedown", handlePointerDown);
+    container.addEventListener("mouseup", handlePointerUp);
+    container.addEventListener("touchstart", handlePointerDown);
+    container.addEventListener("touchend", handlePointerUp);
+    container.addEventListener("mouseenter", handlePointerEnter);
+    container.addEventListener("mouseleave", handlePointerLeave);
+
+    // Also handle pointer up outside the canvas
+    document.addEventListener("mouseup", handlePointerUp);
+    document.addEventListener("touchend", handlePointerUp);
+
     return () => {
       container.removeEventListener("mousemove", handlePointerMove);
       container.removeEventListener("touchmove", handlePointerMove);
       container.removeEventListener("touchstart", handlePointerMove);
+      container.removeEventListener("mousedown", handlePointerDown);
+      container.removeEventListener("mouseup", handlePointerUp);
+      container.removeEventListener("touchstart", handlePointerDown);
+      container.removeEventListener("touchend", handlePointerUp);
+      container.removeEventListener("mouseenter", handlePointerEnter);
+      container.removeEventListener("mouseleave", handlePointerLeave);
+      document.removeEventListener("mouseup", handlePointerUp);
+      document.removeEventListener("touchend", handlePointerUp);
     };
-  }, [handlePointerMove, __options.ignoremouse]);
+  }, [
+    handlePointerMove,
+    handlePointerDown,
+    handlePointerUp,
+    handlePointerEnter,
+    handlePointerLeave,
+    __options.ignoremouse,
+  ]);
 
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;

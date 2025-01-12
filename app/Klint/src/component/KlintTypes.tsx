@@ -20,6 +20,8 @@ export interface KlintProps {
   setup?: (ctx: KlintContext | KlintCoreContext) => void;
   preload?: (ctx: KlintContext | KlintCoreContext) => Promise<void>;
   options?: KlintCanvasOptions;
+  onClick?: (ctx: KlintContext) => void;
+  onResize?: (ctx: KlintContext) => void;
 }
 
 export type KlintConfig = Partial<
@@ -82,6 +84,8 @@ export interface KlintMouse {
   vx: number;
   vy: number;
   angle: number;
+  isPressed: boolean;
+  isHover: boolean;
 }
 
 export interface KlintContextWrapper {
