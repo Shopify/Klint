@@ -1,4 +1,6 @@
-import { KlintFunctions, CONFIG_PROPS } from "./Klint";
+import { CONFIG_PROPS } from "./Klint";
+import { KlintFunctions } from "./KlintFunctions";
+import { KlintCoreFunctions } from "./KlintCoreFunctions";
 // canvas props
 
 export interface KlintCanvasOptions {
@@ -29,13 +31,13 @@ export type KlintConfig = Partial<
 >;
 export type KlintImageInput = HTMLImageElement | undefined | HTMLCanvasElement;
 
-export type VertexType = "linear" | "bezier" | "curve" | "catmull" | "arc";
+export type VertexType = "linear" | "curve" | "catmull" | "arc";
 export type VertexPoint = {
   type: VertexType;
   points: number[][]; // [x,y] for linear, [[x1,y1], [x2,y2], [x,y]] for bezier, etc.
 };
 
-export interface KlintContext extends CanvasRenderingContext2D {
+export interface KlintContext extends CanvasRenderingContext2D, KlintFunctions {
   width: number;
   height: number;
   __dpr: number;
@@ -63,7 +65,10 @@ export interface KlintContext extends CanvasRenderingContext2D {
 }
 
 // core context, should not be applied to the offscreen canvas
-export interface KlintCoreContext extends KlintContext, KlintFunctions {
+export interface KlintCoreContext
+  extends KlintContext,
+    KlintFunctions,
+    KlintCoreFunctions {
   // core
   frame: number;
   time: number;
