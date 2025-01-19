@@ -437,7 +437,7 @@ export default function Klint({
       intersectionObserverRef.current?.disconnect();
     };
     // Only run once on mount, since these dependencies are stable
-  }, []);
+  });
 
   useEffect(() => {
     if (!contextRef.current) return;
