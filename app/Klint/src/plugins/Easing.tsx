@@ -1,12 +1,12 @@
-import { KlintCoreContext, KlintContext } from "../component/KlintTypes";
+import { KlintContexts } from "../component/KlintTypes";
 
 interface KlintEasing {
-  context: KlintContext | KlintCoreContext;
+  context: KlintContexts;
 }
 
 class Easing implements KlintEasing {
-  context: KlintContext | KlintCoreContext;
-  constructor(ctx: KlintContext | KlintCoreContext) {
+  context: KlintContexts;
+  constructor(ctx: KlintContexts) {
     this.context = ctx;
   }
 

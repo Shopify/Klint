@@ -1,4 +1,4 @@
-import { KlintContext } from "../component/KlintTypes";
+import { KlintContext, KlintOffscreenContext } from "../component/KlintTypes";
 
 interface KlintBitmapText {
   context: KlintContext;
@@ -79,7 +79,7 @@ class BitmapText implements KlintBitmapText {
       textureWidth,
       textureHeight,
       { origin: "corner", static: "true" },
-      (offscreen: KlintContext) => {
+      (offscreen: KlintOffscreenContext) => {
         offscreen.clear();
         // offscreen.background("#f00");
         // offscreen.strokeJoin("round");

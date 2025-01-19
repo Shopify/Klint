@@ -71,6 +71,8 @@ export interface KlintOffscreenContext
   [key: string]: any;
 }
 
+export type KlintContexts = KlintContext | KlintOffscreenContext;
+
 // core context, should not be applied to the offscreen canvas
 export interface KlintContext
   extends KlintOffscreenContext,

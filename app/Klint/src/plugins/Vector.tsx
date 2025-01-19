@@ -54,7 +54,7 @@ class Vector implements KlintVector {
     this.y /= n;
     return this;
   }
-
+  // to do : project, perp, slerp
   rotate(angle: number): Vector {
     const cos = Math.cos(angle);
     const sin = Math.sin(angle);

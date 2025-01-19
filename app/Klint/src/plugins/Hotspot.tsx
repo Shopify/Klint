@@ -1,4 +1,4 @@
-import { KlintCoreContext, KlintMouse } from "../component/KlintTypes";
+import { KlintContext, KlintMouse } from "../component/KlintTypes";
 
 type HotspotShape = "circle" | "rectangle";
 
@@ -15,12 +15,12 @@ interface HotspotConfig {
 }
 
 class Hotspot {
-  private context: KlintCoreContext;
+  private context: KlintContext;
   private isHovered: boolean = false;
   private wasHovered: boolean = false;
   private config: HotspotConfig;
 
-  constructor(ctx: KlintCoreContext, config: HotspotConfig) {
+  constructor(ctx: KlintContext, config: HotspotConfig) {
     this.context = ctx;
     this.config = config;
   }

@@ -1,7 +1,7 @@
-import { KlintCoreContext, KlintContext } from "../component/KlintTypes";
+import { KlintContexts } from "../component/KlintTypes";
 
 interface KlintTime {
-  context: KlintContext | KlintCoreContext;
+  context: KlintContexts;
 }
 
 interface KlintTimeline {
@@ -10,12 +10,12 @@ interface KlintTimeline {
 }
 
 class Time implements KlintTime {
-  context: KlintContext | KlintCoreContext;
+  context: KlintContexts;
   private timelines: Map<string, KlintTimeline> = new Map();
   private currentTimeline: string = "default";
   private readonly DEFAULT_DURATION = 8 * 60;
   private staggers: { id: number; progress: number }[] = [];
-  constructor(ctx: KlintContext | KlintCoreContext) {
+  constructor(ctx: KlintContexts) {
     this.context = ctx;
     this.timelines.set("default", {
       progress: 0,

@@ -1,4 +1,4 @@
-import { KlintContext } from "../component/KlintTypes";
+import { KlintContexts } from "../component/KlintTypes";
 
 type TextMetrics = {
   width: number;
@@ -21,7 +21,7 @@ type LineData = {
 };
 
 interface KlintText {
-  context: KlintContext;
+  context: KlintContexts;
   findTextSize: (
     text: string,
     dist: number,
@@ -64,8 +64,8 @@ interface KlintText {
 }
 
 class Text implements KlintText {
-  context: KlintContext;
-  constructor(ctx: KlintContext) {
+  context: KlintContexts;
+  constructor(ctx: KlintContexts) {
     this.context = ctx;
   }
 

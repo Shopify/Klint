@@ -1,12 +1,13 @@
-import { KlintOffscreenContext, KlintContext } from "../component/KlintTypes";
+// import { KlintOffscreenContext, KlintContext } from "../component/KlintTypes";
+import { KlintContexts } from "../component/KlintTypes";
 
 interface KlintThing {
-  context: KlintContext | KlintOffscreenContext;
+  context: KlintContexts;
   log(): void;
 }
 
 class Thing implements KlintThing {
-  constructor(public readonly context: KlintContext | KlintOffscreenContext) {}
+  constructor(public readonly context: KlintContexts) {}
 
   log(): void {
     console.log(this.context);

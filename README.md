@@ -46,8 +46,11 @@ npm run dev
 - [ ] Triangle strip and Quad strip
 - [ ] Add other types of vertices : bezierTo(), quadraticTo(), arcTo(),
 - [ ] Filters
+- [ ] Props handling and update.
 
 ## TO DO
+- [ ] Refresh GTP prompt
+- [ ] Figuring out bundles, packages and plugins
 
 ## TESTS
 
@@ -57,13 +60,8 @@ npm run dev
 - [ ] Grids : 2D, responsive, radial 
 - [ ] Curve : Strips, rounding
 - [ ] Vector2D & Matrix
-- [ ] Noise
+- [ ] Noise + pseudo-random
 - [ ] Advanced Pixels array : load, set, copy & update => Done but considering removing it. Should set Canvas to willReadOften if loaded, needs to happen at preload stage
-
-## DEV
-- [ ] Add loading state if external libs are imported in the Klint lifecycle
-- [ ] Figuring out bundles of plugins
-- [ ] Refresh GTP prompt
 
 ## EXTRAS PLUGINS
 ### will be in an external extras folder

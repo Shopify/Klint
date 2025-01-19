@@ -1,4 +1,4 @@
-import { KlintCoreContext, KlintContext } from "../component/KlintTypes";
+import { KlintContexts } from "../component/KlintTypes";
 
 // const colors = {
 //   coral: "#E84D37",
@@ -22,13 +22,13 @@ import { KlintCoreContext, KlintContext } from "../component/KlintTypes";
 // };
 
 interface KlintColor {
-  context: KlintContext | KlintCoreContext;
+  context: KlintContexts;
 }
 
 class Color implements KlintColor {
-  context: KlintContext | KlintCoreContext;
+  context: KlintContexts;
 
-  constructor(ctx: KlintContext | KlintCoreContext) {
+  constructor(ctx: KlintContexts) {
     this.context = ctx;
   }
 

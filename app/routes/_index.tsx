@@ -4,15 +4,25 @@ import Klint, {
 } from "~/Klint/src/component/Klint";
 import useKlint from "~/Klint/src/hooks/useKlint";
 import Text from "~/Klint/src/plugins/Text";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
-export function KlintCanvas() {
+interface CanvasProps {
+  counter: number;
+}
+
+export function KlintCanvas({ ...props }: CanvasProps) {
+  const { counter } = props;
+  console.log("hey");
   const klint = useKlint();
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(
     null
   );
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
+  const counterRef = useRef(counter);
+  useEffect(() => {
+    counterRef.current = counter;
+  }, [counter]);
+  // const [isLoading, setIsLoading] = useState(false);
+  // const [isError, setIsError] = useState(false);
 
   const preload = async (K: KlintContext) => {
     // const video = document.createElement("video");
@@ -23,7 +33,7 @@ export function KlintCanvas() {
     // video.muted = true;
     // await video.play();
     // setVideoElement(video);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // Simulate random error (50% chance)
     // if (Math.random() > 0.5) {
@@ -46,12 +56,12 @@ export function KlintCanvas() {
       }
     );
 
-    K.pause();
+    // K.pause();
   };
 
-  // const setup=()=>{
-
-  // }
+  const setup = (K: KlintContext) => {
+    K.textSize(100);
+  };
 
   const onResize = (K: KlintContext) => {
     console.log("resize");
@@ -77,7 +87,9 @@ export function KlintCanvas() {
 
     // K.translate(K.mouse.x, K.mouse.y);
     K.rotate(K.frame * 0.03);
-    K.image(K.getOffscreen("buffer"), 0, 0, 512, 512);
+    // console.log(counterRef);
+    K.text(String(counterRef?.current), 0, 0);
+    // K.image(K.getOffscreen("buffer"), 0, 0, 512, 512);
     K.pop();
     // if (videoElement) {
     //   K.image(videoElement, 0, 0, K.width, K.height);
@@ -87,7 +99,7 @@ export function KlintCanvas() {
 
   return (
     <>
-      {isLoading && (
+      {/* {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white">
           <div className="bg-slate-800 px-6 py-3 rounded-lg">Loading...</div>
         </div>
@@ -96,19 +108,21 @@ export function KlintCanvas() {
         <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white">
           <div className="bg-red-800 px-6 py-3 rounded-lg">Error !</div>
         </div>
-      )}
+      )} */}
       <Klint
         context={klint}
         preload={preload}
         draw={draw}
+        setup={setup}
         options={{
           origin: "center",
           // noloop: "true",
         }}
         onClick={onClick}
         onResize={onResize}
-        onMouseIn={onMouseIn}
-        onMouseOut={onMouseOut}
+        // onMouseIn={onMouseIn}
+
+        // onMouseOut={onMouseOut}
         // onLoading={setIsLoading}
         // onError={setIsError}
       />
@@ -117,7 +131,7 @@ export function KlintCanvas() {
 }
 
 export default function Index() {
-  const [count, setCount] = useState(0);
+  const [count, setCount] = useState(1);
 
   // const { colors } = useKlint();
 
@@ -130,7 +144,7 @@ export default function Index() {
         Count: {count}
       </button>
       <div className="w-4/5 h-4/5 flex justify-center items-center bg-[#398575] overflow-hidden rounded-[8px]">
-        <KlintCanvas />
+        <KlintCanvas counter={count} />
       </div>
     </div>
   );
