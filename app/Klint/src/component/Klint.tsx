@@ -408,6 +408,133 @@ export default function Klint({
     animationFrameId.current = requestAnimationFrame(animate);
   }, [draw, isVisible]);
 
+<<<<<<< HEAD
+=======
+  const initializeKlint = useCallback(async () => {
+    if (!contextRef.current) return;
+    const context = contextRef.current;
+    if (context.__isReadyToDraw) return;
+    onLoading?.(true);
+    try {
+      try {
+        if (preload && !context.__isPreloaded) {
+          await preload(context);
+        }
+      } catch (error) {
+        console.error("Error during preload:", error);
+        throw error;
+      } finally {
+        context.__isPreloaded = true;
+      }
+      try {
+        if (setup && !context.__isSetup) {
+          setup(context);
+        }
+      } catch (error) {
+        console.error("Error during setup:", error);
+        throw error;
+      } finally {
+        context.__isSetup = true;
+      }
+      context.__isReadyToDraw = true;
+      if (__options.static === "true") {
+        try {
+          draw(context);
+          const imageUrl = canvasRef.current?.toDataURL("image/png");
+          setStaticImage(imageUrl || null);
+          return;
+        } catch (error) {
+          console.error("Error in static mode:", error);
+          throw error;
+        }
+      }
+      setIsReady(true);
+      onLoading?.(false);
+      if (__options.noloop !== "true") animate();
+    } catch (error) {
+      console.error("Fatal Klint initialization error:", error);
+      context.__isReadyToDraw = false;
+      onLoading?.(false);
+      onError?.(true);
+    }
+  }, [
+    preload,
+    setup,
+    draw,
+    animate,
+    onLoading,
+    onError,
+    __options.static,
+    __options.noloop,
+  ]);
+
+  useEffect(() => {
+    if (!canvasRef.current || !containerRef.current) return;
+
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    const dpr = window.devicePixelRatio || 3;
+
+    // Initialize context
+    contextRef.current = initContext ? initContext(canvas) : null;
+    const context = contextRef.current;
+    if (!context) return;
+    context.__dpr = dpr;
+
+    // Set origins
+    if (__options.origin === "center") {
+      context.__imageOrigin = "center";
+      context.__rectangleOrigin = "center";
+      context.__canvasOrigin = "center";
+    }
+
+    // Set FPS
+    if (__options.fps && __options.fps !== context.fps) {
+      context.fps = __options.fps;
+    }
+
+    // Add Klint functions
+    if (__options.ignorefunctions !== "true") {
+      Object.entries(KlintFunctions).forEach(([name, fn]) => {
+        contextRef.current![name] = fn(context as KlintContext);
+      });
+    }
+
+    // Initialize size
+    updateCanvasSize();
+
+    // Setup resize observer
+    if (options.ignoreresize !== "true") {
+      resizeObserverRef.current = new ResizeObserver(() => {
+        updateCanvasSize(context.__isReadyToDraw);
+        onResize?.(context);
+      });
+      resizeObserverRef.current.observe(container);
+    }
+
+    // Setup intersection observer
+    intersectionObserverRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsVisible(entry.isIntersecting);
+        });
+      },
+      { threshold: 0.1, root: null, rootMargin: "50px" }
+    );
+    intersectionObserverRef.current.observe(canvas);
+    console.log("hey");
+
+    // Initialize Klint
+    initializeKlint();
+
+    return () => {
+      resizeObserverRef.current?.disconnect();
+      intersectionObserverRef.current?.disconnect();
+    };
+    // Only run once on mount, since these dependencies are stable
+  }, []);
+
+>>>>>>> parent of 5acbbff (core : fix : renaming context and offscreen context)
   useEffect(() => {
     if (!contextRef.current) return;
     if (!isReady) return;
