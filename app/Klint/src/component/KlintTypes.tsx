@@ -24,6 +24,8 @@ export interface KlintProps {
   options?: KlintCanvasOptions;
   onClick?: (ctx: KlintContext) => void;
   onResize?: (ctx: KlintContext) => void;
+  onMouseIn?: (ctx: KlintContext) => void;
+  onMouseOut?: (ctx: KlintContext) => void;
 }
 
 export type KlintConfig = Partial<

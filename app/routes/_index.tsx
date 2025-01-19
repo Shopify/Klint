@@ -35,7 +35,21 @@ export function KlintCanvas() {
       }
     );
   };
+  const onResize = (K: KlintContext) => {
+    console.log("resize");
+  };
 
+  const onClick = (K: KlintContext) => {
+    console.log("click");
+  };
+
+  const onMouseIn = (K: KlintContext) => {
+    console.log("mouse in");
+  };
+
+  const onMouseOut = (K: KlintContext) => {
+    console.log("mouse out");
+  };
   const draw = (K: KlintContext) => {
     K.background("#FFF");
     K.fillColor("#FFF");
@@ -57,8 +71,12 @@ export function KlintCanvas() {
       draw={draw}
       options={{
         origin: "center",
-        noloop: "false",
+        noloop: "true",
       }}
+      onClick={onClick}
+      onResize={onResize}
+      onMouseIn={onMouseIn}
+      onMouseOut={onMouseOut}
     />
   );
 }

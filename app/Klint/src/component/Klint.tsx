@@ -67,6 +67,10 @@ export default function Klint({
   draw,
   options = {},
   preload,
+  onClick,
+  onResize,
+  onMouseIn,
+  onMouseOut,
 }: KlintProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -173,13 +177,22 @@ export default function Klint({
     if (mouseRef.current) {
       mouseRef.current.isHover = true;
     }
-  }, []);
+    if (contextRef.current) onMouseIn?.(contextRef.current);
+  }, [onMouseIn]);
 
   const handlePointerLeave = useCallback(() => {
     if (mouseRef.current) {
       mouseRef.current.isHover = false;
     }
-  }, []);
+    if (contextRef.current) onMouseOut?.(contextRef.current);
+  }, [onMouseOut]);
+
+  const handleClick = useCallback(() => {
+    if (mouseRef.current) {
+      mouseRef.current.isHover = false;
+    }
+    if (contextRef.current) onClick?.(contextRef.current);
+  }, [onClick]);
 
   useEffect(() => {
     if (__options.ignoremouse === "true") return;
@@ -193,6 +206,7 @@ export default function Klint({
     container.addEventListener("mouseup", handlePointerUp);
     container.addEventListener("mouseenter", handlePointerEnter);
     container.addEventListener("mouseleave", handlePointerLeave);
+    container.addEventListener("click", handleClick);
 
     // Touch events (passive)
     container.addEventListener("touchmove", handlePointerMove, {
@@ -217,7 +231,7 @@ export default function Klint({
       container.removeEventListener("mouseup", handlePointerUp);
       container.removeEventListener("mouseenter", handlePointerEnter);
       container.removeEventListener("mouseleave", handlePointerLeave);
-
+      container.removeEventListener("click", handleClick);
       // Touch cleanup
       container.removeEventListener("touchmove", handlePointerMove);
       container.removeEventListener("touchstart", handlePointerMove);
@@ -278,9 +292,10 @@ export default function Klint({
     };
     updateCanvasSize();
     if (options.ignoreresize !== "true") {
-      resizeObserverRef.current = new ResizeObserver(() =>
-        updateCanvasSize(context.__isReadyToDraw)
-      );
+      resizeObserverRef.current = new ResizeObserver(() => {
+        updateCanvasSize(context.__isReadyToDraw);
+        onResize?.(context);
+      });
       if (container) {
         resizeObserverRef.current.observe(container);
       }
