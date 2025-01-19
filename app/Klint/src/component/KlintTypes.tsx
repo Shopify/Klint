@@ -6,6 +6,7 @@ import { KlintCoreFunctions } from "./KlintCoreFunctions";
 export interface KlintCanvasOptions {
   alpha?: string;
   willreadfrequently?: string;
+  autoplay?: string;
   ignoremouse?: string;
   ignoreresize?: string;
   noloop?: string;
@@ -80,6 +81,7 @@ export interface KlintCoreContext
   // internals
   __lastTargetTime: number;
   __lastRealTime: number;
+  __isPlaying: boolean;
   __offscreens: Map<string, KlintContext | HTMLImageElement>;
 }
 // mouse

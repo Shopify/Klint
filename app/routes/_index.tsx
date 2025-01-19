@@ -34,7 +34,14 @@ export function KlintCanvas() {
         K.T.circularText("hello world !", 640);
       }
     );
+
+    K.pause();
   };
+
+  // const setup=()=>{
+
+  // }
+
   const onResize = (K: KlintContext) => {
     console.log("resize");
   };
@@ -44,17 +51,19 @@ export function KlintCanvas() {
   };
 
   const onMouseIn = (K: KlintContext) => {
+    K.play();
     console.log("mouse in");
   };
 
   const onMouseOut = (K: KlintContext) => {
+    K.pause();
     console.log("mouse out");
   };
   const draw = (K: KlintContext) => {
     K.background("#FFF");
     K.fillColor("#FFF");
     K.push();
-    K.translate(K.mouse.x, K.mouse.y);
+    // K.translate(K.mouse.x, K.mouse.y);
     K.rotate(K.frame * 0.03);
     K.image(K.getOffscreen("buffer"), 0, 0, 512, 512);
     K.pop();
@@ -71,7 +80,7 @@ export function KlintCanvas() {
       draw={draw}
       options={{
         origin: "center",
-        noloop: "true",
+        // noloop: "true",
       }}
       onClick={onClick}
       onResize={onResize}

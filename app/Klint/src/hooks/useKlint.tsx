@@ -41,6 +41,7 @@ export default function useKlint() {
           vertical: "top" as CanvasTextBaseline,
         };
         context.__offscreens = new Map();
+        context.__isPlaying = true;
         context.__currentContext = context;
         // Add necessary Klint Functions.
         // If you really don't need these, you might be better with your

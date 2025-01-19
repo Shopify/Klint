@@ -22,6 +22,14 @@ export const KlintCoreFunctions = {
   fullscreen: (ctx: KlintCoreContext) => () => {
     ctx.canvas.requestFullscreen?.();
   },
+  play: (ctx: KlintCoreContext) => () => {
+    if (!ctx.__isPlaying) ctx.__isPlaying = true;
+  },
+  pause: (ctx: KlintCoreContext) => () => {
+    if (ctx.__isPlaying) ctx.__isPlaying = false;
+  },
+  // to do
+  redraw: () => () => {},
   extend:
     (ctx: KlintCoreContext) =>
     (name: string, data: unknown, enforceReplace = false) => {

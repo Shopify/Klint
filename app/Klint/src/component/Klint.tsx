@@ -248,6 +248,7 @@ export default function Klint({
     handlePointerUp,
     handlePointerEnter,
     handlePointerLeave,
+    handleClick,
     __options.ignoremouse,
   ]);
 
@@ -374,6 +375,11 @@ export default function Klint({
   const animate = useCallback(() => {
     if (!contextRef.current || !isVisible) return;
     if (!contextRef.current.__isReadyToDraw) return;
+    if (!contextRef.current.__isPlaying) {
+      // Schedule next frame even when paused to allow resuming
+      animationFrameId.current = requestAnimationFrame(animate);
+      return;
+    }
     const context = contextRef.current;
     const now = performance.now();
     const target = 1000 / context.fps;
@@ -403,6 +409,7 @@ export default function Klint({
   useEffect(() => {
     if (!contextRef.current) return;
     if (!isReady) return;
+
     draw(contextRef.current);
     if (!isVisible) return;
     if (__options.noloop !== "true") {
@@ -413,7 +420,7 @@ export default function Klint({
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, [animate, isVisible]);
+  }, [animate, isVisible, __options.noloop, draw, isReady]);
 
   return (
     <div ref={containerRef} style={{ width: "100%", height: "100%" }}>
