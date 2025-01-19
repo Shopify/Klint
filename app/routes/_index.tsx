@@ -74,6 +74,7 @@ export function KlintCanvas() {
     K.background("#FFF");
     K.fillColor("#FFF");
     K.push();
+
     // K.translate(K.mouse.x, K.mouse.y);
     K.rotate(K.frame * 0.03);
     K.image(K.getOffscreen("buffer"), 0, 0, 512, 512);
@@ -108,8 +109,8 @@ export function KlintCanvas() {
         onResize={onResize}
         onMouseIn={onMouseIn}
         onMouseOut={onMouseOut}
-        onLoading={setIsLoading}
-        onError={setIsError}
+        // onLoading={setIsLoading}
+        // onError={setIsError}
       />
     </>
   );
