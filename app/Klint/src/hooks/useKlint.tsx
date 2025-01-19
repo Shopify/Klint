@@ -1,14 +1,14 @@
 import { useRef, useCallback } from "react";
-import { KlintCoreContext } from "../component/KlintTypes";
+import { KlintContext } from "../component/KlintTypes";
 import { KlintCoreFunctions } from "../component/KlintCoreFunctions";
 
 export default function useKlint() {
-  const contextRef = useRef<KlintCoreContext | null>(null);
+  const contextRef = useRef<KlintContext | null>(null);
 
   const initCoreContext = useCallback(
-    (canvas: HTMLCanvasElement): KlintCoreContext => {
+    (canvas: HTMLCanvasElement): KlintContext => {
       if (!contextRef.current) {
-        const context = canvas.getContext("2d") as unknown as KlintCoreContext;
+        const context = canvas.getContext("2d") as unknown as KlintContext;
         if (!context) throw new Error("Failed to get canvas context");
         // Initialize core properties
         contextRef.current = context;

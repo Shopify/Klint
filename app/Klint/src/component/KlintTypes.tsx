@@ -19,14 +19,16 @@ export interface KlintCanvasOptions {
 
 export interface KlintProps {
   context: KlintContextWrapper;
-  draw: (ctx: KlintContext | KlintCoreContext) => void;
-  setup?: (ctx: KlintContext | KlintCoreContext) => void;
-  preload?: (ctx: KlintContext | KlintCoreContext) => Promise<void>;
+  draw: (ctx: KlintContext) => void;
+  setup?: (ctx: KlintContext) => void;
+  preload?: (ctx: KlintContext) => Promise<void>;
   options?: KlintCanvasOptions;
   onClick?: (ctx: KlintContext) => void;
   onResize?: (ctx: KlintContext) => void;
   onMouseIn?: (ctx: KlintContext) => void;
   onMouseOut?: (ctx: KlintContext) => void;
+  onLoading?: (isLoading: boolean) => void;
+  onError?: (isError: boolean) => void;
 }
 
 export type KlintConfig = Partial<
@@ -40,7 +42,9 @@ export type VertexPoint = {
   points: number[][]; // [x,y] for linear, [[x1,y1], [x2,y2], [x,y]] for bezier, etc.
 };
 
-export interface KlintContext extends CanvasRenderingContext2D, KlintFunctions {
+export interface KlintOffscreenContext
+  extends CanvasRenderingContext2D,
+    KlintFunctions {
   width: number;
   height: number;
   __dpr: number;
@@ -68,8 +72,8 @@ export interface KlintContext extends CanvasRenderingContext2D, KlintFunctions {
 }
 
 // core context, should not be applied to the offscreen canvas
-export interface KlintCoreContext
-  extends KlintContext,
+export interface KlintContext
+  extends KlintOffscreenContext,
     KlintFunctions,
     KlintCoreFunctions {
   // core
@@ -82,7 +86,7 @@ export interface KlintCoreContext
   __lastTargetTime: number;
   __lastRealTime: number;
   __isPlaying: boolean;
-  __offscreens: Map<string, KlintContext | HTMLImageElement>;
+  __offscreens: Map<string, KlintOffscreenContext | HTMLImageElement>;
 }
 // mouse
 export interface KlintMouse {
@@ -98,6 +102,6 @@ export interface KlintMouse {
 }
 
 export interface KlintContextWrapper {
-  context: KlintCoreContext | null;
-  initCoreContext: (canvas: HTMLCanvasElement) => KlintCoreContext;
+  context: KlintContext | null;
+  initCoreContext: (canvas: HTMLCanvasElement) => KlintContext;
 }

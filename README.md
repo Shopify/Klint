@@ -36,37 +36,16 @@ npm run dev
 #### ( Non-exhaustive and probably highly underestimated ) 
 - [ ] Core library
 - [ ] Essentials plugins
-- [ ] Dev => optimization, types, ... 
-- [ ] QA + reviews
+- [ ] Tests
+- [ ] Docs
 
 ## CORE
-- [x] describe => HTMLElement
-- [x] Points => strokeRect(x,y,1,1)
-- [x] Lines 
-- [x] Arcs
-- [x] Better mouse & touch listeners
-- [x] Custom shape + contours
-- [ ] Add other types of vertices
-- [x] Text measurement 
-- [x] distance, clamp, lerp, wrap, remap
-- [x] blending operations
-- [x] better text options
-- [x] line joints and caps
+
 - [ ] clip
-- [x] pixels array data but considering removing it
 - [ ] Loading ... state + onDoneLoading callback
-- [x] improve extend to flag duplicates
-- [x] preload
-- [x] better loadImage & passImage
-- [x] better options : fps, origin : center, ...options
-- [x] better configs + clone : clone canvas features
-- [x] no canvas mode => favicon - toBase64()
-- [x] add proper framecount
-- [ ] add callback to mouse actions and resize
 - [ ] Triangle strip and Quad strip
+- [ ] Add other types of vertices : bezierTo(), quadraticTo(), arcTo(),
 - [ ] Filters
-- [x] Gradients
-- [x] Offscreen Canvas + foreign => pass an external canvas to the renderer as an image
 
 ## TO DO
 
@@ -75,14 +54,11 @@ npm run dev
 ## ESSENTIALS PLUGINS
 ### will be in the main lib
 - [ ] Hotspot : note ( Path 2D circle and square : ctx.isPointInPath()) 
-- [x] Colors : Lerp color, grayscale, gradients & Color Modes 
 - [ ] Grids : 2D, responsive, radial 
-- [x] Text helper : paragraph, precise bounding, text directions, circular text, text on a path & wrap ( char || words )
+- [ ] Curve : Strips, rounding
 - [ ] Vector2D & Matrix
 - [ ] Noise
-- [ ] Video
-- [ ] Loading State fallback
-- [ ] Pixels array : load, set, copy & update => ! set Canvas to willReadOften if loaded, needs to happen at preload stage
+- [ ] Advanced Pixels array : load, set, copy & update => Done but considering removing it. Should set Canvas to willReadOften if loaded, needs to happen at preload stage
 
 ## DEV
 - [ ] Add loading state if external libs are imported in the Klint lifecycle

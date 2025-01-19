@@ -2,8 +2,8 @@ import { useRef, useEffect, useMemo, useCallback, useState } from "react";
 
 import {
   KlintProps,
+  // KlintOffscreenContext,
   KlintContext,
-  KlintCoreContext,
   KlintMouse,
   KlintCanvasOptions,
 } from "./KlintTypes";
@@ -11,7 +11,7 @@ import {
 export type {
   KlintProps,
   KlintContext,
-  KlintCoreContext,
+  KlintOffscreenContext,
   KlintMouse,
   KlintCanvasOptions,
   KlintConfig,
@@ -71,10 +71,12 @@ export default function Klint({
   onResize,
   onMouseIn,
   onMouseOut,
+  onLoading,
+  onError,
 }: KlintProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const contextRef = useRef<KlintCoreContext | null>(null); // KlintCoreContext | undefined
+  const contextRef = useRef<KlintContext | null>(null); // KlintCoreContext | undefined
   const animationFrameId = useRef<number>();
   const intersectionObserverRef = useRef<IntersectionObserver | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
@@ -100,7 +102,7 @@ export default function Klint({
   const [toStaticImage, setStaticImage] = useState<string | null>(null);
   // from the hook
   let initContext:
-    | ((canvas: HTMLCanvasElement) => KlintCoreContext | null)
+    | ((canvas: HTMLCanvasElement) => KlintContext | null)
     | undefined;
   if (context) {
     initContext = context.initCoreContext;
@@ -317,7 +319,7 @@ export default function Klint({
     if (!contextRef.current) return;
     const context = contextRef.current;
     if (context.__isReadyToDraw) return;
-
+    onLoading?.(true);
     try {
       try {
         if (preload && !context.__isPreloaded) {
@@ -329,7 +331,6 @@ export default function Klint({
       } finally {
         context.__isPreloaded = true;
       }
-
       try {
         if (setup && !context.__isSetup) {
           setup(context);
@@ -353,12 +354,24 @@ export default function Klint({
         }
       }
       setIsReady(true);
+      onLoading?.(false);
       if (__options.noloop !== "true") animate();
     } catch (error) {
       console.error("Fatal Klint initialization error:", error);
       context.__isReadyToDraw = false;
+      onLoading?.(false);
+      onError?.(true);
     }
-  }, [preload, setup, draw, animate, __options.static, __options.noloop]);
+  }, [
+    preload,
+    setup,
+    draw,
+    animate,
+    onLoading,
+    onError,
+    __options.static,
+    __options.noloop,
+  ]);
 
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;

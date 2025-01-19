@@ -1,4 +1,4 @@
-import { KlintContext, KlintConfig } from "./KlintTypes";
+import { KlintOffscreenContext, KlintConfig } from "./KlintTypes";
 
 // Klint Functions
 export type KlintFunctions = {
@@ -8,16 +8,16 @@ type KlintFunctionNames = keyof typeof KlintFunctions;
 
 export const KlintFunctions = {
   extend:
-    (ctx: KlintContext) =>
+    (ctx: KlintOffscreenContext) =>
     (name: string, data: unknown, enforceReplace = false) => {
       // if (ctx._) {
       //   console.log(`Cannot extend Klint with '${name}' after preload/setup`);
       //   return;
       // }
       if (name in ctx && !enforceReplace) return;
-      (ctx as KlintContext)[name] = data;
+      (ctx as KlintOffscreenContext)[name] = data;
     },
-  background: (ctx: KlintContext) => (color?: string) => {
+  background: (ctx: KlintOffscreenContext) => (color?: string) => {
     ctx.resetTransform();
     ctx.push();
     if (color && color !== "transparent") {
@@ -30,46 +30,46 @@ export const KlintFunctions = {
     if (ctx.__canvasOrigin === "center")
       ctx.translate(ctx.width * 0.5, ctx.height * 0.5);
   },
-  reset: (ctx: KlintContext) => () => {
+  reset: (ctx: KlintOffscreenContext) => () => {
     ctx.clearRect(0, 0, ctx.width, ctx.height);
     ctx.resetTransform();
   },
-  clear: (ctx: KlintContext) => () => {
+  clear: (ctx: KlintOffscreenContext) => () => {
     ctx.clearRect(0, 0, ctx.width, ctx.height);
   },
-  fillColor: (ctx: KlintContext) => (color: string) => {
+  fillColor: (ctx: KlintOffscreenContext) => (color: string) => {
     ctx.fillStyle = color;
   },
-  strokeColor: (ctx: KlintContext) => (color: string) => {
+  strokeColor: (ctx: KlintOffscreenContext) => (color: string) => {
     ctx.strokeStyle = color;
   },
-  noFill: (ctx: KlintContext) => () => {
+  noFill: (ctx: KlintOffscreenContext) => () => {
     ctx.fillStyle = "transparent";
   },
-  noStroke: (ctx: KlintContext) => () => {
+  noStroke: (ctx: KlintOffscreenContext) => () => {
     ctx.strokeStyle = "transparent";
   },
-  strokeWidth: (ctx: KlintContext) => (width: number) => {
+  strokeWidth: (ctx: KlintOffscreenContext) => (width: number) => {
     ctx.lineWidth = width;
   },
-  strokeJoin: (ctx: KlintContext) => (join: CanvasLineJoin) => {
+  strokeJoin: (ctx: KlintOffscreenContext) => (join: CanvasLineJoin) => {
     ctx.lineJoin = join;
   },
-  strokeCap: (ctx: KlintContext) => (cap: CanvasLineCap) => {
+  strokeCap: (ctx: KlintOffscreenContext) => (cap: CanvasLineCap) => {
     ctx.lineCap = cap;
   },
-  push: (ctx: KlintContext) => () => {
+  push: (ctx: KlintOffscreenContext) => () => {
     ctx.save();
   },
-  pop: (ctx: KlintContext) => () => {
+  pop: (ctx: KlintOffscreenContext) => () => {
     ctx.restore();
   },
-  point: (ctx: KlintContext) => (x: number, y: number) => {
+  point: (ctx: KlintOffscreenContext) => (x: number, y: number) => {
     if (!ctx.checkTransparency("stroke")) return;
     ctx.beginPath();
     ctx.strokeRect(x, y, 1, 1);
   },
-  checkTransparency: (ctx: KlintContext) => (toCheck: string) => {
+  checkTransparency: (ctx: KlintOffscreenContext) => (toCheck: string) => {
     if (
       toCheck === "stroke" &&
       (ctx.strokeStyle === "transparent" || ctx.lineWidth === 0)
@@ -78,12 +78,13 @@ export const KlintFunctions = {
     if (toCheck === "fill" && ctx.fillStyle === "transparent") return false;
     return true;
   },
-  drawIfVisible: (ctx: KlintContext) => () => {
+  drawIfVisible: (ctx: KlintOffscreenContext) => () => {
     if (ctx.checkTransparency("fill")) ctx.fill();
     if (ctx.checkTransparency("stroke")) ctx.stroke();
   },
   line:
-    (ctx: KlintContext) => (x1: number, y1: number, x2: number, y2: number) => {
+    (ctx: KlintOffscreenContext) =>
+    (x1: number, y1: number, x2: number, y2: number) => {
       if (!ctx.checkTransparency("stroke")) return;
       ctx.beginPath();
       ctx.moveTo(x1, y1);
@@ -91,14 +92,14 @@ export const KlintFunctions = {
       ctx.stroke();
     },
   circle:
-    (ctx: KlintContext) =>
+    (ctx: KlintOffscreenContext) =>
     (x: number, y: number, radius: number, radius2?: number) => {
       ctx.beginPath();
       ctx.ellipse(x, y, radius, radius2 || radius, 0, 0, Math.PI * 2);
       ctx.drawIfVisible();
     },
   disk:
-    (ctx: KlintContext) =>
+    (ctx: KlintOffscreenContext) =>
     (
       x: number,
       y: number,
@@ -119,7 +120,7 @@ export const KlintFunctions = {
     },
 
   rectangle:
-    (ctx: KlintContext) =>
+    (ctx: KlintOffscreenContext) =>
     (x: number, y: number, width: number, height?: number) => {
       const originType = ctx.__rectangleOrigin || ctx.origin;
       const h = height ?? width;
@@ -130,7 +131,7 @@ export const KlintFunctions = {
       ctx.drawIfVisible();
     },
   roundedRectangle:
-    (ctx: KlintContext) =>
+    (ctx: KlintOffscreenContext) =>
     (
       x: number,
       y: number,
@@ -147,7 +148,7 @@ export const KlintFunctions = {
       ctx.drawIfVisible();
     },
   polygon:
-    (ctx: KlintContext) =>
+    (ctx: KlintOffscreenContext) =>
     (
       x: number,
       y: number,
@@ -167,14 +168,14 @@ export const KlintFunctions = {
       ctx.closePath();
       ctx.drawIfVisible();
     },
-  beginShape: (ctx: KlintContext) => () => {
+  beginShape: (ctx: KlintOffscreenContext) => () => {
     if (ctx.__startedShape) return;
     ctx.beginPath();
     ctx.__startedShape = true;
     ctx.__currentShape = [];
     ctx.__currentContours = [];
   },
-  beginContour: (ctx: KlintContext) => () => {
+  beginContour: (ctx: KlintOffscreenContext) => () => {
     if (!ctx.__startedShape) return;
     if (ctx.__startedContour && ctx.__currentContour?.length) {
       ctx.__currentContours?.push([...ctx.__currentContour]);
@@ -182,7 +183,7 @@ export const KlintFunctions = {
     ctx.__startedContour = true;
     ctx.__currentContour = [];
   },
-  vertex: (ctx: KlintContext) => (x: number, y: number) => {
+  vertex: (ctx: KlintOffscreenContext) => (x: number, y: number) => {
     if (!ctx.__startedShape) return;
     const points = ctx.__startedContour
       ? ctx.__currentContour
@@ -190,7 +191,7 @@ export const KlintFunctions = {
     points?.push([x, y]);
   },
   endContour:
-    (ctx: KlintContext) =>
+    (ctx: KlintOffscreenContext) =>
     (forceRevert = true) => {
       if (!ctx.__startedContour || !ctx.__currentContour?.length) return;
       const contourPoints = [...ctx.__currentContour];
@@ -202,7 +203,7 @@ export const KlintFunctions = {
       ctx.__startedContour = false;
     },
   endShape:
-    (ctx: KlintContext) =>
+    (ctx: KlintOffscreenContext) =>
     (close = false) => {
       if (!ctx.__startedShape) return;
       if (ctx.__startedContour) ctx.endContour();
@@ -235,12 +236,12 @@ export const KlintFunctions = {
       ctx.__startedShape = false;
     },
   gradient:
-    (ctx: KlintContext) =>
+    (ctx: KlintOffscreenContext) =>
     (x1 = 0, y1 = 0, x2 = ctx.width, y2 = ctx.width) => {
       return ctx.createLinearGradient(x1, y1, x2, y2);
     },
   radialGradient:
-    (ctx: KlintContext) =>
+    (ctx: KlintOffscreenContext) =>
     (
       x1 = ctx.width / 2,
       y1 = ctx.height / 2,
@@ -252,7 +253,7 @@ export const KlintFunctions = {
       return ctx.createRadialGradient(x1, y1, r1, x2, y2, r2);
     },
   conicGradient:
-    (ctx: KlintContext) =>
+    (ctx: KlintOffscreenContext) =>
     (angle = 0, x1 = ctx.width / 2, y1 = ctx.height / 2) => {
       return ctx.createConicGradient(angle, x1, y1);
     },
@@ -262,20 +263,20 @@ export const KlintFunctions = {
       return gradient.addColorStop(offset, color);
     },
 
-  textFont: (ctx: KlintContext) => (font: string) => {
+  textFont: (ctx: KlintOffscreenContext) => (font: string) => {
     ctx.__textFont = font;
   },
-  textSize: (ctx: KlintContext) => (size: number) => {
+  textSize: (ctx: KlintOffscreenContext) => (size: number) => {
     ctx.__textSize = size * ctx.__dpr || ctx.__textSize;
   },
-  textStyle: (ctx: KlintContext) => (style: string) => {
+  textStyle: (ctx: KlintOffscreenContext) => (style: string) => {
     ctx.__textStyle = style || "normal";
   },
-  textWeight: (ctx: KlintContext) => (weight: string) => {
+  textWeight: (ctx: KlintOffscreenContext) => (weight: string) => {
     ctx.__textWeight = weight || "normal";
   },
   textQuality:
-    (ctx: KlintContext) =>
+    (ctx: KlintOffscreenContext) =>
     (quality: "speed" | "auto" | "legibility" | "precision" = "auto") => {
       if (quality === "speed") {
         ctx.textRendering = "optimizeSpeed";
@@ -288,32 +289,33 @@ export const KlintFunctions = {
       }
     },
   textSpacing:
-    (ctx: KlintContext) => (kind: "letter" | "word", value: number) => {
+    (ctx: KlintOffscreenContext) =>
+    (kind: "letter" | "word", value: number) => {
       ctx[`${kind}Spacing`] = `${value}px`;
     },
   // TO DO : add variable axis handling
-  computeTextStyle: (ctx: KlintContext) => () => {
+  computeTextStyle: (ctx: KlintOffscreenContext) => () => {
     ctx.__computedTextFont = `${ctx.__textWeight} ${ctx.__textStyle} ${ctx.__textSize}px ${ctx.__textFont}`;
   },
   alignText:
-    (ctx: KlintContext) =>
+    (ctx: KlintOffscreenContext) =>
     (horizontal: CanvasTextAlign, vertical?: CanvasTextBaseline) => {
       ctx.__textAlignment.horizontal = horizontal;
       ctx.__textAlignment.vertical = vertical ?? ctx.__textAlignment.vertical;
     },
-  textLeading: (ctx: KlintContext) => (spacing: number) => {
+  textLeading: (ctx: KlintOffscreenContext) => (spacing: number) => {
     ctx.lineHeight = `${spacing}px`;
   },
-  computeFont: (ctx: KlintContext) => () => {
+  computeFont: (ctx: KlintOffscreenContext) => () => {
     ctx.computeTextStyle();
     if (ctx.font !== ctx.__computedTextFont) ctx.font = ctx.__computedTextFont;
   },
-  textWidth: (ctx: KlintContext) => (text: string) => {
+  textWidth: (ctx: KlintOffscreenContext) => (text: string) => {
     ctx.computeFont();
     return ctx.measureText(text).width;
   },
   text:
-    (ctx: KlintContext) =>
+    (ctx: KlintOffscreenContext) =>
     (
       text: string,
       x: number,
@@ -334,13 +336,13 @@ export const KlintFunctions = {
 
   // DO NOT use putImageData for images you can draw : https://www.measurethat.net/Benchmarks/Show/9510/0/putimagedata-vs-drawimage
   image:
-    (ctx: KlintContext) =>
+    (ctx: KlintOffscreenContext) =>
     (
       image:
         | HTMLImageElement
         | HTMLCanvasElement
         | OffscreenCanvas
-        | KlintContext,
+        | KlintOffscreenContext,
       x: number,
       y: number,
       arg3?: number,
@@ -407,11 +409,11 @@ export const KlintFunctions = {
       ctx.drawImage(sourceImage, adjustedX, adjustedY);
     },
   // unsure about keeping those next two, maybe a shader plugin would be better
-  loadPixels: (ctx: KlintContext) => () => {
+  loadPixels: (ctx: KlintOffscreenContext) => () => {
     return ctx.getImageData(0, 0, ctx.width, ctx.height);
   },
   updatePixels:
-    (ctx: KlintContext) => (pixels: Uint8ClampedArray | number[]) => {
+    (ctx: KlintOffscreenContext) => (pixels: Uint8ClampedArray | number[]) => {
       const imageData = new ImageData(
         pixels instanceof Uint8ClampedArray
           ? pixels
@@ -422,49 +424,53 @@ export const KlintFunctions = {
       ctx.putImageData(imageData, 0, 0);
     },
   readPixels:
-    (ctx: KlintContext) =>
+    (ctx: KlintOffscreenContext) =>
     (x: number, y: number, w = 1, h = 1) => {
       const imageData = ctx.getImageData(x, y, w, h);
       return Array.from(imageData.data); // Returns [r,g,b,a]
     },
 
-  opacity: (ctx: KlintContext) => (value: number) => {
+  opacity: (ctx: KlintOffscreenContext) => (value: number) => {
     ctx.globalAlpha = ctx.constrain(value, 0, 1);
   },
-  blend: (ctx: KlintContext) => (blend: GlobalCompositeOperation) => {
+  blend: (ctx: KlintOffscreenContext) => (blend: GlobalCompositeOperation) => {
     ctx.globalCompositeOperation = blend;
   },
-  setCanvasOrigin: (ctx: KlintContext) => (type: "center" | "corner") => {
-    ctx.__canvasOrigin = type;
-  },
-  setImageOrigin: (ctx: KlintContext) => (type: "center" | "corner") => {
-    ctx.__imageOrigin = type;
-  },
-  setRectOrigin: (ctx: KlintContext) => (type: "center" | "corner") => {
-    ctx.__rectangleOrigin = type;
-  },
+  setCanvasOrigin:
+    (ctx: KlintOffscreenContext) => (type: "center" | "corner") => {
+      ctx.__canvasOrigin = type;
+    },
+  setImageOrigin:
+    (ctx: KlintOffscreenContext) => (type: "center" | "corner") => {
+      ctx.__imageOrigin = type;
+    },
+  setRectOrigin:
+    (ctx: KlintOffscreenContext) => (type: "center" | "corner") => {
+      ctx.__rectangleOrigin = type;
+    },
   withConfig:
-    (ctx: KlintContext) =>
+    (ctx: KlintOffscreenContext) =>
     (config: KlintConfig): void => {
       Object.assign(ctx, config);
     },
   toBase64:
-    (ctx: KlintContext) =>
+    (ctx: KlintOffscreenContext) =>
     (type: string = "image/png", quality?: number) => {
       const canvas = ctx.canvas;
       return canvas.toDataURL(type, quality);
     },
 
-  resizeCanvas: (ctx: KlintContext) => (width: number, height: number) => {
-    // Ignore if this is the main canvas
-    if (ctx.__isMainContext) return;
+  resizeCanvas:
+    (ctx: KlintOffscreenContext) => (width: number, height: number) => {
+      // Ignore if this is the main canvas
+      if (ctx.__isMainContext) return;
 
-    const config = ctx.saveConfig();
-    ctx.canvas.width = ctx.width = width;
-    ctx.canvas.height = ctx.height = height;
-    ctx.restoreConfig(config);
-    if (ctx.__canvasOrigin === "center") {
-      ctx.translate(ctx.width * 0.5, ctx.height * 0.5);
-    }
-  },
+      const config = ctx.saveConfig();
+      ctx.canvas.width = ctx.width = width;
+      ctx.canvas.height = ctx.height = height;
+      ctx.restoreConfig(config);
+      if (ctx.__canvasOrigin === "center") {
+        ctx.translate(ctx.width * 0.5, ctx.height * 0.5);
+      }
+    },
 } as const;

@@ -1,4 +1,7 @@
-import Klint, { KlintContext } from "~/Klint/src/component/Klint";
+import Klint, {
+  KlintContext,
+  KlintOffscreenContext,
+} from "~/Klint/src/component/Klint";
 import useKlint from "~/Klint/src/hooks/useKlint";
 import Text from "~/Klint/src/plugins/Text";
 import { useState } from "react";
@@ -8,6 +11,8 @@ export function KlintCanvas() {
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(
     null
   );
+  const [isLoading, setIsLoading] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   const preload = async (K: KlintContext) => {
     // const video = document.createElement("video");
@@ -18,13 +23,19 @@ export function KlintCanvas() {
     // video.muted = true;
     // await video.play();
     // setVideoElement(video);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    // Simulate random error (50% chance)
+    // if (Math.random() > 0.5) {
+    //   throw new Error("Something went wrong!");
+    // }
 
     K.createOffscreen(
       "buffer",
       1024,
       1024,
       { static: "false" },
-      (K: KlintContext) => {
+      (K: KlintOffscreenContext) => {
         K.extend("T", new Text(K));
         // K.background("#0DF");
         K.fillColor("FFF");
@@ -74,19 +85,33 @@ export function KlintCanvas() {
   };
 
   return (
-    <Klint
-      context={klint}
-      preload={preload}
-      draw={draw}
-      options={{
-        origin: "center",
-        // noloop: "true",
-      }}
-      onClick={onClick}
-      onResize={onResize}
-      onMouseIn={onMouseIn}
-      onMouseOut={onMouseOut}
-    />
+    <>
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white">
+          <div className="bg-slate-800 px-6 py-3 rounded-lg">Loading...</div>
+        </div>
+      )}
+      {isError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white">
+          <div className="bg-red-800 px-6 py-3 rounded-lg">Error !</div>
+        </div>
+      )}
+      <Klint
+        context={klint}
+        preload={preload}
+        draw={draw}
+        options={{
+          origin: "center",
+          // noloop: "true",
+        }}
+        onClick={onClick}
+        onResize={onResize}
+        onMouseIn={onMouseIn}
+        onMouseOut={onMouseOut}
+        onLoading={setIsLoading}
+        onError={setIsError}
+      />
+    </>
   );
 }
 

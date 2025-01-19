@@ -1,9 +1,9 @@
 import { CONFIG_PROPS } from "../component/Klint";
 import { KlintFunctions } from "../component/KlintFunctions";
 import {
-  KlintCoreContext,
-  KlintConfig,
   KlintContext,
+  KlintConfig,
+  KlintOffscreenContext,
   KlintCanvasOptions,
 } from "../component/KlintTypes";
 // Klint Core Functions
@@ -12,33 +12,38 @@ export type KlintCoreFunctions = {
 };
 type KlintCoreFunctionNames = keyof typeof KlintCoreFunctions;
 
+export type KlintOffscreenMap = Map<
+  string,
+  KlintOffscreenContext | HTMLImageElement
+>;
+
 export const KlintCoreFunctions = {
-  saveCanvas: (ctx: KlintCoreContext) => () => {
+  saveCanvas: (ctx: KlintContext) => () => {
     const link = document.createElement("a");
     link.download = "canvas.png";
     link.href = ctx.canvas.toDataURL();
     link.click();
   },
-  fullscreen: (ctx: KlintCoreContext) => () => {
+  fullscreen: (ctx: KlintContext) => () => {
     ctx.canvas.requestFullscreen?.();
   },
-  play: (ctx: KlintCoreContext) => () => {
+  play: (ctx: KlintContext) => () => {
     if (!ctx.__isPlaying) ctx.__isPlaying = true;
   },
-  pause: (ctx: KlintCoreContext) => () => {
+  pause: (ctx: KlintContext) => () => {
     if (ctx.__isPlaying) ctx.__isPlaying = false;
   },
   // to do
   redraw: () => () => {},
   extend:
-    (ctx: KlintCoreContext) =>
+    (ctx: KlintContext) =>
     (name: string, data: unknown, enforceReplace = false) => {
       // if (ctx._) {
       //   console.log(`Cannot extend Klint with '${name}' after preload/setup`);
       //   return;
       // }
       if (name in ctx && !enforceReplace) return;
-      (ctx as KlintCoreContext)[name] = data;
+      (ctx as KlintContext)[name] = data;
     },
   constrain: () => (val: number, floor: number, ceil: number) => {
     return Math.max(floor, Math.min(val, ceil));
@@ -118,32 +123,31 @@ export const KlintCoreFunctions = {
     return element;
   },
 
-  saveConfig: (ctx: KlintCoreContext) => (from?: KlintCoreContext) => {
+  saveConfig: (ctx: KlintContext) => (from?: KlintContext) => {
     return Object.fromEntries(
       CONFIG_PROPS.map((key) => [
         key,
-        from?.[key as keyof KlintCoreContext] ??
-          ctx[key as keyof KlintCoreContext],
+        from?.[key as keyof KlintContext] ?? ctx[key as keyof KlintContext],
       ])
     ) as KlintConfig;
   },
   restoreConfig:
-    (ctx: KlintCoreContext) =>
+    (ctx: KlintContext) =>
     (config: KlintConfig): void => {
       Object.assign(ctx, config);
     },
-  describe: (ctx: KlintCoreContext) => (description: string) => {
+  describe: (ctx: KlintContext) => (description: string) => {
     ctx.__description = description;
   },
 
   createOffscreen:
-    (ctx: KlintCoreContext) =>
+    (ctx: KlintContext) =>
     (
       id: string,
       width: number,
       height: number,
       options?: KlintCanvasOptions,
-      callback?: (ctx: KlintContext) => void
+      callback?: (ctx: KlintOffscreenContext) => void
     ) => {
       const offscreen = document.createElement("canvas");
       offscreen.width = width * ctx.__dpr;
@@ -152,7 +156,7 @@ export const KlintCoreFunctions = {
       const context = offscreen.getContext("2d", {
         alpha: options?.alpha ?? true,
         willReadFrequently: options?.willreadfrequently ?? false,
-      }) as KlintContext;
+      }) as unknown as KlintOffscreenContext;
 
       if (!context) throw new Error("Failed to create offscreen context");
 
@@ -177,7 +181,7 @@ export const KlintCoreFunctions = {
       // Add KlintFunctions if not ignored
       if (!options?.ignorefunctions) {
         Object.entries(KlintFunctions).forEach(([name, fn]) => {
-          context[name] = fn(context);
+          context[name] = fn(context as KlintOffscreenContext);
         });
       }
       // Set origin if specified
@@ -205,8 +209,8 @@ export const KlintCoreFunctions = {
       return context;
     },
   getOffscreen:
-    (ctx: KlintCoreContext) =>
-    (id: string): KlintContext | HTMLImageElement => {
+    (ctx: KlintContext) =>
+    (id: string): KlintOffscreenContext | HTMLImageElement => {
       const offscreen = ctx.__offscreens.get(id);
       if (!offscreen)
         throw new Error(`No offscreen context found with id: ${id}`);
