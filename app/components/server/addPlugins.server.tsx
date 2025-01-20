@@ -1,21 +1,54 @@
-export async function loadPlugins() {
-  const modules = import.meta.glob("./plugins/*.tsx");
-  const plugins = [];
+export async function loadNavigation() {
+  const modules = import.meta.glob("../../Klint/docs/documentation/*/*.tsx");
+  // const plugins = [];
+  console.log(modules);
 
+  return { modules, error: null };
+}
+
+/*
+interface NavItem {
+  name: string;
+  path: string;
+  isDirectory: boolean;
+  children?: NavItem[];
+}
+
+export async function loadNavigation() {
+  // const modules = import.meta.glob("../../Klint/docs/documentation/*);
+  const navigation: NavItem[] = [];
+  console.log(modules);
   for (const path in modules) {
-    try {
-      const module = await modules[path]();
-      const moduleName = path.replace("./plugins/", "").replace(".tsx", "");
-      plugins.push({
-        name: moduleName,
-        //@ts-expect-error module.default is a function but TypeScript doesn't know its type
-        code: module.default.toString(),
-        type: moduleName,
-      });
-    } catch (err) {
-      console.error(`Failed to load plugin ${path}:`, err);
-    }
+    const isDirectory = !path.includes(".");
+    const name = path
+      .replace("../../Klint/docs/documentation/", "")
+      .replace(/\.(mdx?|tsx?)$/, "")
+      .split("/")
+      .pop();
+
+    navigation.push({
+      name: (name ?? "").charAt(0).toUpperCase() + (name ?? "").slice(1),
+      path: `/docs/${path
+        .replace("../../Klint/docs/documentation/", "")
+        .replace(/\.(mdx?|tsx?)$/, "")}`,
+      isDirectory,
+      ...(isDirectory && { children: [] }),
+    });
   }
 
-  return { plugins, error: null };
+  // Build tree structure
+  const tree = navigation.filter((item) => !item.path.includes("/"));
+  navigation.forEach((item) => {
+    if (item.path.includes("/")) {
+      const parentPath = item.path.split("/").slice(0, -1).join("/");
+      const parent = navigation.find((p) => p.path === parentPath);
+      if (parent?.children) {
+        parent.children.push(item);
+      }
+    }
+  });
+
+  return { navigation: tree, error: null };
 }
+
+*/

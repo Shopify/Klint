@@ -1,8 +1,12 @@
 import Klint, { KlintContext } from "./Klint";
 import useKlint from "../hooks/useKlint";
+import useProps from "../hooks/useProps";
 
 export function KlintCanvas() {
   const klint = useKlint();
+  const P = useProps({
+    hello: "world",
+  });
   const onResize = (/*K: KlintContext*/) => {
     console.log("resize");
   };

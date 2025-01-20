@@ -1,4 +1,4 @@
-import { KlintCanvas } from "../docs/typography";
+// import { KlintCanvas } from "../docs/typography";
 import { useState } from "react";
 //import { loadPlugins } from "../components/addPlugins.server";
 // import useKlintPlugins from "~/components/useKlintPlugins";
@@ -36,7 +36,7 @@ export default function Index() {
         Count: {count}
       </button>
       <div className="w-4/5 h-4/5 flex justify-center items-center bg-[#398575] overflow-hidden rounded-[8px]">
-        <KlintCanvas />
+        {/* <KlintCanvas /> */}
       </div>
     </div>
   );

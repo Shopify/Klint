@@ -37,12 +37,14 @@ export const KlintFunctions = {
   clear: (ctx: KlintOffscreenContext) => () => {
     ctx.clearRect(0, 0, ctx.width, ctx.height);
   },
-  fillColor: (ctx: KlintOffscreenContext) => (color: string) => {
-    ctx.fillStyle = color;
-  },
-  strokeColor: (ctx: KlintOffscreenContext) => (color: string) => {
-    ctx.strokeStyle = color;
-  },
+  fillColor:
+    (ctx: KlintOffscreenContext) => (color: string | CanvasGradient) => {
+      ctx.fillStyle = color;
+    },
+  strokeColor:
+    (ctx: KlintOffscreenContext) => (color: string | CanvasGradient) => {
+      ctx.strokeStyle = color;
+    },
   noFill: (ctx: KlintOffscreenContext) => () => {
     ctx.fillStyle = "transparent";
   },

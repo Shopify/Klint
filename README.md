@@ -6,20 +6,19 @@
 # TODO
 ## 💾 Roadmap to Klint 1.0 
 #### ( Non-exhaustive and probably highly underestimated ) 
-- [ ] Core library : 90%
-- [ ] Essentials plugins : 50%
-- [ ] Tests : 0%
-- [ ] Docs : 0%
+- [ ] Core library 
+- [ ] Essentials plugins 
+- [ ] Tests 
+- [ ] Docs 
 
 ## CORE
 
 ### Blocking
-- [ ] clip
 - [ ] onLoading & onError : to finish, not sure if it the right direction or it should be handled outside.
-- [ ] Props handling and update : working but ugly, needs a hook.
+- [x] Props handling and update.
 
 ### Non Blocking
-
+- [ ] clip
 - [ ] Triangle strip and Quad strip
 - [ ] Add other types of vertices : bezierTo(), quadraticTo(), arcTo(),
 - [ ] Filters
