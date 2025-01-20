@@ -69,6 +69,7 @@ export function KlintCanvas({ ...props }: CanvasProps) {
 
   const setup = (K: KlintContext) => {
     K.textSize(100);
+    K.alignText("center", "middle");
   };
 
   const onResize = (K: KlintContext) => {
@@ -94,11 +95,13 @@ export function KlintCanvas({ ...props }: CanvasProps) {
     K.fillColor("#FFF");
     K.push();
 
-    // K.translate(K.mouse.x, K.mouse.y);
+    K.translate(K.width / 2, K.height / 2);
     K.rotate(K.frame * 0.03);
     // console.log(counterRef);
-    K.text(String(P.get("counter")), 0, 0);
-    K.text(String(P.get("click-test")), 0, 200);
+    K.fillColor("#00FF00");
+    K.text(String(P.get("counter")), 0, -100);
+    K.fillColor("#0000FF");
+    K.text(String(P.get("click-test")), 0, 100);
     // K.image(K.getOffscreen("buffer"), 0, 0, 512, 512);
     K.pop();
     // if (videoElement) {
@@ -125,14 +128,13 @@ export function KlintCanvas({ ...props }: CanvasProps) {
         draw={draw}
         setup={setup}
         options={{
-          origin: "center",
+          origin: "corner",
           // noloop: "true",
         }}
         onClick={onClick}
         onResize={onResize}
-        // onMouseIn={onMouseIn}
-
-        // onMouseOut={onMouseOut}
+        onMouseIn={onMouseIn}
+        onMouseOut={onMouseOut}
         // onLoading={setIsLoading}
         // onError={setIsError}
       />
