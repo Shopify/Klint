@@ -3,6 +3,7 @@ import Klint, {
   KlintOffscreenContext,
 } from "~/Klint/src/component/Klint";
 import useKlint from "~/Klint/src/hooks/useKlint";
+import useProps from "~/Klint/src/hooks/useProps";
 import Text from "~/Klint/src/plugins/Text";
 import { useState, useRef, useEffect } from "react";
 
@@ -12,15 +13,22 @@ interface CanvasProps {
 
 export function KlintCanvas({ ...props }: CanvasProps) {
   const { counter } = props;
-  console.log("hey");
+  console.log("Forced re-render");
   const klint = useKlint();
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(
     null
   );
-  const counterRef = useRef(counter);
+
+  const P = useProps({
+    counter: counter,
+    hello: "world",
+    "click-test": 0,
+  });
+
+  // const propsRef = useRef(props);
   useEffect(() => {
-    counterRef.current = counter;
-  }, [counter]);
+    P.set("counter", props.counter);
+  }, [props, P]);
   // const [isLoading, setIsLoading] = useState(false);
   // const [isError, setIsError] = useState(false);
 
@@ -68,6 +76,7 @@ export function KlintCanvas({ ...props }: CanvasProps) {
   };
 
   const onClick = (K: KlintContext) => {
+    P.set("click-test", Number(P.get("click-test")) + 1);
     console.log("click");
   };
 
@@ -88,7 +97,8 @@ export function KlintCanvas({ ...props }: CanvasProps) {
     // K.translate(K.mouse.x, K.mouse.y);
     K.rotate(K.frame * 0.03);
     // console.log(counterRef);
-    K.text(String(counterRef?.current), 0, 0);
+    K.text(String(P.get("counter")), 0, 0);
+    K.text(String(P.get("click-test")), 0, 200);
     // K.image(K.getOffscreen("buffer"), 0, 0, 512, 512);
     K.pop();
     // if (videoElement) {
