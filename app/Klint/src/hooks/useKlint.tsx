@@ -1,6 +1,7 @@
 import { useRef, useCallback } from "react";
 import { KlintContext } from "../component/KlintTypes";
 import { KlintCoreFunctions } from "../component/KlintCoreFunctions";
+import Klint from "../component/Klint";
 
 export default function useKlint() {
   const contextRef = useRef<KlintContext | null>(null);
@@ -57,5 +58,8 @@ export default function useKlint() {
     []
   );
 
-  return { context: contextRef.current, initCoreContext };
+  return {
+    context: { context: contextRef.current, initCoreContext },
+    Klint: Klint,
+  };
 }

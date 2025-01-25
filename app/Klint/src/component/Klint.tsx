@@ -21,6 +21,7 @@ import { KlintFunctions } from "./KlintFunctions";
 
 const DEFAULT_FPS = 60;
 const DEFAULT_ALT = "A beautiful artwork made with Klint Canvas";
+export const EPSILON = 0.0001;
 
 const DEFAULT_OPTIONS: KlintCanvasOptions = {
   alpha: "true",

@@ -1,5 +1,5 @@
 import { KlintOffscreenContext, KlintConfig } from "./KlintTypes";
-
+import { EPSILON } from "./Klint";
 // Klint Functions
 export type KlintFunctions = {
   [K in KlintFunctionNames]: ReturnType<(typeof KlintFunctions)[K]>;
@@ -52,6 +52,9 @@ export const KlintFunctions = {
     ctx.strokeStyle = "transparent";
   },
   strokeWidth: (ctx: KlintOffscreenContext) => (width: number) => {
+    if (width <= 0) {
+      ctx.lineWidth = EPSILON;
+    }
     ctx.lineWidth = width;
   },
   strokeJoin: (ctx: KlintOffscreenContext) => (join: CanvasLineJoin) => {
@@ -72,11 +75,7 @@ export const KlintFunctions = {
     ctx.strokeRect(x, y, 1, 1);
   },
   checkTransparency: (ctx: KlintOffscreenContext) => (toCheck: string) => {
-    if (
-      toCheck === "stroke" &&
-      (ctx.strokeStyle === "transparent" || ctx.lineWidth === 0)
-    )
-      return false;
+    if (toCheck === "stroke" && ctx.strokeStyle === "transparent") return false;
     if (toCheck === "fill" && ctx.fillStyle === "transparent") return false;
     return true;
   },
@@ -87,6 +86,7 @@ export const KlintFunctions = {
   line:
     (ctx: KlintOffscreenContext) =>
     (x1: number, y1: number, x2: number, y2: number) => {
+      console.log(ctx.lineWidth);
       if (!ctx.checkTransparency("stroke")) return;
       ctx.beginPath();
       ctx.moveTo(x1, y1);
