@@ -2,7 +2,7 @@ export async function loadNavigation() {
   const modules = import.meta.glob("../documentation/*/*.tsx");
   const paths = Object.keys(modules);
 
-  const tree: Record<string, Record<string, string>> = {};
+  let tree: Record<string, Record<string, string>> = {};
 
   paths.forEach((path) => {
     const cleanPath = path.replace("../documentation/", "").replace(".tsx", "");
@@ -12,6 +12,12 @@ export async function loadNavigation() {
       tree[folder] = {};
     }
     // Updated to match the /documentation route prefix
+    if (folder === "Klint" && Object.keys(tree).length > 0) {
+      const klintSection = tree["Klint"];
+      delete tree["Klint"];
+      const newTree = { Klint: klintSection, ...tree };
+      tree = newTree;
+    }
     tree[folder][file] = `/documentation/${folder}/${file}`;
   });
 
