@@ -1,5 +1,4 @@
-import { KlintContext } from "~/Klint/src/component/Klint";
-import useKlint from "~/Klint/src/hooks/useKlint";
+import useKlint, { KlintContext } from "~/Klint/src/hooks/useKlint";
 
 // interface CanvasProps {}
 

@@ -3,6 +3,12 @@ import { KlintContext } from "../component/KlintTypes";
 import { KlintCoreFunctions } from "../component/KlintCoreFunctions";
 import Klint from "../component/Klint";
 
+export type {
+  KlintContext,
+  KlintOffscreenContext,
+  KlintMouse,
+} from "../component/KlintTypes";
+
 export default function useKlint() {
   const contextRef = useRef<KlintContext | null>(null);
 
