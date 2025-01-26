@@ -10,10 +10,6 @@ export const KlintFunctions = {
   extend:
     (ctx: KlintOffscreenContext) =>
     (name: string, data: unknown, enforceReplace = false) => {
-      // if (ctx._) {
-      //   console.log(`Cannot extend Klint with '${name}' after preload/setup`);
-      //   return;
-      // }
       if (name in ctx && !enforceReplace) return;
       (ctx as KlintOffscreenContext)[name] = data;
     },
@@ -258,7 +254,7 @@ export const KlintFunctions = {
     (angle = 0, x1 = ctx.width / 2, y1 = ctx.height / 2) => {
       return ctx.createConicGradient(angle, x1, y1);
     },
-  addColor:
+  addColorStop:
     () =>
     (gradient: CanvasGradient, offset = 0, color = "#000") => {
       return gradient.addColorStop(offset, color);

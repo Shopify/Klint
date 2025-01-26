@@ -10,10 +10,7 @@ export type {
   KlintMouse,
 } from "../component/KlintTypes";
 
-export function buildKlintContext(
-  ctx: CanvasRenderingContext2D
-  // isTestingFunctions = false
-): KlintContext {
+export function buildKlintContext(ctx: CanvasRenderingContext2D): KlintContext {
   const context = ctx as unknown as KlintContext;
 
   // Initialize core properties

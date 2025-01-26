@@ -10,7 +10,7 @@ declare module "@remix-run/node" {
 
 export default defineConfig({
   test: {
-    includeSource: ['app/Klint/tests/*/*.test.tsx'],
+    includeSource: ['app/Klint/tests/*/*.test.tsx',],
     setupFiles: ['./vitest.setup.ts'],
     environment: 'jsdom',
     deps: {

@@ -208,6 +208,7 @@ export const KlintCoreFunctions = {
       ctx.__offscreens.set(id, context);
       return context;
     },
+
   getOffscreen:
     (ctx: KlintContext) =>
     (id: string): KlintOffscreenContext | HTMLImageElement => {
