@@ -2,7 +2,6 @@ import { useRef, useEffect, useMemo, useCallback, useState } from "react";
 
 import {
   KlintProps,
-  // KlintOffscreenContext,
   KlintContext,
   KlintMouse,
   KlintCanvasOptions,
@@ -17,7 +16,7 @@ export type {
   KlintConfig,
 } from "./KlintTypes";
 
-import { KlintFunctions } from "./KlintFunctions";
+// import { KlintFunctions } from "./KlintFunctions";
 
 const DEFAULT_FPS = 60;
 const DEFAULT_ALT = "A beautiful artwork made with Klint Canvas";
@@ -296,11 +295,11 @@ export default function Klint({
       context.fps = __options.fps;
     }
 
-    if (__options.ignorefunctions !== "true") {
-      Object.entries(KlintFunctions).forEach(([name, fn]) => {
-        contextRef.current![name] = fn(context as KlintContext);
-      });
-    }
+    // if (__options.ignorefunctions !== "true") {
+    //   Object.entries(KlintFunctions).forEach(([name, fn]) => {
+    //     contextRef.current![name] = fn(context as KlintContext);
+    //   });
+    // }
 
     updateCanvasSize();
 

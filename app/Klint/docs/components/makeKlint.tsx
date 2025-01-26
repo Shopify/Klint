@@ -1,14 +1,6 @@
-import { useRef, useCallback } from "react";
-import { KlintContext } from "../component/KlintTypes";
-import { KlintCoreFunctions } from "../component/KlintCoreFunctions";
-import { KlintFunctions } from "../component/KlintFunctions";
-// import Klint from "../component/Klint";
-
-export type {
-  KlintContext,
-  KlintOffscreenContext,
-  KlintMouse,
-} from "../component/KlintTypes";
+import { KlintContext } from "~/Klint/src/component/KlintTypes";
+import { KlintCoreFunctions } from "~/Klint/src/component/KlintCoreFunctions";
+import { KlintFunctions } from "~/Klint/src/component/KlintFunctions";
 
 export function createKlintContext(
   ctx: CanvasRenderingContext2D
@@ -60,26 +52,4 @@ export function createKlintContext(
   });
   // }
   return context;
-}
-
-// Modified hook
-export default function useKlint() {
-  const contextRef = useRef<KlintContext | null>(null);
-
-  const initCoreContext = useCallback(
-    (canvas: HTMLCanvasElement): KlintContext => {
-      if (!contextRef.current) {
-        const ctx = canvas.getContext("2d");
-        if (!ctx) throw new Error("Failed to get canvas context");
-        contextRef.current = createKlintContext(ctx);
-      }
-      return contextRef.current;
-    },
-    []
-  );
-
-  return {
-    context: { context: contextRef.current, initCoreContext },
-    // Klint: Klint,
-  };
 }

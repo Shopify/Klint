@@ -1,33 +1,8 @@
 import useKlint, { KlintContext } from "~/Klint/src/hooks/useKlint";
-
-// interface CanvasProps {}
-
+import Klint from "~/Klint/src/component/Klint";
 export function KlintCanvas() {
-  const { context, Klint } = useKlint();
+  const { context } = useKlint();
 
-  // const preload = async (K: KlintContext) => {
-
-  //   K.createOffscreen(
-  //     "buffer",
-  //     1024,
-  //     1024,
-  //     { static: "false" },
-  //     (K: KlintOffscreenContext) => {
-  //       K.extend("T", new Text(K));
-  //       // K.background("#0DF");
-  //       K.fillColor("FFF");
-  //       // K.circle(K.width / 2, K.height / 2, 100);
-  //       K.translate(K.width / 2, K.height / 2);
-  //       K.textSize(64);
-  //       K.T.circularText("hello world !", 640);
-  //     }
-  //   );
-
-  // };
-
-  // const setup = (K: KlintContext) => {
-
-  // };
   const widths = [0, 1, 2, 3, 10, 100];
   const draw = (K: KlintContext) => {
     K.background("#CCC");
