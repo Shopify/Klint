@@ -26,6 +26,12 @@
 - [ ] Figuring out bundles, packages and plugins
 
 ## TESTS
+- [x] Figure it out
+
+## DOCS
+- [x] Figure it out
+
+
 
 ## ESSENTIALS PLUGINS
 ### will be in the main lib

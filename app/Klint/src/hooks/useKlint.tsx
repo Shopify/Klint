@@ -2,7 +2,7 @@ import { useRef, useCallback } from "react";
 import { KlintContext } from "../component/KlintTypes";
 import { KlintCoreFunctions } from "../component/KlintCoreFunctions";
 import { KlintFunctions } from "../component/KlintFunctions";
-// import Klint from "../component/Klint";
+import Klint from "../component/Klint";
 
 export type {
   KlintContext,
@@ -10,7 +10,7 @@ export type {
   KlintMouse,
 } from "../component/KlintTypes";
 
-export function createKlintContext(
+export function buildKlintContext(
   ctx: CanvasRenderingContext2D
   // isTestingFunctions = false
 ): KlintContext {
@@ -50,15 +50,15 @@ export function createKlintContext(
   context.__isPlaying = true;
   context.__currentContext = context;
 
-  // Add Klint Functions
+  // Add Klint core functions
   Object.entries(KlintCoreFunctions).forEach(([name, fn]) => {
     context[name] = fn(context as unknown as KlintContext);
   });
-  // if (isTestingFunctions) {
+  // Add Klint functions
   Object.entries(KlintFunctions).forEach(([name, fn]) => {
     context[name] = fn(context as unknown as KlintContext);
   });
-  // }
+
   return context;
 }
 
@@ -71,7 +71,7 @@ export default function useKlint() {
       if (!contextRef.current) {
         const ctx = canvas.getContext("2d");
         if (!ctx) throw new Error("Failed to get canvas context");
-        contextRef.current = createKlintContext(ctx);
+        contextRef.current = buildKlintContext(ctx);
       }
       return contextRef.current;
     },
@@ -80,6 +80,6 @@ export default function useKlint() {
 
   return {
     context: { context: contextRef.current, initCoreContext },
-    // Klint: Klint,
+    Klint: Klint,
   };
 }

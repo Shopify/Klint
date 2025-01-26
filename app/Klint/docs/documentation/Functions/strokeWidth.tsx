@@ -1,7 +1,7 @@
 import useKlint, { KlintContext } from "~/Klint/src/hooks/useKlint";
-import Klint from "~/Klint/src/component/Klint";
+
 export function KlintCanvas() {
-  const { context } = useKlint();
+  const { Klint, context } = useKlint();
 
   const widths = [0, 1, 2, 3, 10, 100];
   const draw = (K: KlintContext) => {
