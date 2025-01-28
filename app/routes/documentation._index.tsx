@@ -24,14 +24,6 @@ export default function DocumentationIndex() {
 
   return (
     <div className="max-w-7xl mx-auto px-4">
-      <div className="max-w-3xl mx-auto mb-12">
-        <h1 className="text-3xl font-bold mb-6">Klint Examples</h1>
-        <p className="text-gray-600">
-          A collection of interactive examples showcasing Klint&apos;s
-          capabilities.
-        </p>
-      </div>
-
       <div className="grid grid-cols-1 gap-8">
         {examples.map(({ name, path }: Example) => {
           if (!componentCache.has(path)) {
@@ -43,11 +35,8 @@ export default function DocumentationIndex() {
           const Component = componentCache.get(path);
 
           return (
-            <div key={name} className="border rounded-lg overflow-hidden">
-              <div className="p-4 border-b bg-gray-50">
-                <h2 className="text-xl font-semibold">{name}</h2>
-              </div>
-              <div className="w-full" style={{ height: "400px" }}>
+            <div key={name} className="rounded-lg overflow-hidden">
+              <div className="w-full h-full">
                 <Suspense fallback={<div>Loading example...</div>}>
                   <Component className="w-full h-full" />
                 </Suspense>
