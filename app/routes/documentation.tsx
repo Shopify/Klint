@@ -9,7 +9,7 @@ export async function loader() {
 
 export default function DocumentationLayout() {
   const { tree } = useLoaderData<typeof loader>();
-
+  console.log("hey");
   return (
     <div className="flex">
       <Navigation tree={tree} />

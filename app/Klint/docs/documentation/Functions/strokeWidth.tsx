@@ -1,11 +1,12 @@
 import useKlint, { KlintContext } from "~/Klint/src/hooks/useKlint";
 import DocLinks from "../../components/DocLinks";
 import Banner from "../../components/DocBanners";
-import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
-import jsx from "react-syntax-highlighter/dist/esm/languages/prism/jsx";
-import a11yDark from "react-syntax-highlighter/dist/esm/styles/prism/a11y-dark";
+import Code from "../../components/DocCode";
+// import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
+// import jsx from "react-syntax-highlighter/dist/esm/languages/prism/jsx";
+// import a11yDark from "react-syntax-highlighter/dist/esm/styles/prism/a11y-dark";
 
-SyntaxHighlighter.registerLanguage("jsx", jsx);
+// SyntaxHighlighter.registerLanguage("jsx", jsx);
 
 export function KlintCanvas() {
   const { Klint, context } = useKlint();
@@ -58,13 +59,10 @@ Klint.strokeWidth(width: number): void
       <div className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">Syntax</h2>
         <div>
-          <SyntaxHighlighter
-            className="rounded-lg"
-            language="jsx"
-            style={a11yDark}
-          >
-            {codeExample}
-          </SyntaxHighlighter>
+          <Code
+            // className="rounded-lg"
+            code={codeExample}
+          ></Code>
         </div>
       </div>
 

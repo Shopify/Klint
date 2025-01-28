@@ -3,7 +3,6 @@ export async function loadNavigation() {
   const paths = Object.keys(modules);
 
   let tree: Record<string, Record<string, string>> = {};
-
   paths.forEach((path) => {
     const cleanPath = path.replace("../documentation/", "").replace(".tsx", "");
 
