@@ -1,11 +1,11 @@
-import Klint, { KlintContext } from "./Klint";
+import type { KlintContext } from "../hooks/useKlint";
 import useKlint from "../hooks/useKlint";
 import useProps from "../hooks/useProps";
 
 export function KlintCanvas() {
-  const klint = useKlint();
+  const { Klint, context } = useKlint();
   const P = useProps({
-    hello: "world",
+    hello: "hello world",
   });
   const onResize = (/*K: KlintContext*/) => {
     console.log("resize");
@@ -27,20 +27,22 @@ export function KlintCanvas() {
   };
   const setup = (K: KlintContext) => {
     K.textFont("Inter");
+    K.alignText("center", "middle");
   };
 
   const draw = (K: KlintContext) => {
     K.background("#222");
+    K.text(String(P.get("hello")), K.width / 2, K.height / 2);
   };
 
   return (
     <Klint
-      context={klint}
+      context={context}
       preload={preload}
       draw={draw}
       setup={setup}
       options={{
-        origin: "corner",
+        origin: "center",
         static: "false",
       }}
       onClick={onClick}

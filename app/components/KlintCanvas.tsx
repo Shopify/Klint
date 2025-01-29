@@ -1,5 +1,4 @@
 import { KlintContext } from "../Klint/src/component/KlintTypes";
-import Klint from "../Klint/src/component/Klint";
 import useKlint from "../Klint/src/hooks/useKlint";
 import State from "../Klint/src/plugins/State";
 import Vector from "../Klint/src/plugins/Vector";
@@ -8,7 +7,7 @@ import Text from "../Klint/src/plugins/Text";
 export function KlintCanvas() {
   const cols = ["#F00", "#0F0", "#00F"];
 
-  const klint = useKlint();
+  const { Klint, context } = useKlint();
   // const {
   //   library: opentype,
   //   error: opentypeError,
@@ -240,7 +239,7 @@ export function KlintCanvas() {
 
   return (
     <Klint
-      context={klint}
+      context={context}
       draw={draw}
       setup={setup}
       preload={preload}

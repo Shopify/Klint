@@ -28,63 +28,84 @@ interface KlintColor {
 class Color implements KlintColor {
   context: KlintContexts;
 
+  public colors = [
+    "#E84D37", // coral
+    "#7F4C2F", // brown
+    "#EDBC2F", // mustard
+    "#BF3034", // crimson
+    "#18599D", // navy
+    "#45A7C6", // sky
+    "#8CB151", // olive
+    "#252120", // charcoal
+    "#ECA088", // peach
+    "#C9B1B8", // rose
+    "#8F3064", // plum
+    "#7B8870", // sage
+    "#C0C180", // drab
+    "#4B423D", // taupe
+    "#1A2A65", // midnight
+    "#EAA550", // golden
+    "#F17B04", // orange
+    "#404757", // slate
+  ] as const;
+
   constructor(ctx: KlintContexts) {
     this.context = ctx;
   }
 
   get coral() {
-    return "#E84D37";
+    return this.colors[0];
   }
   get brown() {
-    return "#7F4C2F";
+    return this.colors[1];
   }
   get mustard() {
-    return "#EDBC2F";
+    return this.colors[2];
   }
   get crimson() {
-    return "#BF3034";
+    return this.colors[3];
   }
   get navy() {
-    return "#18599D";
+    return this.colors[4];
   }
   get sky() {
-    return "#45A7C6";
+    return this.colors[5];
   }
   get olive() {
-    return "#8CB151";
+    return this.colors[6];
   }
   get charcoal() {
-    return "#252120";
+    return this.colors[7];
   }
   get peach() {
-    return "#ECA088";
+    return this.colors[8];
   }
   get rose() {
-    return "#C9B1B8";
+    return this.colors[9];
   }
   get plum() {
-    return "#8F3064";
+    return this.colors[10];
   }
   get sage() {
-    return "#7B8870";
+    return this.colors[11];
   }
   get drab() {
-    return "#C0C180";
+    return this.colors[12];
   }
   get taupe() {
-    return "#4B423D";
+    return this.colors[13];
   }
   get midnight() {
-    return "#1A2A65";
+    return this.colors[14];
   }
   get golden() {
-    return "#EAA550";
+    return this.colors[15];
   }
   get orange() {
-    return "#F17B04";
+    return this.colors[16];
   }
   get slate() {
-    return "#404757";
+    return this.colors[17];
   }
 
   private toHex(n: number): string {

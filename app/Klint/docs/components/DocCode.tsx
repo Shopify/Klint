@@ -9,10 +9,10 @@ function Code({ code }: Props) {
     return text
       .split(/(\s+|[(){}[\],.]|:|\(.*?\))/)
       .filter(Boolean)
-      .map((token, i) => {
+      .map((token, i, arr) => {
         if (token.trim() === "") return <span key={i}>{token}</span>;
-        // Match Klint specifically
-        if (i === 0) {
+        // If the first is a followed by a dot
+        if (i == 0 && arr[i + 1] === ".") {
           return (
             <span key={i} className="text-red-400">
               {token}
@@ -21,7 +21,7 @@ function Code({ code }: Props) {
         }
 
         // Method names after a dot
-        if (i === 2) {
+        if (i !== 0 && arr[i - 1] === ".") {
           return (
             <span key={i} className="text-yellow-400">
               {token}

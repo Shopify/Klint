@@ -1,10 +1,17 @@
 import { KlintContext } from "~/Klint/src/component/Klint";
 import useKlint from "~/Klint/src/hooks/useKlint";
+import useProps from "~/Klint/src/hooks/useProps";
 import Easing from "~/Klint/src/plugins/Easing";
 import Color from "~/Klint/src/plugins/Color";
 
-export function KlintCanvas() {
+export function KlintCanvas({ ...props }: { count?: number }) {
   const { Klint, context } = useKlint();
+  const { count } = props;
+
+  const P = useProps({
+    count: count,
+  });
+
   const fontSize = 20;
   const preload = async (K: KlintContext) => {
     K.extend("E", new Easing(K));
@@ -19,10 +26,12 @@ export function KlintCanvas() {
 
   const draw = (K: KlintContext) => {
     const { E, C } = K as unknown as { E: Easing; C: Color };
-
+    const _count = Number(P.get("count"));
     K.background("#111");
     K.fillColor("#FF0");
-    K.circle(K.width * 0.5, K.height * 0.5, 100);
+    const t = (Math.sin(K.frame * 0.03 + _count) * K.height) / 8;
+    K.fillColor(C.colors[_count % C.colors.length]);
+    K.circle(K.width * 0.5, K.height * 0.5 + t, 100);
 
     // const a = (K.frame * 0.005) % 1;
     // const b = E.normalize(Math.cos(K.frame * 0.03));
@@ -69,12 +78,18 @@ export function KlintCanvas() {
   );
 }
 
-export default function SquaresOnSine({ className }: { className?: string }) {
+export default function SquaresOnSine({
+  className,
+  count,
+}: {
+  className?: string;
+  count?: number;
+}) {
   // const { colors } = useKlint();
 
   return (
     <div className={`${className} h-[240px]`}>
-      <KlintCanvas />
+      <KlintCanvas count={count} />
     </div>
   );
 }

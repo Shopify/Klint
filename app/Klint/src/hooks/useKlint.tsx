@@ -7,6 +7,7 @@ import Klint from "../component/Klint";
 export type {
   KlintContext,
   KlintOffscreenContext,
+  KlintContexts,
   KlintMouse,
 } from "../component/KlintTypes";
 
