@@ -184,6 +184,7 @@ export const KlintCoreFunctions = {
           context[name] = fn(context as KlintOffscreenContext);
         });
       }
+
       // Set origin if specified
       if (options?.origin) {
         context.__canvasOrigin = options.origin;

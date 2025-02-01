@@ -14,6 +14,7 @@ export interface KlintCanvasOptions {
   static?: string;
   nocanvas?: string;
   fps?: number;
+  unsafemode?: string;
   origin?: "corner" | "center";
 }
 

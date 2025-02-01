@@ -30,6 +30,7 @@ const DEFAULT_OPTIONS: KlintCanvasOptions = {
   ignorefunctions: "false",
   static: "false",
   nocanvas: "false",
+  unsafemode: "false",
   willreadfrequently: "false",
   fps: DEFAULT_FPS,
   origin: "corner",
@@ -295,12 +296,6 @@ export default function Klint({
       context.fps = __options.fps;
     }
 
-    // if (__options.ignorefunctions !== "true") {
-    //   Object.entries(KlintFunctions).forEach(([name, fn]) => {
-    //     contextRef.current![name] = fn(context as KlintContext);
-    //   });
-    // }
-
     updateCanvasSize();
 
     if (options.ignoreresize !== "true") {
@@ -323,8 +318,36 @@ export default function Klint({
 
     const initializeKlint = async () => {
       if (!context) return;
-      if (context.__isReadyToDraw) return;
 
+      // Unsafe mode - reload everything on each render
+      if (__options.unsafemode === "true") {
+        try {
+          if (preload) {
+            await preload(context);
+          }
+          if (setup) {
+            setup(context);
+          }
+          context.__isReadyToDraw = true;
+
+          if (__options.static === "true") {
+            draw(context);
+            const imageUrl = canvas.toDataURL("image/png");
+            setStaticImage(imageUrl);
+            return;
+          }
+
+          setIsReady(true);
+          if (__options.noloop !== "true") animate();
+        } catch (error) {
+          console.error("Fatal Klint initialization error:", error);
+          context.__isReadyToDraw = false;
+        }
+        return;
+      }
+
+      // Safe mode - normal initialization with state checks
+      if (context.__isReadyToDraw) return;
       try {
         try {
           if (preload && !context.__isPreloaded) {
@@ -348,6 +371,7 @@ export default function Klint({
           context.__isSetup = true;
         }
         context.__isReadyToDraw = true;
+
         if (__options.static === "true") {
           try {
             draw(context);
@@ -359,6 +383,7 @@ export default function Klint({
             throw error;
           }
         }
+
         setIsReady(true);
         if (__options.noloop !== "true") animate();
       } catch (error) {
