@@ -31,18 +31,26 @@ class Time implements KlintTime {
     return this;
   }
 
-  use(frame: number) {
+  use(progress: number) {
     const timeline = this.timelines.get(this.currentTimeline)!;
-    timeline.progress = (frame / timeline.duration) % 1;
+    if (timeline.duration <= 0) {
+      timeline.progress = 0;
+      return this;
+    }
+    timeline.progress =
+      timeline.duration === 1
+        ? Math.min(progress, 1)
+        : (progress / timeline.duration) % 1;
     return this;
   }
 
   for(duration: number) {
     const timeline = this.timelines.get(this.currentTimeline)!;
     timeline.duration = duration;
-    timeline.progress =
-      ((timeline.progress * timeline.duration) % timeline.duration) /
-      timeline.duration;
+    // timeline.progress =
+    // ((timeline.progress * timeline.duration) % timeline.duration) /
+    // timeline.duration;
+
     return this;
   }
 
@@ -52,6 +60,7 @@ class Time implements KlintTime {
     callback?: (progress: number, id: number, num: number) => void
   ) {
     const timeline = this.timelines.get(this.currentTimeline)!;
+
     const totalduration = this.context.remap(
       timeline.progress,
       0,
@@ -67,6 +76,7 @@ class Time implements KlintTime {
         0,
         1
       );
+
       if (!callback) {
         if (this.staggers[i]) {
           this.staggers[i].progress = progress;
@@ -82,11 +92,14 @@ class Time implements KlintTime {
 
   between(from = 0, to = 1, callback: (progress: number) => void) {
     const timeline = this.timelines.get(this.currentTimeline)!;
-    const localProgress = this.context.remap(timeline.progress, 0, 1, from, to);
-
-    if (timeline.progress >= from && timeline.progress <= to) {
-      callback(localProgress);
-    }
+    const localProgress = this.context.remap(
+      timeline.progress,
+      Math.max(0, from),
+      Math.min(1, to),
+      0,
+      1
+    );
+    callback(localProgress);
     return this;
   }
 

@@ -72,7 +72,7 @@ export function KlintCanvas() {
     const dy = Math.abs(K.mouse.y / K.height - 0.5);
     // console.log(d);
     for (let i = 0; i < count; i++) {
-      const s = Math.sin(i / 2 + K.frame * 0.03 + dx);
+      const s = Math.sin(i / 2 + K.time * 0.03 + dx);
       const x = K.width / 2 + s * dx * K.width;
       const y = K.height / 2 + ((count / 2 - i) * K.height) / count;
 
@@ -92,13 +92,13 @@ export function KlintCanvas() {
       K.rectangle(-size / 2, -size / 2, size, size);
       K.pop();
     }
-    K.push();
-    K.scale(s, s);
-    K.image(K.getOffscreen("buffer"), 0, 0);
-    K.pop();
-    // K.fillColor("#FFF");
-    // K.textSize(K.width * 0.25);
-    // K.text(String(P.get("hello")), K.width / 2, K.width * 0.25);
+    // K.push();
+    // K.scale(s, s);
+    // K.image(K.getOffscreen("buffer"), 0, 0);
+    // K.pop();
+    K.fillColor("#FFF");
+    K.textSize(K.width * 0.25);
+    K.text(String(P.get("hello")), K.width / 2, K.width * 0.25);
   };
 
   return (
@@ -110,6 +110,7 @@ export function KlintCanvas() {
       options={{
         origin: "corner",
         static: "false",
+        // fps: 8,
       }}
       onClick={onClick}
       onResize={onResize}

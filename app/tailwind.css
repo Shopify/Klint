@@ -8,7 +8,7 @@
 
 html,
 body {
-  @apply bg-white dark:bg-gray-600;
+  @apply bg-white dark:bg-gray-900;
   padding: 0;
   margin: 0;
 
