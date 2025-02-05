@@ -23,8 +23,8 @@ function draw(K) {
  
 }`;
 
-export default function KlintEditor() {
-  const [code, setCode] = useState(defaultCode);
+// Separate Klint Canvas component
+function KlintCanvas({ code }: { code: string }) {
   const { Klint, context } = useKlint();
   const P = useProps({});
   const [klintFunctions, setKlintFunctions] = useState<{
@@ -36,66 +36,63 @@ export default function KlintEditor() {
     setup: undefined,
     draw: undefined,
   });
-  const [runCount, setRunCount] = useState(0);
 
-  const evaluateCode = (sourceCode: string) => {
+  useEffect(() => {
     try {
       const context = {};
       const evaluatedCode = new Function(`
         "use strict";
         return (function() {
-          ${sourceCode}
+          ${code}
           return { preload, setup, draw };
         })();
       `).call(context);
 
-      if (evaluatedCode.draw) {
-        setKlintFunctions({ ...evaluatedCode });
-        // Reset context when code changes
-        if (Klint?.reset) {
-          Klint.reset();
-        }
-      }
+      setKlintFunctions(evaluatedCode);
     } catch (error) {
       console.error("Error evaluating code:", error);
     }
-  };
+  }, [code]);
 
   const preload = async (K: KlintContext) => {
-    console.log("Main preload called");
-    // Initialize all plugins
     Object.entries(Plugins).forEach(([name, Plugin]) => {
-      // console.log(`Initializing plugin: ${name}`);
       K.extend(name.charAt(0), new Plugin(K));
     });
 
-    // Call user's preload if exists
     if (klintFunctions.preload) {
-      console.log("Calling user preload");
       await klintFunctions.preload(K);
     }
   };
 
-  useEffect(() => {
-    evaluateCode(defaultCode);
-  }, []);
+  // Only render Klint when we have a valid draw function
+  if (!klintFunctions.draw) {
+    return (
+      <div style={{ width: "100%", height: "100%", background: "#000" }}></div>
+    );
+  }
 
-  // Add cleanup effect
-  useEffect(() => {
-    return () => {
-      if (Klint?.reset) {
-        Klint.reset();
-      }
-    };
-  }, [Klint]);
+  return (
+    <Klint
+      context={context}
+      preload={preload}
+      setup={klintFunctions.setup}
+      draw={klintFunctions.draw}
+      options={{
+        origin: "corner",
+        unsafemode: "true",
+      }}
+    />
+  );
+}
+
+export default function KlintEditor() {
+  const [code, setCode] = useState(defaultCode);
+  const [runningCode, setRunningCode] = useState(defaultCode);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
       <button
-        onClick={() => {
-          evaluateCode(code);
-          setRunCount((prev) => prev + 1);
-        }}
+        onClick={() => setRunningCode(code)}
         style={{
           padding: "8px 16px",
           margin: "8px",
@@ -122,17 +119,7 @@ export default function KlintEditor() {
           />
         </div>
         <div style={{ flex: 1, background: "#000" }}>
-          <Klint
-            key={runCount}
-            context={context}
-            preload={preload}
-            setup={klintFunctions.setup}
-            draw={klintFunctions.draw!}
-            options={{
-              origin: "corner",
-              unsafemode: "true",
-            }}
-          />
+          <KlintCanvas key={runningCode} code={runningCode} />
         </div>
       </div>
     </div>

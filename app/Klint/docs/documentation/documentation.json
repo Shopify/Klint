@@ -1,0 +1,40 @@
+{
+  "Layout": [
+    {
+      "layouts": [
+        "title",
+        "subtitle",
+        "blurb",
+        "plain",
+        "klint",
+        "block",
+        "code",
+        "good",
+        "bad",
+        "danger",
+        "hint"
+      ]
+    }
+  ],
+  "Klint": [
+    {
+      "introduction": {
+        "contents": [
+          {
+            "layout": "title",
+            "content": "Welcome to Klint"
+          },
+          {
+            "layout": "blurb",
+            "content": "Klint is a 2d webcanvas Component for React. The (big idea)['google.com'] behind it is to extend it from within rather than build around it."
+          },
+          {
+            "layout": "plain",
+            "content": "The quick brown fox jumps over the (lazy dog)['/Klint/introduction']."
+          }
+        ],
+        "links": [{}]
+      }
+    }
+  ]
+}
