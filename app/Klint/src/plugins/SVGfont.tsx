@@ -51,7 +51,7 @@ class SVGfont implements KlintSVGfont {
   public readonly glyphs: Map<string, GlyphMetrics>;
   private font: string = "";
   private SCALE: number = 1;
-  private targetXHeight: number = 100; // desired x-height in pixels
+  private targetXHeight: number = 512;
   constructor(public readonly context: KlintContexts) {
     this.metrics = {
       fontFamily: "",
@@ -66,7 +66,7 @@ class SVGfont implements KlintSVGfont {
     this.context = context;
   }
 
-  parse(font: string, desiredXHeight: number = 100): void {
+  parse(font: string, desiredXHeight: number = 512): void {
     const parser = new DOMParser();
     const doc = parser.parseFromString(font, "text/xml");
 
@@ -137,7 +137,7 @@ class SVGfont implements KlintSVGfont {
         name: character,
         unicode: unicode,
         horizAdvX: horizAdvX * this.SCALE,
-        d: pathData,
+        d: pathData || undefined,
       };
 
       this.glyphs.set(unicode, glyphData);
@@ -199,7 +199,7 @@ class SVGfont implements KlintSVGfont {
     } else if (align === "right") {
       currentX = -totalWidth;
     }
-
+    console.log(this.SCALE);
     // Calculate Y offset based on vertical alignment
     let yOffset = 0;
     switch (center) {
@@ -271,8 +271,25 @@ class SVGfont implements KlintSVGfont {
     return points;
   }
 
-  flatten(points: SVGFontPaths): Array<{ x: number; y: number }> {
-    return points.flatMap((glyph) => glyph.flatMap((contour) => contour));
+  flatten(
+    points: SVGFontPaths,
+    displacement?: DisplacementCallback
+  ): Array<{ x: number; y: number }> {
+    return points.flatMap((glyph) =>
+      glyph.flatMap((contour, contourIndex) =>
+        contour.map((point) => {
+          if (displacement) {
+            return displacement({
+              point,
+              position: point,
+              groupIndex: contourIndex,
+              letterSpacing: 0,
+            });
+          }
+          return point;
+        })
+      )
+    );
   }
 
   draw(points: SVGFontPaths, displacement?: DisplacementCallback) {

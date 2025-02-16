@@ -7,6 +7,7 @@ import useProps from "~/Klint/src/hooks/useProps";
 import { useState } from "react";
 import Color from "~/Klint/src/plugins/Color";
 import SVGfont, { SVGFontPaths } from "~/Klint/src/plugins/SVGfont";
+import Easing from "~/Klint/src/plugins/Easing";
 
 import svgFont from "~/src/Marcel-semibold.svg?raw";
 
@@ -33,14 +34,14 @@ export function KlintCanvas() {
   const preload = async (K: KlintContext) => {
     //K.extend("T", new Text(K));
     // console.log(K, "Welcome to Klint ! 🎨");
-    K.extend("C", new Color(K));
+    K.extend("E", new Easing(K));
     K.extend("SVG", new SVGfont(K));
     K.SVG.parse(svgFont);
 
     P.set(
       "points",
       K.SVG.getPoints("Ah !", {
-        factor: 0.25,
+        factor: 0.1,
         align: "center",
         center: "middle",
       })
@@ -76,63 +77,58 @@ export function KlintCanvas() {
     // );
   };
   const setup = (K: KlintContext) => {
-    K.textFont("Inter");
-    // K.textSize(48);
+    K.textFont("Marcel");
+    K.textSize(512);
     K.noStroke();
     K.alignText("center", "middle");
     K.setImageOrigin("center");
   };
 
   const draw = (K: KlintContext) => {
-    // const { C } = K as unknown as { E: Easing; C: Color };
+    const { E } = K as unknown as { E: Easing };
     const lamp = P.get("lamp") as HTMLImageElement;
     const rawpoints = P.get("points") as SVGFontPaths;
-    const pts = K.SVG.flatten(rawpoints);
+    const pts = K.SVG.flatten(rawpoints, ({ point }) => {
+      return {
+        x: point.x,
+        y: point.y + 72,
+      };
+    });
     K.background(`rgba(0, 0, 0, 255)`);
-    // K.noFill();
-
-    // K.push();
-    // K.fillColor("#555");
-
-    // K.pop();
 
     K.push();
-    // K.translate(K.width / 2, K.height / 2);
     K.fillColor("#FFF");
     K.text("Ah !", K.width / 2, K.height / 2);
     K.pop();
 
-    K.push();
-    K.strokeColor("#F0F");
-    K.translate(K.width / 2, K.height / 2);
-    K.SVG.draw(rawpoints, ({ point }) => {
-      return {
-        x: point.x,
-        y: point.y,
-      };
-    });
+    // K.push();
+    // K.strokeColor("#F0F");
+    // K.translate(K.width / 2, K.height / 2);
+    // K.SVG.draw(rawpoints, ({ point }) => {
+    //   return {
+    //     x: point.x,
+    //     y: point.y + 72,
+    //   };
+    // });
 
-    K.pop();
+    // K.pop();
 
-    // for (const point of pts) {
-    //   const { x, y } = point;
-    //   const px = x * 4 + K.width / 2;
-    //   const py = y * 4 + K.height / 2;
-    //   K.push();
-    //   const d = K.remap(
-    //     K.distance(px, py, K.mouse.x, K.mouse.y),
-    //     0,
-    //     300,
-    //     0.25,
-    //     0.0
-    //   );
-    //   const a = Math.atan2(py - K.mouse.y, px - K.mouse.x);
-    //   K.translate(px, py);
-    //   K.scale(d, d);
-    //   K.rotate(a);
-    //   K.image(lamp, 0, 0);
-    //   K.pop();
-    // }
+    for (const point of pts) {
+      const { x, y } = point;
+      const px = x + K.width / 2;
+      const py = y + K.height / 2;
+      K.push();
+      const d =
+        E.inout(
+          K.remap(K.distance(px, py, K.mouse.x, K.mouse.y), 0, 400, 1, 0.0)
+        ) * 0.4;
+      const a = Math.atan2(py - K.mouse.y, px - K.mouse.x);
+      K.translate(px, py);
+      K.scale(d, d);
+      K.rotate(a);
+      K.image(lamp, 0, 0);
+      K.pop();
+    }
 
     // const b = K.getOffscreen("buffer");
     // const s = K.scaleTo(b.width, b.height, K.width - 50, 100, true);
