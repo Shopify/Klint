@@ -1,5 +1,5 @@
 import { KlintContexts, KlintConfig } from "./KlintTypes";
-import { CONFIG_PROPS, EPSILON, KlintContext } from "./Klint";
+import { CONFIG_PROPS, EPSILON } from "./Klint";
 // Klint Functions
 export type KlintFunctions = {
   [K in KlintFunctionNames]: ReturnType<(typeof KlintFunctions)[K]>;
@@ -464,16 +464,16 @@ export const KlintFunctions = {
       const canvas = ctx.canvas;
       return canvas.toDataURL(type, quality);
     },
-  saveConfig: (ctx: KlintContext) => (from?: KlintContext) => {
+  saveConfig: (ctx: KlintContexts) => (from?: KlintContexts) => {
     return Object.fromEntries(
       CONFIG_PROPS.map((key) => [
         key,
-        from?.[key as keyof KlintContext] ?? ctx[key as keyof KlintContext],
+        from?.[key as keyof KlintContexts] ?? ctx[key as keyof KlintContexts],
       ])
     ) as KlintConfig;
   },
   restoreConfig:
-    (ctx: KlintContext) =>
+    (ctx: KlintContexts) =>
     (config: KlintConfig): void => {
       Object.assign(ctx, config);
     },

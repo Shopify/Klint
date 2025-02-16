@@ -39,7 +39,7 @@ export function buildKlintContext(ctx: CanvasRenderingContext2D): KlintContext {
   context.__textFont = "sans-serif";
   context.__textWeight = "normal";
   context.__textStyle = "normal";
-  context.__textSize = 12;
+  context.__textSize = 120;
   context.__textAlignment = {
     horizontal: "left" as CanvasTextAlign,
     vertical: "top" as CanvasTextBaseline,

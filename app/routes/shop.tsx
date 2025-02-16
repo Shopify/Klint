@@ -58,7 +58,8 @@ export function KlintCanvas() {
     const ny = 10;
     const dx = (K.width - margins * 2) / (nx - 1);
     const dy = (K.height - margins * 2) / (ny - 1);
-
+    const lamp = P.get("lamp") as HTMLImageElement;
+    const headphones = P.get("headphones") as HTMLImageElement;
     const ratio = 0.25;
     K.fillColor("#FFF");
     K.push();
@@ -70,31 +71,32 @@ export function KlintCanvas() {
         const a = K.mouse.y - y;
         const c = Math.sqrt(a * a + b * b) || 1;
         // const a = Math.atan2(y - K.mouse.y, x - K.mouse.x);
-        // const d = K.remap(
-        //   K.distance(x, y, K.mouse.x, K.mouse.y),
-        //   0,
-        //   K.width * 0.25,
-        //   1,
-        //   0.0
-        // );
+        const d = K.remap(
+          K.distance(x, y, K.mouse.x, K.mouse.y),
+          0,
+          K.width * 0.25,
+          1,
+          0.0
+        );
+
         const e =
           ((Math.acos(b / c) * Math.PI) / Math.PI) * (K.mouse.y > y ? 1 : -1);
         K.push();
         K.translate(x, y);
-        // K.scale(d, d);
+        K.scale(d, d);
         K.rotate(e);
 
-        // if ((i + j) % 2 === 0) {
-        //   //K.text("A", 0, 0);
-        //   K.image(lamp, 0, 0, lamp.width * ratio, lamp.height * ratio);
-        // } else {
-        //   //K.text("B", 0, 0);
-        //   K.image(headphones, 0, 0, lamp.width * ratio, lamp.height * ratio);
-        // }
+        if ((i + j) % 2 === 0) {
+          //K.text("A", 0, 0);
+          K.image(lamp, 0, 0, lamp.width * ratio, lamp.height * ratio);
+        } else {
+          //K.text("B", 0, 0);
+          K.image(headphones, 0, 0, lamp.width * ratio, lamp.height * ratio);
+        }
         // K.text("hello", 0, 0);
         // K.image(lamp, 0, 0, lamp.width * ratio, lamp.height * ratio);
         // K.image(headphones, 0, 0, lamp.width * ratio, lamp.height * ratio);
-        K.rectangle(0, 0, 25, 100);
+        // K.rectangle(0, 0, 25, 100);
         //
         K.pop();
       }
