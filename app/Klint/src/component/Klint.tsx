@@ -117,12 +117,8 @@ export default function Klint({
   const [isReady, setIsReady] = useState(false);
   const [toStaticImage, setStaticImage] = useState<string | null>(null);
 
-  let initContext:
-    | ((canvas: HTMLCanvasElement) => KlintContext | null)
-    | undefined;
-  if (context) {
-    initContext = context.initCoreContext;
-  }
+  const initContext = context?.initCoreContext;
+  const initMouse = context?.mouse.initMouse;
 
   const handlers = useEventHandlers(
     mouseRef,
@@ -227,6 +223,7 @@ export default function Klint({
     contextRef.current = initContext ? initContext(canvas) : null;
     const context = contextRef.current;
     if (!context) return;
+    initMouse(context.canvas);
     context.__dpr = dpr;
 
     if (__options.origin === "center") {

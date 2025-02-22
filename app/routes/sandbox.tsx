@@ -12,12 +12,13 @@ import Klint from "~/Klint/src/component/Klint";
 // import svgFont from "~/src/Marcel-semibold.svg?raw";
 
 export function KlintCanvas() {
-  const { context } = useKlint();
+  const { context, useMouse } = useKlint();
   const P = useProps({
     hello: "Klint",
     lamp: "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/lamp.png?v=1734625960",
     scroll: { distance: 0, velocity: 0 },
   });
+  const mouse = useMouse();
   const onResize = (/*K: KlintContext*/) => {
     console.log("resize");
   };
@@ -99,11 +100,12 @@ export function KlintCanvas() {
 
   const draw = (K: KlintContext) => {
     const { C } = K as unknown as { C: Color };
+    console.log(mouse.x, mouse.y, mouse.isPressed);
     const scrollAmount = P.get("scroll") as {
       distance: number;
       velocity: number;
     };
-    console.log(scrollAmount.velocity);
+    // console.log(scrollAmount.velocity);
     // const lamp = P.get("lamp") as HTMLImageElement;
     // const rawpoints = P.get("points") as SVGFontPaths;
     // const pts = K.SVG.flatten(rawpoints, ({ point }) => {

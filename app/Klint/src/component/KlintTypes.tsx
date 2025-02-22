@@ -120,4 +120,8 @@ export interface KlintScroll {
 export interface KlintContextWrapper {
   context: KlintContext | null;
   initCoreContext: (canvas: HTMLCanvasElement) => KlintContext;
+  mouse: {
+    current: KlintMouse;
+    initMouse: (canvas: HTMLCanvasElement) => () => void;
+  };
 }
