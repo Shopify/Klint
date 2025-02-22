@@ -1,4 +1,12 @@
-import { useRef, useEffect, useCallback, useState } from "react";
+import {
+  useRef,
+  useEffect,
+  useCallback,
+  useState,
+  Component,
+  ErrorInfo,
+  ReactNode,
+} from "react";
 
 import {
   KlintProps,
@@ -7,6 +15,8 @@ import {
   KlintScroll,
   KlintCanvasOptions,
 } from "./KlintTypes";
+
+import { useEventHandlers } from "../hooks/useEvents";
 
 export type {
   KlintProps,
@@ -17,8 +27,6 @@ export type {
   KlintCanvasOptions,
   KlintConfig,
 } from "./KlintTypes";
-
-// import { KlintFunctions } from "./KlintFunctions";
 
 const DEFAULT_FPS = 60;
 const DEFAULT_ALT = "A beautiful artwork made with Klint Canvas";
@@ -64,85 +72,6 @@ export const CONFIG_PROPS = [
   "__textAlignment",
 ] as const;
 
-const createEventHandler = (
-  mouseRef: React.RefObject<KlintMouse>,
-  contextRef: React.RefObject<KlintContext>,
-  containerRef: React.RefObject<HTMLDivElement>,
-  callbacks: {
-    onMouseIn?: (context: KlintContext) => void;
-    onMouseOut?: (context: KlintContext) => void;
-    onClick?: (context: KlintContext) => void;
-    onScroll?: (
-      context: KlintContext,
-      scrollData: { distance: number; velocity: number }
-    ) => void;
-    onKeyPressed?: (context: KlintContext, key: string) => void;
-    onRelease?: (context: KlintContext) => void;
-  },
-  scrollRef: React.RefObject<KlintScroll>,
-  updateMousePosition: (
-    clientX: number,
-    clientY: number,
-    containerRef: React.RefObject<HTMLDivElement>,
-    contextRef: React.RefObject<KlintContext>,
-    mouseRef: React.RefObject<KlintMouse>
-  ) => void,
-  updateKlintScroll: (
-    wheel: WheelEvent,
-    scrollRef: React.RefObject<KlintScroll>,
-    contextRef: React.RefObject<KlintContext>,
-    callbacks: {
-      onScroll?: (
-        context: KlintContext,
-        scrollData: { distance: number; velocity: number }
-      ) => void;
-    }
-  ) => void
-) => {
-  const handlers = {
-    move: (e: Event) => {
-      if (!mouseRef.current) return;
-      const event = e as MouseEvent | TouchEvent;
-      const { clientX, clientY } =
-        event instanceof TouchEvent ? event.touches[0] : event;
-      updateMousePosition(clientX, clientY, containerRef, contextRef, mouseRef);
-      if (event instanceof TouchEvent) event.preventDefault();
-    },
-    down: () => mouseRef.current && (mouseRef.current.isPressed = true),
-    up: () => mouseRef.current && (mouseRef.current.isPressed = false),
-    enter: () => {
-      if (!mouseRef.current) return;
-      mouseRef.current.isHover = true;
-      if (contextRef.current) callbacks.onMouseIn?.(contextRef.current);
-    },
-    leave: () => {
-      if (!mouseRef.current) return;
-      mouseRef.current.isHover = false;
-      if (contextRef.current) callbacks.onMouseOut?.(contextRef.current);
-    },
-    click: () => {
-      if (contextRef.current) callbacks.onClick?.(contextRef.current);
-    },
-    scroll: (e: Event) => {
-      const wheel = e as WheelEvent;
-      updateKlintScroll(wheel, scrollRef, contextRef, {
-        onScroll: callbacks.onScroll,
-      });
-      wheel.preventDefault();
-    },
-    keypress: (e: Event) => {
-      const event = e as KeyboardEvent;
-      if (contextRef.current)
-        callbacks.onKeyPressed?.(contextRef.current, event.key);
-    },
-    release: () => {
-      if (contextRef.current) callbacks.onRelease?.(contextRef.current);
-    },
-  };
-
-  return handlers;
-};
-
 // Entry point
 export default function Klint({
   context,
@@ -176,118 +105,36 @@ export default function Klint({
     isPressed: false,
     isHover: false,
   });
+  const scrollRef = useRef<KlintScroll>({
+    distance: 0,
+    velocity: 0,
+    lastTime: 0,
+  });
   const __options = {
     ...DEFAULT_OPTIONS,
     ...options,
   };
   const [isReady, setIsReady] = useState(false);
   const [toStaticImage, setStaticImage] = useState<string | null>(null);
-  // from the hook
+
   let initContext:
     | ((canvas: HTMLCanvasElement) => KlintContext | null)
     | undefined;
   if (context) {
     initContext = context.initCoreContext;
   }
-  const updateMousePosition = (
-    clientX: number,
-    clientY: number,
-    containerRef: React.RefObject<HTMLDivElement>,
-    contextRef: React.RefObject<KlintContext>,
-    mouseRef: React.RefObject<KlintMouse>
-  ) => {
-    if (!contextRef.current || !containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const context = contextRef.current;
-    const dpr = context.__dpr;
-    const mouse = mouseRef.current;
-    const origin = context.__canvasOrigin;
-    if (mouse) {
-      mouse.px = mouse.x;
-      mouse.py = mouse.y;
-      mouse.x =
-        origin === "center"
-          ? (clientX - rect.left) * dpr - context.canvas.width / 2
-          : (clientX - rect.left) * dpr;
-      mouse.y =
-        origin === "center"
-          ? (clientY - rect.top) * dpr - context.canvas.height / 2
-          : (clientY - rect.top) * dpr;
-      mouse.vx = mouse.x - mouse.px;
-      mouse.vy = mouse.y - mouse.py;
-      mouse.angle = Number(
-        ((Math.atan2(mouse.vy, mouse.vx) * 180) / Math.PI).toFixed(4)
-      );
 
-      contextRef.current.mouse = mouse;
-    }
-  };
-
-  const updateScrollState = (
-    wheel: WheelEvent,
-    scrollRef: React.RefObject<KlintScroll>,
-    contextRef: React.RefObject<KlintContext>,
-    callbacks: {
-      onScroll?: (
-        context: KlintContext,
-        scrollData: { distance: number; velocity: number }
-      ) => void;
-    }
-  ) => {
-    if (!scrollRef.current || !contextRef.current) return;
-
-    const now = performance.now();
-    const deltaTime = now - scrollRef.current.lastTime;
-    const spring = 0.3;
-    const damping = 0.75;
-    const epsilon = 0.075; // Threshold for zeroing out velocity
-
-    // Update velocity with spring physics
-    scrollRef.current.velocity =
-      deltaTime > 0
-        ? (wheel.deltaY / deltaTime) * spring +
-          scrollRef.current.velocity * damping
-        : scrollRef.current.velocity * damping;
-
-    // Force velocity to 0 if it's very small
-    if (Math.abs(scrollRef.current.velocity) < epsilon) {
-      scrollRef.current.velocity = 0;
-    }
-
-    // Apply velocity to distance
-    scrollRef.current.distance += scrollRef.current.velocity;
-    scrollRef.current.lastTime = now;
-
-    // Decelerate when no input
-    if (Math.abs(wheel.deltaY) < 0.01) {
-      scrollRef.current.velocity *= damping;
-    }
-
-    callbacks.onScroll?.(contextRef.current, {
-      distance: Math.min(Math.max(scrollRef.current.distance, -100000), 100000),
-      velocity: Math.abs(scrollRef.current.velocity),
-    });
-  };
-
-  const scrollRef = useRef<KlintScroll>({
-    distance: 0,
-    velocity: 0,
-    lastTime: performance.now(),
-  });
+  const handlers = useEventHandlers(
+    mouseRef,
+    contextRef,
+    containerRef,
+    { onMouseIn, onMouseOut, onClick, onScroll, onKeyPressed, onRelease },
+    scrollRef
+  );
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-
-    const handlers = createEventHandler(
-      mouseRef,
-      contextRef,
-      containerRef,
-      { onMouseIn, onMouseOut, onClick, onScroll, onKeyPressed, onRelease },
-      scrollRef,
-      updateMousePosition,
-      updateScrollState
-    );
 
     const eventMap: Record<
       string,
@@ -322,7 +169,8 @@ export default function Klint({
         ignore: __options.ignoreKeyboard === "true",
       },
     };
-    // Add event listeners based on options and callback existence
+
+    // Add event listeners
     Object.entries(eventMap).forEach(([type, { events, ignore }]) => {
       if (ignore) return;
       // Special case for click
@@ -332,6 +180,7 @@ export default function Klint({
         container.addEventListener(event, handler as EventListener);
       });
     });
+
     return () => {
       Object.values(eventMap).forEach(({ events }) => {
         events.forEach(([event, handler]) => {
@@ -340,12 +189,8 @@ export default function Klint({
       });
     };
   }, [
-    onMouseIn,
-    onMouseOut,
+    handlers,
     onClick,
-    onScroll,
-    onKeyPressed,
-    onRelease,
     __options.ignoreMouse,
     __options.ignoreScroll,
     __options.ignoreKeyboard,
@@ -421,74 +266,47 @@ export default function Klint({
     const initializeKlint = async () => {
       if (!context) return;
 
-      // Unsafe mode - reload everything on each re-render.
-      // Used for the Editor, do not use unless you know what you're doing.
-      if (__options.unsafemode === "true") {
-        try {
-          if (preload) {
-            await preload(context);
-          }
-          if (setup) {
-            setup(context);
-          }
-          context.__isReadyToDraw = true;
+      const handleStaticMode = () => {
+        draw(context);
+        const imageUrl = canvas.toDataURL("image/png");
+        setStaticImage(imageUrl);
+      };
 
-          if (__options.static === "true") {
-            draw(context);
-            const imageUrl = canvas.toDataURL("image/png");
-            setStaticImage(imageUrl);
-            return;
-          }
-
-          setIsReady(true);
-          if (__options.noloop !== "true") animate();
-        } catch (error) {
-          console.error("Fatal Klint initialization error:", error);
-          context.__isReadyToDraw = false;
-        }
-        return;
-      }
-
-      // Safe mode - normal initialization with state checks
-      if (context.__isReadyToDraw) return;
-      try {
-        try {
-          if (preload && !context.__isPreloaded) {
-            await preload(context);
-          }
-        } catch (error) {
-          console.error("Error during preload:", error);
-          throw error;
-        } finally {
-          context.__isPreloaded = true;
-        }
-
-        try {
-          if (setup && !context.__isSetup) {
-            setup(context);
-          }
-        } catch (error) {
-          console.error("Error during setup:", error);
-          throw error;
-        } finally {
-          context.__isSetup = true;
-        }
-        context.__isReadyToDraw = true;
-
-        if (__options.static === "true") {
-          try {
-            draw(context);
-            const imageUrl = canvas.toDataURL("image/png");
-            setStaticImage(imageUrl);
-            return;
-          } catch (error) {
-            console.error("Error in static mode:", error);
-            throw error;
-          }
-        }
-
+      const startAnimation = () => {
         setIsReady(true);
         if (__options.noloop !== "true") animate();
+      };
+
+      const initializeContext = async (skipStateChecks = false) => {
+        if (preload && (skipStateChecks || !context.__isPreloaded)) {
+          await preload(context);
+          if (!skipStateChecks) context.__isPreloaded = true;
+        }
+
+        if (setup && (skipStateChecks || !context.__isSetup)) {
+          setup(context);
+          if (!skipStateChecks) context.__isSetup = true;
+        }
+
+        context.__isReadyToDraw = true;
+      };
+
+      try {
+        // Unsafe mode - reload everything on each re-render
+        if (__options.unsafemode === "true") {
+          await initializeContext(true);
+          return __options.static === "true"
+            ? handleStaticMode()
+            : startAnimation();
+        }
+
+        // Safe mode - normal initialization with state checks
+        if (context.__isReadyToDraw) return;
+        await initializeContext();
+
+        return __options.static === "true"
+          ? handleStaticMode()
+          : startAnimation();
       } catch (error) {
         console.error("Fatal Klint initialization error:", error);
         context.__isReadyToDraw = false;
@@ -556,28 +374,69 @@ export default function Klint({
   }, [animate, isVisible, __options.noloop, draw, isReady]);
 
   return (
-    <div ref={containerRef} style={{ width: "100%", height: "100%" }}>
-      {toStaticImage ? (
-        <img
-          src={toStaticImage}
-          alt={contextRef.current?.__description || DEFAULT_ALT}
-          style={{
-            display: "block",
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-          }}
-        />
-      ) : (
-        <canvas
-          ref={canvasRef}
-          style={{
-            display: __options.nocanvas === "true" ? "none" : "block",
-          }}
-          aria-label={contextRef.current?.__description || DEFAULT_ALT}
-          role="img"
-        />
-      )}
-    </div>
+    <KlintErrorBoundary>
+      <div ref={containerRef} style={{ width: "100%", height: "100%" }}>
+        {toStaticImage ? (
+          <img
+            src={toStaticImage}
+            alt={contextRef.current?.__description || DEFAULT_ALT}
+            style={{
+              display: "block",
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+            }}
+          />
+        ) : (
+          <canvas
+            ref={canvasRef}
+            style={{
+              display: __options.nocanvas === "true" ? "none" : "block",
+            }}
+            aria-label={contextRef.current?.__description || DEFAULT_ALT}
+            role="img"
+          />
+        )}
+      </div>
+    </KlintErrorBoundary>
   );
+}
+
+interface ErrorBoundaryProps {
+  children: ReactNode;
+  fallback?: ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error?: Error;
+}
+
+export class KlintErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("Klint error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        this.props.fallback || (
+          <div style={{ padding: "20px", color: "red" }}>
+            Something went wrong with the canvas.
+          </div>
+        )
+      );
+    }
+
+    return this.props.children;
+  }
 }
