@@ -51,7 +51,7 @@ class SVGfont implements KlintSVGfont {
   public readonly glyphs: Map<string, GlyphMetrics>;
   private font: string = "";
   private SCALE: number = 1;
-  private targetXHeight: number = 512;
+  private targetXHeight: number = 256;
   constructor(public readonly context: KlintContexts) {
     this.metrics = {
       fontFamily: "",
@@ -66,7 +66,7 @@ class SVGfont implements KlintSVGfont {
     this.context = context;
   }
 
-  parse(font: string, desiredXHeight: number = 512): void {
+  parse(font: string, desiredXHeight: number = 256): void {
     const parser = new DOMParser();
     const doc = parser.parseFromString(font, "text/xml");
 

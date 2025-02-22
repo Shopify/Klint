@@ -6,16 +6,17 @@ import useKlint from "~/Klint/src/hooks/useKlint";
 import useProps from "~/Klint/src/hooks/useProps";
 import { useState } from "react";
 import Color from "~/Klint/src/plugins/Color";
-import SVGfont, { SVGFontPaths } from "~/Klint/src/plugins/SVGfont";
+// import SVGfont, { SVGFontPaths } from "~/Klint/src/plugins/SVGfont";
 import Easing from "~/Klint/src/plugins/Easing";
-
-import svgFont from "~/src/Marcel-semibold.svg?raw";
+import Klint from "~/Klint/src/component/Klint";
+// import svgFont from "~/src/Marcel-semibold.svg?raw";
 
 export function KlintCanvas() {
-  const { Klint, context } = useKlint();
+  const { context } = useKlint();
   const P = useProps({
     hello: "Klint",
     lamp: "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/lamp.png?v=1734625960",
+    scroll: { distance: 0, velocity: 0 },
   });
   const onResize = (/*K: KlintContext*/) => {
     console.log("resize");
@@ -31,21 +32,33 @@ export function KlintCanvas() {
     // K.pause();
     console.log("mouse out");
   };
+
+  const onScroll = (
+    K: KlintContext,
+    { distance, velocity }: { distance: number; velocity: number }
+  ) => {
+    // K.pause();
+    P.set("scroll", { distance, velocity });
+    // console.log("scroll");
+    // console.table({ distance, velocity });
+  };
+
   const preload = async (K: KlintContext) => {
     //K.extend("T", new Text(K));
     // console.log(K, "Welcome to Klint ! 🎨");
     K.extend("E", new Easing(K));
-    K.extend("SVG", new SVGfont(K));
-    K.SVG.parse(svgFont);
+    K.extend("C", new Color(K));
+    // K.extend("SVG", new SVGfont(K));
+    // K.SVG.parse(svgFont);
 
-    P.set(
-      "points",
-      K.SVG.getPoints("Ah !", {
-        factor: 0.1,
-        align: "center",
-        center: "middle",
-      })
-    );
+    // P.set(
+    //   "points",
+    //   K.SVG.getPoints("Ah !", {
+    //     factor: 0.1,
+    //     align: "center",
+    //     center: "middle",
+    //   })
+    // );
 
     P.set(
       "lamp",
@@ -85,20 +98,28 @@ export function KlintCanvas() {
   };
 
   const draw = (K: KlintContext) => {
-    const { E } = K as unknown as { E: Easing };
-    const lamp = P.get("lamp") as HTMLImageElement;
-    const rawpoints = P.get("points") as SVGFontPaths;
-    const pts = K.SVG.flatten(rawpoints, ({ point }) => {
-      return {
-        x: point.x,
-        y: point.y + 72,
-      };
-    });
-    K.background(`rgba(0, 0, 0, 255)`);
+    const { C } = K as unknown as { C: Color };
+    const scrollAmount = P.get("scroll") as {
+      distance: number;
+      velocity: number;
+    };
+    console.log(scrollAmount.velocity);
+    // const lamp = P.get("lamp") as HTMLImageElement;
+    // const rawpoints = P.get("points") as SVGFontPaths;
+    // const pts = K.SVG.flatten(rawpoints, ({ point }) => {
+    //   return {
+    //     x: point.x * 2,
+    //     y: point.y * 2 + 72,
+    //   };
+    // });
+
+    const col = C.hsl(scrollAmount.velocity * 360, 100, 50);
+    K.background(col);
 
     K.push();
     K.fillColor("#FFF");
-    K.text("Ah !", K.width / 2, K.height / 2);
+    K.circle(K.mouse.x, K.mouse.y, 100);
+    // K.text("Ah !", K.width / 2, K.height / 2);
     K.pop();
 
     // K.push();
@@ -113,22 +134,22 @@ export function KlintCanvas() {
 
     // K.pop();
 
-    for (const point of pts) {
-      const { x, y } = point;
-      const px = x + K.width / 2;
-      const py = y + K.height / 2;
-      K.push();
-      const d =
-        E.inout(
-          K.remap(K.distance(px, py, K.mouse.x, K.mouse.y), 0, 400, 1, 0.0)
-        ) * 0.4;
-      const a = Math.atan2(py - K.mouse.y, px - K.mouse.x);
-      K.translate(px, py);
-      K.scale(d, d);
-      K.rotate(a);
-      K.image(lamp, 0, 0);
-      K.pop();
-    }
+    // for (const point of pts) {
+    //   const { x, y } = point;
+    //   const px = x + K.width / 2;
+    //   const py = y + K.height / 2;
+    //   K.push();
+    //   const d =
+    //     E.inout(
+    //       K.remap(K.distance(px, py, K.mouse.x, K.mouse.y), 0, 400, 1, 0.0)
+    //     ) * 0.4;
+    //   const a = Math.atan2(py - K.mouse.y, px - K.mouse.x);
+    //   K.translate(px, py);
+    //   K.scale(d, d);
+    //   K.rotate(a);
+    //   K.image(lamp, 0, 0);
+    //   K.pop();
+    // }
 
     // const b = K.getOffscreen("buffer");
     // const s = K.scaleTo(b.width, b.height, K.width - 50, 100, true);
@@ -175,14 +196,16 @@ export function KlintCanvas() {
       draw={draw}
       setup={setup}
       options={{
-        origin: "corner",
+        origin: "center",
         noloop: "false",
+        ignoreScroll: "false",
         // fps: 8,
       }}
       onClick={onClick}
       onResize={onResize}
       onMouseIn={onMouseIn}
       onMouseOut={onMouseOut}
+      onScroll={onScroll}
     />
   );
 }

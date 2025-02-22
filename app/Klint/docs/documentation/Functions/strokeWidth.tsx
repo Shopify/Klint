@@ -1,4 +1,5 @@
 import useKlint, { KlintContext } from "~/Klint/src/hooks/useKlint";
+import Klint from "~/Klint/src/component/Klint";
 import DocLinks from "../../components/DocLinks";
 import Banner from "../../components/DocBanners";
 import Code from "../../components/DocCode";
@@ -9,7 +10,7 @@ import Code from "../../components/DocCode";
 // SyntaxHighlighter.registerLanguage("jsx", jsx);
 
 export function KlintCanvas() {
-  const { Klint, context } = useKlint();
+  const { context } = useKlint();
 
   const widths = [0, 1, 2, 3, 10, 100];
   const draw = (K: KlintContext) => {

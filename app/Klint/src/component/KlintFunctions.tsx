@@ -311,7 +311,7 @@ export const KlintFunctions = {
   text:
     (ctx: KlintContexts) =>
     (
-      text: string,
+      text: string | number,
       x: number,
       y: number,
       maxWidth: number | undefined = undefined
@@ -324,8 +324,10 @@ export const KlintFunctions = {
       if (ctx.textBaseline !== ctx.__textAlignment.vertical) {
         ctx.textBaseline = ctx.__textAlignment.vertical;
       }
-      if (ctx.checkTransparency("fill")) ctx.fillText(text, x, y, maxWidth);
-      if (ctx.checkTransparency("stroke")) ctx.strokeText(text, x, y, maxWidth);
+      if (ctx.checkTransparency("fill"))
+        ctx.fillText(String(text), x, y, maxWidth);
+      if (ctx.checkTransparency("stroke"))
+        ctx.strokeText(String(text), x, y, maxWidth);
     },
 
   // DO NOT use putImageData for images you can draw : https://www.measurethat.net/Benchmarks/Show/9510/0/putimagedata-vs-drawimage

@@ -4,9 +4,10 @@ import useProps from "~/Klint/src/hooks/useProps";
 import { useState } from "react";
 import Color from "~/Klint/src/plugins/Color";
 import Easing from "~/Klint/src/plugins/Easing";
+import Klint from "~/Klint/src/component/Klint";
 
 export function KlintCanvas() {
-  const { Klint, context } = useKlint();
+  const { context } = useKlint();
   const P = useProps({
     hello: "Klint",
     headphones:
@@ -50,7 +51,7 @@ export function KlintCanvas() {
   };
 
   const draw = (K: KlintContext) => {
-    const { C, E } = K as unknown as { E: Easing; C: Color };
+    // const { C, E } = K as unknown as { E: Easing; C: Color };
     K.background(`rgba(0, 0, 0, 1)`);
 
     const margins = K.width * 0.2;

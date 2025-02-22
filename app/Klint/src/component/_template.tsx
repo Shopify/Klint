@@ -1,16 +1,31 @@
+import { useState, useEffect } from "react";
 import type { KlintContext } from "../hooks/useKlint";
 import useKlint from "../hooks/useKlint";
 import useProps from "../hooks/useProps";
+import Klint from "./Klint";
 
-export function KlintCanvas() {
-  const { Klint, context } = useKlint();
+export interface KlintCanvasProps {
+  count?: number;
+}
+
+export function KlintCanvas(props: KlintCanvasProps) {
+  const { context } = useKlint();
+  const { count } = props;
+
   const P = useProps({
-    hello: "hello world",
+    count: count,
+    clicks: 0,
   });
+
+  useEffect(() => {
+    P.set("count", props.count);
+  }, [props, P]);
+
   const onResize = (/*K: KlintContext*/) => {
     console.log("resize");
   };
   const onClick = (/*K: KlintContext*/) => {
+    P.set("click-test", Number(P.get("clicks")) + 1);
     console.log("click");
   };
   const onMouseIn = (/*K: KlintContext*/) => {
@@ -32,7 +47,7 @@ export function KlintCanvas() {
 
   const draw = (K: KlintContext) => {
     K.background("#222");
-    K.text(String(P.get("hello")), K.width / 2, K.height / 2);
+    K.text(String(P.get("count")), K.width / 2, K.height / 2);
   };
 
   return (
@@ -50,5 +65,25 @@ export function KlintCanvas() {
       onMouseIn={onMouseIn}
       onMouseOut={onMouseOut}
     />
+  );
+}
+
+export default function Index() {
+  const [count, setCount] = useState(0);
+
+  // const { colors } = useKlint();
+
+  return (
+    <div className="flex h-screen items-center justify-center flex-col gap-4">
+      <button
+        onClick={() => setCount((c) => c + 1)}
+        className="px-4 py-2 bg-white rounded"
+      >
+        Count: {count}
+      </button>
+      <div className="w-4/5 h-4/5 flex justify-center items-center bg-[#000] overflow-hidden rounded-[8px]">
+        <KlintCanvas count={count} />
+      </div>
+    </div>
   );
 }

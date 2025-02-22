@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 
-// Only import what we need for testing
+// Partial representation of Klint
 type KlintContext = {
   lineWidth: number;
   strokeWidth: (width: number) => void;

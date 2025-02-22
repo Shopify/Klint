@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { Editor } from "@monaco-editor/react";
 import useKlint from "~/Klint/src/hooks/useKlint";
-import useProps from "~/Klint/src/hooks/useProps";
+// import useProps from "~/Klint/src/hooks/useProps";
 import * as Plugins from "~/Klint/src/plugins/Plugins";
 import type { KlintContext } from "~/Klint/src/hooks/useKlint";
-
+import Klint from "~/Klint/src/component/Klint";
 const defaultCode = `function preload(K) {
   console.log(K, "Welcome to Klint ! 🎨");
 }
@@ -25,8 +25,8 @@ function draw(K) {
 
 // Separate Klint Canvas component
 function KlintCanvas({ code }: { code: string }) {
-  const { Klint, context } = useKlint();
-  const P = useProps({});
+  const { context } = useKlint();
+  // const P = useProps({});
   const [klintFunctions, setKlintFunctions] = useState<{
     preload?: (K: KlintContext) => Promise<void>;
     setup?: (K: KlintContext) => void;

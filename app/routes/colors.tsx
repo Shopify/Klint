@@ -5,7 +5,7 @@ import Color from "~/Klint/src/plugins/Color";
 import { useState } from "react";
 
 export function KlintCanvas() {
-  const klint = useKlint();
+  const { context } = useKlint();
   const fontSize = 20;
   const preload = async (K: KlintContext) => {
     K.extend("E", new Easing(K));
@@ -57,7 +57,7 @@ export function KlintCanvas() {
 
   return (
     <Klint
-      context={klint}
+      context={context}
       preload={preload}
       draw={draw}
       setup={setup}

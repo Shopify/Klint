@@ -8,9 +8,10 @@ import { useState } from "react";
 import Color from "~/Klint/src/plugins/Color";
 import Easing from "~/Klint/src/plugins/Easing";
 import Time from "~/Klint/src/plugins/Time";
+import Klint from "~/Klint/src/component/Klint";
 
 export function KlintCanvas() {
-  const { Klint, context } = useKlint();
+  const { context } = useKlint();
   const P = useProps({
     hello: "Klint",
     headphones:
@@ -74,7 +75,7 @@ export function KlintCanvas() {
     const { T, E } = K as unknown as { T: Time; E: Easing };
     K.background(`#E84D37`);
     const buffer = K.getOffscreen("buffer");
-    const s = K.scaleTo(buffer.width, buffer.height, K.width - 50, 100, true);
+    // const s = K.scaleTo(buffer.width, buffer.height, K.width - 50, 100, true);
     // K.fillColor("#FFF");
     const slices = buffer.height - 10;
     K.push();

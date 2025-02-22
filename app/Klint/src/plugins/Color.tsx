@@ -152,9 +152,9 @@ class Color implements KlintColor {
 
   hsl(h: number, s: number, l: number, alpha?: number) {
     // Convert HSL to RGB
-    h = h % 360;
-    s = s / 100;
-    l = l / 100;
+    h = h >= 0 ? h % 360 : 360 - (-h % 360);
+    s = Math.max(0, s / 100);
+    l = Math.max(0, l / 100);
 
     const c = (1 - Math.abs(2 * l - 1)) * s;
     const x = c * (1 - Math.abs(((h / 60) % 2) - 1));

@@ -1,16 +1,17 @@
 import { CONFIG_PROPS } from "./Klint";
 import { KlintFunctions } from "./KlintFunctions";
 import { KlintCoreFunctions } from "./KlintCoreFunctions";
-// canvas props
 
 export interface KlintCanvasOptions {
   alpha?: string;
   willreadfrequently?: string;
   autoplay?: string;
-  ignoremouse?: string;
-  ignoreresize?: string;
+  ignoreMouse?: string;
+  ignoreResize?: string;
+  ignoreScroll?: string;
+  ignoreKeyboard?: string;
   noloop?: string;
-  ignorefunctions?: string;
+  ignoreFunctions?: string;
   static?: string;
   nocanvas?: string;
   fps?: number;
@@ -25,9 +26,15 @@ export interface KlintProps {
   preload?: (ctx: KlintContext) => Promise<void>;
   options?: KlintCanvasOptions;
   onClick?: (ctx: KlintContext) => void;
+  onRelease?: (ctx: KlintContext) => void;
   onResize?: (ctx: KlintContext) => void;
   onMouseIn?: (ctx: KlintContext) => void;
   onMouseOut?: (ctx: KlintContext) => void;
+  onScroll?: (
+    context: KlintContext,
+    scrollData: { distance: number; velocity: number }
+  ) => void;
+  onKeyPressed?: (ctx: KlintContext) => void;
   onLoading?: (isLoading: boolean) => void;
   onError?: (isError: boolean) => void;
 }
@@ -102,6 +109,12 @@ export interface KlintMouse {
   angle: number;
   isPressed: boolean;
   isHover: boolean;
+}
+
+export interface KlintScroll {
+  distance: number;
+  velocity: number;
+  lastTime: number;
 }
 
 export interface KlintContextWrapper {

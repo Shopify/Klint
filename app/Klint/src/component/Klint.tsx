@@ -1,9 +1,10 @@
-import { useRef, useEffect, useMemo, useCallback, useState } from "react";
+import { useRef, useEffect, useCallback, useState } from "react";
 
 import {
   KlintProps,
   KlintContext,
   KlintMouse,
+  KlintScroll,
   KlintCanvasOptions,
 } from "./KlintTypes";
 
@@ -12,6 +13,7 @@ export type {
   KlintContext,
   KlintOffscreenContext,
   KlintMouse,
+  KlintScroll,
   KlintCanvasOptions,
   KlintConfig,
 } from "./KlintTypes";
@@ -24,10 +26,11 @@ export const EPSILON = 0.0001;
 
 const DEFAULT_OPTIONS: KlintCanvasOptions = {
   alpha: "true",
-  ignoremouse: "false",
-  ignoreresize: "false",
+  ignoreMouse: "false",
+  ignoreScroll: "true",
+  ignoreKeyboard: "true",
+  ignoreResize: "false",
   noloop: "false",
-  ignorefunctions: "false",
   static: "false",
   nocanvas: "false",
   unsafemode: "false",
@@ -61,6 +64,85 @@ export const CONFIG_PROPS = [
   "__textAlignment",
 ] as const;
 
+const createEventHandler = (
+  mouseRef: React.RefObject<KlintMouse>,
+  contextRef: React.RefObject<KlintContext>,
+  containerRef: React.RefObject<HTMLDivElement>,
+  callbacks: {
+    onMouseIn?: (context: KlintContext) => void;
+    onMouseOut?: (context: KlintContext) => void;
+    onClick?: (context: KlintContext) => void;
+    onScroll?: (
+      context: KlintContext,
+      scrollData: { distance: number; velocity: number }
+    ) => void;
+    onKeyPressed?: (context: KlintContext, key: string) => void;
+    onRelease?: (context: KlintContext) => void;
+  },
+  scrollRef: React.RefObject<KlintScroll>,
+  updateMousePosition: (
+    clientX: number,
+    clientY: number,
+    containerRef: React.RefObject<HTMLDivElement>,
+    contextRef: React.RefObject<KlintContext>,
+    mouseRef: React.RefObject<KlintMouse>
+  ) => void,
+  updateKlintScroll: (
+    wheel: WheelEvent,
+    scrollRef: React.RefObject<KlintScroll>,
+    contextRef: React.RefObject<KlintContext>,
+    callbacks: {
+      onScroll?: (
+        context: KlintContext,
+        scrollData: { distance: number; velocity: number }
+      ) => void;
+    }
+  ) => void
+) => {
+  const handlers = {
+    move: (e: Event) => {
+      if (!mouseRef.current) return;
+      const event = e as MouseEvent | TouchEvent;
+      const { clientX, clientY } =
+        event instanceof TouchEvent ? event.touches[0] : event;
+      updateMousePosition(clientX, clientY, containerRef, contextRef, mouseRef);
+      if (event instanceof TouchEvent) event.preventDefault();
+    },
+    down: () => mouseRef.current && (mouseRef.current.isPressed = true),
+    up: () => mouseRef.current && (mouseRef.current.isPressed = false),
+    enter: () => {
+      if (!mouseRef.current) return;
+      mouseRef.current.isHover = true;
+      if (contextRef.current) callbacks.onMouseIn?.(contextRef.current);
+    },
+    leave: () => {
+      if (!mouseRef.current) return;
+      mouseRef.current.isHover = false;
+      if (contextRef.current) callbacks.onMouseOut?.(contextRef.current);
+    },
+    click: () => {
+      if (contextRef.current) callbacks.onClick?.(contextRef.current);
+    },
+    scroll: (e: Event) => {
+      const wheel = e as WheelEvent;
+      updateKlintScroll(wheel, scrollRef, contextRef, {
+        onScroll: callbacks.onScroll,
+      });
+      wheel.preventDefault();
+    },
+    keypress: (e: Event) => {
+      const event = e as KeyboardEvent;
+      if (contextRef.current)
+        callbacks.onKeyPressed?.(contextRef.current, event.key);
+    },
+    release: () => {
+      if (contextRef.current) callbacks.onRelease?.(contextRef.current);
+    },
+  };
+
+  return handlers;
+};
+
 // Entry point
 export default function Klint({
   context,
@@ -72,6 +154,9 @@ export default function Klint({
   onResize,
   onMouseIn,
   onMouseOut,
+  onScroll,
+  onKeyPressed,
+  onRelease,
 }: KlintProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -91,12 +176,10 @@ export default function Klint({
     isPressed: false,
     isHover: false,
   });
-  const __options = useMemo(() => {
-    return {
-      ...DEFAULT_OPTIONS,
-      ...options,
-    };
-  }, [options]);
+  const __options = {
+    ...DEFAULT_OPTIONS,
+    ...options,
+  };
   const [isReady, setIsReady] = useState(false);
   const [toStaticImage, setStaticImage] = useState<string | null>(null);
   // from the hook
@@ -140,117 +223,132 @@ export default function Klint({
     }
   };
 
-  const handlePointerMove = useCallback((e: MouseEvent | TouchEvent) => {
-    if (e.type.startsWith("touch")) {
-      e.preventDefault();
-      const touch = (e as TouchEvent).touches[0];
-      updateMousePosition(
-        touch.clientX,
-        touch.clientY,
-        containerRef,
-        contextRef,
-        mouseRef
-      );
-    } else {
-      updateMousePosition(
-        (e as MouseEvent).clientX,
-        (e as MouseEvent).clientY,
-        containerRef,
-        contextRef,
-        mouseRef
-      );
+  const updateScrollState = (
+    wheel: WheelEvent,
+    scrollRef: React.RefObject<KlintScroll>,
+    contextRef: React.RefObject<KlintContext>,
+    callbacks: {
+      onScroll?: (
+        context: KlintContext,
+        scrollData: { distance: number; velocity: number }
+      ) => void;
     }
-  }, []);
+  ) => {
+    if (!scrollRef.current || !contextRef.current) return;
 
-  const handlePointerDown = useCallback(() => {
-    if (mouseRef.current) {
-      mouseRef.current.isPressed = true;
-    }
-  }, []);
+    const now = performance.now();
+    const deltaTime = now - scrollRef.current.lastTime;
+    const spring = 0.3;
+    const damping = 0.75;
+    const epsilon = 0.075; // Threshold for zeroing out velocity
 
-  const handlePointerUp = useCallback(() => {
-    if (mouseRef.current) {
-      mouseRef.current.isPressed = false;
-    }
-  }, []);
+    // Update velocity with spring physics
+    scrollRef.current.velocity =
+      deltaTime > 0
+        ? (wheel.deltaY / deltaTime) * spring +
+          scrollRef.current.velocity * damping
+        : scrollRef.current.velocity * damping;
 
-  const handlePointerEnter = useCallback(() => {
-    if (mouseRef.current) {
-      mouseRef.current.isHover = true;
+    // Force velocity to 0 if it's very small
+    if (Math.abs(scrollRef.current.velocity) < epsilon) {
+      scrollRef.current.velocity = 0;
     }
-    if (contextRef.current) onMouseIn?.(contextRef.current);
-  }, [onMouseIn]);
 
-  const handlePointerLeave = useCallback(() => {
-    if (mouseRef.current) {
-      mouseRef.current.isHover = false;
-    }
-    if (contextRef.current) onMouseOut?.(contextRef.current);
-  }, [onMouseOut]);
+    // Apply velocity to distance
+    scrollRef.current.distance += scrollRef.current.velocity;
+    scrollRef.current.lastTime = now;
 
-  const handleClick = useCallback(() => {
-    if (mouseRef.current) {
-      mouseRef.current.isHover = false;
+    // Decelerate when no input
+    if (Math.abs(wheel.deltaY) < 0.01) {
+      scrollRef.current.velocity *= damping;
     }
-    if (contextRef.current) onClick?.(contextRef.current);
-  }, [onClick]);
+
+    callbacks.onScroll?.(contextRef.current, {
+      distance: Math.min(Math.max(scrollRef.current.distance, -100000), 100000),
+      velocity: Math.abs(scrollRef.current.velocity),
+    });
+  };
+
+  const scrollRef = useRef<KlintScroll>({
+    distance: 0,
+    velocity: 0,
+    lastTime: performance.now(),
+  });
 
   useEffect(() => {
-    if (__options.ignoremouse === "true") return;
-
     const container = containerRef.current;
     if (!container) return;
 
-    // Mouse events (non-passive)
-    container.addEventListener("mousemove", handlePointerMove);
-    container.addEventListener("mousedown", handlePointerDown);
-    container.addEventListener("mouseup", handlePointerUp);
-    container.addEventListener("mouseenter", handlePointerEnter);
-    container.addEventListener("mouseleave", handlePointerLeave);
-    container.addEventListener("click", handleClick);
+    const handlers = createEventHandler(
+      mouseRef,
+      contextRef,
+      containerRef,
+      { onMouseIn, onMouseOut, onClick, onScroll, onKeyPressed, onRelease },
+      scrollRef,
+      updateMousePosition,
+      updateScrollState
+    );
 
-    // Touch events (passive)
-    container.addEventListener("touchmove", handlePointerMove, {
-      passive: false,
-    });
-    container.addEventListener("touchstart", handlePointerMove, {
-      passive: true,
-    });
-    container.addEventListener("touchstart", handlePointerDown, {
-      passive: true,
-    });
-    container.addEventListener("touchend", handlePointerUp, { passive: true });
+    const eventMap: Record<
+      string,
+      {
+        events: Array<[keyof HTMLElementEventMap, (e: Event) => void]>;
+        ignore: boolean;
+      }
+    > = {
+      mouse: {
+        events: [
+          ["mousemove", handlers.move],
+          ["mousedown", handlers.down],
+          ["mouseup", handlers.up],
+          ["mouseenter", handlers.enter],
+          ["mouseleave", handlers.leave],
+        ],
+        ignore: __options.ignoreMouse === "true",
+      },
+      click: {
+        events: [["click", handlers.click]],
+        ignore: false, // Never ignore if onClick exists
+      },
+      scroll: {
+        events: [["wheel", handlers.scroll]],
+        ignore: __options.ignoreScroll === "true",
+      },
+      keyboard: {
+        events: [
+          ["keypress", handlers.keypress],
+          ["keyup", handlers.release],
+        ],
+        ignore: __options.ignoreKeyboard === "true",
+      },
+    };
+    // Add event listeners based on options and callback existence
+    Object.entries(eventMap).forEach(([type, { events, ignore }]) => {
+      if (ignore) return;
+      // Special case for click
+      if (type === "click" && !onClick) return;
 
-    // Document-level events
-    document.addEventListener("mouseup", handlePointerUp);
-    document.addEventListener("touchend", handlePointerUp, { passive: true });
-
+      events.forEach(([event, handler]) => {
+        container.addEventListener(event, handler as EventListener);
+      });
+    });
     return () => {
-      // Mouse cleanup
-      container.removeEventListener("mousemove", handlePointerMove);
-      container.removeEventListener("mousedown", handlePointerDown);
-      container.removeEventListener("mouseup", handlePointerUp);
-      container.removeEventListener("mouseenter", handlePointerEnter);
-      container.removeEventListener("mouseleave", handlePointerLeave);
-      container.removeEventListener("click", handleClick);
-      // Touch cleanup
-      container.removeEventListener("touchmove", handlePointerMove);
-      container.removeEventListener("touchstart", handlePointerMove);
-      container.removeEventListener("touchstart", handlePointerDown);
-      container.removeEventListener("touchend", handlePointerUp);
-
-      // Document cleanup
-      document.removeEventListener("mouseup", handlePointerUp);
-      document.removeEventListener("touchend", handlePointerUp);
+      Object.values(eventMap).forEach(({ events }) => {
+        events.forEach(([event, handler]) => {
+          container.removeEventListener(event, handler as EventListener);
+        });
+      });
     };
   }, [
-    handlePointerMove,
-    handlePointerDown,
-    handlePointerUp,
-    handlePointerEnter,
-    handlePointerLeave,
-    handleClick,
-    __options.ignoremouse,
+    onMouseIn,
+    onMouseOut,
+    onClick,
+    onScroll,
+    onKeyPressed,
+    onRelease,
+    __options.ignoreMouse,
+    __options.ignoreScroll,
+    __options.ignoreKeyboard,
   ]);
 
   const updateCanvasSize = (shouldRedraw = false) => {
@@ -290,6 +388,10 @@ export default function Klint({
       context.__imageOrigin = "center";
       context.__rectangleOrigin = "center";
       context.__canvasOrigin = "center";
+      context.__mousePosition = {
+        x: context.width * 0.5,
+        y: context.height * 0.5,
+      };
     }
 
     if (__options.fps && __options.fps !== context.fps) {
@@ -298,7 +400,7 @@ export default function Klint({
 
     updateCanvasSize();
 
-    if (options.ignoreresize !== "true") {
+    if (options.ignoreResize !== "true") {
       resizeObserverRef.current = new ResizeObserver(() => {
         updateCanvasSize(context.__isReadyToDraw);
         onResize?.(context);
@@ -319,7 +421,8 @@ export default function Klint({
     const initializeKlint = async () => {
       if (!context) return;
 
-      // Unsafe mode - reload everything on each render
+      // Unsafe mode - reload everything on each re-render.
+      // Used for the Editor, do not use unless you know what you're doing.
       if (__options.unsafemode === "true") {
         try {
           if (preload) {

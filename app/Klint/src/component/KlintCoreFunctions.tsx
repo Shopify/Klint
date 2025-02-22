@@ -2,6 +2,7 @@ import { CONFIG_PROPS } from "../component/Klint";
 import { KlintFunctions } from "../component/KlintFunctions";
 import {
   KlintContext,
+  KlintContexts,
   KlintConfig,
   KlintOffscreenContext,
   KlintCanvasOptions,
@@ -123,11 +124,11 @@ export const KlintCoreFunctions = {
     return element;
   },
 
-  saveConfig: (ctx: KlintContext) => (from?: KlintContext) => {
+  saveConfig: (ctx: KlintContexts) => (from?: KlintContexts) => {
     return Object.fromEntries(
       CONFIG_PROPS.map((key) => [
         key,
-        from?.[key as keyof KlintContext] ?? ctx[key as keyof KlintContext],
+        from?.[key as keyof KlintContexts] ?? ctx[key as keyof KlintContexts],
       ])
     ) as KlintConfig;
   },
@@ -179,7 +180,7 @@ export const KlintCoreFunctions = {
       };
 
       // Add KlintFunctions if not ignored
-      if (!options?.ignorefunctions) {
+      if (!options?.ignoreFunctions) {
         Object.entries(KlintFunctions).forEach(([name, fn]) => {
           context[name] = fn(context as KlintOffscreenContext);
         });

@@ -2,7 +2,6 @@ import { useRef, useCallback } from "react";
 import { KlintContext } from "../component/KlintTypes";
 import { KlintCoreFunctions } from "../component/KlintCoreFunctions";
 import { KlintFunctions } from "../component/KlintFunctions";
-import Klint from "../component/Klint";
 
 export type {
   KlintContext,
@@ -13,7 +12,6 @@ export type {
 
 export function buildKlintContext(ctx: CanvasRenderingContext2D): KlintContext {
   const context = ctx as unknown as KlintContext;
-
   // Initialize core properties
   context.__isMainContext = true;
   context.fps = 60;
@@ -78,6 +76,5 @@ export default function useKlint() {
 
   return {
     context: { context: contextRef.current, initCoreContext },
-    Klint: Klint,
   };
 }
