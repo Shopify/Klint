@@ -122,6 +122,18 @@ export function KlintCanvas() {
     // K.text("Ah !", K.width / 2, K.height / 2);
     K.pop();
 
+    K.push();
+    for (let i = 0; i < 10; i++) {
+      K.fillColor(C.colors[i % 6]);
+
+      K.circle(
+        -K.width / 2 + (K.width * i) / 9,
+        Math.sin(K.frame * 0.03 + i / 10) * 240,
+        100
+      );
+    }
+    K.pop();
+
     // K.push();
     // K.strokeColor("#F0F");
     // K.translate(K.width / 2, K.height / 2);

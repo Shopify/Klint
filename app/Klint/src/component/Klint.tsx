@@ -1,7 +1,6 @@
 import {
   useRef,
   useEffect,
-  useCallback,
   useState,
   Component,
   ErrorInfo,
@@ -16,7 +15,8 @@ import {
   KlintCanvasOptions,
 } from "./KlintTypes";
 
-import { useEventHandlers } from "../hooks/useEvents";
+import { useEventHandlers } from "./hooks/useEvents";
+import { useAnimate } from "./hooks/useAnimate";
 
 export type {
   KlintProps,
@@ -323,39 +323,7 @@ export default function Klint({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const animate = useCallback(() => {
-    if (!contextRef.current || !isVisible) return;
-    if (!contextRef.current.__isReadyToDraw) return;
-    if (!contextRef.current.__isPlaying) {
-      // Schedule next frame even when paused to allow resuming
-      animationFrameId.current = requestAnimationFrame(animate);
-      return;
-    }
-    const context = contextRef.current;
-    const now = performance.now();
-    const target = 1000 / context.fps;
-    if (!context.__lastTargetTime) {
-      context.__lastTargetTime = now;
-      context.__lastRealTime = now;
-    }
-    const sinceLast = now - context.__lastTargetTime;
-    const epsilon = 5;
-
-    if (sinceLast >= target - epsilon) {
-      context.deltaTime = now - context.__lastRealTime;
-      draw(context);
-      if (context.time > 1e7) context.time = 0;
-      if (context.frame > 1e7) context.frame = 0;
-      context.time += context.deltaTime / DEFAULT_FPS;
-      context.frame++;
-      context.__lastTargetTime = Math.max(
-        context.__lastTargetTime + target,
-        now
-      );
-      context.__lastRealTime = now;
-    }
-    animationFrameId.current = requestAnimationFrame(animate);
-  }, [draw, isVisible]);
+  const { animate } = useAnimate(contextRef, draw, isVisible);
 
   useEffect(() => {
     if (!contextRef.current) return;

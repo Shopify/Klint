@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import type { KlintContext, KlintScroll } from "../component/KlintTypes";
+import type { KlintContext, KlintScroll } from "../KlintTypes";
 
 export const useScroll = (
   scrollRef: React.RefObject<KlintScroll>,
