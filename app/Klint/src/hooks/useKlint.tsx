@@ -28,6 +28,7 @@ export function buildKlintContext(ctx: CanvasRenderingContext2D): KlintContext {
     angle: 0,
     isPressed: false,
     isHover: false,
+    _isSetup: false,
   };
 
   // Initialize defaults
@@ -71,64 +72,87 @@ export default function useKlint() {
     angle: 0,
     isPressed: false,
     isHover: false,
+    _isSetup: false,
   });
 
-  const initMouse = useCallback((canvas: HTMLCanvasElement) => {
-    const updateMousePosition = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      const prevX = mouseRef.current.x;
-      const prevY = mouseRef.current.y;
+  const initMouse = useCallback(
+    (
+      ctx: KlintContext,
+      callbacks?: {
+        onMouseIn?: () => void;
+        onMouseOut?: () => void;
+        onClick?: () => void;
+        onKeyPressed?: (key: string) => void;
+        onRelease?: () => void;
+      }
+    ) => {
+      const updateMousePosition = (e: MouseEvent) => {
+        const rect = ctx.canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 3;
+        const origin = ctx.__canvasOrigin;
+        const prevX = mouseRef.current.x;
+        const prevY = mouseRef.current.y;
 
-      mouseRef.current.px = prevX;
-      mouseRef.current.py = prevY;
-      mouseRef.current.x = e.clientX - rect.left;
-      mouseRef.current.y = e.clientY - rect.top;
-      mouseRef.current.vx = mouseRef.current.x - prevX;
-      mouseRef.current.vy = mouseRef.current.y - prevY;
-      mouseRef.current.angle = Math.atan2(
-        mouseRef.current.vy,
-        mouseRef.current.vx
-      );
-    };
+        mouseRef.current.px = prevX;
+        mouseRef.current.py = prevY;
+        mouseRef.current.x =
+          origin === "center"
+            ? (e.clientX - rect.left) * dpr - ctx.canvas.width / 2
+            : (e.clientX - rect.left) * dpr;
+        mouseRef.current.y =
+          origin === "center"
+            ? (e.clientY - rect.top) * dpr - ctx.canvas.height / 2
+            : (e.clientY - rect.top) * dpr;
+        mouseRef.current.vx = mouseRef.current.x - prevX;
+        mouseRef.current.vy = mouseRef.current.y - prevY;
+        mouseRef.current.angle = Math.atan2(
+          mouseRef.current.vy,
+          mouseRef.current.vx
+        );
+      };
 
-    canvas.addEventListener("mousemove", updateMousePosition);
-    canvas.addEventListener(
-      "mouseenter",
-      () => (mouseRef.current.isHover = true)
-    );
-    canvas.addEventListener(
-      "mouseleave",
-      () => (mouseRef.current.isHover = false)
-    );
-    canvas.addEventListener(
-      "mousedown",
-      () => (mouseRef.current.isPressed = true)
-    );
-    canvas.addEventListener(
-      "mouseup",
-      () => (mouseRef.current.isPressed = false)
-    );
+      const handleMouseEnter = () => {
+        mouseRef.current.isHover = true;
+        callbacks?.onMouseIn?.();
+      };
 
-    return () => {
-      canvas.removeEventListener("mousemove", updateMousePosition);
-      canvas.removeEventListener(
-        "mouseenter",
-        () => (mouseRef.current.isHover = true)
-      );
-      canvas.removeEventListener(
-        "mouseleave",
-        () => (mouseRef.current.isHover = false)
-      );
-      canvas.removeEventListener(
-        "mousedown",
-        () => (mouseRef.current.isPressed = true)
-      );
-      canvas.removeEventListener(
-        "mouseup",
-        () => (mouseRef.current.isPressed = false)
-      );
-    };
-  }, []);
+      const handleMouseLeave = () => {
+        mouseRef.current.isHover = false;
+        callbacks?.onMouseOut?.();
+      };
+
+      const handleMouseDown = () => {
+        mouseRef.current.isPressed = true;
+      };
+
+      const handleMouseUp = () => {
+        mouseRef.current.isPressed = false;
+        callbacks?.onRelease?.();
+      };
+
+      const handleClick = () => {
+        callbacks?.onClick?.();
+      };
+      if (!mouseRef.current._isSetup) {
+        ctx.canvas.addEventListener("mousemove", updateMousePosition);
+        ctx.canvas.addEventListener("mouseenter", handleMouseEnter);
+        ctx.canvas.addEventListener("mouseleave", handleMouseLeave);
+        ctx.canvas.addEventListener("mousedown", handleMouseDown);
+        ctx.canvas.addEventListener("mouseup", handleMouseUp);
+        ctx.canvas.addEventListener("click", handleClick);
+      }
+
+      return () => {
+        ctx.canvas.removeEventListener("mousemove", updateMousePosition);
+        ctx.canvas.removeEventListener("mouseenter", handleMouseEnter);
+        ctx.canvas.removeEventListener("mouseleave", handleMouseLeave);
+        ctx.canvas.removeEventListener("mousedown", handleMouseDown);
+        ctx.canvas.removeEventListener("mouseup", handleMouseUp);
+        ctx.canvas.removeEventListener("click", handleClick);
+      };
+    },
+    []
+  );
 
   const useMouse = useCallback(() => mouseRef.current, []);
 

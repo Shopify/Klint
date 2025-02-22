@@ -100,7 +100,7 @@ export function KlintCanvas() {
 
   const draw = (K: KlintContext) => {
     const { C } = K as unknown as { C: Color };
-    console.log(mouse.x, mouse.y, mouse.isPressed);
+    // console.log(mouse.x, mouse.y, mouse.isPressed);
     const scrollAmount = P.get("scroll") as {
       distance: number;
       velocity: number;
@@ -120,7 +120,7 @@ export function KlintCanvas() {
 
     K.push();
     K.fillColor("#FFF");
-    K.circle(K.mouse.x, K.mouse.y, 100);
+    K.circle(mouse.x, mouse.y, 100);
     // K.text("Ah !", K.width / 2, K.height / 2);
     K.pop();
 

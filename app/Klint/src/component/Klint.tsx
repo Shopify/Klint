@@ -124,7 +124,7 @@ export default function Klint({
     mouseRef,
     contextRef,
     containerRef,
-    { onMouseIn, onMouseOut, onClick, onScroll, onKeyPressed, onRelease },
+    { onScroll, onKeyPressed },
     scrollRef
   );
 
@@ -139,29 +139,12 @@ export default function Klint({
         ignore: boolean;
       }
     > = {
-      mouse: {
-        events: [
-          ["mousemove", handlers.move],
-          ["mousedown", handlers.down],
-          ["mouseup", handlers.up],
-          ["mouseenter", handlers.enter],
-          ["mouseleave", handlers.leave],
-        ],
-        ignore: __options.ignoreMouse === "true",
-      },
-      click: {
-        events: [["click", handlers.click]],
-        ignore: false, // Never ignore if onClick exists
-      },
       scroll: {
         events: [["wheel", handlers.scroll]],
         ignore: __options.ignoreScroll === "true",
       },
       keyboard: {
-        events: [
-          ["keypress", handlers.keypress],
-          ["keyup", handlers.release],
-        ],
+        events: [["keypress", handlers.keypress]],
         ignore: __options.ignoreKeyboard === "true",
       },
     };
@@ -169,9 +152,6 @@ export default function Klint({
     // Add event listeners
     Object.entries(eventMap).forEach(([type, { events, ignore }]) => {
       if (ignore) return;
-      // Special case for click
-      if (type === "click" && !onClick) return;
-
       events.forEach(([event, handler]) => {
         container.addEventListener(event, handler as EventListener);
       });
@@ -223,7 +203,7 @@ export default function Klint({
     contextRef.current = initContext ? initContext(canvas) : null;
     const context = contextRef.current;
     if (!context) return;
-    initMouse(context.canvas);
+
     context.__dpr = dpr;
 
     if (__options.origin === "center") {
@@ -239,7 +219,7 @@ export default function Klint({
     if (__options.fps && __options.fps !== context.fps) {
       context.fps = __options.fps;
     }
-
+    initMouse(context, { onClick, onMouseOut, onMouseIn, onRelease });
     updateCanvasSize();
 
     if (options.ignoreResize !== "true") {

@@ -109,6 +109,7 @@ export interface KlintMouse {
   angle: number;
   isPressed: boolean;
   isHover: boolean;
+  _isSetup: boolean;
 }
 
 export interface KlintScroll {
@@ -122,6 +123,10 @@ export interface KlintContextWrapper {
   initCoreContext: (canvas: HTMLCanvasElement) => KlintContext;
   mouse: {
     current: KlintMouse;
-    initMouse: (canvas: HTMLCanvasElement) => () => void;
+    initMouse: (canvas: KlintContext) => () => void;
+  };
+  scroll: {
+    current: KlintScroll;
+    initScroll: (canvas: KlintContext) => () => void;
   };
 }
