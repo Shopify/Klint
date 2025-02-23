@@ -18,21 +18,24 @@ export function KlintCanvas() {
     lamp: "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/lamp.png?v=1734625960",
     scroll: { distance: 0, velocity: 0 },
   });
-  const mouse = useMouse();
-  const onResize = (/*K: KlintContext*/) => {
-    console.log("resize");
-  };
-  const onClick = (/*K: KlintContext*/) => {
-    console.log("click");
-  };
-  const onMouseIn = (/*K: KlintContext*/) => {
-    // K.play();
-    console.log("mouse in");
-  };
-  const onMouseOut = (/*K: KlintContext*/) => {
-    // K.pause();
-    console.log("mouse out");
-  };
+
+  // const onClick = (/*K: KlintContext*/) => {
+  //   console.log("click");
+  // };
+  // const onMouseIn = (/*K: KlintContext*/) => {
+  //   // K.play();
+  //   console.log("mouse in");
+  // };
+  // const onMouseOut = (/*K: KlintContext*/) => {
+  //   // K.pause();
+  //   console.log("mouse out");
+  // };
+
+  const { x, y, onClick } = useMouse();
+  onClick((ctx: KlintContext) => {
+    console.log(`click at ${x},${y}`);
+    console.log("Klint", ctx);
+  });
 
   const onScroll = (
     K: KlintContext,
@@ -105,7 +108,7 @@ export function KlintCanvas() {
       distance: number;
       velocity: number;
     };
-    // console.log(scrollAmount.velocity);
+    // console.log(x, y);
     // const lamp = P.get("lamp") as HTMLImageElement;
     // const rawpoints = P.get("points") as SVGFontPaths;
     // const pts = K.SVG.flatten(rawpoints, ({ point }) => {
@@ -120,7 +123,7 @@ export function KlintCanvas() {
 
     K.push();
     K.fillColor("#FFF");
-    K.circle(mouse.x, mouse.y, 100);
+    // K.circle(mouse.x, mouse.y, 100);
     // K.text("Ah !", K.width / 2, K.height / 2);
     K.pop();
 
@@ -215,10 +218,10 @@ export function KlintCanvas() {
         ignoreScroll: "false",
         // fps: 8,
       }}
-      onClick={onClick}
-      onResize={onResize}
-      onMouseIn={onMouseIn}
-      onMouseOut={onMouseOut}
+      // onClick={onClick}
+      // onResize={onResize}
+      // onMouseIn={onMouseIn}
+      // onMouseOut={onMouseOut}
       onScroll={onScroll}
     />
   );

@@ -109,7 +109,7 @@ export interface KlintMouse {
   angle: number;
   isPressed: boolean;
   isHover: boolean;
-  _isSetup: boolean;
+  ctx: KlintContext | null;
 }
 
 export interface KlintScroll {
@@ -125,8 +125,8 @@ export interface KlintContextWrapper {
     current: KlintMouse;
     initMouse: (canvas: KlintContext) => () => void;
   };
-  scroll: {
-    current: KlintScroll;
-    initScroll: (canvas: KlintContext) => () => void;
-  };
+  // scroll: {
+  //   current: KlintScroll;
+  //   initScroll: (canvas: KlintContext) => () => void;
+  // };
 }

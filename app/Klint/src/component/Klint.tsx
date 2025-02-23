@@ -219,7 +219,7 @@ export default function Klint({
     if (__options.fps && __options.fps !== context.fps) {
       context.fps = __options.fps;
     }
-    initMouse(context, { onClick, onMouseOut, onMouseIn, onRelease });
+    initMouse(context);
     updateCanvasSize();
 
     if (options.ignoreResize !== "true") {
