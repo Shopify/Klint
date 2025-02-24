@@ -23,6 +23,7 @@ export interface KlintProps {
   preload?: (ctx: KlintContext) => Promise<void>;
   options?: KlintCanvasOptions;
   onResize?: (ctx: KlintContext) => void;
+  onVisible?: (ctx: KlintContext) => void;
 }
 
 export type KlintConfig = Partial<
@@ -104,5 +105,8 @@ export interface KlintScroll {
 
 export interface KlintContextWrapper {
   context: KlintContext | null;
-  initCoreContext: (canvas: HTMLCanvasElement) => KlintContext;
+  initCoreContext: (
+    canvas: HTMLCanvasElement,
+    options: KlintCanvasOptions
+  ) => KlintContext;
 }

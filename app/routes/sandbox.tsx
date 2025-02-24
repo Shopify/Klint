@@ -84,7 +84,7 @@ export function KlintCanvas() {
     //     center: "middle",
     //   })
     // );
-
+    // K.describe("A set of circles");
     P.set("lamp", await K.loadImage(String(P.get("lamp"))));
 
     // K.createOffscreen(
@@ -232,6 +232,7 @@ export function KlintCanvas() {
         setup={setup}
         options={{
           origin: "center",
+          // static: "true",
         }}
       />
     </KlintErrorBoundary>

@@ -1,5 +1,10 @@
 import { useRef, useCallback, useEffect } from "react";
-import { KlintContext, KlintMouse, KlintScroll } from "../component/KlintTypes";
+import {
+  KlintCanvasOptions,
+  KlintContext,
+  KlintMouse,
+  KlintScroll,
+} from "../component/KlintTypes";
 import { KlintCoreFunctions } from "../component/KlintCoreFunctions";
 import { KlintFunctions } from "../component/KlintFunctions";
 
@@ -183,7 +188,10 @@ export default function useKlint() {
     };
   };
 
-  const buildKlintContext = (ctx: CanvasRenderingContext2D): KlintContext => {
+  const buildKlintContext = (
+    ctx: CanvasRenderingContext2D,
+    options: KlintCanvasOptions
+  ): KlintContext => {
     const context = ctx as unknown as KlintContext;
     // Initialize core properties
     context.__isMainContext = true;
@@ -193,14 +201,15 @@ export default function useKlint() {
     context.deltaTime = 0;
 
     // Initialize defaults
-    context.__imageOrigin = "corner";
 
-    context.__rectangleOrigin = "corner";
-    context.__canvasOrigin = "corner";
+    context.__imageOrigin = options.origin === "center" ? "center" : "corner";
+    context.__rectangleOrigin =
+      options.origin === "center" ? "center" : "corner";
+    context.__canvasOrigin = options.origin === "center" ? "center" : "corner";
     context.__textFont = "sans-serif";
     context.__textWeight = "normal";
     context.__textStyle = "normal";
-    context.__textSize = 120;
+    context.__textSize = 72;
     context.__textAlignment = {
       horizontal: "left" as CanvasTextAlign,
       vertical: "top" as CanvasTextBaseline,
@@ -222,22 +231,19 @@ export default function useKlint() {
   };
 
   const initCoreContext = useCallback(
-    (canvas: HTMLCanvasElement): KlintContext => {
+    (canvas: HTMLCanvasElement, options: KlintCanvasOptions): KlintContext => {
       if (!contextRef.current) {
-        const ctx = canvas.getContext("2d");
+        const ctx = canvas.getContext("2d", {
+          alpha: options.alpha ?? true,
+          willReadFrequently: options.willreadfrequently ?? true,
+        }) as CanvasRenderingContext2D;
         if (!ctx) throw new Error("Failed to get canvas context");
-        contextRef.current = buildKlintContext(ctx);
+        contextRef.current = buildKlintContext(ctx, options);
       }
       return contextRef.current;
     },
     []
   );
-
-  // Add mount tracking
-  // useEffect(() => {
-  //   console.log("useKlint mounted");
-  //   return () => console.log("useKlint unmounted");
-  // }, []);
 
   return {
     context: {

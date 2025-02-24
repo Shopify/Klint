@@ -10,8 +10,6 @@ import {
 
 import { KlintProps, KlintContext, KlintCanvasOptions } from "./KlintTypes";
 
-// import { useAnimate } from "./hooks/useAnimate";
-
 export type {
   KlintProps,
   KlintContext,
@@ -26,9 +24,6 @@ export const EPSILON = 0.0001;
 
 const DEFAULT_OPTIONS: KlintCanvasOptions = {
   alpha: "true",
-  ignoreMouse: "false",
-  ignoreScroll: "true",
-  ignoreKeyboard: "true",
   ignoreResize: "false",
   noloop: "false",
   static: "false",
@@ -122,11 +117,11 @@ export default function Klint({
   options = {},
   preload,
   onResize,
+  onVisible,
 }: KlintProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const contextRef = useRef<KlintContext | null>(null); // KlintCoreContext | undefined
-  const animationFrameId = useRef<number>();
   const intersectionObserverRef = useRef<IntersectionObserver | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const [isVisible, setIsVisible] = useState(true);
@@ -134,10 +129,10 @@ export default function Klint({
     ...DEFAULT_OPTIONS,
     ...options,
   };
-  const [isReady, setIsReady] = useState(false);
   const [toStaticImage, setStaticImage] = useState<string | null>(null);
 
   const initContext = context?.initCoreContext;
+  const { animate, animationFrameId } = useAnimate(contextRef, draw, isVisible);
 
   const updateCanvasSize = (shouldRedraw = false) => {
     if (!containerRef.current || !contextRef.current || !canvasRef.current)
@@ -167,25 +162,19 @@ export default function Klint({
     const container = containerRef.current;
     const dpr = window.devicePixelRatio || 3;
 
-    contextRef.current = initContext ? initContext(canvas) : null;
+    contextRef.current = initContext ? initContext(canvas, __options) : null;
     const context = contextRef.current;
     if (!context) return;
 
     context.__dpr = dpr;
 
-    if (__options.origin === "center") {
-      context.__imageOrigin = "center";
-      context.__rectangleOrigin = "center";
-      context.__canvasOrigin = "center";
-    }
-
     if (__options.fps && __options.fps !== context.fps) {
       context.fps = __options.fps;
     }
-    // initMouse(context);
+
     updateCanvasSize();
 
-    if (options.ignoreResize !== "true") {
+    if (__options.ignoreResize !== "true") {
       resizeObserverRef.current = new ResizeObserver(() => {
         updateCanvasSize(context.__isReadyToDraw);
         onResize?.(context);
@@ -197,6 +186,7 @@ export default function Klint({
       (entries) => {
         entries.forEach((entry) => {
           setIsVisible(entry.isIntersecting);
+          onVisible?.(context);
         });
       },
       { threshold: 0.1, root: null, rootMargin: "50px" }
@@ -208,7 +198,6 @@ export default function Klint({
 
       const handleStaticMode = () => {
         try {
-          draw(context);
           const imageUrl = canvas.toDataURL("image/png");
           setStaticImage(imageUrl);
         } catch (error: unknown) {
@@ -218,79 +207,68 @@ export default function Klint({
         }
       };
 
-      const startAnimation = () => {
-        setIsReady(true);
-        if (__options.noloop !== "true") animate();
-      };
-
-      const initializeContext = async (skipStateChecks = false) => {
+      const initializeContext = async (unsafeReset = false) => {
         // Preload phase
-        if (preload && (skipStateChecks || !context.__isPreloaded)) {
+        if (preload && (unsafeReset || !context.__isPreloaded)) {
           try {
             await preload(context);
-            if (!skipStateChecks) context.__isPreloaded = true;
+            if (!unsafeReset) context.__isPreloaded = true;
           } catch (error) {
             const message =
               error instanceof Error ? error.message : String(error);
-            throw new Error(`Klint draw error in static mode: ${message}`);
+            throw new Error(`Klint error in the preload: ${message}`);
           }
         }
 
         // Setup phase
-        if (setup && (skipStateChecks || !context.__isSetup)) {
+        if (setup && (unsafeReset || !context.__isSetup)) {
           try {
             setup(context);
-            if (!skipStateChecks) context.__isSetup = true;
+            if (!unsafeReset) context.__isSetup = true;
           } catch (error) {
             const message =
               error instanceof Error ? error.message : String(error);
-            throw new Error(`Klint draw error in static mode: ${message}`);
+            throw new Error(`Klint error in the setup: ${message}`);
           }
         }
 
-        context.__isReadyToDraw = true;
+        if (draw && !context.__isReadyToDraw) {
+          try {
+            draw(context);
+            context.__isReadyToDraw = true;
+          } catch (error) {
+            const message =
+              error instanceof Error ? error.message : String(error);
+            throw new Error(`Klint error in the draw: ${message}`);
+          }
+        }
       };
 
-      const skipStateChecks = __options.unsafemode === "true";
+      const unsafeMode = __options.unsafemode === "true";
+      if (!unsafeMode && context.__isReadyToDraw) return;
 
-      if (!skipStateChecks && context.__isReadyToDraw) return;
-
-      await initializeContext(skipStateChecks);
+      await initializeContext(unsafeMode);
 
       if (__options.static === "true") {
         handleStaticMode();
       } else {
-        startAnimation();
+        if (__options.noloop !== "true") animate();
       }
     };
 
     initializeKlint();
 
+    const frameId = animationFrameId.current;
     return () => {
       resizeObserverRef.current?.disconnect();
       intersectionObserverRef.current?.disconnect();
+      if (frameId) {
+        cancelAnimationFrame(frameId);
+      }
     };
     // Not ideal, but without an empty array, everything get recomputed unnecesseraly.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const { animate } = useAnimate(contextRef, draw, isVisible);
-
-  useEffect(() => {
-    if (!contextRef.current) return;
-    if (!isReady) return;
-
-    draw(contextRef.current);
-    if (!isVisible) return;
-    if (__options.noloop !== "true") {
-      animationFrameId.current = requestAnimationFrame(animate);
-    }
-    return () => {
-      if (animationFrameId.current) {
-        cancelAnimationFrame(animationFrameId.current);
-      }
-    };
-  }, [animate, isVisible, __options.noloop, draw, isReady]);
 
   return (
     <div ref={containerRef} style={{ width: "100%", height: "100%" }}>
