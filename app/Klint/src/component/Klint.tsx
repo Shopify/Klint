@@ -7,23 +7,14 @@ import {
   ReactNode,
 } from "react";
 
-import {
-  KlintProps,
-  KlintContext,
-  KlintMouse,
-  KlintScroll,
-  KlintCanvasOptions,
-} from "./KlintTypes";
+import { KlintProps, KlintContext, KlintCanvasOptions } from "./KlintTypes";
 
-import { useEventHandlers } from "./hooks/useEvents";
 import { useAnimate } from "./hooks/useAnimate";
 
 export type {
   KlintProps,
   KlintContext,
   KlintOffscreenContext,
-  KlintMouse,
-  KlintScroll,
   KlintCanvasOptions,
   KlintConfig,
 } from "./KlintTypes";
@@ -79,13 +70,7 @@ export default function Klint({
   draw,
   options = {},
   preload,
-  onClick,
   onResize,
-  onMouseIn,
-  onMouseOut,
-  onScroll,
-  onKeyPressed,
-  onRelease,
 }: KlintProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -94,22 +79,6 @@ export default function Klint({
   const intersectionObserverRef = useRef<IntersectionObserver | null>(null);
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
   const [isVisible, setIsVisible] = useState(true);
-  const mouseRef = useRef<KlintMouse>({
-    x: 0,
-    y: 0,
-    px: 0,
-    py: 0,
-    vx: 0,
-    vy: 0,
-    angle: 0,
-    isPressed: false,
-    isHover: false,
-  });
-  const scrollRef = useRef<KlintScroll>({
-    distance: 0,
-    velocity: 0,
-    lastTime: 0,
-  });
   const __options = {
     ...DEFAULT_OPTIONS,
     ...options,
@@ -118,59 +87,6 @@ export default function Klint({
   const [toStaticImage, setStaticImage] = useState<string | null>(null);
 
   const initContext = context?.initCoreContext;
-  const initMouse = context?.mouse.initMouse;
-
-  const handlers = useEventHandlers(
-    mouseRef,
-    contextRef,
-    containerRef,
-    { onScroll, onKeyPressed },
-    scrollRef
-  );
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const eventMap: Record<
-      string,
-      {
-        events: Array<[keyof HTMLElementEventMap, (e: Event) => void]>;
-        ignore: boolean;
-      }
-    > = {
-      scroll: {
-        events: [["wheel", handlers.scroll]],
-        ignore: __options.ignoreScroll === "true",
-      },
-      keyboard: {
-        events: [["keypress", handlers.keypress]],
-        ignore: __options.ignoreKeyboard === "true",
-      },
-    };
-
-    // Add event listeners
-    Object.entries(eventMap).forEach(([type, { events, ignore }]) => {
-      if (ignore) return;
-      events.forEach(([event, handler]) => {
-        container.addEventListener(event, handler as EventListener);
-      });
-    });
-
-    return () => {
-      Object.values(eventMap).forEach(({ events }) => {
-        events.forEach(([event, handler]) => {
-          container.removeEventListener(event, handler as EventListener);
-        });
-      });
-    };
-  }, [
-    handlers,
-    onClick,
-    __options.ignoreMouse,
-    __options.ignoreScroll,
-    __options.ignoreKeyboard,
-  ]);
 
   const updateCanvasSize = (shouldRedraw = false) => {
     if (!containerRef.current || !contextRef.current || !canvasRef.current)
@@ -210,16 +126,12 @@ export default function Klint({
       context.__imageOrigin = "center";
       context.__rectangleOrigin = "center";
       context.__canvasOrigin = "center";
-      context.__mousePosition = {
-        x: context.width * 0.5,
-        y: context.height * 0.5,
-      };
     }
 
     if (__options.fps && __options.fps !== context.fps) {
       context.fps = __options.fps;
     }
-    initMouse(context);
+    // initMouse(context);
     updateCanvasSize();
 
     if (options.ignoreResize !== "true") {

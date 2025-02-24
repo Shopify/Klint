@@ -12,7 +12,18 @@ import Klint from "~/Klint/src/component/Klint";
 // import svgFont from "~/src/Marcel-semibold.svg?raw";
 
 export function KlintCanvas() {
-  const { context, useMouse } = useKlint();
+  const { context, useMouse, useScroll } = useKlint();
+  const { mouse, onClick, onMouseIn, onMouseOut, onMouseDown, onMouseUp } =
+    useMouse();
+  onClick(() => {
+    console.log("mouse click !");
+  });
+  const { scroll, onScroll } = useScroll();
+
+  // onMouseIn((ctx, e) => console.log("mouse entered"));
+  // onMouseOut((ctx, e) => console.log("mouse left"));
+  // onMouseDown((ctx, e) => console.log("pressed"));
+  // onMouseUp((ctx, e) => console.log("released"));
   const P = useProps({
     hello: "Klint",
     lamp: "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/lamp.png?v=1734625960",
@@ -31,21 +42,30 @@ export function KlintCanvas() {
   //   console.log("mouse out");
   // };
 
-  const { x, y, onClick } = useMouse();
-  onClick((ctx: KlintContext) => {
-    console.log(`click at ${x},${y}`);
-    console.log("Klint", ctx);
-  });
+  // const { mouse, onClick } = useMouse();
+  // onClick((ctx: KlintContext) => {
+  //   console.log(`click at ${mouse.x},${mouse.y}`);
+  //   console.log("Klint", ctx);
+  // });
+  // onMouseMove((ctx: KlintContext) => {
+  //   console.log(`moved at ${mouse.x},${mouse.y}`);
+  //   // console.log("Klint", ctx);
+  // });
+  // const { scroll, onScroll } = useScroll();
+  // onScroll(() => {
+  //   console.log("Look at me, i'm scrolling !");
+  //   console.log(`distance ${scroll.distance}`);
+  // });
 
-  const onScroll = (
-    K: KlintContext,
-    { distance, velocity }: { distance: number; velocity: number }
-  ) => {
-    // K.pause();
-    P.set("scroll", { distance, velocity });
-    // console.log("scroll");
-    // console.table({ distance, velocity });
-  };
+  // const onScroll = (
+  //   K: KlintContext,
+  //   { distance, velocity }: { distance: number; velocity: number }
+  // ) => {
+  //   // K.pause();
+  //   P.set("scroll", { distance, velocity });
+  //   // console.log("scroll");
+  //   // console.table({ distance, velocity });
+  // };
 
   const preload = async (K: KlintContext) => {
     //K.extend("T", new Text(K));
@@ -103,11 +123,11 @@ export function KlintCanvas() {
 
   const draw = (K: KlintContext) => {
     const { C } = K as unknown as { C: Color };
-    // console.log(mouse.x, mouse.y, mouse.isPressed);
-    const scrollAmount = P.get("scroll") as {
-      distance: number;
-      velocity: number;
-    };
+
+    // const scrollAmount = P.get("scroll") as {
+    //   distance: number;
+    //   velocity: number;
+    // };
     // console.log(x, y);
     // const lamp = P.get("lamp") as HTMLImageElement;
     // const rawpoints = P.get("points") as SVGFontPaths;
@@ -118,12 +138,13 @@ export function KlintCanvas() {
     //   };
     // });
 
-    const col = C.hsl(scrollAmount.velocity * 360, 100, 50);
+    const col = C.hsl(scroll.velocity * 360, 100, 50);
     K.background(col);
 
     K.push();
-    K.fillColor("#FFF");
-    // K.circle(mouse.x, mouse.y, 100);
+    K.fillColor(mouse.isPressed ? "#FFF" : "#000");
+    // console.log(mouse);
+    K.circle(mouse.x, mouse.y, 100);
     // K.text("Ah !", K.width / 2, K.height / 2);
     K.pop();
 
@@ -222,7 +243,7 @@ export function KlintCanvas() {
       // onResize={onResize}
       // onMouseIn={onMouseIn}
       // onMouseOut={onMouseOut}
-      onScroll={onScroll}
+      // onScroll={onScroll}
     />
   );
 }
