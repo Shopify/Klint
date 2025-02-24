@@ -13,9 +13,9 @@
 
 ## CORE
 
-### Blocking
-- [ ] onLoading & onError : to finish, not sure if it the right direction or it should be handled outside.
-- [x] Props handling and update.
+### TO DO
+- [ ] Make the loadImage a hook
+- [ ] Make the loadVideo a hook 
 
 ### Non Blocking
 - [ ] clip
@@ -26,10 +26,10 @@
 - [ ] Figuring out bundles, packages and plugins
 
 ## TESTS
-- [x] Figure it out
+- [ ] Add unit tests for Klint Functions
 
 ## DOCS
-- [x] Figure it out
+- [ ] Add Docusaurus
 
 
 

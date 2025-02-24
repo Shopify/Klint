@@ -1,30 +1,10 @@
 import { KlintContexts } from "../component/KlintTypes";
 
-// declare module '../hooks/useKlint' {
-//   interface KlintPlugins {
-//     C: Color;
-//   }
-// }
-// const colors = {
-//   coral: "#E84D37",
-//   brown: "#7F4C2F",
-//   mustard: "#EDBC2F",
-//   crimson: "#BF3034",
-//   navy: "#18599D",
-//   sky: "#45A7C6",
-//   olive: "#8CB151",
-//   charcoal: "#252120",
-//   peach: "#ECA088",
-//   rose: "#C9B1B8",
-//   plum: "#8F3064",
-//   sage: "#7B8870",
-//   drab: "#C0C180",
-//   taupe: "#4B423D",
-//   midnight: "#1A2A65",
-//   golden: "#EAA550",
-//   orange: "#F17B04",
-//   slate: "#404757",
-// };
+declare module "../component/KlintTypes" {
+  interface KlintPlugins {
+    Color: Color;
+  }
+}
 
 interface KlintColor {
   context: KlintContexts;
@@ -229,5 +209,26 @@ class Color implements KlintColor {
     */
   }
 }
+
+// const colors = {
+//   coral: "#E84D37",
+//   brown: "#7F4C2F",
+//   mustard: "#EDBC2F",
+//   crimson: "#BF3034",
+//   navy: "#18599D",
+//   sky: "#45A7C6",
+//   olive: "#8CB151",
+//   charcoal: "#252120",
+//   peach: "#ECA088",
+//   rose: "#C9B1B8",
+//   plum: "#8F3064",
+//   sage: "#7B8870",
+//   drab: "#C0C180",
+//   taupe: "#4B423D",
+//   midnight: "#1A2A65",
+//   golden: "#EAA550",
+//   orange: "#F17B04",
+//   slate: "#404757",
+// };
 
 export default Color;

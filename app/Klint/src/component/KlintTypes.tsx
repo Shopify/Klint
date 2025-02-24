@@ -1,11 +1,14 @@
 import { KlintFunctions } from "./KlintFunctions";
 import { KlintCoreFunctions } from "./KlintCoreFunctions";
 
+export interface KlintPlugins {}
+
 export type KlintContexts = KlintContext | KlintOffscreenContext;
 
 export interface KlintOffscreenContext
   extends CanvasRenderingContext2D,
-    KlintFunctions {
+    KlintFunctions,
+    KlintPlugins {
   width: number;
   height: number;
   __dpr: number;
@@ -30,13 +33,11 @@ export interface KlintOffscreenContext
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
-  // install: <K extends string, T>(key: K, plugin: T) => void;
 }
 
 // core context, should not be applied to the offscreen canvas
 export interface KlintContext
   extends KlintOffscreenContext,
-    KlintFunctions,
     KlintCoreFunctions {
   frame: number;
   time: number;

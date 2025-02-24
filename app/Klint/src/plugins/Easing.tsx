@@ -1,5 +1,11 @@
 import { KlintContexts } from "../component/KlintTypes";
 
+declare module "../component/KlintTypes" {
+  interface KlintPlugins {
+    Easing: Easing;
+  }
+}
+
 interface KlintEasing {
   context: KlintContexts;
 }

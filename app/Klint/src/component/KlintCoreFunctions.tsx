@@ -41,10 +41,6 @@ export const KlintCoreFunctions = {
   extend:
     (ctx: KlintContext) =>
     (name: string, data: unknown, enforceReplace = false) => {
-      // if (ctx._) {
-      //   console.log(`Cannot extend Klint with '${name}' after preload/setup`);
-      //   return;
-      // }
       if (name in ctx && !enforceReplace) return;
       (ctx as KlintContext)[name] = data;
     },

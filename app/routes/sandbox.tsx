@@ -4,10 +4,11 @@ import type {
 } from "~/Klint/src/hooks/useKlint";
 import useKlint from "~/Klint/src/hooks/useKlint";
 import useProps from "~/Klint/src/hooks/useProps";
+import { installPlugins } from "~/Klint/src/plugins/installPlugins";
 import { useState } from "react";
-import Color from "~/Klint/src/plugins/Color";
+// import Color from "~/Klint/src/plugins/Color";
 // import SVGfont, { SVGFontPaths } from "~/Klint/src/plugins/SVGfont";
-import Easing from "~/Klint/src/plugins/Easing";
+// import Easing from "~/Klint/src/plugins/Easing";
 import Klint, { KlintErrorBoundary } from "~/Klint/src/component/Klint";
 // import svgFont from "~/src/Marcel-semibold.svg?raw";
 
@@ -34,11 +35,12 @@ export function KlintCanvas() {
   const preload = async (K: KlintContext) => {
     //K.extend("T", new Text(K));
     // console.log(K, "Welcome to Klint ! 🎨");
-    K.extend("E", new Easing(K));
-    K.extend("C", new Color(K));
+    // K.extend("E", new Easing(K));
+    // K.install("Color", new Color(K));
     // K.extend("SVG", new SVGfont(K));
     // K.SVG.parse(svgFont);
-
+    const loadPlugins = installPlugins(K, ["Color", "Easing"]);
+    await loadPlugins();
     // P.set(
     //   "points",
     //   K.SVG.getPoints("Ah !", {
@@ -81,7 +83,7 @@ export function KlintCanvas() {
   };
 
   const draw = (K: KlintContext) => {
-    const { C } = K as unknown as { C: Color };
+    const { Color: C } = K;
 
     // const scrollAmount = P.get("scroll") as {
     //   distance: number;
