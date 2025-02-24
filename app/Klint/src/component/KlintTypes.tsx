@@ -6,10 +6,7 @@ export interface KlintCanvasOptions {
   alpha?: string;
   willreadfrequently?: string;
   autoplay?: string;
-  ignoreMouse?: string;
   ignoreResize?: string;
-  ignoreScroll?: string;
-  ignoreKeyboard?: string;
   noloop?: string;
   ignoreFunctions?: string;
   static?: string;
@@ -26,13 +23,6 @@ export interface KlintProps {
   preload?: (ctx: KlintContext) => Promise<void>;
   options?: KlintCanvasOptions;
   onResize?: (ctx: KlintContext) => void;
-  // onScroll?: (
-  //   context: KlintContext,
-  //   scrollData: { distance: number; velocity: number }
-  // ) => void;
-  // onKeyPressed?: (ctx: KlintContext) => void;
-  onLoading?: (isLoading: boolean) => void;
-  onError?: (isError: boolean) => void;
 }
 
 export type KlintConfig = Partial<
@@ -115,12 +105,4 @@ export interface KlintScroll {
 export interface KlintContextWrapper {
   context: KlintContext | null;
   initCoreContext: (canvas: HTMLCanvasElement) => KlintContext;
-  // mouse: {
-  //   current: KlintMouse;
-  //   initMouse: (canvas: KlintContext) => () => void;
-  // };
-  // scroll: {
-  //   current: KlintScroll;
-  //   initScroll: (canvas: KlintContext) => () => void;
-  // };
 }

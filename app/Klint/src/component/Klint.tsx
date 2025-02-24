@@ -2,6 +2,7 @@ import {
   useRef,
   useEffect,
   useState,
+  useCallback,
   Component,
   ErrorInfo,
   ReactNode,
@@ -9,7 +10,7 @@ import {
 
 import { KlintProps, KlintContext, KlintCanvasOptions } from "./KlintTypes";
 
-import { useAnimate } from "./hooks/useAnimate";
+// import { useAnimate } from "./hooks/useAnimate";
 
 export type {
   KlintProps,
@@ -62,6 +63,56 @@ export const CONFIG_PROPS = [
   "__textSize",
   "__textAlignment",
 ] as const;
+
+function useAnimate(
+  contextRef: React.RefObject<KlintContext | null>,
+  draw: (context: KlintContext) => void,
+  isVisible: boolean
+) {
+  const animationFrameId = useRef<number>();
+
+  const animate = useCallback(() => {
+    if (!contextRef.current || !isVisible) return;
+    if (!contextRef.current.__isReadyToDraw) return;
+    if (!contextRef.current.__isPlaying) {
+      animationFrameId.current = requestAnimationFrame(animate);
+      return;
+    }
+
+    const context = contextRef.current;
+    const now = performance.now();
+    const target = 1000 / context.fps;
+
+    if (!context.__lastTargetTime) {
+      context.__lastTargetTime = now;
+      context.__lastRealTime = now;
+    }
+
+    const sinceLast = now - context.__lastTargetTime;
+    const epsilon = 5;
+
+    if (sinceLast >= target - epsilon) {
+      context.deltaTime = now - context.__lastRealTime;
+      draw(context);
+      if (context.time > 1e7) context.time = 0;
+      if (context.frame > 1e7) context.frame = 0;
+      context.time += context.deltaTime / DEFAULT_FPS;
+      context.frame++;
+      context.__lastTargetTime = Math.max(
+        context.__lastTargetTime + target,
+        now
+      );
+      context.__lastRealTime = now;
+    }
+
+    animationFrameId.current = requestAnimationFrame(animate);
+  }, [draw, isVisible, contextRef]);
+
+  return {
+    animate,
+    animationFrameId,
+  };
+}
 
 // Entry point
 export default function Klint({
@@ -150,15 +201,21 @@ export default function Klint({
       },
       { threshold: 0.1, root: null, rootMargin: "50px" }
     );
-    intersectionObserverRef.current.observe(canvas);
+    intersectionObserverRef.current.observe(container);
 
     const initializeKlint = async () => {
       if (!context) return;
 
       const handleStaticMode = () => {
-        draw(context);
-        const imageUrl = canvas.toDataURL("image/png");
-        setStaticImage(imageUrl);
+        try {
+          draw(context);
+          const imageUrl = canvas.toDataURL("image/png");
+          setStaticImage(imageUrl);
+        } catch (error: unknown) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+          throw new Error(`Klint draw error in static mode: ${message}`);
+        }
       };
 
       const startAnimation = () => {
@@ -167,38 +224,43 @@ export default function Klint({
       };
 
       const initializeContext = async (skipStateChecks = false) => {
+        // Preload phase
         if (preload && (skipStateChecks || !context.__isPreloaded)) {
-          await preload(context);
-          if (!skipStateChecks) context.__isPreloaded = true;
+          try {
+            await preload(context);
+            if (!skipStateChecks) context.__isPreloaded = true;
+          } catch (error) {
+            const message =
+              error instanceof Error ? error.message : String(error);
+            throw new Error(`Klint draw error in static mode: ${message}`);
+          }
         }
 
+        // Setup phase
         if (setup && (skipStateChecks || !context.__isSetup)) {
-          setup(context);
-          if (!skipStateChecks) context.__isSetup = true;
+          try {
+            setup(context);
+            if (!skipStateChecks) context.__isSetup = true;
+          } catch (error) {
+            const message =
+              error instanceof Error ? error.message : String(error);
+            throw new Error(`Klint draw error in static mode: ${message}`);
+          }
         }
 
         context.__isReadyToDraw = true;
       };
 
-      try {
-        // Unsafe mode - reload everything on each re-render
-        if (__options.unsafemode === "true") {
-          await initializeContext(true);
-          return __options.static === "true"
-            ? handleStaticMode()
-            : startAnimation();
-        }
+      const skipStateChecks = __options.unsafemode === "true";
 
-        // Safe mode - normal initialization with state checks
-        if (context.__isReadyToDraw) return;
-        await initializeContext();
+      if (!skipStateChecks && context.__isReadyToDraw) return;
 
-        return __options.static === "true"
-          ? handleStaticMode()
-          : startAnimation();
-      } catch (error) {
-        console.error("Fatal Klint initialization error:", error);
-        context.__isReadyToDraw = false;
+      await initializeContext(skipStateChecks);
+
+      if (__options.static === "true") {
+        handleStaticMode();
+      } else {
+        startAnimation();
       }
     };
 
@@ -231,31 +293,29 @@ export default function Klint({
   }, [animate, isVisible, __options.noloop, draw, isReady]);
 
   return (
-    <KlintErrorBoundary>
-      <div ref={containerRef} style={{ width: "100%", height: "100%" }}>
-        {toStaticImage ? (
-          <img
-            src={toStaticImage}
-            alt={contextRef.current?.__description || DEFAULT_ALT}
-            style={{
-              display: "block",
-              width: "100%",
-              height: "100%",
-              objectFit: "contain",
-            }}
-          />
-        ) : (
-          <canvas
-            ref={canvasRef}
-            style={{
-              display: __options.nocanvas === "true" ? "none" : "block",
-            }}
-            aria-label={contextRef.current?.__description || DEFAULT_ALT}
-            role="img"
-          />
-        )}
-      </div>
-    </KlintErrorBoundary>
+    <div ref={containerRef} style={{ width: "100%", height: "100%" }}>
+      {toStaticImage ? (
+        <img
+          src={toStaticImage}
+          alt={contextRef.current?.__description || DEFAULT_ALT}
+          style={{
+            display: "block",
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+          }}
+        />
+      ) : (
+        <canvas
+          ref={canvasRef}
+          style={{
+            display: __options.nocanvas === "true" ? "none" : "block",
+          }}
+          aria-label={contextRef.current?.__description || DEFAULT_ALT}
+          role="img"
+        />
+      )}
+    </div>
   );
 }
 
@@ -273,7 +333,7 @@ export class KlintErrorBoundary extends Component<
   ErrorBoundaryProps,
   ErrorBoundaryState
 > {
-  state = { hasError: false };
+  state: ErrorBoundaryState = { hasError: false };
 
   static getDerivedStateFromError(error: Error) {
     return { hasError: true, error };
@@ -287,8 +347,14 @@ export class KlintErrorBoundary extends Component<
     if (this.state.hasError) {
       return (
         this.props.fallback || (
-          <div style={{ padding: "20px", color: "red" }}>
-            Something went wrong with the canvas.
+          <div className="w-full h-full flex items-center justify-center bg-red-50">
+            <div className="text-red-600 text-center p-4">
+              <h3 className="font-bold mb-2">Canvas Error</h3>
+              <p>
+                {this.state.error?.message ||
+                  "Something went wrong with the canvas."}
+              </p>
+            </div>
           </div>
         )
       );

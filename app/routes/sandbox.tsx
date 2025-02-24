@@ -8,18 +8,19 @@ import { useState } from "react";
 import Color from "~/Klint/src/plugins/Color";
 // import SVGfont, { SVGFontPaths } from "~/Klint/src/plugins/SVGfont";
 import Easing from "~/Klint/src/plugins/Easing";
-import Klint from "~/Klint/src/component/Klint";
+import Klint, { KlintErrorBoundary } from "~/Klint/src/component/Klint";
 // import svgFont from "~/src/Marcel-semibold.svg?raw";
 
 export function KlintCanvas() {
   const { context, useMouse, useScroll } = useKlint();
-  const { mouse, onClick, onMouseIn, onMouseOut, onMouseDown, onMouseUp } =
-    useMouse();
+  const { mouse, onClick } = useMouse();
   onClick(() => {
     console.log("mouse click !");
   });
   const { scroll, onScroll } = useScroll();
-
+  onScroll(() => {
+    console.log("mouse scroll !");
+  });
   // onMouseIn((ctx, e) => console.log("mouse entered"));
   // onMouseOut((ctx, e) => console.log("mouse left"));
   // onMouseDown((ctx, e) => console.log("pressed"));
@@ -84,12 +85,7 @@ export function KlintCanvas() {
     //   })
     // );
 
-    P.set(
-      "lamp",
-      await K.loadImage(
-        "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/lamp.png?v=1734625960"
-      )
-    );
+    P.set("lamp", await K.loadImage(String(P.get("lamp"))));
 
     // K.createOffscreen(
     //   "buffer",
@@ -228,23 +224,17 @@ export function KlintCanvas() {
   };
 
   return (
-    <Klint
-      context={context}
-      preload={preload}
-      draw={draw}
-      setup={setup}
-      options={{
-        origin: "center",
-        noloop: "false",
-        ignoreScroll: "false",
-        // fps: 8,
-      }}
-      // onClick={onClick}
-      // onResize={onResize}
-      // onMouseIn={onMouseIn}
-      // onMouseOut={onMouseOut}
-      // onScroll={onScroll}
-    />
+    <KlintErrorBoundary>
+      <Klint
+        context={context}
+        preload={preload}
+        draw={draw}
+        setup={setup}
+        options={{
+          origin: "center",
+        }}
+      />
+    </KlintErrorBoundary>
   );
 }
 

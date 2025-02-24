@@ -234,10 +234,10 @@ export default function useKlint() {
   );
 
   // Add mount tracking
-  useEffect(() => {
-    console.log("useKlint mounted");
-    return () => console.log("useKlint unmounted");
-  }, []);
+  // useEffect(() => {
+  //   console.log("useKlint mounted");
+  //   return () => console.log("useKlint unmounted");
+  // }, []);
 
   return {
     context: {
