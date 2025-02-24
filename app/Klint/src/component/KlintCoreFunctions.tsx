@@ -1,11 +1,13 @@
-import { CONFIG_PROPS } from "../component/Klint";
+import {
+  CONFIG_PROPS,
+  KlintConfig,
+  KlintCanvasOptions,
+} from "../component/Klint";
 import { KlintFunctions } from "../component/KlintFunctions";
 import {
   KlintContext,
   KlintContexts,
-  KlintConfig,
   KlintOffscreenContext,
-  KlintCanvasOptions,
 } from "../component/KlintTypes";
 // Klint Core Functions
 export type KlintCoreFunctions = {

@@ -1,41 +1,7 @@
-import { CONFIG_PROPS } from "./Klint";
 import { KlintFunctions } from "./KlintFunctions";
 import { KlintCoreFunctions } from "./KlintCoreFunctions";
 
-export interface KlintCanvasOptions {
-  alpha?: string;
-  willreadfrequently?: string;
-  autoplay?: string;
-  ignoreResize?: string;
-  noloop?: string;
-  ignoreFunctions?: string;
-  static?: string;
-  nocanvas?: string;
-  fps?: number;
-  unsafemode?: string;
-  origin?: "corner" | "center";
-}
-
-export interface KlintProps {
-  context: KlintContextWrapper;
-  draw: (ctx: KlintContext) => void;
-  setup?: (ctx: KlintContext) => void;
-  preload?: (ctx: KlintContext) => Promise<void>;
-  options?: KlintCanvasOptions;
-  onResize?: (ctx: KlintContext) => void;
-  onVisible?: (ctx: KlintContext) => void;
-}
-
-export type KlintConfig = Partial<
-  Pick<KlintContext, (typeof CONFIG_PROPS)[number]>
->;
-export type KlintImageInput = HTMLImageElement | undefined | HTMLCanvasElement;
-
-export type VertexType = "linear" | "curve" | "catmull" | "arc";
-export type VertexPoint = {
-  type: VertexType;
-  points: number[][]; // [x,y] for linear, [[x1,y1], [x2,y2], [x,y]] for bezier, etc.
-};
+export type KlintContexts = KlintContext | KlintOffscreenContext;
 
 export interface KlintOffscreenContext
   extends CanvasRenderingContext2D,
@@ -64,49 +30,21 @@ export interface KlintOffscreenContext
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
+  // install: <K extends string, T>(key: K, plugin: T) => void;
 }
-
-export type KlintContexts = KlintContext | KlintOffscreenContext;
 
 // core context, should not be applied to the offscreen canvas
 export interface KlintContext
   extends KlintOffscreenContext,
     KlintFunctions,
     KlintCoreFunctions {
-  // core
   frame: number;
   time: number;
   deltaTime: number;
   fps: number;
-  // internals
   __lastTargetTime: number;
   __lastRealTime: number;
   __isPlaying: boolean;
   __offscreens: Map<string, KlintOffscreenContext | HTMLImageElement>;
 }
 // mouse
-export interface KlintMouse {
-  x: number;
-  y: number;
-  px: number;
-  py: number;
-  vx: number;
-  vy: number;
-  angle: number;
-  isPressed: boolean;
-  isHover: boolean;
-}
-
-export interface KlintScroll {
-  distance: number;
-  velocity: number;
-  lastTime: number;
-}
-
-export interface KlintContextWrapper {
-  context: KlintContext | null;
-  initCoreContext: (
-    canvas: HTMLCanvasElement,
-    options: KlintCanvasOptions
-  ) => KlintContext;
-}

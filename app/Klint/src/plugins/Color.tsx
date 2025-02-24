@@ -1,5 +1,10 @@
 import { KlintContexts } from "../component/KlintTypes";
 
+// declare module '../hooks/useKlint' {
+//   interface KlintPlugins {
+//     C: Color;
+//   }
+// }
 // const colors = {
 //   coral: "#E84D37",
 //   brown: "#7F4C2F",

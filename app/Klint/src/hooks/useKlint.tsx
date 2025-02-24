@@ -1,19 +1,34 @@
 import { useRef, useCallback, useEffect } from "react";
-import {
-  KlintCanvasOptions,
-  KlintContext,
-  KlintMouse,
-  KlintScroll,
-} from "../component/KlintTypes";
+import { KlintContext } from "../component/KlintTypes";
 import { KlintCoreFunctions } from "../component/KlintCoreFunctions";
 import { KlintFunctions } from "../component/KlintFunctions";
+import { KlintCanvasOptions } from "../component/Klint";
 
 export type {
   KlintContext,
   KlintOffscreenContext,
   KlintContexts,
-  KlintMouse,
 } from "../component/KlintTypes";
+
+export interface KlintContextWrapper {
+  context: KlintContext | null;
+  initCoreContext: (
+    canvas: HTMLCanvasElement,
+    options: KlintCanvasOptions
+  ) => KlintContext;
+}
+
+export interface KlintMouse {
+  x: number;
+  y: number;
+  px: number;
+  py: number;
+  vx: number;
+  vy: number;
+  angle: number;
+  isPressed: boolean;
+  isHover: boolean;
+}
 
 const DEFAULT_MOUSE_STATE: KlintMouse = {
   x: 0,
@@ -26,6 +41,12 @@ const DEFAULT_MOUSE_STATE: KlintMouse = {
   isPressed: false,
   isHover: false,
 };
+
+export interface KlintScroll {
+  distance: number;
+  velocity: number;
+  lastTime: number;
+}
 
 const DEFAULT_SCROLL_STATE: KlintScroll = {
   distance: 0,

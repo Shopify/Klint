@@ -8,19 +8,29 @@ import {
   ReactNode,
 } from "react";
 
-import { KlintProps, KlintContext, KlintCanvasOptions } from "./KlintTypes";
+import { KlintContextWrapper } from "../hooks/useKlint";
 
-export type {
-  KlintProps,
-  KlintContext,
-  KlintOffscreenContext,
-  KlintCanvasOptions,
-  KlintConfig,
-} from "./KlintTypes";
+import { KlintContext } from "./KlintTypes";
+
+export type { KlintContext, KlintOffscreenContext } from "./KlintTypes";
 
 const DEFAULT_FPS = 60;
 const DEFAULT_ALT = "A beautiful artwork made with Klint Canvas";
 export const EPSILON = 0.0001;
+
+export interface KlintCanvasOptions {
+  alpha?: string;
+  willreadfrequently?: string;
+  autoplay?: string;
+  ignoreResize?: string;
+  noloop?: string;
+  ignoreFunctions?: string;
+  static?: string;
+  nocanvas?: string;
+  fps?: number;
+  unsafemode?: string;
+  origin?: "corner" | "center";
+}
 
 const DEFAULT_OPTIONS: KlintCanvasOptions = {
   alpha: "true",
@@ -33,6 +43,10 @@ const DEFAULT_OPTIONS: KlintCanvasOptions = {
   fps: DEFAULT_FPS,
   origin: "corner",
 };
+
+export type KlintConfig = Partial<
+  Pick<KlintContext, (typeof CONFIG_PROPS)[number]>
+>;
 
 export const CONFIG_PROPS = [
   "lineWidth",
@@ -58,6 +72,16 @@ export const CONFIG_PROPS = [
   "__textSize",
   "__textAlignment",
 ] as const;
+
+export interface KlintProps {
+  context: KlintContextWrapper;
+  draw: (ctx: KlintContext) => void;
+  setup?: (ctx: KlintContext) => void;
+  preload?: (ctx: KlintContext) => Promise<void>;
+  options?: KlintCanvasOptions;
+  onResize?: (ctx: KlintContext) => void;
+  onVisible?: (ctx: KlintContext) => void;
+}
 
 function useAnimate(
   contextRef: React.RefObject<KlintContext | null>,

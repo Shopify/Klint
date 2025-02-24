@@ -1,5 +1,5 @@
-import { KlintContexts, KlintConfig } from "./KlintTypes";
-import { CONFIG_PROPS, EPSILON } from "./Klint";
+import { KlintContexts } from "./KlintTypes";
+import { CONFIG_PROPS, EPSILON, KlintConfig } from "./Klint";
 // Klint Functions
 export type KlintFunctions = {
   [K in KlintFunctionNames]: ReturnType<(typeof KlintFunctions)[K]>;

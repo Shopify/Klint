@@ -31,43 +31,6 @@ export function KlintCanvas() {
     scroll: { distance: 0, velocity: 0 },
   });
 
-  // const onClick = (/*K: KlintContext*/) => {
-  //   console.log("click");
-  // };
-  // const onMouseIn = (/*K: KlintContext*/) => {
-  //   // K.play();
-  //   console.log("mouse in");
-  // };
-  // const onMouseOut = (/*K: KlintContext*/) => {
-  //   // K.pause();
-  //   console.log("mouse out");
-  // };
-
-  // const { mouse, onClick } = useMouse();
-  // onClick((ctx: KlintContext) => {
-  //   console.log(`click at ${mouse.x},${mouse.y}`);
-  //   console.log("Klint", ctx);
-  // });
-  // onMouseMove((ctx: KlintContext) => {
-  //   console.log(`moved at ${mouse.x},${mouse.y}`);
-  //   // console.log("Klint", ctx);
-  // });
-  // const { scroll, onScroll } = useScroll();
-  // onScroll(() => {
-  //   console.log("Look at me, i'm scrolling !");
-  //   console.log(`distance ${scroll.distance}`);
-  // });
-
-  // const onScroll = (
-  //   K: KlintContext,
-  //   { distance, velocity }: { distance: number; velocity: number }
-  // ) => {
-  //   // K.pause();
-  //   P.set("scroll", { distance, velocity });
-  //   // console.log("scroll");
-  //   // console.table({ distance, velocity });
-  // };
-
   const preload = async (K: KlintContext) => {
     //K.extend("T", new Text(K));
     // console.log(K, "Welcome to Klint ! 🎨");
