@@ -4,13 +4,12 @@ import type {
 } from "~/Klint/src/hooks/useKlint";
 import useKlint from "~/Klint/src/hooks/useKlint";
 import useProps from "~/Klint/src/hooks/useProps";
-import { installPlugins } from "~/Klint/src/plugins/installPlugins";
+// import { installPlugins } from "~/Klint/src/plugins/installPlugins";
 import { useState } from "react";
-// import Color from "~/Klint/src/plugins/Color";
-// import SVGfont, { SVGFontPaths } from "~/Klint/src/plugins/SVGfont";
-// import Easing from "~/Klint/src/plugins/Easing";
 import Klint, { KlintErrorBoundary } from "~/Klint/src/component/Klint";
 // import svgFont from "~/src/Marcel-semibold.svg?raw";
+
+import Color from "~/Klint/src/plugins/Color";
 
 export function KlintCanvas() {
   const { context, useMouse, useScroll } = useKlint();
@@ -33,14 +32,15 @@ export function KlintCanvas() {
   });
 
   const preload = async (K: KlintContext) => {
+    K.extend("Color", Color);
+    // await loadPlugins();
     //K.extend("T", new Text(K));
     // console.log(K, "Welcome to Klint ! 🎨");
     // K.extend("E", new Easing(K));
     // K.install("Color", new Color(K));
     // K.extend("SVG", new SVGfont(K));
     // K.SVG.parse(svgFont);
-    const loadPlugins = installPlugins(K, ["Color", "Easing"]);
-    await loadPlugins();
+
     // P.set(
     //   "points",
     //   K.SVG.getPoints("Ah !", {
@@ -83,7 +83,7 @@ export function KlintCanvas() {
   };
 
   const draw = (K: KlintContext) => {
-    const { Color: C } = K;
+    // const { Color } = K;
 
     // const scrollAmount = P.get("scroll") as {
     //   distance: number;
@@ -99,8 +99,8 @@ export function KlintCanvas() {
     //   };
     // });
 
-    const col = C.hsl(scroll.velocity * 360, 100, 50);
-    K.background(col);
+    // const col = C.hsl(scroll.velocity * 360, 100, 50);
+    K.background(`color(from green srgb r g b / 0.5)`);
 
     K.push();
     K.fillColor(mouse.isPressed ? "#FFF" : "#000");
@@ -110,14 +110,21 @@ export function KlintCanvas() {
     K.pop();
 
     K.push();
+    // K.blend("difference");
     for (let i = 0; i < 10; i++) {
-      K.fillColor(C.colors[i % 6]);
+      K.fillColor("#FFFFFF");
 
       K.circle(
         -K.width / 2 + (K.width * i) / 9,
         Math.sin(K.frame * 0.03 + i / 10) * 240,
         100
       );
+
+      // K.circle(
+      //   -K.width / 2 + (K.width * i) / 9,
+      //   Math.sin(K.time * 0.03 + i / 10) * 240,
+      //   100
+      // );
     }
     K.pop();
 
@@ -197,6 +204,7 @@ export function KlintCanvas() {
         setup={setup}
         options={{
           origin: "center",
+          // fps: 24,
           // static: "true",
         }}
       />

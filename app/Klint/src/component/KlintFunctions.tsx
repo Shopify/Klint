@@ -13,6 +13,7 @@ export const KlintFunctions = {
       if (name in ctx && !enforceReplace) return;
       (ctx as KlintContexts)[name] = data;
     },
+
   background: (ctx: KlintContexts) => (color?: string) => {
     ctx.resetTransform();
     ctx.push();

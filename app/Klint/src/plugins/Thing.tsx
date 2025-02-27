@@ -1,5 +1,10 @@
-// import { KlintOffscreenContext, KlintContext } from "../component/KlintTypes";
 import { KlintContexts } from "../component/KlintTypes";
+
+declare module "../component/KlintTypes" {
+  interface KlintPlugins {
+    Thing: Thing;
+  }
+}
 
 interface KlintThing {
   context: KlintContexts;

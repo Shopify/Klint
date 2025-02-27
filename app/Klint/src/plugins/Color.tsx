@@ -93,120 +93,130 @@ class Color implements KlintColor {
     return this.colors[17];
   }
 
-  private toHex(n: number): string {
-    const hex = Math.round(n).toString(16);
-    return hex.length === 1 ? "0" + hex : hex;
-  }
-
-  private parseHex(hex: string): [number, number, number, number] {
-    // Remove # if present
-    hex = hex.replace("#", "");
-
-    // Handle shorthand hex (#RGB or #RGBA)
-    if (hex.length <= 4) {
-      hex = hex
-        .split("")
-        .map((c) => c + c)
-        .join("");
-    }
-
-    // Pad with FF for alpha if needed
-    if (hex.length === 6) hex += "FF";
-
-    return [
-      parseInt(hex.slice(0, 2), 16),
-      parseInt(hex.slice(2, 4), 16),
-      parseInt(hex.slice(4, 6), 16),
-      parseInt(hex.slice(6, 8), 16),
-    ];
+  hex(color: string) {
+    return color.startsWith("#") ? color : `#${color}`;
   }
 
   rgb(r: number, g: number, b: number) {
-    return this.rgba(r, g, b, 1);
+    return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
   }
 
   rgba(r: number, g: number, b: number, alpha: number) {
-    return `#${this.toHex(r)}${this.toHex(g)}${this.toHex(b)}${this.toHex(
-      alpha * 255
-    )}`;
+    return `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(
+      b
+    )}, ${alpha})`;
   }
 
   gray(value: number, alpha?: number) {
-    return this.rgba(value, value, value, alpha ?? 1);
+    return alpha !== undefined
+      ? `rgba(${Math.round(value)}, ${Math.round(value)}, ${Math.round(
+          value
+        )}, ${alpha})`
+      : `rgb(${Math.round(value)}, ${Math.round(value)}, ${Math.round(value)})`;
   }
 
-  hsl(h: number, s: number, l: number, alpha?: number) {
-    // Convert HSL to RGB
-    h = h >= 0 ? h % 360 : 360 - (-h % 360);
-    s = Math.max(0, s / 100);
-    l = Math.max(0, l / 100);
+  hsl(h: number, s: number, l: number) {
+    return `hsl(${h % 360}, ${Math.max(0, s)}%, ${Math.max(0, l)}%)`;
+  }
 
-    const c = (1 - Math.abs(2 * l - 1)) * s;
-    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-    const m = l - c / 2;
+  hsla(h: number, s: number, l: number, alpha: number) {
+    return `hsla(${h % 360}, ${Math.max(0, s)}%, ${Math.max(0, l)}%, ${alpha})`;
+  }
 
-    let r = 0,
-      g = 0,
-      b = 0;
-    if (h < 60) {
-      [r, g, b] = [c, x, 0];
-    } else if (h < 120) {
-      [r, g, b] = [x, c, 0];
-    } else if (h < 180) {
-      [r, g, b] = [0, c, x];
-    } else if (h < 240) {
-      [r, g, b] = [0, x, c];
-    } else if (h < 300) {
-      [r, g, b] = [x, 0, c];
-    } else {
-      [r, g, b] = [c, 0, x];
-    }
+  lch(l: number, c: number, h: number) {
+    return `lch(${l}% ${c} ${h})`;
+  }
 
-    return this.rgba(
-      Math.round((r + m) * 255),
-      Math.round((g + m) * 255),
-      Math.round((b + m) * 255),
-      alpha ?? 1
-    );
+  lcha(l: number, c: number, h: number, alpha: number) {
+    return `lch(${l}% ${c} ${h} / ${alpha})`;
+  }
+
+  lab(l: number, a: number, b: number) {
+    return `lab(${l}% ${a} ${b})`;
+  }
+
+  laba(l: number, a: number, b: number, alpha: number) {
+    return `lab(${l}% ${a} ${b} / ${alpha})`;
+  }
+
+  oklch(l: number, c: number, h: number) {
+    return `oklch(${l} ${c} ${h})`;
+  }
+
+  oklcha(l: number, c: number, h: number, alpha: number) {
+    return `oklch(${l} ${c} ${h} / ${alpha})`;
+  }
+
+  oklab(l: number, a: number, b: number) {
+    return `oklab(${l} ${a} ${b})`;
+  }
+
+  oklaba(l: number, a: number, b: number, alpha: number) {
+    return `oklab(${l} ${a} ${b} / ${alpha})`;
   }
 
   blendColors(
-    A: string,
-    B: string,
+    colorMode: string,
+    colorA: string,
+    colorB: string,
     factor: number
-    //colorspace: "rgb" | "lab" | "hsl" | "oklch" = "rgb"
   ): string {
-    const cA = this.parseHex(A);
-    const cB = this.parseHex(B);
-    // console.log("colorA", cA);
-    // console.log("colorB", cB);
-    // Clamp factor between 0 and 1
-    const t = Math.max(0, Math.min(1, factor));
+    const t = Math.max(0, Math.min(1, factor)) * 100;
+    return `color-mix(in ${colorMode}, ${colorA}, ${colorB} ${t}%)`;
+  }
 
-    return this.rgba(
-      cA[0] * (1 - t) + cB[0] * t,
-      cA[1] * (1 - t) + cB[1] * t,
-      cA[2] * (1 - t) + cB[2] * t,
-      (cA[3] / 255) * (1 - t) + (cB[3] / 255) * t
-    );
-    /*
-    switch (colorspace) {
-      case "rgb":
-        // Linear interpolation in RGB space
-        return this.rgba(
-          cA[0] * (1 - t) + cB[0] * t,
-          cA[1] * (1 - t) + cB[1] * t,
-          cA[2] * (1 - t) + cB[2] * t,
-          cA[3] * (1 - t) + cB[3] * t
-        );
-
-      case "hsl":
-      case "lab":
-      case "oklch":
-        // Fallback to RGB blending for now
-        return this.blendColors(A, B, factor, "rgb");
+  createPalette(baseColor: string, steps: number = 9): string[] {
+    const palette: string[] = [];
+    // Generate lighter shades
+    for (let i = 1; i < steps; i++) {
+      const factor = i / steps;
+      palette.unshift(
+        this.blendColors("in oklch", baseColor, "#ffffff", factor)
+      );
     }
-    */
+    // Add base color
+    palette.push(baseColor);
+    // Generate darker shades
+    for (let i = 1; i < steps; i++) {
+      const factor = i / steps;
+      palette.push(this.blendColors("in oklch", baseColor, "#000000", factor));
+    }
+    return palette;
+  }
+
+  // Create a complementary color
+  complementary(color: string): string {
+    return `color-mix(in hsl, ${color}, hsl(180deg 100% 50% / 100%))`;
+  }
+
+  // Create analogous colors
+  analogous(color: string, angle: number = 30): [string, string] {
+    return [
+      `color-mix(in hsl, ${color}, hsl(${-angle}deg 100% 50% / 100%))`,
+      `color-mix(in hsl, ${color}, hsl(${angle}deg 100% 50% / 100%))`,
+    ];
+  }
+
+  // Create a triadic color scheme
+  triadic(color: string): [string, string] {
+    return [
+      `color-mix(in hsl, ${color}, hsl(120deg 100% 50% / 100%))`,
+      `color-mix(in hsl, ${color}, hsl(240deg 100% 50% / 100%))`,
+    ];
+  }
+
+  // Adjust color saturation
+  saturate(color: string, amount: number): string {
+    return `color-mix(in hsl, ${color}, hsl(0deg 100% 50% / 0%) ${amount}%)`;
+  }
+
+  // Adjust color lightness
+  lighten(color: string, amount: number): string {
+    return `color-mix(in hsl, ${color}, white ${amount}%)`;
+  }
+
+  darken(color: string, amount: number): string {
+    return `color-mix(in hsl, ${color}, black ${amount}%)`;
   }
 }
 

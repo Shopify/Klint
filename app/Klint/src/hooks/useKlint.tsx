@@ -60,7 +60,9 @@ export default function useKlint() {
   const scrollRef = useRef<KlintScroll | null>(null);
 
   const useMouse = () => {
-    mouseRef.current = DEFAULT_MOUSE_STATE;
+    if (!mouseRef.current) {
+      mouseRef.current = { ...DEFAULT_MOUSE_STATE };
+    }
     const clickCallbackRef = useRef<
       ((ctx: KlintContext, e: MouseEvent) => void) | null
     >(null);
@@ -149,7 +151,7 @@ export default function useKlint() {
         canvas.removeEventListener("mouseleave", handleMouseLeave);
         canvas.removeEventListener("click", handleClick);
       };
-    }, []);
+    });
 
     return {
       mouse: mouseRef.current,
@@ -167,7 +169,9 @@ export default function useKlint() {
   };
 
   const useScroll = () => {
-    scrollRef.current = DEFAULT_SCROLL_STATE;
+    if (!scrollRef.current) {
+      scrollRef.current = { ...DEFAULT_SCROLL_STATE };
+    }
     const scrollCallbackRef = useRef<
       ((ctx: KlintContext, scroll: KlintScroll, e: WheelEvent) => void) | null
     >(null);
@@ -195,7 +199,7 @@ export default function useKlint() {
 
       canvas.addEventListener("wheel", handleScroll);
       return () => canvas.removeEventListener("wheel", handleScroll);
-    }, []);
+    });
 
     return {
       scroll: scrollRef.current,
@@ -266,6 +270,36 @@ export default function useKlint() {
     []
   );
 
+  const togglePlay = useCallback((playing?: boolean) => {
+    if (!contextRef.current) return;
+
+    if (playing !== undefined) {
+      contextRef.current.__isPlaying = playing;
+    } else {
+      contextRef.current.__isPlaying = !contextRef.current.__isPlaying;
+    }
+  }, []);
+
+  const resize = useCallback(() => {
+    if (!contextRef.current?.canvas) return;
+
+    const canvas = contextRef.current.canvas;
+    const container = canvas.parentElement;
+    if (!container) return;
+
+    const { width, height } = container.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+
+    if (contextRef.current.__canvasOrigin === "center") {
+      contextRef.current.translate(canvas.width * 0.5, canvas.height * 0.5);
+    }
+  }, []);
+
   return {
     context: {
       context: contextRef.current,
@@ -273,5 +307,7 @@ export default function useKlint() {
     },
     useMouse,
     useScroll,
+    togglePlay,
+    resize,
   };
 }
