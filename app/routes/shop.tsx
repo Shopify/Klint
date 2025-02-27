@@ -1,6 +1,5 @@
 import type { KlintContext } from "~/Klint/src/hooks/useKlint";
-import useKlint from "~/Klint/src/hooks/useKlint";
-import useProps from "~/Klint/src/hooks/useProps";
+import useKlint, { useProps } from "~/Klint/src/hooks/useKlint";
 import { useState } from "react";
 import Color from "~/Klint/src/plugins/Color";
 import Easing from "~/Klint/src/plugins/Easing";

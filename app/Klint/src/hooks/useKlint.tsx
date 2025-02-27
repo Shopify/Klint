@@ -213,6 +213,68 @@ export default function useKlint() {
     };
   };
 
+  const useWindow = () => {
+    const resizeCallbackRef = useRef<((ctx: KlintContext) => void) | null>(
+      null
+    );
+    const blurCallbackRef = useRef<((ctx: KlintContext) => void) | null>(null);
+    const focusCallbackRef = useRef<((ctx: KlintContext) => void) | null>(null);
+    const visibilityChangeCallbackRef = useRef<
+      ((ctx: KlintContext, isVisible: boolean) => void) | null
+    >(null);
+
+    useEffect(() => {
+      if (!contextRef.current) return;
+      const ctx = contextRef.current;
+
+      const handleResize = () => {
+        if (resizeCallbackRef.current) resizeCallbackRef.current(ctx);
+      };
+
+      const handleBlur = () => {
+        if (blurCallbackRef.current) blurCallbackRef.current(ctx);
+      };
+
+      const handleFocus = () => {
+        if (focusCallbackRef.current) focusCallbackRef.current(ctx);
+      };
+
+      const handleVisibilityChange = () => {
+        const isVisible = document.visibilityState === "visible";
+        if (visibilityChangeCallbackRef.current) {
+          visibilityChangeCallbackRef.current(ctx, isVisible);
+        }
+      };
+
+      window.addEventListener("resize", handleResize);
+      window.addEventListener("blur", handleBlur);
+      window.addEventListener("focus", handleFocus);
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+
+      return () => {
+        window.removeEventListener("resize", handleResize);
+        window.removeEventListener("blur", handleBlur);
+        window.removeEventListener("focus", handleFocus);
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange
+        );
+      };
+    }, []);
+
+    return {
+      onResize: (callback: (ctx: KlintContext) => void) =>
+        (resizeCallbackRef.current = callback),
+      onBlur: (callback: (ctx: KlintContext) => void) =>
+        (blurCallbackRef.current = callback),
+      onFocus: (callback: (ctx: KlintContext) => void) =>
+        (focusCallbackRef.current = callback),
+      onVisibilityChange: (
+        callback: (ctx: KlintContext, isVisible: boolean) => void
+      ) => (visibilityChangeCallbackRef.current = callback),
+    };
+  };
+
   const buildKlintContext = (
     ctx: CanvasRenderingContext2D,
     options: KlintCanvasOptions
@@ -280,26 +342,6 @@ export default function useKlint() {
     }
   }, []);
 
-  const resize = useCallback(() => {
-    if (!contextRef.current?.canvas) return;
-
-    const canvas = contextRef.current.canvas;
-    const container = canvas.parentElement;
-    if (!container) return;
-
-    const { width, height } = container.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-
-    if (contextRef.current.__canvasOrigin === "center") {
-      contextRef.current.translate(canvas.width * 0.5, canvas.height * 0.5);
-    }
-  }, []);
-
   return {
     context: {
       context: contextRef.current,
@@ -307,7 +349,38 @@ export default function useKlint() {
     },
     useMouse,
     useScroll,
+    useWindow,
     togglePlay,
-    resize,
   };
 }
+
+type PropsValue = unknown;
+type PropsStore = Record<string, PropsValue>;
+
+export const useProps = (initialProps: PropsStore = {}) => {
+  const storeRef = useRef<PropsStore>(initialProps);
+
+  const get = useCallback((key: string): PropsValue => {
+    return storeRef.current[key];
+  }, []);
+
+  const set = useCallback((key: string, value: PropsValue): void => {
+    storeRef.current[key] = value;
+  }, []);
+
+  const has = useCallback((key: string): boolean => {
+    return key in storeRef.current;
+  }, []);
+
+  const remove = useCallback((key: string): void => {
+    delete storeRef.current[key];
+  }, []);
+
+  return {
+    get,
+    set,
+    has,
+    remove,
+    store: storeRef.current,
+  };
+};

@@ -2,8 +2,8 @@ import type {
   KlintContext,
   // KlintOffscreenContext,
 } from "~/Klint/src/hooks/useKlint";
-import useKlint from "~/Klint/src/hooks/useKlint";
-import useProps from "~/Klint/src/hooks/useProps";
+import useKlint, { useProps } from "~/Klint/src/hooks/useKlint";
+
 // import { installPlugins } from "~/Klint/src/plugins/installPlugins";
 import { useState } from "react";
 import Klint, { KlintErrorBoundary } from "~/Klint/src/component/Klint";
@@ -12,15 +12,19 @@ import Klint, { KlintErrorBoundary } from "~/Klint/src/component/Klint";
 import Color from "~/Klint/src/plugins/Color";
 
 export function KlintCanvas() {
-  const { context, useMouse, useScroll } = useKlint();
+  const { context, useMouse, useWindow /*useScroll*/ } = useKlint();
   const { mouse, onClick } = useMouse();
+  const { onResize } = useWindow();
   onClick(() => {
     console.log("mouse click !");
   });
-  const { scroll, onScroll } = useScroll();
-  onScroll(() => {
-    console.log("mouse scroll !");
+  onResize(() => {
+    console.log("resized");
   });
+  // const { scroll, onScroll } = useScroll();
+  // onScroll(() => {
+  //   console.log("mouse scroll !");
+  // });
   // onMouseIn((ctx, e) => console.log("mouse entered"));
   // onMouseOut((ctx, e) => console.log("mouse left"));
   // onMouseDown((ctx, e) => console.log("pressed"));
@@ -32,7 +36,7 @@ export function KlintCanvas() {
   });
 
   const preload = async (K: KlintContext) => {
-    K.extend("Color", Color);
+    K.extend("Color", new Color(K));
     // await loadPlugins();
     //K.extend("T", new Text(K));
     // console.log(K, "Welcome to Klint ! 🎨");
@@ -83,8 +87,6 @@ export function KlintCanvas() {
   };
 
   const draw = (K: KlintContext) => {
-    // const { Color } = K;
-
     // const scrollAmount = P.get("scroll") as {
     //   distance: number;
     //   velocity: number;
@@ -100,7 +102,7 @@ export function KlintCanvas() {
     // });
 
     // const col = C.hsl(scroll.velocity * 360, 100, 50);
-    K.background(`color(from green srgb r g b / 0.5)`);
+    K.background(`color(from green srgb r g b / 0.25)`);
 
     K.push();
     K.fillColor(mouse.isPressed ? "#FFF" : "#000");
