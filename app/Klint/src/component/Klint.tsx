@@ -71,6 +71,7 @@ export const CONFIG_PROPS = [
   "__textStyle",
   "__textSize",
   "__textAlignment",
+  "__isPlaying",
 ] as const;
 
 export interface KlintProps {
@@ -139,7 +140,6 @@ export default function Klint({
   draw,
   options = {},
   preload,
-  onResize,
   onVisible,
 }: KlintProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -200,7 +200,6 @@ export default function Klint({
     if (__options.ignoreResize !== "true") {
       resizeObserverRef.current = new ResizeObserver(() => {
         updateCanvasSize(context.__isReadyToDraw);
-        onResize?.(context);
       });
       resizeObserverRef.current.observe(container);
     }

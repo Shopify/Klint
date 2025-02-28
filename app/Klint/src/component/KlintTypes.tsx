@@ -3,10 +3,7 @@ import { KlintCoreFunctions } from "./KlintCoreFunctions";
 
 export interface KlintPlugins {}
 
-export type KlintContexts =
-  | KlintContext
-  | KlintOffscreenContext
-  | CanvasRenderingContext2D;
+export type KlintContexts = KlintContext | KlintOffscreenContext;
 
 export interface KlintOffscreenContext
   extends CanvasRenderingContext2D,

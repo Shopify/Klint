@@ -14,20 +14,6 @@ export function KlintCanvas() {
     lamp: "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/lamp.png?v=1734625960",
   });
 
-  const onResize = (/*K: KlintContext*/) => {
-    // console.log("resize");
-  };
-  const onClick = (/*K: KlintContext*/) => {
-    // console.log("click");
-  };
-  const onMouseIn = (/*K: KlintContext*/) => {
-    // K.play();
-    // console.log("mouse in");
-  };
-  const onMouseOut = (/*K: KlintContext*/) => {
-    // K.pause();
-    // console.log("mouse out");
-  };
   const preload = async (K: KlintContext) => {
     //K.extend("T", new Text(K));
     console.log(K, "Welcome to Klint ! 🎨");
@@ -124,10 +110,6 @@ export function KlintCanvas() {
         static: "false",
         // fps: 8,
       }}
-      onClick={onClick}
-      onResize={onResize}
-      onMouseIn={onMouseIn}
-      onMouseOut={onMouseOut}
     />
   );
 }

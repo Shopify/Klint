@@ -1,8 +1,8 @@
-import type {
-  KlintContext,
-  // KlintOffscreenContext,
+import useKlint, {
+  useProps,
+  type KlintContext,
 } from "~/Klint/src/hooks/useKlint";
-import useKlint, { useProps } from "~/Klint/src/hooks/useKlint";
+import { useImage } from "~/Klint/src/hooks/useImage";
 
 // import { installPlugins } from "~/Klint/src/plugins/installPlugins";
 import { useState } from "react";
@@ -13,8 +13,11 @@ import Color from "~/Klint/src/plugins/Color";
 
 export function KlintCanvas() {
   const { context, useMouse, useWindow /*useScroll*/ } = useKlint();
-  const { mouse, onClick } = useMouse();
+  const { /*mouse,*/ onClick } = useMouse();
   const { onResize } = useWindow();
+  const { image, loading } = useImage(
+    "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/lamp.png?v=1734625960"
+  );
   onClick(() => {
     console.log("mouse click !");
   });
@@ -104,31 +107,33 @@ export function KlintCanvas() {
     // const col = C.hsl(scroll.velocity * 360, 100, 50);
     K.background(`color(from green srgb r g b / 0.25)`);
 
-    K.push();
-    K.fillColor(mouse.isPressed ? "#FFF" : "#000");
-    // console.log(mouse);
-    K.circle(mouse.x, mouse.y, 100);
-    // K.text("Ah !", K.width / 2, K.height / 2);
-    K.pop();
+    K.image(P.get("lamp") as HTMLImageElement, 0, 0);
 
-    K.push();
-    // K.blend("difference");
-    for (let i = 0; i < 10; i++) {
-      K.fillColor("#FFFFFF");
+    // K.push();
+    // K.fillColor(mouse.isPressed ? "#FFF" : "#000");
+    // // console.log(mouse);
+    // K.circle(mouse.x, mouse.y, 100);
+    // // K.text("Ah !", K.width / 2, K.height / 2);
+    // K.pop();
 
-      K.circle(
-        -K.width / 2 + (K.width * i) / 9,
-        Math.sin(K.frame * 0.03 + i / 10) * 240,
-        100
-      );
+    // K.push();
+    // // K.blend("difference");
+    // for (let i = 0; i < 10; i++) {
+    //   K.fillColor("#FFFFFF");
 
-      // K.circle(
-      //   -K.width / 2 + (K.width * i) / 9,
-      //   Math.sin(K.time * 0.03 + i / 10) * 240,
-      //   100
-      // );
-    }
-    K.pop();
+    //   K.circle(
+    //     -K.width / 2 + (K.width * i) / 9,
+    //     Math.sin(K.frame * 0.03 + i / 10) * 240,
+    //     100
+    //   );
+
+    //   // K.circle(
+    //   //   -K.width / 2 + (K.width * i) / 9,
+    //   //   Math.sin(K.time * 0.03 + i / 10) * 240,
+    //   //   100
+    //   // );
+    // }
+    // K.pop();
 
     // K.push();
     // K.strokeColor("#F0F");

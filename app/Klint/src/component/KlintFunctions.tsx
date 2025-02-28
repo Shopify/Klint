@@ -259,6 +259,63 @@ export const KlintFunctions = {
       return gradient.addColorStop(offset, color);
     },
 
+  constrain: () => (val: number, floor: number, ceil: number) => {
+    return Math.max(floor, Math.min(val, ceil));
+  },
+  lerp:
+    (ctx: KlintContexts) =>
+    (A: number, B: number, mix: number, bounded = true) => {
+      return A + (B - A) * (bounded ? ctx.constrain(mix, 0, 1) : mix);
+    },
+  fract:
+    () =>
+    (
+      n: number,
+      mod: number,
+      mode: "precise" | "fast" | "faster" = "precise"
+    ) => {
+      if (mode === "faster") {
+        // only works reliably for positive numbers < 2^31
+        const floor = (x: number) => x >> 0;
+        return n - floor(n / mod) * mod;
+      }
+      if (mode === "fast") {
+        return n - ~~(n / mod) * mod;
+      }
+      if (n >= 0) return n % mod;
+      return mod - (-n % mod);
+    },
+  distance:
+    (ctx: KlintContexts) =>
+    (
+      x1: number,
+      y1: number,
+      x2: number,
+      y2: number,
+      mode: "precise" | "fast" | "faster" = "precise"
+    ) => {
+      if (mode === "faster") {
+        const dx = Math.abs(x2 - x1);
+        const dy = Math.abs(y2 - y1);
+        return dx + dy - Math.min(dx, dy) * 0.3;
+      }
+      if (mode === "fast")
+        return ctx.squareDistance(x1, y1, x2, y2) * Math.SQRT1_2;
+      return Math.hypot(x2 - x1, y2 - y1);
+    },
+  squareDistance: () => (x1: number, y1: number, x2: number, y2: number) => {
+    return (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+  },
+  dot: () => (x1: number, y1: number, x2: number, y2: number) => {
+    return x1 * x2 + y1 * y2;
+  },
+  remap:
+    (ctx: KlintContexts) =>
+    (n: number, A: number, B: number, C: number, D: number, bounded = true) => {
+      const t = (n - A) / (B - A);
+      return ctx.lerp(C, D, t, bounded);
+    },
+
   textFont: (ctx: KlintContexts) => (font: string) => {
     ctx.__textFont = font;
   },
