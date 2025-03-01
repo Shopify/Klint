@@ -2,28 +2,33 @@ import useKlint, {
   useProps,
   type KlintContext,
 } from "~/Klint/src/hooks/useKlint";
-import { useImage } from "~/Klint/src/hooks/useImage";
 
-// import { installPlugins } from "~/Klint/src/plugins/installPlugins";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Klint, { KlintErrorBoundary } from "~/Klint/src/component/Klint";
-// import svgFont from "~/src/Marcel-semibold.svg?raw";
-
 import Color from "~/Klint/src/plugins/Color";
 
-export function KlintCanvas() {
-  const { context, useMouse, useWindow /*useScroll*/ } = useKlint();
+import { useImage } from "~/Klint/src/hooks/useImage";
+
+interface KlintCanvasProps {
+  hello: string;
+  lamp?: HTMLImageElement;
+  scroll: { distance: number; velocity: number };
+}
+
+export function KlintCanvas({ images: src }: KlintCanvasProps) {
+  const { context, useMouse, useWindow, useImage /*useScroll*/ } = useKlint();
   const { /*mouse,*/ onClick } = useMouse();
+  const { images, loadImages } = useImage();
   const { onResize } = useWindow();
-  const { image, loading } = useImage(
-    "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/lamp.png?v=1734625960"
-  );
+  // const { images, loading } = useImage(src);
+  // console.log(images, loading);
   onClick(() => {
     console.log("mouse click !");
   });
   onResize(() => {
     console.log("resized");
   });
+
   // const { scroll, onScroll } = useScroll();
   // onScroll(() => {
   //   console.log("mouse scroll !");
@@ -32,15 +37,17 @@ export function KlintCanvas() {
   // onMouseOut((ctx, e) => console.log("mouse left"));
   // onMouseDown((ctx, e) => console.log("pressed"));
   // onMouseUp((ctx, e) => console.log("released"));
-  const P = useProps({
+  const P = useProps<KlintCanvasProps>({
     hello: "Klint",
-    lamp: "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/lamp.png?v=1734625960",
     scroll: { distance: 0, velocity: 0 },
   });
 
   const preload = async (K: KlintContext) => {
+    await loadImages({
+      lamp: "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/lamp.png?v=1734625960",
+    });
     K.extend("Color", new Color(K));
-    // await loadPlugins();
+
     //K.extend("T", new Text(K));
     // console.log(K, "Welcome to Klint ! 🎨");
     // K.extend("E", new Easing(K));
@@ -57,7 +64,6 @@ export function KlintCanvas() {
     //   })
     // );
     // K.describe("A set of circles");
-    P.set("lamp", await K.loadImage(String(P.get("lamp"))));
 
     // K.createOffscreen(
     //   "buffer",
@@ -106,8 +112,9 @@ export function KlintCanvas() {
 
     // const col = C.hsl(scroll.velocity * 360, 100, 50);
     K.background(`color(from green srgb r g b / 0.25)`);
-
-    K.image(P.get("lamp") as HTMLImageElement, 0, 0);
+    K.scale(0.5, 0.5);
+    // console.log("rendering the image on canvas");
+    K.image(images["lamp"], 0, 0);
 
     // K.push();
     // K.fillColor(mouse.isPressed ? "#FFF" : "#000");
@@ -221,8 +228,24 @@ export function KlintCanvas() {
 
 export default function Index() {
   const [count, setCount] = useState(0);
+  const [externalImage, setExternalImage] = useState<HTMLImageElement | null>(
+    null
+  );
 
-  // const { colors } = useKlint();
+  // Load the external image
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      setExternalImage(img);
+    };
+    img.onerror = () => {
+      console.error("Failed to load image");
+    };
+    img.src =
+      "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/lamp.png?v=1734625960";
+  }, []);
+
+  // Process the image with our hook
 
   return (
     <div className="flex h-screen items-center justify-center flex-col gap-4">
@@ -233,7 +256,7 @@ export default function Index() {
         Count: {count}
       </button>
       <div className="w-4/5 h-4/5 flex justify-center items-center bg-[#000] overflow-hidden rounded-[8px]">
-        <KlintCanvas />
+        <KlintCanvas images={externalImage} />
       </div>
     </div>
   );

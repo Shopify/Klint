@@ -59,13 +59,40 @@ export const KlintCoreFunctions = {
         img.src = url;
       });
     },
-  // passImage: () => (element: HTMLImageElement) => {
-  //   if (!element.complete) {
-  //     console.warn("Image passed to passImage() is not fully loaded");
-  //     return null;
-  //   }
-  //   return element;
-  // },
+  loadImages:
+    () =>
+    async (urls: string[]): Promise<HTMLImageElement[]> => {
+      return Promise.all(
+        urls.map((url) => {
+          return new Promise<HTMLImageElement>((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+              img.width = img.naturalWidth;
+              img.height = img.naturalHeight;
+              resolve(img);
+            };
+            img.onerror = reject;
+            img.src = url;
+          });
+        })
+      );
+    },
+  passImage: () => (element: HTMLImageElement) => {
+    if (!element.complete) {
+      console.warn("Image passed to passImage() is not fully loaded");
+      return null;
+    }
+    return element;
+  },
+  passImages: () => (elements: HTMLImageElement[]) => {
+    return elements.map((element) => {
+      if (!element.complete) {
+        console.warn("Image passed to passImages() is not fully loaded");
+        return null;
+      }
+      return element;
+    });
+  },
 
   saveConfig: (ctx: KlintContexts) => (from?: KlintContexts) => {
     return Object.fromEntries(

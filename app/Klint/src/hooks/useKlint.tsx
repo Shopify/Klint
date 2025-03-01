@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect } from "react";
+import { useRef, useCallback, useEffect, useMemo } from "react";
 import { KlintContext } from "../component/KlintTypes";
 import { KlintCoreFunctions } from "../component/KlintCoreFunctions";
 import { KlintFunctions } from "../component/KlintFunctions";
@@ -58,6 +58,73 @@ export default function useKlint() {
   const contextRef = useRef<KlintContext | null>(null);
   const mouseRef = useRef<KlintMouse | null>(null);
   const scrollRef = useRef<KlintScroll | null>(null);
+
+  const useImage = () => {
+    const imagesRef = useRef<Map<string, HTMLImageElement>>(new Map());
+
+    const loadImage = useCallback(
+      async (key: string, url: string): Promise<HTMLImageElement> => {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            img.width = img.naturalWidth;
+            img.height = img.naturalHeight;
+            imagesRef.current.set(key, img);
+            resolve(img);
+          };
+          img.onerror = reject;
+          img.src = url;
+        });
+      },
+      []
+    );
+
+    const loadImages = useCallback(
+      async (
+        imageMap: Record<string, string>
+      ): Promise<Map<string, HTMLImageElement>> => {
+        const promises = Object.entries(imageMap).map(([key, url]) =>
+          loadImage(key, url).then(
+            (img) => [key, img] as [string, HTMLImageElement]
+          )
+        );
+
+        const results = await Promise.all(promises);
+        return new Map(results);
+      },
+      [loadImage]
+    );
+
+    // Proxy to allow both images['key'] and images.get('key') access patterns
+    const imagesProxy = useMemo(() => {
+      return new Proxy({} as Record<string, HTMLImageElement>, {
+        get: (target, prop) => {
+          if (prop === "get") {
+            return (key: string) => imagesRef.current.get(key);
+          }
+          if (typeof prop === "string") {
+            return imagesRef.current.get(prop);
+          }
+          return undefined;
+        },
+        has: (_, prop) => {
+          if (typeof prop === "string") {
+            return imagesRef.current.has(prop);
+          }
+          return false;
+        },
+      });
+    }, []);
+
+    return {
+      images: imagesProxy,
+      loadImage,
+      loadImages,
+      getImage: useCallback((key: string) => imagesRef.current.get(key), []),
+      hasImage: useCallback((key: string) => imagesRef.current.has(key), []),
+      clearImages: useCallback(() => imagesRef.current.clear(), []),
+    };
+  };
 
   const useMouse = () => {
     if (!mouseRef.current) {
@@ -350,29 +417,29 @@ export default function useKlint() {
     useMouse,
     useScroll,
     useWindow,
+    useImage,
     togglePlay,
   };
 }
 
-type PropsValue = unknown;
-type PropsStore = Record<string, PropsValue>;
+export const useProps = <T extends object = Record<string, unknown>>(
+  initialProps: T = {} as T
+) => {
+  const storeRef = useRef<T>(initialProps);
 
-export const useProps = (initialProps: PropsStore = {}) => {
-  const storeRef = useRef<PropsStore>(initialProps);
-
-  const get = useCallback((key: string): PropsValue => {
+  const get = useCallback(<K extends keyof T>(key: K): T[K] => {
     return storeRef.current[key];
   }, []);
 
-  const set = useCallback((key: string, value: PropsValue): void => {
+  const set = useCallback(<K extends keyof T>(key: K, value: T[K]): void => {
     storeRef.current[key] = value;
   }, []);
 
-  const has = useCallback((key: string): boolean => {
+  const has = useCallback(<K extends keyof T>(key: K): boolean => {
     return key in storeRef.current;
   }, []);
 
-  const remove = useCallback((key: string): void => {
+  const remove = useCallback(<K extends keyof T>(key: K): void => {
     delete storeRef.current[key];
   }, []);
 

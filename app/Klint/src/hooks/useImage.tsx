@@ -1,65 +1,57 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
-function loadImage(url: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      img.width = img.naturalWidth;
-      img.height = img.naturalHeight;
-      resolve(img);
-    };
-    img.onerror = reject;
-    img.src = url;
-  });
+type ImageUrl = string;
+
+interface UseImageReturn {
+  image: HTMLImageElement | null;
+  loading: boolean;
+  error: Error | null;
+  loadImage: (url: string) => Promise<HTMLImageElement>;
 }
 
-export function useImages(urls: string | string[], throwErrors = false) {
-  const [images, setImages] = useState<HTMLImageElement[] | null>(null);
-  const [loading, setLoading] = useState(true);
+export function useImage(src: ImageUrl): UseImageReturn {
+  const [image, setImage] = useState<HTMLImageElement | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    let mounted = true;
-    const urlsArray = Array.isArray(urls) ? urls : [urls];
+  const loadImage = useCallback(
+    async (url: string): Promise<HTMLImageElement> => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          img.width = img.naturalWidth;
+          img.height = img.naturalHeight;
+          resolve(img);
+        };
+        img.onerror = (e) => {
+          reject(new Error(`Failed to load image: ${url}`));
+        };
+        img.src = url;
+      });
+    },
+    []
+  );
 
+  useEffect(() => {
     setLoading(true);
     setError(null);
-    setImages(null);
 
-    Promise.all(urlsArray.map((url) => loadImage(url)))
-      .then((loadedImages) => {
-        // Only update state if component is still mounted
-        if (mounted) {
-          setImages(loadedImages);
-          setLoading(false);
-        }
+    loadImage(src)
+      .then((img) => {
+        setImage(img);
+        setLoading(false);
       })
       .catch((err) => {
-        // Only update state if component is still mounted
-        if (mounted) {
-          setError(err);
-          setLoading(false);
-        }
+        setError(err);
+        setLoading(false);
+        console.error("Failed to load image:", err);
       });
+  }, [src, loadImage]);
 
-    // Cleanup function to prevent state updates after unmount
-    return () => {
-      mounted = false;
-    };
-  }, [urls]);
-
-  // This will propagate the error to error boundaries if enabled
-  if (throwErrors && error && !loading) {
-    throw error;
-  }
-
-  // Only return images when they're fully loaded
-  return { images, loading, error };
-}
-
-// For single image convenience
-export function useImage(url: string, throwErrors = false) {
-  const { images, loading, error } = useImages(url, throwErrors);
-  console.log(images);
-  return { image: images?.[0] || null, loading, error };
+  return {
+    image,
+    loading,
+    error,
+    loadImage,
+  };
 }
