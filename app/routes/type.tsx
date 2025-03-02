@@ -1,9 +1,9 @@
 import type { KlintContext, KlintOffscreenContext } from "~/useKlint";
 import useKlint, { useProps } from "~/useKlint";
 import { useState } from "react";
-import Color from "~/Color";
-import Easing from "~/Easing";
-import Time from "~/Time";
+import Color from "~/plugins/Color";
+import Easing from "~/plugins/Easing";
+import Time from "~/plugins/Time";
 import Klint from "~/Klint";
 
 export function KlintCanvas() {
