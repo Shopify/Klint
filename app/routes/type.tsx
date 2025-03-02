@@ -1,13 +1,10 @@
-import type {
-  KlintContext,
-  KlintOffscreenContext,
-} from "~/Klint/src/component/useKlint";
-import useKlint, { useProps } from "~/Klint/src/component/useKlint";
+import type { KlintContext, KlintOffscreenContext } from "~/useKlint";
+import useKlint, { useProps } from "~/useKlint";
 import { useState } from "react";
-import Color from "~/Klint/src/plugins/Color";
-import Easing from "~/Klint/src/plugins/Easing";
-import Time from "~/Klint/src/plugins/Time";
-import Klint from "~/Klint/src/component/Klint";
+import Color from "~/Color";
+import Easing from "~/Easing";
+import Time from "~/Time";
+import Klint from "~/Klint";
 
 export function KlintCanvas() {
   const { context } = useKlint();

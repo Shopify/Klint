@@ -1,8 +1,8 @@
-import Klint, { KlintContext } from "~/Klint/src/component/Klint";
-import useKlint, { useProps } from "~/Klint/src/component/useKlint";
+import Klint, { KlintContext } from "Klint/src/component/Klint";
+import useKlint, { useProps } from "Klint/Klint/component/useKlint";
 
-import Easing from "~/Klint/src/plugins/Easing";
-import Color from "~/Klint/src/plugins/Color";
+import Easing from "Klint/Klint/dist/plugins/Easing";
+import Color from "Klint/Klint/dist/plugins/Color";
 
 export function KlintCanvas({ ...props }: { count?: number }) {
   const { context } = useKlint();

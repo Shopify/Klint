@@ -1,7 +1,7 @@
-import Klint, { KlintContext } from "~/Klint/src/component/Klint";
-import useKlint from "~/Klint/src/component/useKlint";
-import Easing from "~/Klint/src/plugins/Easing";
-import Color from "~/Klint/src/plugins/Color";
+import Klint, { KlintContext } from "~/Klint";
+import useKlint from "~/useKlint";
+import Easing from "Klint/Klint/dist/plugins/Easing";
+import Color from "Klint/Klint/dist/plugins/Color";
 import { useState } from "react";
 
 export function KlintCanvas() {

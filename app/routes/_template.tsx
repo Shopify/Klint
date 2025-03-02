@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import Klint, { type KlintContext } from "~/Klint/src/component/Klint";
-import useKlint, { useProps } from "~/Klint/src/component/useKlint";
+import { useState } from "react";
+import Klint, { type KlintContext } from "~/Klint";
+import useKlint, { useProps } from "~/useKlint";
 
 export interface KlintCanvasProps {
   count?: number;
@@ -15,25 +15,6 @@ export function KlintCanvas(props: KlintCanvasProps) {
     clicks: 0,
   });
 
-  useEffect(() => {
-    P.set("count", props.count);
-  }, [props, P]);
-
-  const onResize = (/*K: KlintContext*/) => {
-    console.log("resize");
-  };
-  const onClick = (/*K: KlintContext*/) => {
-    P.set("click-test", Number(P.get("clicks")) + 1);
-    console.log("click");
-  };
-  const onMouseIn = (/*K: KlintContext*/) => {
-    // K.play();
-    console.log("mouse in");
-  };
-  const onMouseOut = (/*K: KlintContext*/) => {
-    // K.pause();
-    console.log("mouse out");
-  };
   const preload = async (K: KlintContext) => {
     //K.extend("T", new Text(K));
     console.log(K, "Welcome to Klint ! 🎨");
@@ -58,10 +39,6 @@ export function KlintCanvas(props: KlintCanvasProps) {
         origin: "center",
         static: "false",
       }}
-      onClick={onClick}
-      onResize={onResize}
-      onMouseIn={onMouseIn}
-      onMouseOut={onMouseOut}
     />
   );
 }

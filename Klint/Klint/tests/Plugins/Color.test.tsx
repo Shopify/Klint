@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import Color from "../../src/plugins/Color";
-import { KlintContext } from "../../src/component/useKlint";
+import Color from "../../dist/plugins/Color";
+import { KlintContext } from "../../dist/Klint";
 
 describe("Color Plugin", () => {
   let C: Color;

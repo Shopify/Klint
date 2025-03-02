@@ -1,11 +1,8 @@
-import useKlint, {
-  useStorage,
-  type KlintContext,
-} from "~/Klint/src/component/useKlint";
+import useKlint, { useStorage, type KlintContext } from "~/useKlint";
 
 import { useState } from "react";
-import Klint from "~/Klint/src/component/Klint";
-import Color from "~/Klint/src/plugins/Color";
+import Klint from "~/Klint";
+import Color from "~/plugins/Color";
 
 // interface KlintCanvasProps {
 //   counter: number;

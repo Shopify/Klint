@@ -1,6 +1,6 @@
 import { KlintContext } from "~/Klint/src/component/KlintTypes";
 import { KlintCoreFunctions } from "~/Klint/src/component/KlintCoreFunctions";
-import { KlintFunctions } from "~/Klint/src/component/KlintFunctions";
+import { KlintFunctions } from "Klint/Klint/component/KlintFunctions";
 
 export function createKlintContext(
   ctx: CanvasRenderingContext2D

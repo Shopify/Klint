@@ -1,6 +1,6 @@
 import { Outlet, useLoaderData } from "@remix-run/react";
-import { Navigation } from "~/Klint/docs/components/Navigation";
-import { loadNavigation } from "~/Klint/docs/components/addNavigation.server";
+import { Navigation } from "Klint/docs/components/Navigation";
+import { loadNavigation } from "Klint/docs/components/addNavigation.server";
 
 export async function loader() {
   const { tree } = await loadNavigation();

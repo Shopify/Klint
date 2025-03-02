@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from "react";
 
-import { KlintContextWrapper } from "./useKlint";
+import { KlintContextWrapper } from "../useKlint";
 import { KlintFunctions, KlintCoreFunctions } from "./KlintFunctions";
 
 const DEFAULT_FPS = 60;
