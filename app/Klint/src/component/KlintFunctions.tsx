@@ -369,11 +369,12 @@ export const KlintFunctions = {
   text:
     (ctx: KlintContexts) =>
     (
-      text: string | number,
+      text: string | number | undefined,
       x: number,
       y: number,
       maxWidth: number | undefined = undefined
     ) => {
+      if (text === undefined) return;
       ctx.computeFont();
 
       if (ctx.textAlign !== ctx.__textAlignment.horizontal) {

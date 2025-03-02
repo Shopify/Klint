@@ -98,7 +98,7 @@ export default function useKlint() {
     // Proxy to allow both images['key'] and images.get('key') access patterns
     const imagesProxy = useMemo(() => {
       return new Proxy({} as Record<string, HTMLImageElement>, {
-        get: (target, prop) => {
+        get: (_, prop) => {
           if (prop === "get") {
             return (key: string) => imagesRef.current.get(key);
           }
@@ -423,6 +423,31 @@ export default function useKlint() {
 }
 
 export const useProps = <T extends object = Record<string, unknown>>(
+  props: T
+) => {
+  const propsRef = useRef<T>(props);
+
+  // Update ref when props change
+  useEffect(() => {
+    propsRef.current = props;
+  }, [props]);
+
+  const get = useCallback(<K extends keyof T>(key: K): T[K] => {
+    return propsRef.current[key];
+  }, []);
+
+  const has = useCallback(<K extends keyof T>(key: K): boolean => {
+    return key in propsRef.current;
+  }, []);
+
+  return {
+    get,
+    has,
+    props: propsRef.current,
+  };
+};
+
+export const useStorage = <T extends object = Record<string, unknown>>(
   initialProps: T = {} as T
 ) => {
   const storeRef = useRef<T>(initialProps);

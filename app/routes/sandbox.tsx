@@ -1,27 +1,27 @@
 import useKlint, {
   useProps,
+  useStorage,
   type KlintContext,
 } from "~/Klint/src/hooks/useKlint";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Klint, { KlintErrorBoundary } from "~/Klint/src/component/Klint";
 import Color from "~/Klint/src/plugins/Color";
 
-import { useImage } from "~/Klint/src/hooks/useImage";
-
 interface KlintCanvasProps {
-  hello: string;
-  lamp?: HTMLImageElement;
-  scroll: { distance: number; velocity: number };
+  counter: number;
+}
+interface KlintStorageProps {
+  hello?: string;
 }
 
-export function KlintCanvas({ images: src }: KlintCanvasProps) {
+export function KlintCanvas({ ...props }: KlintCanvasProps) {
   const { context, useMouse, useWindow, useImage /*useScroll*/ } = useKlint();
   const { /*mouse,*/ onClick } = useMouse();
   const { images, loadImages } = useImage();
+
   const { onResize } = useWindow();
   // const { images, loading } = useImage(src);
-  // console.log(images, loading);
   onClick(() => {
     console.log("mouse click !");
   });
@@ -29,25 +29,18 @@ export function KlintCanvas({ images: src }: KlintCanvasProps) {
     console.log("resized");
   });
 
-  // const { scroll, onScroll } = useScroll();
-  // onScroll(() => {
-  //   console.log("mouse scroll !");
-  // });
-  // onMouseIn((ctx, e) => console.log("mouse entered"));
-  // onMouseOut((ctx, e) => console.log("mouse left"));
-  // onMouseDown((ctx, e) => console.log("pressed"));
-  // onMouseUp((ctx, e) => console.log("released"));
-  const P = useProps<KlintCanvasProps>({
-    hello: "Klint",
-    scroll: { distance: 0, velocity: 0 },
+  const klintProps = useProps<KlintCanvasProps>(props);
+  const P = useStorage<KlintStorageProps>({
+    hello: "world",
   });
 
   const preload = async (K: KlintContext) => {
     await loadImages({
       lamp: "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/lamp.png?v=1734625960",
     });
-    K.extend("Color", new Color(K));
 
+    K.extend("Color", new Color(K));
+    // P.set("counter", props.counter);
     //K.extend("T", new Text(K));
     // console.log(K, "Welcome to Klint ! 🎨");
     // K.extend("E", new Easing(K));
@@ -93,6 +86,7 @@ export function KlintCanvas({ images: src }: KlintCanvasProps) {
     K.noStroke();
     K.alignText("center", "middle");
     K.setImageOrigin("center");
+    // console.log(P.get("counter"));
   };
 
   const draw = (K: KlintContext) => {
@@ -111,11 +105,14 @@ export function KlintCanvas({ images: src }: KlintCanvasProps) {
     // });
 
     // const col = C.hsl(scroll.velocity * 360, 100, 50);
-    K.background(`color(from green srgb r g b / 0.25)`);
-    K.scale(0.5, 0.5);
-    // console.log("rendering the image on canvas");
-    K.image(images["lamp"], 0, 0);
+    K.background(`#FFF`);
 
+    // console.log("rendering the image on canvas");
+    // K.image(images["lamp"], 0, 0);
+    K.push();
+    // console.log(P.get("counter"));
+    K.text(P.get("hello"), 0, 0);
+    K.pop();
     // K.push();
     // K.fillColor(mouse.isPressed ? "#FFF" : "#000");
     // // console.log(mouse);
@@ -130,7 +127,7 @@ export function KlintCanvas({ images: src }: KlintCanvasProps) {
 
     //   K.circle(
     //     -K.width / 2 + (K.width * i) / 9,
-    //     Math.sin(K.frame * 0.03 + i / 10) * 240,
+    //     Math.sin(K.time * 0.03 + i / 10) * 240,
     //     100
     //   );
 
@@ -210,7 +207,14 @@ export function KlintCanvas({ images: src }: KlintCanvasProps) {
   };
 
   return (
-    <KlintErrorBoundary>
+    <KlintErrorBoundary
+      fallback={
+        <div className="p-4 bg-red-100 text-red-800 rounded">
+          Something went wrong with the canvas rendering. Please try again
+          later.
+        </div>
+      }
+    >
       <Klint
         context={context}
         preload={preload}
@@ -228,24 +232,16 @@ export function KlintCanvas({ images: src }: KlintCanvasProps) {
 
 export default function Index() {
   const [count, setCount] = useState(0);
-  const [externalImage, setExternalImage] = useState<HTMLImageElement | null>(
-    null
-  );
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load the external image
   useEffect(() => {
-    const img = new Image();
-    img.onload = () => {
-      setExternalImage(img);
-    };
-    img.onerror = () => {
-      console.error("Failed to load image");
-    };
-    img.src =
-      "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/lamp.png?v=1734625960";
+    async function loadData() {
+      // Load your data
+      setIsLoaded(true);
+    }
+    loadData();
   }, []);
-
-  // Process the image with our hook
 
   return (
     <div className="flex h-screen items-center justify-center flex-col gap-4">
@@ -256,7 +252,7 @@ export default function Index() {
         Count: {count}
       </button>
       <div className="w-4/5 h-4/5 flex justify-center items-center bg-[#000] overflow-hidden rounded-[8px]">
-        <KlintCanvas images={externalImage} />
+        <KlintCanvas counter={count} />
       </div>
     </div>
   );
