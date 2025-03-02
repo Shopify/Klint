@@ -1,0 +1,8 @@
+node_modules
+hooks
+plugins/wip
+dist
+
+/.cache
+/build
+.env
