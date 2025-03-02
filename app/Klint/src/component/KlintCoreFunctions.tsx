@@ -45,38 +45,6 @@ export const KlintCoreFunctions = {
       (ctx as KlintContext)[name] = data;
     },
 
-  loadImage:
-    () =>
-    async (url: string): Promise<HTMLImageElement> => {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-          img.width = img.naturalWidth;
-          img.height = img.naturalHeight;
-          resolve(img);
-        };
-        img.onerror = reject;
-        img.src = url;
-      });
-    },
-  loadImages:
-    () =>
-    async (urls: string[]): Promise<HTMLImageElement[]> => {
-      return Promise.all(
-        urls.map((url) => {
-          return new Promise<HTMLImageElement>((resolve, reject) => {
-            const img = new Image();
-            img.onload = () => {
-              img.width = img.naturalWidth;
-              img.height = img.naturalHeight;
-              resolve(img);
-            };
-            img.onerror = reject;
-            img.src = url;
-          });
-        })
-      );
-    },
   passImage: () => (element: HTMLImageElement) => {
     if (!element.complete) {
       console.warn("Image passed to passImage() is not fully loaded");

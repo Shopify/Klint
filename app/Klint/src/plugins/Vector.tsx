@@ -1,8 +1,12 @@
+declare module "../component/KlintTypes" {
+  interface KlintPlugins {
+    Vector: Vector;
+  }
+}
+
 interface KlintVector {
   x: number;
   y: number;
-  z: number;
-  w: number;
   add: (v: KlintVector) => KlintVector;
   sub: (v: KlintVector) => KlintVector;
   mult: (n: number) => KlintVector;
@@ -21,14 +25,10 @@ interface KlintVector {
 class Vector implements KlintVector {
   x: number;
   y: number;
-  z: number;
-  w: number;
 
-  constructor(x = 0, y = 0, z = 0, w = 1) {
+  constructor(x = 0, y = 0) {
     this.x = x;
     this.y = y;
-    this.z = z;
-    this.w = w;
   }
 
   add(v: KlintVector): Vector {
@@ -86,7 +86,7 @@ class Vector implements KlintVector {
   }
 
   copy(): Vector {
-    return new Vector(this.x, this.y, this.z, this.w);
+    return new Vector(this.x, this.y);
   }
 
   normalize(): Vector {
@@ -94,22 +94,16 @@ class Vector implements KlintVector {
     return m !== 0 ? this.div(m) : this;
   }
 
-  set(x: number, y: number, z = 0, w = 1): Vector {
+  set(x: number, y: number): Vector {
     this.x = x;
     this.y = y;
-    this.z = z;
-    this.w = w;
     return this;
   }
 
-  static fromAngle(
-    a: number,
-    r: number,
-    center: { x: number; y: number }
-  ): Vector {
+  static fromAngle(center: Vector, a: number, r: number): Vector {
     const x = Math.cos(a) * r + center.x;
     const y = Math.sin(a) * r + center.y;
-    return new Vector(x, y, 0, 1);
+    return new Vector(x, y);
   }
 }
 

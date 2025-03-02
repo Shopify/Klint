@@ -1,21 +1,20 @@
 import useKlint, {
-  useProps,
   useStorage,
   type KlintContext,
 } from "~/Klint/src/hooks/useKlint";
 
-import { useState, useEffect, useRef } from "react";
-import Klint, { KlintErrorBoundary } from "~/Klint/src/component/Klint";
+import { useState } from "react";
+import Klint from "~/Klint/src/component/Klint";
 import Color from "~/Klint/src/plugins/Color";
 
-interface KlintCanvasProps {
-  counter: number;
-}
+// interface KlintCanvasProps {
+//   counter: number;
+// }
 interface KlintStorageProps {
   hello?: string;
 }
 
-export function KlintCanvas({ ...props }: KlintCanvasProps) {
+export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
   const { context, useMouse, useWindow, useImage /*useScroll*/ } = useKlint();
   const { /*mouse,*/ onClick } = useMouse();
   const { images, loadImages } = useImage();
@@ -29,7 +28,7 @@ export function KlintCanvas({ ...props }: KlintCanvasProps) {
     console.log("resized");
   });
 
-  const klintProps = useProps<KlintCanvasProps>(props);
+  // const klintProps = useProps<KlintCanvasProps>(props);
   const P = useStorage<KlintStorageProps>({
     hello: "world",
   });
@@ -106,9 +105,13 @@ export function KlintCanvas({ ...props }: KlintCanvasProps) {
 
     // const col = C.hsl(scroll.velocity * 360, 100, 50);
     K.background(`#FFF`);
-
+    K.push();
+    const lamp = images["lamp"];
+    const fit = K.scaleTo(lamp.width, lamp.height, K.width, K.height);
     // console.log("rendering the image on canvas");
-    // K.image(images["lamp"], 0, 0);
+    K.scale(fit, fit);
+    K.image(lamp, 0, 0);
+    K.pop();
     K.push();
     // console.log(P.get("counter"));
     K.text(P.get("hello"), 0, 0);
@@ -207,41 +210,31 @@ export function KlintCanvas({ ...props }: KlintCanvasProps) {
   };
 
   return (
-    <KlintErrorBoundary
-      fallback={
-        <div className="p-4 bg-red-100 text-red-800 rounded">
-          Something went wrong with the canvas rendering. Please try again
-          later.
-        </div>
-      }
-    >
-      <Klint
-        context={context}
-        preload={preload}
-        draw={draw}
-        setup={setup}
-        options={{
-          origin: "center",
-          // fps: 24,
-          // static: "true",
-        }}
-      />
-    </KlintErrorBoundary>
+    // <KlintErrorBoundary
+    //   fallback={
+    //     <div className="p-4 bg-red-100 text-red-800 rounded">
+    //       Something went wrong with the canvas rendering. Please try again
+    //       later.
+    //     </div>
+    //   }
+    // >
+    <Klint
+      context={context}
+      preload={preload}
+      draw={draw}
+      setup={setup}
+      options={{
+        origin: "center",
+        // fps: 24,
+        // static: "true",
+      }}
+    />
+    // </KlintErrorBoundary>
   );
 }
 
 export default function Index() {
   const [count, setCount] = useState(0);
-  const imgRef = useRef<HTMLImageElement>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    async function loadData() {
-      // Load your data
-      setIsLoaded(true);
-    }
-    loadData();
-  }, []);
 
   return (
     <div className="flex h-screen items-center justify-center flex-col gap-4">
@@ -252,7 +245,7 @@ export default function Index() {
         Count: {count}
       </button>
       <div className="w-4/5 h-4/5 flex justify-center items-center bg-[#000] overflow-hidden rounded-[8px]">
-        <KlintCanvas counter={count} />
+        <KlintCanvas /*counter={count} */ />
       </div>
     </div>
   );

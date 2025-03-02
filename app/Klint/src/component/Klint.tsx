@@ -3,9 +3,9 @@ import {
   useEffect,
   useState,
   useCallback,
-  Component,
-  ErrorInfo,
-  ReactNode,
+  // Component,
+  // ErrorInfo,
+  // ReactNode,
 } from "react";
 
 import { KlintContextWrapper } from "../hooks/useKlint";
@@ -319,47 +319,47 @@ export default function Klint({
   );
 }
 
-interface ErrorBoundaryProps {
-  children: ReactNode;
-  fallback?: ReactNode;
-}
+// interface ErrorBoundaryProps {
+//   children: ReactNode;
+//   fallback?: ReactNode;
+// }
 
-interface ErrorBoundaryState {
-  hasError: boolean;
-  error?: Error;
-}
+// interface ErrorBoundaryState {
+//   hasError: boolean;
+//   error?: Error;
+// }
 
-export class KlintErrorBoundary extends Component<
-  ErrorBoundaryProps,
-  ErrorBoundaryState
-> {
-  state: ErrorBoundaryState = { hasError: false };
+// export class KlintErrorBoundary extends Component<
+//   ErrorBoundaryProps,
+//   ErrorBoundaryState
+// > {
+//   state: ErrorBoundaryState = { hasError: false };
 
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
+//   static getDerivedStateFromError(error: Error) {
+//     return { hasError: true, error };
+//   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Klint error:", error, errorInfo);
-  }
+//   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+//     console.error("Klint error:", error, errorInfo);
+//   }
 
-  render() {
-    if (this.state.hasError) {
-      return (
-        this.props.fallback || (
-          <div className="w-full h-full flex items-center justify-center bg-red-50">
-            <div className="text-red-600 text-center p-4">
-              <h3 className="font-bold mb-2">Canvas Error</h3>
-              <p>
-                {this.state.error?.message ||
-                  "Something went wrong with the canvas."}
-              </p>
-            </div>
-          </div>
-        )
-      );
-    }
+//   render() {
+//     if (this.state.hasError) {
+//       return (
+//         this.props.fallback || (
+//           <div className="w-full h-full flex items-center justify-center bg-red-50">
+//             <div className="text-red-600 text-center p-4">
+//               <h3 className="font-bold mb-2">Canvas Error</h3>
+//               <p>
+//                 {this.state.error?.message ||
+//                   "Something went wrong with the canvas."}
+//               </p>
+//             </div>
+//           </div>
+//         )
+//       );
+//     }
 
-    return this.props.children;
-  }
-}
+//     return this.props.children;
+//   }
+// }
