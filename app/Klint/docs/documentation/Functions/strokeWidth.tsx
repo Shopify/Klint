@@ -1,4 +1,4 @@
-import useKlint, { KlintContext } from "~/Klint/src/hooks/useKlint";
+import useKlint, { KlintContext } from "~/Klint/src/component/useKlint";
 import Klint from "~/Klint/src/component/Klint";
 import DocLinks from "../../components/DocLinks";
 import Banner from "../../components/DocBanners";

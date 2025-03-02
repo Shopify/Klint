@@ -1,14 +1,12 @@
 import { useRef, useCallback, useEffect, useMemo } from "react";
-import { KlintContext } from "../component/KlintTypes";
-import { KlintCoreFunctions } from "../component/KlintCoreFunctions";
-import { KlintFunctions } from "../component/KlintFunctions";
-import { KlintCanvasOptions } from "../component/Klint";
+import { KlintFunctions, KlintCoreFunctions } from "./KlintFunctions";
+import { KlintCanvasOptions, KlintContext } from "../component/Klint";
 
 export type {
   KlintContext,
   KlintOffscreenContext,
   KlintContexts,
-} from "../component/KlintTypes";
+} from "../component/Klint";
 
 export interface KlintContextWrapper {
   context: KlintContext | null;

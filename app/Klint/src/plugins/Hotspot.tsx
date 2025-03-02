@@ -1,4 +1,10 @@
-import { KlintContext, KlintMouse } from "../component/KlintTypes";
+import { KlintContext } from "../component/Klint";
+import { KlintMouse } from "../component/useKlint";
+declare module "../component/Klint" {
+  interface KlintPlugins {
+    Hotspot: Hotspot;
+  }
+}
 
 type HotspotShape = "circle" | "rectangle";
 

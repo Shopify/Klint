@@ -1,5 +1,5 @@
 import Klint, { KlintContext } from "~/Klint/src/component/Klint";
-import useKlint, { useProps } from "~/Klint/src/hooks/useKlint";
+import useKlint, { useProps } from "~/Klint/src/component/useKlint";
 
 import Easing from "~/Klint/src/plugins/Easing";
 import Color from "~/Klint/src/plugins/Color";

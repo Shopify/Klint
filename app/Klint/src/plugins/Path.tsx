@@ -1,5 +1,11 @@
 // import { KlintOffscreenContext, KlintContext } from "../component/KlintTypes";
-import { KlintContexts } from "../component/KlintTypes";
+import { KlintContexts } from "../component/Klint";
+
+declare module "../component/Klint" {
+  interface KlintPlugins {
+    Path: Path;
+  }
+}
 
 interface KlintPath {
   context: KlintContexts;
@@ -21,7 +27,7 @@ interface KlintSVGPathCommands {
   closePath(): KlintSVGPathCommand;
 }
 type KlintSVGPathCommand = { cmd: string; coord: number[] };
-class SVGPathCommands implements KlintSVGPathCommands {
+export class SVGPathCommands implements KlintSVGPathCommands {
   moveTo(x: number, y: number): KlintSVGPathCommand {
     return { cmd: "M", coord: [x, y] };
   }

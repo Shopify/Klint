@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Editor } from "@monaco-editor/react";
-import useKlint from "~/Klint/src/hooks/useKlint";
+import useKlint from "~/Klint/src/component/useKlint";
 // import useProps from "~/Klint/src/hooks/useProps";
 import * as Plugins from "~/Klint/src/plugins/Plugins";
-import type { KlintContext } from "~/Klint/src/hooks/useKlint";
+import type { KlintContext } from "~/Klint/src/component/useKlint";
 import Klint from "~/Klint/src/component/Klint";
 const defaultCode = `function preload(K) {
   console.log(K, "Welcome to Klint ! 🎨");

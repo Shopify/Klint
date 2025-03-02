@@ -1,8 +1,8 @@
 import type {
   KlintContext,
   KlintOffscreenContext,
-} from "~/Klint/src/hooks/useKlint";
-import useKlint, { useProps } from "~/Klint/src/hooks/useKlint";
+} from "~/Klint/src/component/useKlint";
+import useKlint, { useProps } from "~/Klint/src/component/useKlint";
 import { useState } from "react";
 import Color from "~/Klint/src/plugins/Color";
 import Easing from "~/Klint/src/plugins/Easing";

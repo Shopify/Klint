@@ -1,7 +1,7 @@
 import useKlint, {
   useStorage,
   type KlintContext,
-} from "~/Klint/src/hooks/useKlint";
+} from "~/Klint/src/component/useKlint";
 
 import { useState } from "react";
 import Klint from "~/Klint/src/component/Klint";
@@ -39,6 +39,10 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
     });
 
     K.extend("Color", new Color(K));
+    // K.extend("createVector", (x: number, y: number): Vector => {
+    //   return new Vector(x, y);
+    // });
+
     // P.set("counter", props.counter);
     //K.extend("T", new Text(K));
     // console.log(K, "Welcome to Klint ! 🎨");

@@ -1,3 +1,9 @@
+declare module "../component/Klint" {
+  interface KlintPlugins {
+    State: State;
+  }
+}
+
 type KlintStateValue = unknown;
 type KlintStateCallback = (key: string, value: KlintStateValue) => void;
 interface KlintState {

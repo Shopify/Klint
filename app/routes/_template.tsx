@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
-import type { KlintContext } from "../hooks/useKlint";
-import useKlint from "../hooks/useKlint";
-import useProps from "../hooks/useProps";
-import Klint from "./Klint";
+import Klint, { type KlintContext } from "~/Klint/src/component/Klint";
+import useKlint, { useProps } from "~/Klint/src/component/useKlint";
 
 export interface KlintCanvasProps {
   count?: number;

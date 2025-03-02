@@ -1,6 +1,6 @@
-import { KlintContexts } from "../component/KlintTypes";
+import { KlintContexts } from "../component/Klint";
 
-declare module "../component/KlintTypes" {
+declare module "../component/Klint" {
   interface KlintPlugins {
     Color: Color;
   }

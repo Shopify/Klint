@@ -1,5 +1,9 @@
-import { KlintContext, KlintOffscreenContext } from "../component/KlintTypes";
-
+import { KlintContext, KlintOffscreenContext } from "../component/Klint";
+declare module "../component/Klint" {
+  interface KlintPlugins {
+    BitmapText: BitmapText;
+  }
+}
 interface KlintBitmapText {
   context: KlintContext;
   chars: Map<string, { x: number; y: number; width: number; height: number }>;
@@ -174,3 +178,23 @@ class BitmapText implements KlintBitmapText {
 }
 
 export default BitmapText;
+
+// txt.split("").map((letter, id, arr) => {
+//   const char = characters.get(letter);
+//   const x = 10 + (id / arr.length) * K.width;
+//   const y =
+//     K.height / 2 +
+//     Math.sin((id / arr.length) * 2 * Math.PI + K.time * 0.03) * 200;
+//   const scale = 0.5;
+//   K.image(
+//     K.bitmapText.texture,
+//     char.x,
+//     char.y - char.height,
+//     char.width,
+//     char.height,
+//     x - char.width * scale * 0.5,
+//     y - char.height * scale * 0.5,
+//     char.width * scale,
+//     char.height * scale
+//   );
+// });

@@ -1,4 +1,4 @@
-declare module "../component/KlintTypes" {
+declare module "../component/Klint" {
   interface KlintPlugins {
     Vector: Vector;
   }
