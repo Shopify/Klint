@@ -1,6 +1,5 @@
 import { useState } from "react";
-import Klint, { type KlintContext } from "~/Klint";
-import useKlint, { useProps } from "~/useKlint";
+import { Klint, useKlint, useProps, type KlintContext } from "klint";
 
 export interface KlintCanvasProps {
   count?: number;

@@ -14,16 +14,14 @@
 ## CORE
 
 ### TO DO
-- [ ] Make the loadImage a hook
-- [ ] Make the loadVideo a hook 
+- [ ] Make the loadVideo hook 
+- [ ] Make the useGestures hook 
 
 ### Non Blocking
 - [ ] clip
 - [ ] Triangle strip and Quad strip
 - [ ] Add other types of vertices : bezierTo(), quadraticTo(), arcTo(),
 - [ ] Filters
-- [ ] Refresh GTP prompt
-- [ ] Figuring out bundles, packages and plugins
 
 ## TESTS
 - [ ] Add unit tests for Klint Functions

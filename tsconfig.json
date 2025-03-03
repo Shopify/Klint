@@ -22,7 +22,7 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./Klint/Klint/dist/*"],
+      "~/*": ["Klint/Klint/src/*"],
       "@/*": ["./Klint/*"]
     },
 

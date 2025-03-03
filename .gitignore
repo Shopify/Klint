@@ -1,5 +1,5 @@
 node_modules
-app
+./app
 
 /.cache
 /build

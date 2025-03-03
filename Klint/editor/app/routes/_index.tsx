@@ -45,9 +45,6 @@ function KlintCanvas({ code }: { code: string }) {
         K: {
           ...context,
           useMouse: () => mouseHook,
-          log: (val: unknown) => {
-            console.log(val);
-          },
           // Add other hooks here
         },
         console: console,
