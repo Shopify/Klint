@@ -1,17 +1,64 @@
-import { KlintContexts } from "../Klint";
-
-declare module "../Klint" {
+declare module "./index" {
   interface KlintPlugins {
     Color: Color;
   }
 }
 
 interface KlintColor {
-  context: KlintContexts;
+  colors: readonly string[];
+
+  // Color getters
+  coral: string;
+  brown: string;
+  mustard: string;
+  crimson: string;
+  navy: string;
+  sky: string;
+  olive: string;
+  charcoal: string;
+  peach: string;
+  rose: string;
+  plum: string;
+  sage: string;
+  drab: string;
+  taupe: string;
+  midnight: string;
+  golden: string;
+  orange: string;
+  slate: string;
+
+  // Methods without static keyword
+  hex(color: string): string;
+  rgb(r: number, g: number, b: number): string;
+  rgba(r: number, g: number, b: number, alpha: number): string;
+  gray(value: number, alpha?: number): string;
+  hsl(h: number, s: number, l: number): string;
+  hsla(h: number, s: number, l: number, alpha: number): string;
+  lch(l: number, c: number, h: number): string;
+  lcha(l: number, c: number, h: number, alpha: number): string;
+  lab(l: number, a: number, b: number): string;
+  laba(l: number, a: number, b: number, alpha: number): string;
+  oklch(l: number, c: number, h: number): string;
+  oklcha(l: number, c: number, h: number, alpha: number): string;
+  oklab(l: number, a: number, b: number): string;
+  oklaba(l: number, a: number, b: number, alpha: number): string;
+  blendColors(
+    colorA: string,
+    colorB: string,
+    factor: number,
+    colorMode?: string
+  ): string;
+  createPalette(baseColor: string, steps?: number): string[];
+  complementary(color: string): string;
+  analogous(color: string, angle?: number): [string, string];
+  triadic(color: string): [string, string];
+  saturate(color: string, amount: number): string;
+  lighten(color: string, amount: number): string;
+  darken(color: string, amount: number): string;
 }
 
 class Color implements KlintColor {
-  context: KlintContexts;
+  // context: KlintContexts;
 
   /**
    * Array of predefined colors in the Klint color palette
@@ -37,13 +84,13 @@ class Color implements KlintColor {
     "#404757", // slate
   ] as const;
 
-  /**
-   * Creates a new Color instance
-   * @param ctx - The Klint context
-   */
-  constructor(ctx: KlintContexts) {
-    this.context = ctx;
-  }
+  // /**
+  //  * Creates a new Color instance
+  //  * @param ctx - The Klint context
+  //  */
+  // constructor(ctx: KlintContexts) {
+  //   this.context = ctx;
+  // }
 
   get coral() {
     return this.colors[0];

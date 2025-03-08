@@ -1,96 +1,3 @@
-import React from 'react';
-
-type KlintCoreFunctionNames = keyof typeof KlintCoreFunctions;
-type KlintCoreFunctions = {
-    [K in KlintCoreFunctionNames]: ReturnType<(typeof KlintCoreFunctions)[K]>;
-};
-declare const KlintCoreFunctions: {
-    saveCanvas: (ctx: KlintContext) => () => void;
-    fullscreen: (ctx: KlintContext) => () => void;
-    play: (ctx: KlintContext) => () => void;
-    pause: (ctx: KlintContext) => () => void;
-    redraw: () => () => void;
-    extend: (ctx: KlintContext) => (name: string, data: unknown, enforceReplace?: boolean) => void;
-    passImage: () => (element: HTMLImageElement) => HTMLImageElement | null;
-    passImages: () => (elements: HTMLImageElement[]) => (HTMLImageElement | null)[];
-    saveConfig: (ctx: KlintContexts) => (from?: KlintContexts) => KlintConfig;
-    restoreConfig: (ctx: KlintContext) => (config: KlintConfig) => void;
-    describe: (ctx: KlintContext) => (description: string) => void;
-    createOffscreen: (ctx: KlintContext) => (id: string, width: number, height: number, options?: KlintCanvasOptions, callback?: (ctx: KlintOffscreenContext) => void) => KlintOffscreenContext | HTMLImageElement;
-    getOffscreen: (ctx: KlintContext) => (id: string) => KlintOffscreenContext | HTMLImageElement;
-};
-type KlintFunctionNames = keyof typeof KlintFunctions;
-type KlintFunctions = {
-    [K in KlintFunctionNames]: ReturnType<(typeof KlintFunctions)[K]>;
-};
-declare const KlintFunctions: {
-    readonly extend: (ctx: KlintContexts) => (name: string, data: unknown, enforceReplace?: boolean) => void;
-    readonly background: (ctx: KlintContexts) => (color?: string) => void;
-    readonly reset: (ctx: KlintContexts) => () => void;
-    readonly clear: (ctx: KlintContexts) => () => void;
-    readonly fillColor: (ctx: KlintContexts) => (color: string | CanvasGradient) => void;
-    readonly strokeColor: (ctx: KlintContexts) => (color: string | CanvasGradient) => void;
-    readonly noFill: (ctx: KlintContexts) => () => void;
-    readonly noStroke: (ctx: KlintContexts) => () => void;
-    readonly strokeWidth: (ctx: KlintContexts) => (width: number) => void;
-    readonly strokeJoin: (ctx: KlintContexts) => (join: CanvasLineJoin) => void;
-    readonly strokeCap: (ctx: KlintContexts) => (cap: CanvasLineCap) => void;
-    readonly push: (ctx: KlintContexts) => () => void;
-    readonly pop: (ctx: KlintContexts) => () => void;
-    readonly point: (ctx: KlintContexts) => (x: number, y: number) => void;
-    readonly checkTransparency: (ctx: KlintContexts) => (toCheck: string) => boolean;
-    readonly drawIfVisible: (ctx: KlintContexts) => () => void;
-    readonly line: (ctx: KlintContexts) => (x1: number, y1: number, x2: number, y2: number) => void;
-    readonly circle: (ctx: KlintContexts) => (x: number, y: number, radius: number, radius2?: number) => void;
-    readonly disk: (ctx: KlintContexts) => (x: number, y: number, radius: number, startAngle?: number, endAngle?: number, closed?: boolean) => void;
-    readonly rectangle: (ctx: KlintContexts) => (x: number, y: number, width: number, height?: number) => void;
-    readonly roundedRectangle: (ctx: KlintContexts) => (x: number, y: number, width: number, radius: number | number[], height?: number) => void;
-    readonly polygon: (ctx: KlintContexts) => (x: number, y: number, radius: number, sides: number, radius2?: number, rotation?: number) => void;
-    readonly beginShape: (ctx: KlintContexts) => () => void;
-    readonly beginContour: (ctx: KlintContexts) => () => void;
-    readonly vertex: (ctx: KlintContexts) => (x: number, y: number) => void;
-    readonly endContour: (ctx: KlintContexts) => (forceRevert?: boolean) => void;
-    readonly endShape: (ctx: KlintContexts) => (close?: boolean) => void;
-    readonly gradient: (ctx: KlintContexts) => (x1?: number, y1?: number, x2?: number, y2?: number) => CanvasGradient;
-    readonly radialGradient: (ctx: KlintContexts) => (x1?: number, y1?: number, r1?: number, x2?: number, y2?: number, r2?: number) => CanvasGradient;
-    readonly conicGradient: (ctx: KlintContexts) => (angle?: number, x1?: number, y1?: number) => CanvasGradient;
-    readonly addColorStop: () => (gradient: CanvasGradient, offset?: number, color?: string) => void;
-    readonly constrain: () => (val: number, floor: number, ceil: number) => number;
-    readonly lerp: (ctx: KlintContexts) => (A: number, B: number, mix: number, bounded?: boolean) => number;
-    readonly fract: () => (n: number, mod: number, mode?: "precise" | "fast" | "faster") => number;
-    readonly distance: (ctx: KlintContexts) => (x1: number, y1: number, x2: number, y2: number, mode?: "precise" | "fast" | "faster") => number;
-    readonly squareDistance: () => (x1: number, y1: number, x2: number, y2: number) => number;
-    readonly dot: () => (x1: number, y1: number, x2: number, y2: number) => number;
-    readonly remap: (ctx: KlintContexts) => (n: number, A: number, B: number, C: number, D: number, bounded?: boolean) => number;
-    readonly textFont: (ctx: KlintContexts) => (font: string) => void;
-    readonly textSize: (ctx: KlintContexts) => (size: number) => void;
-    readonly textStyle: (ctx: KlintContexts) => (style: string) => void;
-    readonly textWeight: (ctx: KlintContexts) => (weight: string) => void;
-    readonly textQuality: (ctx: KlintContexts) => (quality?: "speed" | "auto" | "legibility" | "precision") => void;
-    readonly textSpacing: (ctx: KlintContexts) => (kind: "letter" | "word", value: number) => void;
-    readonly computeTextStyle: (ctx: KlintContexts) => () => void;
-    readonly alignText: (ctx: KlintContexts) => (horizontal: CanvasTextAlign, vertical?: CanvasTextBaseline) => void;
-    readonly textLeading: (ctx: KlintContexts) => (spacing: number) => void;
-    readonly computeFont: (ctx: KlintContexts) => () => void;
-    readonly textWidth: (ctx: KlintContexts) => (text: string) => number;
-    readonly text: (ctx: KlintContexts) => (text: string | number | undefined, x: number, y: number, maxWidth?: number | undefined) => void;
-    readonly image: (ctx: KlintContexts) => (image: HTMLImageElement | HTMLCanvasElement | OffscreenCanvas | KlintContexts, x: number, y: number, arg3?: number, arg4?: number, arg5?: number, arg6?: number, arg7?: number, arg8?: number) => void;
-    readonly loadPixels: (ctx: KlintContexts) => () => ImageData;
-    readonly updatePixels: (ctx: KlintContexts) => (pixels: Uint8ClampedArray | number[]) => void;
-    readonly readPixels: (ctx: KlintContexts) => (x: number, y: number, w?: number, h?: number) => number[];
-    readonly scaleTo: () => (originWidth: number, originHeight: number, destinationWidth: number, destinationHeight: number, cover?: boolean) => number;
-    readonly opacity: (ctx: KlintContexts) => (value: number) => void;
-    readonly blend: (ctx: KlintContexts) => (blend: GlobalCompositeOperation) => void;
-    readonly setCanvasOrigin: (ctx: KlintContexts) => (type: "center" | "corner") => void;
-    readonly setImageOrigin: (ctx: KlintContexts) => (type: "center" | "corner") => void;
-    readonly setRectOrigin: (ctx: KlintContexts) => (type: "center" | "corner") => void;
-    readonly withConfig: (ctx: KlintContexts) => (config: KlintConfig) => void;
-    readonly toBase64: (ctx: KlintContexts) => (type?: string, quality?: number) => string;
-    readonly saveConfig: (ctx: KlintContexts) => (from?: KlintContexts) => KlintConfig;
-    readonly restoreConfig: (ctx: KlintContexts) => (config: KlintConfig) => void;
-    readonly resizeCanvas: (ctx: KlintContexts) => (width: number, height: number) => void;
-};
-
 declare module "./index" {
     interface KlintPlugins {
         Color: Color;
@@ -334,6 +241,149 @@ declare class Color implements KlintColor {
      */
     darken(color: string, amount: number): string;
 }
+
+type KlintCoreFunctionNames = keyof typeof KlintCoreFunctions;
+type KlintCoreFunctions = {
+    [K in KlintCoreFunctionNames]: ReturnType<(typeof KlintCoreFunctions)[K]>;
+};
+declare const KlintCoreFunctions: {
+    saveCanvas: (ctx: KlintContext) => () => void;
+    fullscreen: (ctx: KlintContext) => () => void;
+    play: (ctx: KlintContext) => () => void;
+    pause: (ctx: KlintContext) => () => void;
+    redraw: () => () => void;
+    extend: (ctx: KlintContext) => (name: string, data: unknown, enforceReplace?: boolean) => void;
+    passImage: () => (element: HTMLImageElement) => HTMLImageElement | null;
+    passImages: () => (elements: HTMLImageElement[]) => (HTMLImageElement | null)[];
+    saveConfig: (ctx: KlintContexts) => (from?: KlintContexts) => KlintConfig;
+    restoreConfig: (ctx: KlintContext) => (config: KlintConfig) => void;
+    describe: (ctx: KlintContext) => (description: string) => void;
+    createOffscreen: (ctx: KlintContext) => (id: string, width: number, height: number, options?: KlintCanvasOptions, callback?: (ctx: KlintOffscreenContext) => void) => KlintOffscreenContext | HTMLImageElement;
+    getOffscreen: (ctx: KlintContext) => (id: string) => KlintOffscreenContext | HTMLImageElement;
+};
+type KlintFunctionNames = keyof typeof KlintFunctions;
+type KlintFunctions = {
+    [K in KlintFunctionNames]: ReturnType<(typeof KlintFunctions)[K]>;
+};
+declare const KlintFunctions: {
+    readonly extend: (ctx: KlintContexts) => (name: string, data: unknown, enforceReplace?: boolean) => void;
+    readonly background: (ctx: KlintContexts) => (color?: string) => void;
+    readonly reset: (ctx: KlintContexts) => () => void;
+    readonly clear: (ctx: KlintContexts) => () => void;
+    readonly fillColor: (ctx: KlintContexts) => (color: string | CanvasGradient) => void;
+    readonly strokeColor: (ctx: KlintContexts) => (color: string | CanvasGradient) => void;
+    readonly noFill: (ctx: KlintContexts) => () => void;
+    readonly noStroke: (ctx: KlintContexts) => () => void;
+    readonly strokeWidth: (ctx: KlintContexts) => (width: number) => void;
+    readonly strokeJoin: (ctx: KlintContexts) => (join: CanvasLineJoin) => void;
+    readonly strokeCap: (ctx: KlintContexts) => (cap: CanvasLineCap) => void;
+    readonly push: (ctx: KlintContexts) => () => void;
+    readonly pop: (ctx: KlintContexts) => () => void;
+    readonly point: (ctx: KlintContexts) => (x: number, y: number) => void;
+    readonly checkTransparency: (ctx: KlintContexts) => (toCheck: string) => boolean;
+    readonly drawIfVisible: (ctx: KlintContexts) => () => void;
+    readonly line: (ctx: KlintContexts) => (x1: number, y1: number, x2: number, y2: number) => void;
+    readonly circle: (ctx: KlintContexts) => (x: number, y: number, radius: number, radius2?: number) => void;
+    readonly disk: (ctx: KlintContexts) => (x: number, y: number, radius: number, startAngle?: number, endAngle?: number, closed?: boolean) => void;
+    readonly rectangle: (ctx: KlintContexts) => (x: number, y: number, width: number, height?: number) => void;
+    readonly roundedRectangle: (ctx: KlintContexts) => (x: number, y: number, width: number, radius: number | number[], height?: number) => void;
+    readonly polygon: (ctx: KlintContexts) => (x: number, y: number, radius: number, sides: number, radius2?: number, rotation?: number) => void;
+    readonly beginShape: (ctx: KlintContexts) => () => void;
+    readonly beginContour: (ctx: KlintContexts) => () => void;
+    readonly vertex: (ctx: KlintContexts) => (x: number, y: number) => void;
+    readonly endContour: (ctx: KlintContexts) => (forceRevert?: boolean) => void;
+    readonly endShape: (ctx: KlintContexts) => (close?: boolean) => void;
+    readonly gradient: (ctx: KlintContexts) => (x1?: number, y1?: number, x2?: number, y2?: number) => CanvasGradient;
+    readonly radialGradient: (ctx: KlintContexts) => (x1?: number, y1?: number, r1?: number, x2?: number, y2?: number, r2?: number) => CanvasGradient;
+    readonly conicGradient: (ctx: KlintContexts) => (angle?: number, x1?: number, y1?: number) => CanvasGradient;
+    readonly addColorStop: () => (gradient: CanvasGradient, offset?: number, color?: string) => void;
+    readonly constrain: () => (val: number, floor: number, ceil: number) => number;
+    readonly lerp: (ctx: KlintContexts) => (A: number, B: number, mix: number, bounded?: boolean) => number;
+    readonly fract: () => (n: number, mod: number, mode?: "precise" | "fast" | "faster") => number;
+    readonly distance: (ctx: KlintContexts) => (x1: number, y1: number, x2: number, y2: number, mode?: "precise" | "fast" | "faster") => number;
+    readonly squareDistance: () => (x1: number, y1: number, x2: number, y2: number) => number;
+    readonly dot: () => (x1: number, y1: number, x2: number, y2: number) => number;
+    readonly remap: (ctx: KlintContexts) => (n: number, A: number, B: number, C: number, D: number, bounded?: boolean) => number;
+    readonly textFont: (ctx: KlintContexts) => (font: string) => void;
+    readonly textSize: (ctx: KlintContexts) => (size: number) => void;
+    readonly textStyle: (ctx: KlintContexts) => (style: string) => void;
+    readonly textWeight: (ctx: KlintContexts) => (weight: string) => void;
+    readonly textQuality: (ctx: KlintContexts) => (quality?: "speed" | "auto" | "legibility" | "precision") => void;
+    readonly textSpacing: (ctx: KlintContexts) => (kind: "letter" | "word", value: number) => void;
+    readonly computeTextStyle: (ctx: KlintContexts) => () => void;
+    readonly alignText: (ctx: KlintContexts) => (horizontal: CanvasTextAlign, vertical?: CanvasTextBaseline) => void;
+    readonly textLeading: (ctx: KlintContexts) => (spacing: number) => void;
+    readonly computeFont: (ctx: KlintContexts) => () => void;
+    readonly textWidth: (ctx: KlintContexts) => (text: string) => number;
+    readonly text: (ctx: KlintContexts) => (text: string | number | undefined, x: number, y: number, maxWidth?: number | undefined) => void;
+    readonly image: (ctx: KlintContexts) => (image: HTMLImageElement | HTMLCanvasElement | OffscreenCanvas | KlintContexts, x: number, y: number, arg3?: number, arg4?: number, arg5?: number, arg6?: number, arg7?: number, arg8?: number) => void;
+    readonly loadPixels: (ctx: KlintContexts) => () => ImageData;
+    readonly updatePixels: (ctx: KlintContexts) => (pixels: Uint8ClampedArray | number[]) => void;
+    readonly readPixels: (ctx: KlintContexts) => (x: number, y: number, w?: number, h?: number) => number[];
+    readonly scaleTo: () => (originWidth: number, originHeight: number, destinationWidth: number, destinationHeight: number, cover?: boolean) => number;
+    readonly opacity: (ctx: KlintContexts) => (value: number) => void;
+    readonly blend: (ctx: KlintContexts) => (blend: GlobalCompositeOperation) => void;
+    readonly setCanvasOrigin: (ctx: KlintContexts) => (type: "center" | "corner") => void;
+    readonly setImageOrigin: (ctx: KlintContexts) => (type: "center" | "corner") => void;
+    readonly setRectOrigin: (ctx: KlintContexts) => (type: "center" | "corner") => void;
+    readonly withConfig: (ctx: KlintContexts) => (config: KlintConfig) => void;
+    readonly toBase64: (ctx: KlintContexts) => (type?: string, quality?: number) => string;
+    readonly saveConfig: (ctx: KlintContexts) => (from?: KlintContexts) => KlintConfig;
+    readonly restoreConfig: (ctx: KlintContexts) => (config: KlintConfig) => void;
+    readonly resizeCanvas: (ctx: KlintContexts) => (width: number, height: number) => void;
+};
+
+type KlintContexts = KlintContext | KlintOffscreenContext;
+interface KlintOffscreenContext extends CanvasRenderingContext2D, KlintFunctions, KlintPlugins {
+    width: number;
+    height: number;
+    __dpr: number;
+    __startedShape: boolean;
+    __currentShape: number[][] | null;
+    __startedContour: boolean;
+    __currentContours: number[][][] | null;
+    __currentContour: number[][] | null;
+    __isReadyToDraw: boolean;
+    __isMainContext: boolean;
+    __imageOrigin: "corner" | "center";
+    __rectangleOrigin: "corner" | "center";
+    __canvasOrigin: "corner" | "center";
+    __computedTextFont: string;
+    __textFont: string;
+    __textSize: number;
+    __textStyle: string;
+    __textWeight: string;
+    __textAlignment: {
+        horizontal: CanvasTextAlign;
+        vertical: CanvasTextBaseline;
+    };
+    [key: string]: any;
+}
+interface KlintContext extends KlintOffscreenContext, KlintCoreFunctions {
+    frame: number;
+    time: number;
+    deltaTime: number;
+    fps: number;
+    __lastTargetTime: number;
+    __lastRealTime: number;
+    __isPlaying: boolean;
+    __offscreens: Map<string, KlintOffscreenContext | HTMLImageElement>;
+}
+interface KlintCanvasOptions {
+    alpha?: string;
+    willreadfrequently?: string;
+    autoplay?: string;
+    ignoreResize?: string;
+    noloop?: string;
+    ignoreFunctions?: string;
+    static?: string;
+    nocanvas?: string;
+    fps?: number;
+    unsafemode?: string;
+    origin?: "corner" | "center";
+}
+type KlintConfig = Partial<Pick<KlintContext, (typeof CONFIG_PROPS)[number]>>;
+declare const CONFIG_PROPS: readonly ["lineWidth", "strokeStyle", "lineJoin", "lineCap", "fillStyle", "font", "textAlign", "textBaseline", "textRendering", "wordSpacing", "letterSpacing", "globalAlpha", "globalCompositeOperation", "origin", "transform", "__imageOrigin", "__rectangleOrigin", "__textFont", "__textWeight", "__textStyle", "__textSize", "__textAlignment", "__isPlaying"];
 
 declare module "./index" {
     interface KlintPlugins {
@@ -638,133 +688,4 @@ interface KlintPlugins {
     Thing: Thing;
 }
 
-declare const EPSILON = 0.0001;
-type KlintContexts = KlintContext | KlintOffscreenContext;
-interface KlintOffscreenContext extends CanvasRenderingContext2D, KlintFunctions, KlintPlugins {
-    width: number;
-    height: number;
-    __dpr: number;
-    __startedShape: boolean;
-    __currentShape: number[][] | null;
-    __startedContour: boolean;
-    __currentContours: number[][][] | null;
-    __currentContour: number[][] | null;
-    __isReadyToDraw: boolean;
-    __isMainContext: boolean;
-    __imageOrigin: "corner" | "center";
-    __rectangleOrigin: "corner" | "center";
-    __canvasOrigin: "corner" | "center";
-    __computedTextFont: string;
-    __textFont: string;
-    __textSize: number;
-    __textStyle: string;
-    __textWeight: string;
-    __textAlignment: {
-        horizontal: CanvasTextAlign;
-        vertical: CanvasTextBaseline;
-    };
-    [key: string]: any;
-}
-interface KlintContext extends KlintOffscreenContext, KlintCoreFunctions {
-    frame: number;
-    time: number;
-    deltaTime: number;
-    fps: number;
-    __lastTargetTime: number;
-    __lastRealTime: number;
-    __isPlaying: boolean;
-    __offscreens: Map<string, KlintOffscreenContext | HTMLImageElement>;
-}
-interface KlintCanvasOptions {
-    alpha?: string;
-    willreadfrequently?: string;
-    autoplay?: string;
-    ignoreResize?: string;
-    noloop?: string;
-    ignoreFunctions?: string;
-    static?: string;
-    nocanvas?: string;
-    fps?: number;
-    unsafemode?: string;
-    origin?: "corner" | "center";
-}
-type KlintConfig = Partial<Pick<KlintContext, (typeof CONFIG_PROPS)[number]>>;
-interface KlintContextWrapper {
-    context: KlintContext | null;
-    initCoreContext: (canvas: HTMLCanvasElement, options: KlintCanvasOptions) => KlintContext;
-}
-declare const CONFIG_PROPS: readonly ["lineWidth", "strokeStyle", "lineJoin", "lineCap", "fillStyle", "font", "textAlign", "textBaseline", "textRendering", "wordSpacing", "letterSpacing", "globalAlpha", "globalCompositeOperation", "origin", "transform", "__imageOrigin", "__rectangleOrigin", "__textFont", "__textWeight", "__textStyle", "__textSize", "__textAlignment", "__isPlaying"];
-interface KlintProps {
-    context: KlintContextWrapper;
-    draw: (ctx: KlintContext) => void;
-    setup?: (ctx: KlintContext) => void;
-    preload?: (ctx: KlintContext) => Promise<void>;
-    options?: KlintCanvasOptions;
-    onResize?: (ctx: KlintContext) => void;
-    onVisible?: (ctx: KlintContext) => void;
-}
-declare function Klint({ context, setup, draw, options, preload, onVisible, }: KlintProps): React.JSX.Element;
-
-interface KlintMouse {
-    x: number;
-    y: number;
-    px: number;
-    py: number;
-    vx: number;
-    vy: number;
-    angle: number;
-    isPressed: boolean;
-    isHover: boolean;
-}
-interface KlintScroll {
-    distance: number;
-    velocity: number;
-    lastTime: number;
-}
-declare function useKlint(): {
-    context: {
-        context: KlintContext | null;
-        initCoreContext: (canvas: HTMLCanvasElement, options: KlintCanvasOptions) => KlintContext;
-    };
-    useMouse: () => {
-        mouse: KlintMouse;
-        onClick: (callback: (ctx: KlintContext, e: MouseEvent) => void) => (ctx: KlintContext, e: MouseEvent) => void;
-        onMouseIn: (callback: (ctx: KlintContext, e: MouseEvent) => void) => (ctx: KlintContext, e: MouseEvent) => void;
-        onMouseOut: (callback: (ctx: KlintContext, e: MouseEvent) => void) => (ctx: KlintContext, e: MouseEvent) => void;
-        onMouseDown: (callback: (ctx: KlintContext, e: MouseEvent) => void) => (ctx: KlintContext, e: MouseEvent) => void;
-        onMouseUp: (callback: (ctx: KlintContext, e: MouseEvent) => void) => (ctx: KlintContext, e: MouseEvent) => void;
-    };
-    useScroll: () => {
-        scroll: KlintScroll;
-        onScroll: (callback: (ctx: KlintContext, scroll: KlintScroll, e: WheelEvent) => void) => (ctx: KlintContext, scroll: KlintScroll, e: WheelEvent) => void;
-    };
-    useWindow: () => {
-        onResize: (callback: (ctx: KlintContext) => void) => (ctx: KlintContext) => void;
-        onBlur: (callback: (ctx: KlintContext) => void) => (ctx: KlintContext) => void;
-        onFocus: (callback: (ctx: KlintContext) => void) => (ctx: KlintContext) => void;
-        onVisibilityChange: (callback: (ctx: KlintContext, isVisible: boolean) => void) => (ctx: KlintContext, isVisible: boolean) => void;
-    };
-    useImage: () => {
-        images: Record<string, HTMLImageElement>;
-        loadImage: (key: string, url: string) => Promise<HTMLImageElement>;
-        loadImages: (imageMap: Record<string, string>) => Promise<Map<string, HTMLImageElement>>;
-        getImage: (key: string) => HTMLImageElement | undefined;
-        hasImage: (key: string) => boolean;
-        clearImages: () => void;
-    };
-    togglePlay: (playing?: boolean) => void;
-};
-declare const useProps: <T extends object = Record<string, unknown>>(props: T) => {
-    get: <K extends keyof T>(key: K) => T[K];
-    has: <K extends keyof T>(key: K) => boolean;
-    props: T;
-};
-declare const useStorage: <T extends object = Record<string, unknown>>(initialProps?: T) => {
-    get: <K extends keyof T>(key: K) => T[K];
-    set: <K extends keyof T>(key: K, value: T[K]) => void;
-    has: <K extends keyof T>(key: K) => boolean;
-    remove: <K extends keyof T>(key: K) => void;
-    store: T;
-};
-
-export { CONFIG_PROPS, EPSILON, Klint, KlintCanvasOptions, KlintConfig, KlintContext, KlintContextWrapper, KlintContexts, KlintCoreFunctions, KlintFunctions, KlintMouse, KlintOffscreenContext, KlintProps, KlintScroll, useKlint, useProps, useStorage };
+export { Color, Easing, KlintPlugins, SVGfont, State, Text, Thing, Time, Vector };

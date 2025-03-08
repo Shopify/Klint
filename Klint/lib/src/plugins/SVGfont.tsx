@@ -1,6 +1,6 @@
 // import { KlintOffscreenContext, KlintContext } from "../component/KlintTypes";
 import { KlintContexts } from "../Klint";
-declare module "../Klint" {
+declare module "./index" {
   interface KlintPlugins {
     SVGfont: SVGfont;
   }

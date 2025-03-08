@@ -7,6 +7,7 @@
       "strict": true,
       "skipLibCheck": true,
       "declaration": true,
+      "declarationMap": true,
       "jsx": "react",
       "outDir": "dist",
       "rootDir": "src",

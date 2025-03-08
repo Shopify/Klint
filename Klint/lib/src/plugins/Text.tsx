@@ -1,5 +1,5 @@
 import { KlintContexts } from "../Klint";
-declare module "../Klint" {
+declare module "./index" {
   interface KlintPlugins {
     Text: Text;
   }

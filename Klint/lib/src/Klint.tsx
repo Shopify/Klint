@@ -1,11 +1,10 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { KlintFunctions, KlintCoreFunctions } from "./KlintFunctions";
+import { type KlintPlugins } from "./plugins";
 
 const DEFAULT_FPS = 60;
 const DEFAULT_ALT = "A beautiful artwork made with Klint Canvas";
 export const EPSILON = 0.0001;
-
-export interface KlintPlugins {}
 
 export type KlintContexts = KlintContext | KlintOffscreenContext;
 

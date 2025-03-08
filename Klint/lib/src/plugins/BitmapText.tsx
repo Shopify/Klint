@@ -1,5 +1,5 @@
 import { KlintContext, KlintOffscreenContext } from "../Klint";
-declare module "../Klint" {
+declare module "./index" {
   interface KlintPlugins {
     BitmapText: BitmapText;
   }

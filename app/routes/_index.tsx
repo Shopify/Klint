@@ -145,7 +145,11 @@
 //   return null;
 // }
 
-import { Klint, useKlint, useStorage, Color, type KlintContext } from "klint";
+// import Klint, { KlintContext } from "../../Klint/lib/src/Klint";
+// import useKlint, { useStorage } from "../../Klint/lib/src/useKlint";
+// import { Color } from "../../Klint/lib/src/plugins";
+import { Color } from "klint/plugins";
+import { Klint, type KlintContext, useKlint, useStorage } from "klint";
 
 import { useState } from "react";
 
@@ -155,6 +159,8 @@ import { useState } from "react";
 interface KlintStorageProps {
   hello?: string;
 }
+
+// import svgType from "../src/Marcel-semibold.svg";
 
 export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
   const { context, useMouse, useWindow, useImage /*useScroll*/ } = useKlint();
@@ -179,8 +185,9 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
     await loadImages({
       lamp: "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/lamp.png?v=1734625960",
     });
+    K.extend("Color", new Color());
+    // Thing.attach(K)
 
-    K.extend("Color", new Color(K));
     // K.extend("createVector", (x: number, y: number): Vector => {
     //   return new Vector(x, y);
     // });
@@ -191,7 +198,7 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
     // K.extend("E", new Easing(K));
     // K.install("Color", new Color(K));
     // K.extend("SVG", new SVGfont(K));
-    // K.SVG.parse(svgFont);
+    // K.SVG.parse(svgType);
 
     // P.set(
     //   "points",
@@ -235,6 +242,7 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
   };
 
   const draw = (K: KlintContext) => {
+    const { Color } = K;
     // const scrollAmount = P.get("scroll") as {
     //   distance: number;
     //   velocity: number;
@@ -250,17 +258,10 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
     // });
 
     // const col = C.hsl(scroll.velocity * 360, 100, 50);
-    K.background(`#FFF`);
+    K.background(`#F00`);
     K.push();
-    const lamp = images["lamp"];
-    const fit = K.scaleTo(lamp.width, lamp.height, K.width, K.height);
-    // console.log("rendering the image on canvas");
-    K.scale(fit, fit);
-    K.image(lamp, 0, 0);
-    K.pop();
-    K.push();
-    // console.log(P.get("counter"));
-    K.text(P.get("hello"), 0, 0);
+    K.fillColor(Color.hsl(250, 50, 50));
+    K.circle(K.width / 2, K.height / 2, 100);
     K.pop();
     // K.push();
     // K.fillColor(mouse.isPressed ? "#FFF" : "#000");
@@ -306,7 +307,7 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
     //   const py = y + K.height / 2;
     //   K.push();
     //   const d =
-    //     E.inout(
+    //     K.E.inout(
     //       K.remap(K.distance(px, py, K.mouse.x, K.mouse.y), 0, 400, 1, 0.0)
     //     ) * 0.4;
     //   const a = Math.atan2(py - K.mouse.y, px - K.mouse.x);
@@ -370,7 +371,7 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
       draw={draw}
       setup={setup}
       options={{
-        origin: "center",
+        origin: "corner",
         // fps: 24,
         // static: "true",
       }}

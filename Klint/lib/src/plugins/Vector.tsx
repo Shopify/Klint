@@ -1,4 +1,4 @@
-declare module "../Klint" {
+declare module "./index" {
   interface KlintPlugins {
     Vector: Vector;
   }
