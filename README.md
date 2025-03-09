@@ -7,7 +7,8 @@ Klint is p5.js-like React component that comes with a lot of cool plugins to mak
 Klint is a *React Component* written in TSX. You will need a React environment to use it.
 > **Note:** If you're looking for a non-jsx version, p5.js might be a good pick.
 
-### Repository Structure
+## Getting Started
+
 This repository contains:
 
 1. 🎨 The core Klint library — TSX
@@ -15,12 +16,10 @@ This repository contains:
 3. 💻 Editor — Remix
 4. 🚀 Sandbox to play with Klint — Remix
 
-> **Note:** Each folder has its own package and should work individually.
 
-### Development
-> **Note:** The Klint library isn't public yet, so you'll need to link it manually. We're working to resolve this soon.
+## Development and tests
 
-To develop and test Klint:
+> **Important:** The Klint library isn't public yet, so you'll need to link it manually. We're working to resolve this soon but for now, you will need to add it to your npm package using npm link.
 
 1. Clone the repository
    ```bash
@@ -54,14 +53,29 @@ To develop and test Klint:
    npm unlink
    ```
 
-6. If you change anything in the lib or editor, i use Vitest for testing
+6. If you change anything in the library, you will need to rebuild
+   ```bash
+   # In the Klint lib folder
+   npm build
+   npm link
+   ```
+
+7. I use Vitest for testing
    ```bash
    npm test
    ```
 
 
+## Build
+There are two builds, minified or not.
 
-
+   ```bash
+   # In the Klint lib folder
+   # For the minified
+   npm build:minified
+   # For the js build
+   npm build
+   ```
 
 
 ---
