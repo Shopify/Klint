@@ -1,9 +1,4 @@
 import { KlintContexts } from "../Klint";
-declare module "./index" {
-  interface KlintPlugins {
-    Text: Text;
-  }
-}
 
 type TextMetrics = {
   width: number;

@@ -1,13 +1,6 @@
-declare module "./index" {
-  interface KlintPlugins {
-    Color: Color;
-  }
-}
-
 interface KlintColor {
   colors: readonly string[];
 
-  // Color getters
   coral: string;
   brown: string;
   mustard: string;
@@ -27,7 +20,6 @@ interface KlintColor {
   orange: string;
   slate: string;
 
-  // Methods without static keyword
   hex(color: string): string;
   rgb(r: number, g: number, b: number): string;
   rgba(r: number, g: number, b: number, alpha: number): string;

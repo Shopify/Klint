@@ -1,11 +1,5 @@
 import { KlintContexts } from "../Klint";
 
-declare module "./index" {
-  interface KlintPlugins {
-    Time: Time;
-  }
-}
-
 interface KlintTime {
   context: KlintContexts;
   timeline(key: string): KlintTime;

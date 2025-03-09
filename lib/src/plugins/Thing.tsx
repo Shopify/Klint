@@ -1,22 +1,15 @@
 import { KlintContexts } from "../Klint";
 
-declare module "./index" {
-  interface KlintPlugins {
-    Thing: Thing;
-  }
-}
-
 interface KlintThing {
   context: KlintContexts;
   log(): void;
-  attach(context: KlintContexts): void;
 }
 
 class Thing implements KlintThing {
   public context!: KlintContexts;
 
-  attach(context: KlintContexts): void {
-    this.context = context;
+  constructor(ctx: KlintContexts) {
+    this.context = ctx;
   }
 
   log(): void {

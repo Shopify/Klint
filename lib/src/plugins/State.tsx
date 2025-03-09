@@ -1,9 +1,3 @@
-declare module "./index" {
-  interface KlintPlugins {
-    State: State;
-  }
-}
-
 type KlintStateValue = unknown;
 type KlintStateCallback = (key: string, value: KlintStateValue) => void;
 interface KlintState {

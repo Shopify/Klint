@@ -1,10 +1,4 @@
-// import { KlintOffscreenContext, KlintContext } from "../component/KlintTypes";
 import { KlintContexts } from "../Klint";
-declare module "./index" {
-  interface KlintPlugins {
-    SVGfont: SVGfont;
-  }
-}
 
 export type SVGFontPaths = Array<Array<Array<{ x: number; y: number }>>>;
 

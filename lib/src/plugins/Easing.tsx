@@ -1,11 +1,5 @@
 import { KlintContexts } from "../Klint";
 
-declare module "./index" {
-  interface KlintPlugins {
-    Easing: Easing;
-  }
-}
-
 interface KlintEasing {
   context: KlintContexts;
   normalize: (val: number) => number;
