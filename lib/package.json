@@ -64,6 +64,7 @@
   },
   "devDependencies": {
     "concurrently": "^8.2.0",
+    "jsdom": "^26.0.0",
     "rimraf": "^5.0.0",
     "tsup": "^6.7.0",
     "typescript": "^5.0.0",
