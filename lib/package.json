@@ -56,13 +56,17 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src --ext .ts,.tsx",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "version": "yarn version",
+    "release": "npm run clean && npm run build && npm run test && npm publish"
   },
   "peerDependencies": {
     "react": ">=16.8.0",
     "react-dom": ">=16.8.0"
   },
   "devDependencies": {
+    "@types/react": "^19.1.1",
+    "@types/react-dom": "^19.1.2",
     "concurrently": "^8.2.0",
     "jsdom": "^26.0.0",
     "rimraf": "^5.0.0",

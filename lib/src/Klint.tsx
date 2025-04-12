@@ -38,7 +38,6 @@ export interface KlintOffscreenContext
   [key: string]: any;
 }
 
-// core context, should not be applied to the offscreen canvas
 export interface KlintContext
   extends KlintOffscreenContext,
     KlintCoreFunctions {
@@ -131,7 +130,7 @@ function useAnimate(
   draw: (context: KlintContext) => void,
   isVisible: boolean
 ) {
-  const animationFrameId = useRef<number>();
+  const animationFrameId = useRef<number>(0);
 
   const animate = useCallback(
     (timestamp = 0) => {
@@ -160,7 +159,7 @@ function useAnimate(
         if (context.frame > 1e7) context.frame = 0;
         context.time += context.deltaTime / DEFAULT_FPS; // Use actual seconds instead of dividing by FPS
         context.frame++;
-        context.__lastTargetTime = now; // Simpler timing approach
+        context.__lastTargetTime = now;
         context.__lastRealTime = now;
       }
 

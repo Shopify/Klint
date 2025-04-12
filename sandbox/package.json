@@ -1,8 +1,12 @@
 {
   "name": "sandbox",
-  "private": true,
+  "private": false,
+  "version": "1.0.0",
   "sideEffects": false,
   "type": "module",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "build": "remix vite:build",
     "dev": "remix vite:dev",

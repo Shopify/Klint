@@ -69,7 +69,7 @@ export default function useKlint() {
       ): Promise<Map<string, HTMLImageElement>> => {
         const promises = Object.entries(imageMap).map(([key, url]) =>
           loadImage(key, url).then(
-            (img) => [key, img] as [string, HTMLImageElement]
+            (img: HTMLImageElement) => [key, img] as [string, HTMLImageElement]
           )
         );
 
