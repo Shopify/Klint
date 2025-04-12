@@ -1,8 +1,3 @@
-declare module "./index" {
-    interface KlintPlugins {
-        Color: Color;
-    }
-}
 interface KlintColor {
     colors: readonly string[];
     coral: string;
@@ -385,11 +380,6 @@ interface KlintCanvasOptions {
 type KlintConfig = Partial<Pick<KlintContext, (typeof CONFIG_PROPS)[number]>>;
 declare const CONFIG_PROPS: readonly ["lineWidth", "strokeStyle", "lineJoin", "lineCap", "fillStyle", "font", "textAlign", "textBaseline", "textRendering", "wordSpacing", "letterSpacing", "globalAlpha", "globalCompositeOperation", "origin", "transform", "__imageOrigin", "__rectangleOrigin", "__textFont", "__textWeight", "__textStyle", "__textSize", "__textAlignment", "__isPlaying"];
 
-declare module "./index" {
-    interface KlintPlugins {
-        Easing: Easing;
-    }
-}
 interface KlintEasing {
     context: KlintContexts;
     normalize: (val: number) => number;
@@ -422,11 +412,6 @@ declare class Easing implements KlintEasing {
     log: () => void;
 }
 
-declare module "./index" {
-    interface KlintPlugins {
-        SVGfont: SVGfont;
-    }
-}
 type SVGFontPaths = Array<Array<Array<{
     x: number;
     y: number;
@@ -501,11 +486,6 @@ declare class SVGfont implements KlintSVGfont {
     draw(points: SVGFontPaths, displacement?: DisplacementCallback): void;
 }
 
-declare module "./index" {
-    interface KlintPlugins {
-        State: State;
-    }
-}
 type KlintStateValue = unknown;
 type KlintStateCallback = (key: string, value: KlintStateValue) => void;
 interface KlintState {
@@ -524,11 +504,9 @@ declare class State implements KlintState {
     log(): Map<string, unknown>;
 }
 
-declare module "./index" {
-    interface KlintPlugins {
-        Vector: Vector;
-    }
-}
+/**
+ * Interface defining a 2D vector with various vector operations
+ */
 interface KlintVector {
     x: number;
     y: number;
@@ -546,31 +524,104 @@ interface KlintVector {
     normalize: () => KlintVector;
     set: (x: number, y: number, z?: number, w?: number) => KlintVector;
 }
+/**
+ * A 2D vector class with various vector operations
+ */
 declare class Vector implements KlintVector {
+    /** X-coordinate of the vector */
     x: number;
+    /** Y-coordinate of the vector */
     y: number;
+    /**
+     * Creates a new Vector
+     * @param x - X-coordinate (default: 0)
+     * @param y - Y-coordinate (default: 0)
+     */
     constructor(x?: number, y?: number);
+    /**
+     * Adds another vector to this vector
+     * @param v - Vector to add
+     * @returns This vector after addition
+     */
     add(v: KlintVector): Vector;
+    /**
+     * Subtracts another vector from this vector
+     * @param v - Vector to subtract
+     * @returns This vector after subtraction
+     */
     sub(v: KlintVector): Vector;
+    /**
+     * Multiplies this vector by a scalar
+     * @param n - Scalar to multiply by
+     * @returns This vector after multiplication
+     */
     mult(n: number): Vector;
+    /**
+     * Divides this vector by a scalar
+     * @param n - Scalar to divide by
+     * @returns This vector after division
+     */
     div(n: number): Vector;
+    /**
+     * Rotates this vector by an angle
+     * @param angle - Angle in radians
+     * @returns This vector after rotation
+     */
     rotate(angle: number): Vector;
+    /**
+     * Calculates the magnitude (length) of this vector
+     * @returns The magnitude of the vector
+     */
     mag(): number;
+    /**
+     * Alias for mag() - calculates the length of this vector
+     * @returns The length of the vector
+     */
     length(): number;
+    /**
+     * Calculates the dot product of this vector with another vector
+     * @param v - The other vector
+     * @returns The dot product
+     */
     dot(v: KlintVector): number;
+    /**
+     * Calculates the distance between this vector and another vector
+     * @param v - The other vector
+     * @returns The distance between the vectors
+     */
     dist(v: KlintVector): number;
+    /**
+     * Calculates the angle of this vector
+     * @returns The angle in radians
+     */
     angle(): number;
+    /**
+     * Creates a copy of this vector
+     * @returns A new Vector with the same coordinates
+     */
     copy(): Vector;
+    /**
+     * Normalizes this vector (sets its magnitude to 1)
+     * @returns This vector after normalization
+     */
     normalize(): Vector;
+    /**
+     * Sets the coordinates of this vector
+     * @param x - New X-coordinate
+     * @param y - New Y-coordinate
+     * @returns This vector after setting coordinates
+     */
     set(x: number, y: number): Vector;
+    /**
+     * Creates a new vector at a specified angle and distance from a center point
+     * @param center - The center point vector
+     * @param a - The angle in radians
+     * @param r - The radius (distance from center)
+     * @returns A new Vector at the calculated position
+     */
     static fromAngle(center: Vector, a: number, r: number): Vector;
 }
 
-declare module "./index" {
-    interface KlintPlugins {
-        Time: Time;
-    }
-}
 interface KlintTime {
     context: KlintContexts;
     timeline(key: string): KlintTime;
@@ -595,11 +646,6 @@ declare class Time implements KlintTime {
     progress(): number;
 }
 
-declare module "./index" {
-    interface KlintPlugins {
-        Text: Text;
-    }
-}
 type TextMetrics = {
     width: number;
     height: number;
@@ -661,19 +707,13 @@ declare class Text implements KlintText {
     log: () => void;
 }
 
-declare module "./index" {
-    interface KlintPlugins {
-        Thing: Thing;
-    }
-}
 interface KlintThing {
     context: KlintContexts;
     log(): void;
-    attach(context: KlintContexts): void;
 }
 declare class Thing implements KlintThing {
     context: KlintContexts;
-    attach(context: KlintContexts): void;
+    constructor(ctx: KlintContexts);
     log(): void;
 }
 
