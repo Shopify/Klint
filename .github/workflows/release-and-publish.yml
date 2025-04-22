@@ -1,15 +1,15 @@
-name: Release Package
+name: Release and Publish
 
 on:
   push:
     tags:
-      - "v*" # Run workflow on version tags, e.g. v1.0.0
+      - "v*" # triggers on version tags
 
 jobs:
-  release:
+  release-and-publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repo
         uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Important for generating release notes
@@ -22,16 +22,16 @@ jobs:
           cache: "yarn"
 
       - name: Install dependencies
-        working-directory: ./lib
         run: yarn install --frozen-lockfile
+        working-directory: lib
 
       - name: Run tests
-        working-directory: ./lib
         run: yarn test || echo "Tests failed but continuing with release"
+        working-directory: lib
 
-      - name: Build
-        working-directory: ./lib
+      - name: Build package
         run: yarn build
+        working-directory: lib
 
       - name: Generate Release Notes
         id: release_notes
@@ -59,11 +59,9 @@ jobs:
             core.setOutput('notes', notes);
             return notes;
 
-      - name: Publish to NPM
-        working-directory: ./lib
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
-          yarn publish --access public
+      - name: Publish to npm
+        run: yarn publish --access public
+        working-directory: lib
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
