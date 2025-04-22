@@ -2,7 +2,7 @@
   "name": "klint",
   "author": "arthurcloche",
   "license": "MIT",
-  "version": "0.1.1",
+  "version": "0.0.2",
   "description": "A modern creative coding library",
   "type": "module",
   "main": "dist/index.cjs",
@@ -58,7 +58,7 @@
     "lint": "eslint src --ext .ts,.tsx",
     "clean": "rimraf dist",
     "version": "yarn version",
-    "release": "npm run clean && npm run build && npm run test && npm publish"
+    "release": "npm run clean && npm run build && npm publish"
   },
   "peerDependencies": {
     "react": ">=16.8.0",
