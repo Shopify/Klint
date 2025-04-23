@@ -35,25 +35,55 @@ function AnimatedCircle() {
 
 This package uses GitHub Actions for automated releases. Here's how to create a new release:
 
-1. Make your changes and commit them to the repository
-2. Update the version in package.json:
+## Development and tests
+
+> **Important:** The Klint library isn't public yet, so you'll need to link it manually. We're working to resolve this soon but for now, you will need to add it to your npm package using npm link.
+
+1. Clone the repository
+   ```bash
+   git clone https://github.com/Shopify/klint.git
+   cd klint
+   ```
+
+2. Go to the lib folder and link it locally
    ```bash
    cd lib
-   yarn version --new-version [patch|minor|major]
+   npm link
    ```
-   This will:
-   - Update the version in package.json
-   - Create a git commit with the new version
-   - Create a git tag with the new version (e.g., v1.0.0)
 
-3. Push the changes and the tag:
+3. In your working directory, link to the local Klint
    ```bash
-   git push && git push --tags
+   cd your-project
+   npm link klint
    ```
 
-4. The GitHub Action will automatically:
-   - Run tests
-   - Build the package
-   - Publish to npm
-   - Create a GitHub release with auto-generated release notes
+4. Run the dev server:
+   ```bash
+   npm run dev
+   ```
 
+5. When finished, unlink both in your project and the local repo
+   ```bash
+   # In your project
+   npm unlink klint
+   
+   # In the Klint lib folder
+   npm unlink
+   ```
+
+6. If you change anything in the library, you will need to rebuild
+   ```bash
+   # In the Klint lib folder
+   npm build
+   npm link
+   ```
+
+7. I use Vitest for testing
+   ```bash
+   npm test
+   ```
+
+8. Push your commit
+
+
+Made with love at Shopify, 2025
