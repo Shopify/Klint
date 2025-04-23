@@ -76,3 +76,5 @@ jobs:
           body: ${{ steps.release_notes.outputs.notes }}
           draft: false
           prerelease: false
+
+    if: github.actor == 'arthurcloche' || github.actor == 'otherTeamMember'
