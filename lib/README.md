@@ -37,7 +37,7 @@ This package uses GitHub Actions for automated releases. Here's how to create a 
 
 ## Development and tests
 
-> **Important:** The Klint library isn't public yet, so you'll need to link it manually. We're working to resolve this soon but for now, you will need to add it to your npm package using npm link.
+> **Important:** The Klint library isn't public yet, so you'll need to link it manually if you want to edit it.
 
 1. Clone the repository
    ```bash
