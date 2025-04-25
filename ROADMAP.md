@@ -7,37 +7,43 @@
 - [ ] Tests 
 - [ ] Docs 
 
-## CORE
+## 0.0.7
+### Core
+#### Bugs
+- [ ] Vite hotreload creates slows down
+- [ ] Window.resize event inconsistent
 
-### TO DO
-- [ ] Make the loadVideo hook 
-- [ ] Make the useGestures hook 
-
-### Non Blocking
+#### Fixes
+- [ ] Arguments order is wrong on roundedRect
+- [ ] Line breaks in text()
+- [ ] CSS text style cloner : https://blog.steveasleep.com/how-to-draw-multi-line-text-on-an-html-canvas-in-2021
+- [ ] Paragraph break : https://stackoverflow.com/questions/5026961/html5-canvas-ctx-filltext-wont-do-line-breaks
 - [ ] clip
 - [ ] Triangle strip and Quad strip
 - [ ] Add other types of vertices : bezierTo(), quadraticTo(), arcTo(),
 - [ ] Filters
 
-## TESTS
-- [ ] Add unit tests for Klint Functions
+### Doc
+- [ ] Update dependency
+- [ ] Build homepage
 
-## DOCS
-- [ ] Add Docusaurus
+### Editor
+- [ ] Update dependency
 
-
+### Nice to have
+- [ ] Make the loadVideo hook 
+- [ ] Make the useGestures hook 
 
 ## ESSENTIALS PLUGINS
-### will be in the main lib
 - [ ] Hotspot : note ( Path 2D for custom shapes + ctx.isPointInPath()) 
+- [ ] Draggables 
 - [ ] Grids : 2D, responsive, radial 
 - [ ] Curve : Strips, rounding
 - [ ] Vector2D & Matrix
 - [ ] Noise + pseudo-random
 - [ ] Advanced Pixels array : load, set, copy & update => Done but considering removing it. Should set Canvas to willReadOften if loaded, needs to happen at preload stage
-
+- [ ] Noise + pseudo-random
 ## EXTRAS PLUGINS
-### will be in an external extras folder
 - [ ] Catmull Curves : path smoothing and auto-rounded
 - [x] Easing 
 - [ ] Bezier + Bezier sampling + normals 
