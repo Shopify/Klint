@@ -7,14 +7,16 @@
 - [ ] Tests 
 - [ ] Docs 
 
-## 0.0.7
+## 0.1.0
 ### Core
 #### Bugs
 - [ ] Vite hotreload creates slows down
 - [ ] Window.resize event inconsistent
 
+
 #### Fixes
 - [ ] Arguments order is wrong on roundedRect
+- [ ] Dissociate Klint and the 2D context : confusing autocomplete
 - [ ] Line breaks in text()
 - [ ] CSS text style cloner : https://blog.steveasleep.com/how-to-draw-multi-line-text-on-an-html-canvas-in-2021
 - [ ] Paragraph break : https://stackoverflow.com/questions/5026961/html5-canvas-ctx-filltext-wont-do-line-breaks
@@ -22,6 +24,11 @@
 - [ ] Triangle strip and Quad strip
 - [ ] Add other types of vertices : bezierTo(), quadraticTo(), arcTo(),
 - [ ] Filters
+- [ ] Add url params
+- [ ] Make vectors 3D
+- [ ] Add PI and TWO_PI
+- [ ] useImage not working like i wanted it to, inconsistent
+- [ ] Essential plugins to be included in the library
 
 ### Doc
 - [ ] Update dependency

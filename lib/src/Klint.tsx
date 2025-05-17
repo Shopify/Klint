@@ -187,7 +187,9 @@ export default function Klint({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const contextRef = useRef<KlintContext | null>(null); // KlintCoreContext | undefined
   const intersectionObserverRef = useRef<IntersectionObserver | null>(null);
-  const resizeObserverRef = useRef<ResizeObserver | null>(null);
+  const resizeCallbackRef = useRef<((this: Window, ev: UIEvent) => any) | null>(
+    null
+  );
   const [isVisible, setIsVisible] = useState(true);
   const __options = {
     ...DEFAULT_OPTIONS,
@@ -239,10 +241,12 @@ export default function Klint({
     updateCanvasSize();
 
     if (__options.ignoreResize !== "true") {
-      resizeObserverRef.current = new ResizeObserver(() => {
+      const handleResize = () => {
         updateCanvasSize(context.__isReadyToDraw);
-      });
-      resizeObserverRef.current.observe(container);
+      };
+      window.addEventListener("resize", handleResize);
+
+      resizeCallbackRef.current = handleResize;
     }
 
     intersectionObserverRef.current = new IntersectionObserver(
@@ -321,13 +325,18 @@ export default function Klint({
 
     initializeKlint();
 
-    const frameId = animationFrameId.current;
     return () => {
-      resizeObserverRef.current?.disconnect();
-      intersectionObserverRef.current?.disconnect();
-      if (frameId) {
-        cancelAnimationFrame(frameId);
+      if (resizeCallbackRef.current) {
+        window.removeEventListener("resize", resizeCallbackRef.current);
       }
+
+      intersectionObserverRef.current?.disconnect();
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+      }
+      contextRef.current = null;
+      canvasRef.current = null;
+      containerRef.current = null;
     };
     // Not ideal, but without an empty array, everything get recomputed unnecesseraly.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -359,48 +368,3 @@ export default function Klint({
     </div>
   );
 }
-
-// interface ErrorBoundaryProps {
-//   children: ReactNode;
-//   fallback?: ReactNode;
-// }
-
-// interface ErrorBoundaryState {
-//   hasError: boolean;
-//   error?: Error;
-// }
-
-// export class KlintErrorBoundary extends Component<
-//   ErrorBoundaryProps,
-//   ErrorBoundaryState
-// > {
-//   state: ErrorBoundaryState = { hasError: false };
-
-//   static getDerivedStateFromError(error: Error) {
-//     return { hasError: true, error };
-//   }
-
-//   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-//     console.error("Klint error:", error, errorInfo);
-//   }
-
-//   render() {
-//     if (this.state.hasError) {
-//       return (
-//         this.props.fallback || (
-//           <div className="w-full h-full flex items-center justify-center bg-red-50">
-//             <div className="text-red-600 text-center p-4">
-//               <h3 className="font-bold mb-2">Canvas Error</h3>
-//               <p>
-//                 {this.state.error?.message ||
-//                   "Something went wrong with the canvas."}
-//               </p>
-//             </div>
-//           </div>
-//         )
-//       );
-//     }
-
-//     return this.props.children;
-//   }
-// }

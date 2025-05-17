@@ -148,8 +148,8 @@
 // import Klint, { KlintContext } from "../../Klint/lib/src/Klint";
 // import useKlint, { useStorage } from "../../Klint/lib/src/useKlint";
 // import { Color } from "../../Klint/lib/src/plugins";
-import { Color } from "klint/plugins";
-import { Klint, type KlintContext, useKlint, useStorage } from "klint";
+import { Color } from "@shopify/klint/plugins";
+import { Klint, type KlintContext, useKlint, useStorage } from "@shopify/klint";
 
 import { useState } from "react";
 
@@ -166,7 +166,7 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
   const { context, useMouse, useWindow, useImage /*useScroll*/ } = useKlint();
   const { /*mouse,*/ onClick } = useMouse();
   const { images, loadImages } = useImage();
-
+  console.log(context);
   const { onResize } = useWindow();
   // const { images, loading } = useImage(src);
   onClick(() => {
@@ -238,11 +238,11 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
     K.noStroke();
     K.alignText("center", "middle");
     K.setImageOrigin("center");
-    // console.log(P.get("counter"));
   };
 
   const draw = (K: KlintContext) => {
     const { Color } = K;
+    // console.log(images["lamp"]);
     // const scrollAmount = P.get("scroll") as {
     //   distance: number;
     //   velocity: number;
@@ -259,10 +259,18 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
 
     // const col = C.hsl(scroll.velocity * 360, 100, 50);
     K.background(`#F00`);
-    K.push();
-    K.fillColor(Color.hsl(250, 50, 50));
-    K.circle(K.width / 2, K.height / 2, 100);
-    K.pop();
+
+    for (let i = 0; i <= 100; i++) {
+      const x = (i / 100) * K.width;
+      const y =
+        K.height * 0.5 +
+        Math.sin(K.frame * 0.03 + (i / 50) * Math.PI * 2) * 240;
+      K.push();
+      K.fillColor(Color.hsl((i / 100) * 360, 50, 50));
+      K.circle(x, y, 100);
+      K.pop();
+    }
+
     // K.push();
     // K.fillColor(mouse.isPressed ? "#FFF" : "#000");
     // // console.log(mouse);
