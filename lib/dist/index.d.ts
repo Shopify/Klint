@@ -362,80 +362,6 @@ declare class Easing implements KlintEasing {
     log: () => void;
 }
 
-type SVGFontPaths = Array<Array<Array<{
-    x: number;
-    y: number;
-}>>>;
-interface FontMetrics {
-    fontFamily: string;
-    fontWeight: string;
-    unitsPerEm: number;
-    ascent: number;
-    descent: number;
-    xHeight: number;
-    capHeight: number;
-}
-interface GlyphMetrics {
-    name: string;
-    unicode: string;
-    horizAdvX: number;
-    d?: string;
-}
-interface KlintSVGfont {
-    context: KlintContexts;
-    metrics: FontMetrics;
-    glyphs: Map<string, GlyphMetrics>;
-    parse(font: string): void;
-}
-interface PointOptions {
-    factor: number;
-    align?: "center" | "left" | "right";
-    center?: "alphabetic" | "middle" | "top";
-    letterSpacing?: number;
-    treshold?: number;
-}
-interface DisplacementParams {
-    point: {
-        x: number;
-        y: number;
-    };
-    position: {
-        x: number;
-        y: number;
-    };
-    groupIndex: number;
-    letterSpacing: number;
-}
-interface DisplacementCallback {
-    (params: DisplacementParams): {
-        x: number;
-        y: number;
-    };
-}
-declare class SVGfont implements KlintSVGfont {
-    readonly context: KlintContexts;
-    readonly metrics: FontMetrics;
-    readonly glyphs: Map<string, GlyphMetrics>;
-    private font;
-    private SCALE;
-    private targetXHeight;
-    constructor(context: KlintContexts);
-    parse(font: string, desiredXHeight?: number): void;
-    toJSON(): {
-        metrics: FontMetrics;
-        glyphs: Record<string, GlyphMetrics>;
-    };
-    getPoints(text: string, options: PointOptions): Array<Array<Array<{
-        x: number;
-        y: number;
-    }>>>;
-    flatten(points: SVGFontPaths, displacement?: DisplacementCallback): Array<{
-        x: number;
-        y: number;
-    }>;
-    draw(points: SVGFontPaths, displacement?: DisplacementCallback): void;
-}
-
 type KlintStateValue = unknown;
 type KlintStateCallback = (key: string, value: KlintStateValue) => void;
 interface KlintState {
@@ -667,10 +593,9 @@ declare class Thing implements KlintThing {
     log(): void;
 }
 
-interface KlintPlugins {
+interface KlintElements {
     Color: Color;
     Easing: Easing;
-    SVGfont: SVGfont;
     State: State;
     Vector: Vector;
     Time: Time;
@@ -680,7 +605,7 @@ interface KlintPlugins {
 
 declare const EPSILON = 0.0001;
 type KlintContexts = KlintContext | KlintOffscreenContext;
-interface KlintOffscreenContext extends CanvasRenderingContext2D, KlintFunctions, KlintPlugins {
+interface KlintOffscreenContext extends CanvasRenderingContext2D, KlintFunctions, KlintElements {
     width: number;
     height: number;
     __dpr: number;

@@ -10,8 +10,8 @@
 ## 0.1.0
 ### Core
 #### Bugs
-- [ ] Vite hotreload creates slows down
-- [ ] Window.resize event inconsistent
+- [x] Vite hotreload creates slows down
+- [x] Window.resize event inconsistent
 
 
 #### Fixes
@@ -41,7 +41,7 @@
 - [ ] Make the loadVideo hook 
 - [ ] Make the useGestures hook 
 
-## ESSENTIALS PLUGINS
+## ELEMENTS
 - [ ] Hotspot : note ( Path 2D for custom shapes + ctx.isPointInPath()) 
 - [ ] Draggables 
 - [ ] Grids : 2D, responsive, radial 
@@ -49,7 +49,6 @@
 - [ ] Vector2D & Matrix
 - [ ] Noise + pseudo-random
 - [ ] Advanced Pixels array : load, set, copy & update => Done but considering removing it. Should set Canvas to willReadOften if loaded, needs to happen at preload stage
-- [ ] Noise + pseudo-random
 ## EXTRAS PLUGINS
 - [ ] Catmull Curves : path smoothing and auto-rounded
 - [x] Easing 

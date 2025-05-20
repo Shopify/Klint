@@ -48,12 +48,14 @@
     "url": "https://github.com/Shopify/Klint/issues"
   },
   "scripts": {
-    "build": "npm run build:main && npm run build:plugins",
+    "build": "npm run build:main && npm run build:elements",
     "build:main": "tsup src/index.tsx --format esm,cjs --dts --external=react --external=react-dom",
     "build:plugins": "tsup src/plugins/index.tsx --format esm,cjs --dts --outDir dist/plugins",
+    "build:elements": "tsup src/elements/index.tsx --format esm,cjs --dts --outDir dist/elements",
     "build:minified": "npm run build:main:min && npm run build:plugins:min",
     "build:main:min": "tsup src/index.tsx --format esm,cjs --dts --minify --external=react --external=react-dom",
     "build:plugins:min": "tsup src/plugins/index.tsx --format esm,cjs --dts --minify --outDir dist/plugins",
+    "build:elements:min": "tsup src/elements/index.tsx --format esm,cjs --dts --minify --outDir dist/elements",
     "dev": "concurrently \"npm run dev:main\" \"npm run dev:plugins\"",
     "dev:main": "tsup src/index.tsx --format esm,cjs --dts --watch --external=react --external=react-dom",
     "dev:plugins": "tsup src/plugins/index.tsx --format esm,cjs --dts --watch --outDir dist/plugins",
