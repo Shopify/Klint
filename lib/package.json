@@ -2,7 +2,7 @@
   "name": "@shopify/klint",
   "author": "arthurcloche",
   "license": "MIT",
-  "version": "0.0.91",
+  "version": "0.0.92",
   "description": "A modern creative coding library",
   "type": "module",
   "main": "dist/index.cjs",
