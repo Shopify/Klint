@@ -2,7 +2,7 @@
   "name": "@shopify/klint",
   "author": "arthurcloche",
   "license": "MIT",
-  "version": "0.0.92",
+  "version": "0.0.93",
   "description": "A modern creative coding library",
   "type": "module",
   "main": "dist/index.cjs",
@@ -63,11 +63,10 @@
     "test:watch": "vitest --environment jsdom",
     "lint": "eslint src --ext .ts,.tsx",
     "clean": "rimraf dist",
-    "version": "yarn version",
-    "release": "npm run clean && npm run build && npm publish"
+    "version": "yarn version"
   },
   "peerDependencies": {
-    "react": ">=16.8.0",
+    "react": "^19.1.0",
     "react-dom": ">=16.8.0"
   },
   "devDependencies": {
