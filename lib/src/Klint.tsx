@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { KlintFunctions, KlintCoreFunctions } from "./KlintFunctions";
-import { type KlintPlugins } from "./plugins";
+import { type KlintElements } from "./elements";
 
 const DEFAULT_FPS = 60;
 const DEFAULT_ALT = "A beautiful artwork made with Klint Canvas";
@@ -11,7 +11,7 @@ export type KlintContexts = KlintContext | KlintOffscreenContext;
 export interface KlintOffscreenContext
   extends CanvasRenderingContext2D,
     KlintFunctions,
-    KlintPlugins {
+    KlintElements {
   width: number;
   height: number;
   __dpr: number;
@@ -334,9 +334,6 @@ export default function Klint({
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
       }
-      contextRef.current = null;
-      canvasRef.current = null;
-      containerRef.current = null;
     };
     // Not ideal, but without an empty array, everything get recomputed unnecesseraly.
     // eslint-disable-next-line react-hooks/exhaustive-deps

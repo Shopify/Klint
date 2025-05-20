@@ -728,4 +728,4 @@ interface KlintPlugins {
     Thing: Thing;
 }
 
-export { Color, Easing, KlintPlugins, SVGfont, State, Text, Thing, Time, Vector };
+export { Color, Easing, type KlintPlugins, SVGfont, State, Text, Thing, Time, Vector };

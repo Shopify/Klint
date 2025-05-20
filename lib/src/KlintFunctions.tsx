@@ -7,6 +7,7 @@ import {
   EPSILON,
   KlintConfig,
 } from "./Klint";
+import { Color, Vector, Easing, State, Time, Text, Thing } from "./elements";
 
 // Klint Core functions
 export type KlintCoreFunctions = {
@@ -118,6 +119,12 @@ export const KlintCoreFunctions = {
 
       // Add KlintFunctions if not ignored
       if (!options?.ignoreFunctions) {
+        // Add Klint Elements
+        context.Color = ctx.Color;
+        context.createVector = (x = 0, y = 0) => new Vector(x, y);
+        context.Easing = ctx.Easing;
+        context.Text = ctx.Text;
+
         Object.entries(KlintFunctions).forEach(([name, fn]) => {
           context[name] = fn(context as KlintOffscreenContext);
         });

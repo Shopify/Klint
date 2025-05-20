@@ -1,6 +1,15 @@
 import { useRef, useCallback, useEffect, useMemo } from "react";
 import { KlintFunctions, KlintCoreFunctions } from "./KlintFunctions";
-import { KlintCanvasOptions, KlintContext } from "./Klint";
+import {
+  KlintCanvasOptions,
+  KlintContext,
+  KlintContexts,
+  KlintOffscreenContext,
+  CONFIG_PROPS,
+  EPSILON,
+  KlintConfig,
+} from "./Klint";
+import { Color, Vector, Easing, State, Time, Text, Thing } from "./elements";
 
 export interface KlintMouse {
   x: number;
@@ -43,7 +52,11 @@ export default function useKlint() {
   const mouseRef = useRef<KlintMouse | null>(null);
   const scrollRef = useRef<KlintScroll | null>(null);
 
-  const useImage = () => {
+  const useDev = () => {
+    return;
+  };
+
+  const KlintImage = () => {
     const imagesRef = useRef<Map<string, HTMLImageElement>>(new Map());
 
     const loadImage = useCallback(
@@ -110,7 +123,7 @@ export default function useKlint() {
     };
   };
 
-  const useMouse = () => {
+  const KlintMouse = () => {
     if (!mouseRef.current) {
       mouseRef.current = { ...DEFAULT_MOUSE_STATE };
     }
@@ -219,7 +232,7 @@ export default function useKlint() {
     };
   };
 
-  const useScroll = () => {
+  const KlintScroll = () => {
     if (!scrollRef.current) {
       scrollRef.current = { ...DEFAULT_SCROLL_STATE };
     }
@@ -264,7 +277,7 @@ export default function useKlint() {
     };
   };
 
-  const useWindow = () => {
+  const KlintWindow = () => {
     const resizeCallbackRef = useRef<((ctx: KlintContext) => void) | null>(
       null
     );
@@ -356,6 +369,15 @@ export default function useKlint() {
     context.__isPlaying = true;
     context.__currentContext = context;
 
+    // Add Klint Elements
+    context.Color = new Color();
+    context.createVector = (x = 0, y = 0) => new Vector(x, y);
+    context.Easing = new Easing(context);
+    context.State = new State();
+    context.Time = new Time(context);
+    context.Text = new Text(context);
+    context.Thing = new Thing(context);
+
     // Add Klint core functions
     Object.entries(KlintCoreFunctions).forEach(([name, fn]) => {
       context[name] = fn(context as unknown as KlintContext);
@@ -398,11 +420,12 @@ export default function useKlint() {
       context: contextRef.current,
       initCoreContext,
     },
-    useMouse,
-    useScroll,
-    useWindow,
-    useImage,
+    KlintMouse,
+    KlintScroll,
+    KlintWindow,
+    KlintImage,
     togglePlay,
+    useDev,
   };
 }
 

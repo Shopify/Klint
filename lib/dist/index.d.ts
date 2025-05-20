@@ -766,7 +766,7 @@ declare function useKlint(): {
         context: KlintContext | null;
         initCoreContext: (canvas: HTMLCanvasElement, options: KlintCanvasOptions) => KlintContext;
     };
-    useMouse: () => {
+    KlintMouse: () => {
         mouse: KlintMouse;
         onClick: (callback: (ctx: KlintContext, e: MouseEvent) => void) => (ctx: KlintContext, e: MouseEvent) => void;
         onMouseIn: (callback: (ctx: KlintContext, e: MouseEvent) => void) => (ctx: KlintContext, e: MouseEvent) => void;
@@ -774,17 +774,17 @@ declare function useKlint(): {
         onMouseDown: (callback: (ctx: KlintContext, e: MouseEvent) => void) => (ctx: KlintContext, e: MouseEvent) => void;
         onMouseUp: (callback: (ctx: KlintContext, e: MouseEvent) => void) => (ctx: KlintContext, e: MouseEvent) => void;
     };
-    useScroll: () => {
+    KlintScroll: () => {
         scroll: KlintScroll;
         onScroll: (callback: (ctx: KlintContext, scroll: KlintScroll, e: WheelEvent) => void) => (ctx: KlintContext, scroll: KlintScroll, e: WheelEvent) => void;
     };
-    useWindow: () => {
+    KlintWindow: () => {
         onResize: (callback: (ctx: KlintContext) => void) => (ctx: KlintContext) => void;
         onBlur: (callback: (ctx: KlintContext) => void) => (ctx: KlintContext) => void;
         onFocus: (callback: (ctx: KlintContext) => void) => (ctx: KlintContext) => void;
         onVisibilityChange: (callback: (ctx: KlintContext, isVisible: boolean) => void) => (ctx: KlintContext, isVisible: boolean) => void;
     };
-    useImage: () => {
+    KlintImage: () => {
         images: Record<string, HTMLImageElement>;
         loadImage: (key: string, url: string) => Promise<HTMLImageElement>;
         loadImages: (imageMap: Record<string, string>) => Promise<Map<string, HTMLImageElement>>;
@@ -793,6 +793,7 @@ declare function useKlint(): {
         clearImages: () => void;
     };
     togglePlay: (playing?: boolean) => void;
+    useDev: () => void;
 };
 declare const useProps: <T extends object = Record<string, unknown>>(props: T) => {
     get: <K extends keyof T>(key: K) => T[K];
@@ -807,4 +808,4 @@ declare const useStorage: <T extends object = Record<string, unknown>>(initialPr
     store: T;
 };
 
-export { CONFIG_PROPS, EPSILON, Klint, KlintCanvasOptions, KlintConfig, KlintContext, KlintContextWrapper, KlintContexts, KlintCoreFunctions, KlintFunctions, KlintMouse, KlintOffscreenContext, KlintProps, KlintScroll, useKlint, useProps, useStorage };
+export { CONFIG_PROPS, EPSILON, Klint, type KlintCanvasOptions, type KlintConfig, type KlintContext, type KlintContextWrapper, type KlintContexts, KlintCoreFunctions, KlintFunctions, type KlintMouse, type KlintOffscreenContext, type KlintProps, type KlintScroll, useKlint, useProps, useStorage };

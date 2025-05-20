@@ -148,8 +148,7 @@
 // import Klint, { KlintContext } from "../../Klint/lib/src/Klint";
 // import useKlint, { useStorage } from "../../Klint/lib/src/useKlint";
 // import { Color } from "../../Klint/lib/src/plugins";
-import { Color } from "@shopify/klint/plugins";
-import { Klint, type KlintContext, useKlint, useStorage } from "@shopify/klint";
+import { Klint, type KlintContext, useKlint } from "@shopify/klint";
 
 import { useState } from "react";
 
@@ -162,35 +161,47 @@ interface KlintStorageProps {
 
 // import svgType from "../src/Marcel-semibold.svg";
 
+if (import.meta.hot) {
+  console.log("hey");
+}
+
 export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
-  const { context, useMouse, useWindow, useImage /*useScroll*/ } = useKlint();
-  const { /*mouse,*/ onClick } = useMouse();
-  const { images, loadImages } = useImage();
-  console.log(context);
-  const { onResize } = useWindow();
-  // const { images, loading } = useImage(src);
+  const { context, KlintMouse, useDev } = useKlint();
+  const { mouse, onClick } = KlintMouse();
+  useDev();
+  // const { images, loadImages } = useImage();
+  // const { onResize } = useWindow();
+  // // const { onResize } = useWindow();
+  // // const { images, loading } = useImage(src);
   onClick(() => {
     console.log("mouse click !");
   });
-  onResize(() => {
-    console.log("resized");
-  });
+  // onResize(() => {
+  //   console.log("resized");
+  // });
 
   // const klintProps = useProps<KlintCanvasProps>(props);
-  const P = useStorage<KlintStorageProps>({
-    hello: "world",
-  });
+  // const P = useStorage<KlintStorageProps>({
+  //   hello: "world",
+  // });
 
   const preload = async (K: KlintContext) => {
-    await loadImages({
-      lamp: "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/lamp.png?v=1734625960",
-    });
-    K.extend("Color", new Color());
+    // await loadImages({
+    //   lamp: "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/lamp.png?v=1734625960",
+    // });
+    console.log("re-render");
     // Thing.attach(K)
 
-    // K.extend("createVector", (x: number, y: number): Vector => {
-    //   return new Vector(x, y);
-    // });
+    // No need to extend Color anymore, it's already available in the context
+    // K.extend("Color", new Color());
+
+    // Vector is now directly accessible
+    const vec = K.createVector(100, 100);
+    console.log("Vector example:", vec.x, vec.y);
+
+    // Use the built-in Color methods
+    const redColor = K.Color.rgb(255, 0, 0);
+    console.log("Red color:", redColor);
 
     // P.set("counter", props.counter);
     //K.extend("T", new Text(K));
@@ -241,7 +252,9 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
   };
 
   const draw = (K: KlintContext) => {
-    const { Color } = K;
+    // Use Color directly from the context
+    const redColor = K.Color.rgb(255, 0, 0);
+
     // console.log(images["lamp"]);
     // const scrollAmount = P.get("scroll") as {
     //   distance: number;
@@ -258,18 +271,19 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
     // });
 
     // const col = C.hsl(scroll.velocity * 360, 100, 50);
-    K.background(`#F00`);
-
-    for (let i = 0; i <= 100; i++) {
-      const x = (i / 100) * K.width;
-      const y =
-        K.height * 0.5 +
-        Math.sin(K.frame * 0.03 + (i / 50) * Math.PI * 2) * 240;
-      K.push();
-      K.fillColor(Color.hsl((i / 100) * 360, 50, 50));
-      K.circle(x, y, 100);
-      K.pop();
-    }
+    K.background(redColor);
+    K.text("hello\nworld", K.width / 2, K.height / 2);
+    // K.circle(mouse.x, mouse.y, 200);
+    // for (let i = 0; i <= 200; i++) {
+    //   const x = (i / 200) * K.width;
+    //   const y =
+    //     K.height * 0.5 +
+    //     Math.sin(K.frame * 0.03 + (i / 500) * Math.PI * 2) * 240;
+    //   K.push();
+    //   K.fillColor("#0FF");
+    //   K.circle(x, y, 100);
+    //   K.pop();
+    // }
 
     // K.push();
     // K.fillColor(mouse.isPressed ? "#FFF" : "#000");
@@ -382,6 +396,7 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
         origin: "corner",
         // fps: 24,
         // static: "true",
+        // unsafemode: "true",
       }}
     />
     // </KlintErrorBoundary>
