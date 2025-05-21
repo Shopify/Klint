@@ -688,6 +688,23 @@ interface KlintScroll {
     velocity: number;
     lastTime: number;
 }
+interface KlintGesture {
+    active: boolean;
+    touches: TouchList | null;
+    startTouches: TouchList | null;
+    startDistance: number;
+    currentDistance: number;
+    scale: number;
+    rotation: number;
+    startTime: number;
+    deltaX: number;
+    deltaY: number;
+    velocityX: number;
+    velocityY: number;
+    lastTime: number;
+    lastX: number;
+    lastY: number;
+}
 declare function useKlint(): {
     context: {
         context: KlintContext | null;
@@ -704,6 +721,16 @@ declare function useKlint(): {
     KlintScroll: () => {
         scroll: KlintScroll;
         onScroll: (callback: (ctx: KlintContext, scroll: KlintScroll, e: WheelEvent) => void) => (ctx: KlintContext, scroll: KlintScroll, e: WheelEvent) => void;
+    };
+    KlintGesture: () => {
+        gesture: KlintGesture;
+        onTap: (callback: (ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void) => (ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void;
+        onSwipe: (callback: (ctx: KlintContext, e: TouchEvent, gesture: KlintGesture, direction: "left" | "right" | "up" | "down") => void) => (ctx: KlintContext, e: TouchEvent, gesture: KlintGesture, direction: "left" | "right" | "up" | "down") => void;
+        onPinch: (callback: (ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void) => (ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void;
+        onRotate: (callback: (ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void) => (ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void;
+        onTouchStart: (callback: (ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void) => (ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void;
+        onTouchMove: (callback: (ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void) => (ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void;
+        onTouchEnd: (callback: (ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void) => (ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void;
     };
     KlintWindow: () => {
         onResize: (callback: (ctx: KlintContext) => void) => (ctx: KlintContext) => void;

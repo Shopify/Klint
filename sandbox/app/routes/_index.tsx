@@ -178,10 +178,14 @@ if (import.meta.hot) {
 }
 
 export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
-  const { context, KlintMouse, useDev, KlintImage } = useKlint();
+  const { context, KlintMouse, useDev, KlintImage, KlintGesture } = useKlint();
   const { mouse, onClick } = KlintMouse();
   useDev();
   const { images, loadImages } = KlintImage();
+  const { onTap } = KlintGesture();
+  onTap(() => {
+    console.log("hey");
+  });
   // const { onResize } = useWindow();
   // // const { onResize } = useWindow();
   // // const { images, loading } = useImage(src);
@@ -304,31 +308,9 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
     // });
 
     // const col = C.hsl(scroll.velocity * 360, 100, 50);
-    // K.background("#00F");
+    K.background("#00F");
 
-    const a = K.getOffscreen("buffer") as KlintOffscreenContext;
-    K.clear();
-    a.clear();
-    // a.background("#F00");
-
-    const step = K.width / 64;
-    for (let i = 0; i < 64 * 64; i++) {
-      const x = (i % 64) * step;
-      const y = Math.floor(i / 64) * step;
-
-      K.push();
-      K.fillColor("#F00");
-      K.translate(x, y);
-      K.circle(0, 0, 10);
-      K.pop();
-      a.push();
-      a.fillColor("#00F");
-      a.translate(x, y);
-      a.circle(0, 0, 10);
-      a.pop();
-    }
-    a.filter = "blur(10px)";
-    K.image(a, 0, 0);
+    //
 
     // K.text("hello\nworld", K.width / 2, K.height / 2);
     // const lamp = K.getOffscreen("lamp");
