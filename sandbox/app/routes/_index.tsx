@@ -202,23 +202,24 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
       lamp: "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/lamp.png?v=1734625960",
     });
 
-    const lamp = images.lamp;
-    const os = K.scaleTo(lamp.width, lamp.height, K.width, K.height);
-    K.createOffscreen(
-      "lamp",
-      lamp.width * os * 0.5,
-      lamp.height * os * 0.5,
-      {},
-      (O: KlintOffscreenContext) => {
-        O.setImageOrigin("center");
-        const s = O.scaleTo(lamp.width, lamp.height, O.width, O.height);
-        O.push();
-        O.translate(O.width / 2, O.height / 2);
-        O.scale(s, s);
-        O.image(lamp, 0, 0);
-        O.pop();
-      }
-    );
+    // const lamp = images.lamp;
+    // const os = K.scaleTo(lamp.width, lamp.height, K.width, K.height);
+    // K.createOffscreen(
+    //   "lamp",
+    //   lamp.width * os * 0.5,
+    //   lamp.height * os * 0.5,
+    //   {},
+    //   (O: KlintOffscreenContext) => {
+    //     O.setImageOrigin("center");
+    //     const s = O.scaleTo(lamp.width, lamp.height, O.width, O.height);
+    //     O.push();
+    //     O.translate(O.width / 2, O.height / 2);
+    //     O.scale(s, s);
+    //     O.image(lamp, 0, 0);
+    //     O.pop();
+    //   }
+    // );
+    /*
     const offscreen = K.getOffscreen("lamp") as KlintOffscreenContext;
     const steps = 20;
     const points = [];
@@ -240,7 +241,7 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
     P.set("points", points);
     // console.log(points);
     // Thing.attach(K)
-
+    */
     // No need to extend Color anymore, it's already available in the context
     // K.extend("Color", new Color());
 
@@ -270,33 +271,13 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
     // );
     // K.describe("A set of circles");
 
-    // K.createOffscreen(
-    //   "buffer",
-    //   K.width,
-    //   K.height,
-    //   { static: "true" },
-    //   (O: KlintOffscreenContext) => {
-    //     O.textFont("Inter");
-    //     O.textSize(360);
-    //     O.noStroke();
-    //     O.alignText("center", "middle");
-    //     O.computeFont();
-    //     const tx = O.measureText(String(P.get("hello")));
-    //     console.log(tx);
-    //     O.resizeCanvas(
-    //       tx.width,
-    //       tx.actualBoundingBoxAscent + tx.actualBoundingBoxDescent + 24
-    //     );
-    //     O.fillColor("#FFF");
-    //     O.text(String(P.get("hello")), O.width / 2, (O.height / 2) * 1.18);
-    //   }
-    // );
+    K.createOffscreen("buffer", K.width, K.height, {});
   };
   const setup = (K: KlintContext) => {
     K.textFont("Marcel");
     K.textSize(512);
     // K.noStroke();
-    K.strokeWidth(10);
+    K.noStroke();
     // K.strokeCap("round");
     K.strokeJoin("round");
     K.alignText("center", "middle");
@@ -305,7 +286,7 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
 
   const draw = (K: KlintContext) => {
     // Use Color directly from the context
-    const redColor = K.Color.rgb(255, 0, 0);
+    // const redColor = K.Color.rgb(255, 0, 0);
 
     // console.log(images["lamp"]);
     // const scrollAmount = P.get("scroll") as {
@@ -323,19 +304,46 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
     // });
 
     // const col = C.hsl(scroll.velocity * 360, 100, 50);
-    K.background("#000");
-    // K.text("hello\nworld", K.width / 2, K.height / 2);
-    const lamp = K.getOffscreen("lamp");
-    const points = P.get("points");
-    K.push();
-    for (const point of points) {
-      const { pos, color } = point;
+    // K.background("#00F");
+
+    const a = K.getOffscreen("buffer") as KlintOffscreenContext;
+    K.clear();
+    a.clear();
+    // a.background("#F00");
+
+    const step = K.width / 64;
+    for (let i = 0; i < 64 * 64; i++) {
+      const x = (i % 64) * step;
+      const y = Math.floor(i / 64) * step;
+
       K.push();
-      K.strokeColor(K.Color.rgb(color[0], color[1], color[2]));
-      K.point(pos.x, pos.y);
+      K.fillColor("#F00");
+      K.translate(x, y);
+      K.circle(0, 0, 10);
       K.pop();
+      a.push();
+      a.fillColor("#00F");
+      a.translate(x, y);
+      a.circle(0, 0, 10);
+      a.pop();
     }
-    K.pop();
+    a.filter = "blur(10px)";
+    K.image(a, 0, 0);
+
+    // K.text("hello\nworld", K.width / 2, K.height / 2);
+    // const lamp = K.getOffscreen("lamp");
+    // const points = P.get("points");
+    // K.push();
+    // if (points) {
+    //   for (const point of points) {
+    //     const { pos, color } = point;
+    //     K.push();
+    //     K.strokeColor(K.Color.rgb(color[0], color[1], color[2]));
+    //     K.point(pos.x, pos.y);
+    //     K.pop();
+    //   }
+    // }
+    // K.pop();
     // K.image(lamp, 0, 0);
 
     // K.circle(mouse.x, mouse.y, 200);

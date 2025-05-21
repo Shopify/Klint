@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import Color from "../../src/plugins/Color";
+import { Color } from "../../src/elements";
 import { KlintContext } from "../../src/Klint";
 
-describe("Color Plugin", () => {
+describe("Color Element", () => {
   let C: Color;
 
   beforeEach(() => {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d")!;
     // Mock minimal context required by Color
-    C = new Color({ ctx } as unknown as KlintContext);
+    C = new Color();
   });
 
   describe("Color Properties", () => {

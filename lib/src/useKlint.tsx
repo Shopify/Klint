@@ -42,10 +42,47 @@ const DEFAULT_SCROLL_STATE: KlintScroll = {
   lastTime: 0,
 };
 
+export interface KlintGesture {
+  active: boolean;
+  touches: TouchList | null;
+  startTouches: TouchList | null;
+  startDistance: number;
+  currentDistance: number;
+  scale: number;
+  rotation: number;
+  startTime: number;
+  deltaX: number;
+  deltaY: number;
+  velocityX: number;
+  velocityY: number;
+  lastTime: number;
+  lastX: number;
+  lastY: number;
+}
+
+const DEFAULT_GESTURE_STATE: KlintGesture = {
+  active: false,
+  touches: null,
+  startTouches: null,
+  startDistance: 0,
+  currentDistance: 0,
+  scale: 1,
+  rotation: 0,
+  startTime: 0,
+  deltaX: 0,
+  deltaY: 0,
+  velocityX: 0,
+  velocityY: 0,
+  lastTime: 0,
+  lastX: 0,
+  lastY: 0,
+};
+
 export default function useKlint() {
   const contextRef = useRef<KlintContext | null>(null);
   const mouseRef = useRef<KlintMouse | null>(null);
   const scrollRef = useRef<KlintScroll | null>(null);
+  const gestureRef = useRef<KlintGesture | null>(null);
 
   const useDev = () => {
     return;
@@ -279,6 +316,307 @@ export default function useKlint() {
     };
   };
 
+  const KlintGesture = () => {
+    if (!gestureRef.current) {
+      gestureRef.current = { ...DEFAULT_GESTURE_STATE };
+    }
+
+    const tapCallbackRef = useRef<
+      ((ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void) | null
+    >(null);
+    const swipeCallbackRef = useRef<
+      | ((
+          ctx: KlintContext,
+          e: TouchEvent,
+          gesture: KlintGesture,
+          direction: "left" | "right" | "up" | "down"
+        ) => void)
+      | null
+    >(null);
+    const pinchCallbackRef = useRef<
+      ((ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void) | null
+    >(null);
+    const rotateCallbackRef = useRef<
+      ((ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void) | null
+    >(null);
+    const touchStartCallbackRef = useRef<
+      ((ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void) | null
+    >(null);
+    const touchMoveCallbackRef = useRef<
+      ((ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void) | null
+    >(null);
+    const touchEndCallbackRef = useRef<
+      ((ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void) | null
+    >(null);
+
+    useEffect(() => {
+      if (!contextRef.current?.canvas) return;
+      const canvas = contextRef.current.canvas;
+      const ctx = contextRef.current;
+
+      // Calculate distance between two touch points
+      const getDistance = (t1: Touch, t2: Touch): number => {
+        const dx = t1.clientX - t2.clientX;
+        const dy = t1.clientY - t2.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+      };
+
+      // Calculate angle/rotation between two touch points
+      const getAngle = (t1: Touch, t2: Touch): number => {
+        return (
+          (Math.atan2(t2.clientY - t1.clientY, t2.clientX - t1.clientX) * 180) /
+          Math.PI
+        );
+      };
+
+      const getTouchCenter = (touches: TouchList): { x: number; y: number } => {
+        if (touches.length === 1) {
+          return {
+            x: touches[0].clientX,
+            y: touches[0].clientY,
+          };
+        }
+
+        let sumX = 0;
+        let sumY = 0;
+
+        for (let i = 0; i < touches.length; i++) {
+          sumX += touches[i].clientX;
+          sumY += touches[i].clientY;
+        }
+
+        return {
+          x: sumX / touches.length,
+          y: sumY / touches.length,
+        };
+      };
+
+      const handleTouchStart = (e: TouchEvent) => {
+        if (!gestureRef.current) return;
+
+        const now = performance.now();
+        const touchCenter = getTouchCenter(e.touches);
+
+        gestureRef.current.active = true;
+        gestureRef.current.touches = e.touches;
+        gestureRef.current.startTouches = e.touches;
+        gestureRef.current.startTime = now;
+        gestureRef.current.lastTime = now;
+        gestureRef.current.lastX = touchCenter.x;
+        gestureRef.current.lastY = touchCenter.y;
+        gestureRef.current.deltaX = 0;
+        gestureRef.current.deltaY = 0;
+        gestureRef.current.velocityX = 0;
+        gestureRef.current.velocityY = 0;
+
+        // For pinch gesture
+        if (e.touches.length >= 2) {
+          gestureRef.current.startDistance = getDistance(
+            e.touches[0],
+            e.touches[1]
+          );
+          gestureRef.current.currentDistance = gestureRef.current.startDistance;
+          gestureRef.current.scale = 1;
+
+          // Initial rotation
+          gestureRef.current.rotation = getAngle(e.touches[0], e.touches[1]);
+        }
+
+        if (touchStartCallbackRef.current) {
+          touchStartCallbackRef.current(ctx, e, gestureRef.current);
+        }
+      };
+
+      const handleTouchMove = (e: TouchEvent) => {
+        if (!gestureRef.current || !gestureRef.current.active) return;
+
+        const now = performance.now();
+        const deltaTime = now - gestureRef.current.lastTime;
+        const touchCenter = getTouchCenter(e.touches);
+
+        // Update touch list
+        gestureRef.current.touches = e.touches;
+
+        // Calculate deltas and velocities
+        gestureRef.current.deltaX = touchCenter.x - gestureRef.current.lastX;
+        gestureRef.current.deltaY = touchCenter.y - gestureRef.current.lastY;
+
+        if (deltaTime > 0) {
+          gestureRef.current.velocityX = gestureRef.current.deltaX / deltaTime;
+          gestureRef.current.velocityY = gestureRef.current.deltaY / deltaTime;
+        }
+
+        gestureRef.current.lastTime = now;
+        gestureRef.current.lastX = touchCenter.x;
+        gestureRef.current.lastY = touchCenter.y;
+
+        // For pinch gesture
+        if (e.touches.length >= 2) {
+          const currentDistance = getDistance(e.touches[0], e.touches[1]);
+          gestureRef.current.currentDistance = currentDistance;
+
+          // Calculate scale
+          if (gestureRef.current.startDistance > 0) {
+            gestureRef.current.scale =
+              currentDistance / gestureRef.current.startDistance;
+          }
+
+          // Calculate rotation
+          const currentAngle = getAngle(e.touches[0], e.touches[1]);
+          const startAngle = gestureRef.current.rotation;
+          gestureRef.current.rotation = currentAngle - startAngle;
+
+          if (pinchCallbackRef.current) {
+            pinchCallbackRef.current(ctx, e, gestureRef.current);
+          }
+
+          if (
+            rotateCallbackRef.current &&
+            Math.abs(gestureRef.current.rotation) > 5
+          ) {
+            rotateCallbackRef.current(ctx, e, gestureRef.current);
+          }
+        }
+
+        if (touchMoveCallbackRef.current) {
+          touchMoveCallbackRef.current(ctx, e, gestureRef.current);
+        }
+      };
+
+      const handleTouchEnd = (e: TouchEvent) => {
+        if (
+          !gestureRef.current ||
+          !gestureRef.current.active ||
+          !gestureRef.current.startTouches
+        )
+          return;
+
+        const now = performance.now();
+        const touchDuration = now - gestureRef.current.startTime;
+
+        // Detect tap
+        if (
+          touchDuration < 300 &&
+          Math.abs(gestureRef.current.deltaX) < 10 &&
+          Math.abs(gestureRef.current.deltaY) < 10
+        ) {
+          if (tapCallbackRef.current) {
+            tapCallbackRef.current(ctx, e, gestureRef.current);
+          }
+        }
+
+        // Detect swipe
+        const swipeThreshold = 50;
+        const isHorizontalSwipe =
+          Math.abs(gestureRef.current.deltaX) >
+          Math.abs(gestureRef.current.deltaY);
+
+        if (swipeCallbackRef.current && touchDuration < 300) {
+          if (
+            isHorizontalSwipe &&
+            Math.abs(gestureRef.current.deltaX) > swipeThreshold
+          ) {
+            const direction = gestureRef.current.deltaX > 0 ? "right" : "left";
+            swipeCallbackRef.current(ctx, e, gestureRef.current, direction);
+          } else if (
+            !isHorizontalSwipe &&
+            Math.abs(gestureRef.current.deltaY) > swipeThreshold
+          ) {
+            const direction = gestureRef.current.deltaY > 0 ? "down" : "up";
+            swipeCallbackRef.current(ctx, e, gestureRef.current, direction);
+          }
+        }
+
+        if (touchEndCallbackRef.current) {
+          touchEndCallbackRef.current(ctx, e, gestureRef.current);
+        }
+
+        // Reset state if no more touches
+        if (e.touches.length === 0) {
+          gestureRef.current.active = false;
+        }
+      };
+
+      const handleTouchCancel = (e: TouchEvent) => {
+        if (!gestureRef.current) return;
+
+        gestureRef.current.active = false;
+
+        if (touchEndCallbackRef.current) {
+          touchEndCallbackRef.current(ctx, e, gestureRef.current);
+        }
+      };
+
+      canvas.addEventListener("touchstart", handleTouchStart, {
+        passive: false,
+      });
+      canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+      canvas.addEventListener("touchend", handleTouchEnd);
+      canvas.addEventListener("touchcancel", handleTouchCancel);
+
+      return () => {
+        canvas.removeEventListener("touchstart", handleTouchStart);
+        canvas.removeEventListener("touchmove", handleTouchMove);
+        canvas.removeEventListener("touchend", handleTouchEnd);
+        canvas.removeEventListener("touchcancel", handleTouchCancel);
+      };
+    }, []);
+
+    return {
+      gesture: gestureRef.current,
+      onTap: (
+        callback: (
+          ctx: KlintContext,
+          e: TouchEvent,
+          gesture: KlintGesture
+        ) => void
+      ) => (tapCallbackRef.current = callback),
+      onSwipe: (
+        callback: (
+          ctx: KlintContext,
+          e: TouchEvent,
+          gesture: KlintGesture,
+          direction: "left" | "right" | "up" | "down"
+        ) => void
+      ) => (swipeCallbackRef.current = callback),
+      onPinch: (
+        callback: (
+          ctx: KlintContext,
+          e: TouchEvent,
+          gesture: KlintGesture
+        ) => void
+      ) => (pinchCallbackRef.current = callback),
+      onRotate: (
+        callback: (
+          ctx: KlintContext,
+          e: TouchEvent,
+          gesture: KlintGesture
+        ) => void
+      ) => (rotateCallbackRef.current = callback),
+      onTouchStart: (
+        callback: (
+          ctx: KlintContext,
+          e: TouchEvent,
+          gesture: KlintGesture
+        ) => void
+      ) => (touchStartCallbackRef.current = callback),
+      onTouchMove: (
+        callback: (
+          ctx: KlintContext,
+          e: TouchEvent,
+          gesture: KlintGesture
+        ) => void
+      ) => (touchMoveCallbackRef.current = callback),
+      onTouchEnd: (
+        callback: (
+          ctx: KlintContext,
+          e: TouchEvent,
+          gesture: KlintGesture
+        ) => void
+      ) => (touchEndCallbackRef.current = callback),
+    };
+  };
+
   const KlintWindow = () => {
     const resizeCallbackRef = useRef<((ctx: KlintContext) => void) | null>(
       null
@@ -424,6 +762,7 @@ export default function useKlint() {
     },
     KlintMouse,
     KlintScroll,
+    KlintGesture,
     KlintWindow,
     KlintImage,
     togglePlay,
