@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { KlintFunctions, KlintCoreFunctions } from "./KlintFunctions";
-import { type KlintElements } from "./elements";
+import { type KlintElements, Vector } from "./elements";
 
 const DEFAULT_FPS = 60;
 const DEFAULT_ALT = "A beautiful artwork made with Klint Canvas";
@@ -34,6 +34,7 @@ export interface KlintOffscreenContext
     horizontal: CanvasTextAlign;
     vertical: CanvasTextBaseline;
   };
+  createVector: (x: number, y: number) => Vector;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
@@ -62,6 +63,7 @@ export interface KlintCanvasOptions {
   nocanvas?: string;
   fps?: number;
   unsafemode?: string;
+  dpr?: number | "default";
   origin?: "corner" | "center";
 }
 
@@ -74,6 +76,7 @@ const DEFAULT_OPTIONS: KlintCanvasOptions = {
   unsafemode: "false",
   willreadfrequently: "false",
   fps: DEFAULT_FPS,
+  dpr: "default",
   origin: "corner",
 };
 
@@ -226,7 +229,12 @@ export default function Klint({
 
     const canvas = canvasRef.current;
     const container = containerRef.current;
-    const dpr = window.devicePixelRatio || 3;
+    const defaultDPR = window.devicePixelRatio || 3;
+    const dpr = __options.dpr
+      ? __options.dpr === "default"
+        ? defaultDPR
+        : __options.dpr
+      : defaultDPR;
 
     contextRef.current = initContext ? initContext(canvas, __options) : null;
     const context = contextRef.current;

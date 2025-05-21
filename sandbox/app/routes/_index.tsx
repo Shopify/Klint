@@ -148,15 +148,27 @@
 // import Klint, { KlintContext } from "../../Klint/lib/src/Klint";
 // import useKlint, { useStorage } from "../../Klint/lib/src/useKlint";
 // import { Color } from "../../Klint/lib/src/plugins";
-import { Klint, type KlintContext, useKlint } from "@shopify/klint";
+import {
+  Klint,
+  type KlintContext,
+  KlintOffscreenContext,
+  useKlint,
+  useStorage,
+} from "@shopify/klint";
 
 import { useState } from "react";
 
 // interface KlintCanvasProps {
 //   counter: number;
 // }
+
+interface Points {
+  pos?: KlintVector;
+  color: number[];
+}
+
 interface KlintStorageProps {
-  hello?: string;
+  points?: Points[];
 }
 
 // import svgType from "../src/Marcel-semibold.svg";
@@ -166,10 +178,10 @@ if (import.meta.hot) {
 }
 
 export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
-  const { context, KlintMouse, useDev } = useKlint();
+  const { context, KlintMouse, useDev, KlintImage } = useKlint();
   const { mouse, onClick } = KlintMouse();
   useDev();
-  // const { images, loadImages } = useImage();
+  const { images, loadImages } = KlintImage();
   // const { onResize } = useWindow();
   // // const { onResize } = useWindow();
   // // const { images, loading } = useImage(src);
@@ -181,27 +193,64 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
   // });
 
   // const klintProps = useProps<KlintCanvasProps>(props);
-  // const P = useStorage<KlintStorageProps>({
-  //   hello: "world",
-  // });
+  const P = useStorage<KlintStorageProps>({
+    points: [],
+  });
 
   const preload = async (K: KlintContext) => {
-    // await loadImages({
-    //   lamp: "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/lamp.png?v=1734625960",
-    // });
-    console.log("re-render");
+    await loadImages({
+      lamp: "https://cdn.shopify.com/s/files/1/0817/9308/9592/files/lamp.png?v=1734625960",
+    });
+
+    const lamp = images.lamp;
+    const os = K.scaleTo(lamp.width, lamp.height, K.width, K.height);
+    K.createOffscreen(
+      "lamp",
+      lamp.width * os * 0.5,
+      lamp.height * os * 0.5,
+      {},
+      (O: KlintOffscreenContext) => {
+        O.setImageOrigin("center");
+        const s = O.scaleTo(lamp.width, lamp.height, O.width, O.height);
+        O.push();
+        O.translate(O.width / 2, O.height / 2);
+        O.scale(s, s);
+        O.image(lamp, 0, 0);
+        O.pop();
+      }
+    );
+    const offscreen = K.getOffscreen("lamp") as KlintOffscreenContext;
+    const steps = 20;
+    const points = [];
+    P.set("points", []);
+    for (let j = 0; j < offscreen.height; j += steps) {
+      for (let i = 0; i < offscreen.width; i += steps) {
+        const pixel = offscreen.readPixels(i, j);
+        if (pixel[3] !== 0) {
+          points?.push({
+            pos: K.createVector(i, j),
+            color: [pixel[0], pixel[1], pixel[2]],
+          });
+        }
+      }
+    }
+    points.sort((a, b) => a.pos.x - b.pos.x);
+    // points.sort((a, b) => a.pos.y - b.pos.y);
+    console.log(points);
+    P.set("points", points);
+    // console.log(points);
     // Thing.attach(K)
 
     // No need to extend Color anymore, it's already available in the context
     // K.extend("Color", new Color());
 
     // Vector is now directly accessible
-    const vec = K.createVector(100, 100);
-    console.log("Vector example:", vec.x, vec.y);
+    // const vec = K.createVector(100, 100);
+    // console.log("Vector example:", vec.x, vec.y);
 
-    // Use the built-in Color methods
-    const redColor = K.Color.rgb(255, 0, 0);
-    console.log("Red color:", redColor);
+    // // Use the built-in Color methods
+    // const redColor = K.Color.rgb(255, 0, 0);
+    // console.log("Red color:", redColor);
 
     // P.set("counter", props.counter);
     //K.extend("T", new Text(K));
@@ -246,9 +295,12 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
   const setup = (K: KlintContext) => {
     K.textFont("Marcel");
     K.textSize(512);
-    K.noStroke();
+    // K.noStroke();
+    K.strokeWidth(10);
+    // K.strokeCap("round");
+    K.strokeJoin("round");
     K.alignText("center", "middle");
-    K.setImageOrigin("center");
+    // K.setImageOrigin("center");
   };
 
   const draw = (K: KlintContext) => {
@@ -271,8 +323,21 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
     // });
 
     // const col = C.hsl(scroll.velocity * 360, 100, 50);
-    K.background(redColor);
-    K.text("hello\nworld", K.width / 2, K.height / 2);
+    K.background("#000");
+    // K.text("hello\nworld", K.width / 2, K.height / 2);
+    const lamp = K.getOffscreen("lamp");
+    const points = P.get("points");
+    K.push();
+    for (const point of points) {
+      const { pos, color } = point;
+      K.push();
+      K.strokeColor(K.Color.rgb(color[0], color[1], color[2]));
+      K.point(pos.x, pos.y);
+      K.pop();
+    }
+    K.pop();
+    // K.image(lamp, 0, 0);
+
     // K.circle(mouse.x, mouse.y, 200);
     // for (let i = 0; i <= 200; i++) {
     //   const x = (i / 200) * K.width;
@@ -394,6 +459,7 @@ export function KlintCanvas(/*{ ...props }: KlintCanvasProps*/) {
       setup={setup}
       options={{
         origin: "corner",
+        // noloop: "true",
         // fps: 24,
         // static: "true",
         // unsafemode: "true",
