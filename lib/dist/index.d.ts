@@ -628,6 +628,7 @@ interface KlintOffscreenContext extends CanvasRenderingContext2D, KlintFunctions
         horizontal: CanvasTextAlign;
         vertical: CanvasTextBaseline;
     };
+    createVector: (x: number, y: number) => Vector;
     [key: string]: any;
 }
 interface KlintContext extends KlintOffscreenContext, KlintCoreFunctions {
@@ -711,8 +712,12 @@ declare function useKlint(): {
     };
     KlintImage: () => {
         images: Record<string, HTMLImageElement>;
-        loadImage: (key: string, url: string) => Promise<HTMLImageElement>;
-        loadImages: (imageMap: Record<string, string>) => Promise<Map<string, HTMLImageElement>>;
+        loadImage: (key: string, url: string, options?: {
+            crossOrigin?: string;
+        }) => Promise<HTMLImageElement>;
+        loadImages: (imageMap: Record<string, string>, options?: {
+            crossOrigin?: string;
+        }) => Promise<Map<string, HTMLImageElement>>;
         getImage: (key: string) => HTMLImageElement | undefined;
         hasImage: (key: string) => boolean;
         clearImages: () => void;

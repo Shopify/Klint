@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { KlintFunctions, KlintCoreFunctions } from "./KlintFunctions";
-import { type KlintElements } from "./elements";
+import { type KlintElements, Vector } from "./elements";
 
 const DEFAULT_FPS = 60;
 const DEFAULT_ALT = "A beautiful artwork made with Klint Canvas";
@@ -34,6 +34,7 @@ export interface KlintOffscreenContext
     horizontal: CanvasTextAlign;
     vertical: CanvasTextBaseline;
   };
+  createVector: (x: number, y: number) => Vector;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }

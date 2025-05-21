@@ -1,15 +1,10 @@
 import { useRef, useCallback, useEffect, useMemo } from "react";
 import { KlintFunctions, KlintCoreFunctions } from "./KlintFunctions";
-import {
-  KlintCanvasOptions,
-  KlintContext,
-  KlintContexts,
-  KlintOffscreenContext,
-  CONFIG_PROPS,
-  EPSILON,
-  KlintConfig,
-} from "./Klint";
+import { KlintCanvasOptions, KlintContext } from "./Klint";
 import { Color, Vector, Easing, State, Time, Text, Thing } from "./elements";
+
+// Export Vector type as KlintVector
+export type KlintVector = Vector;
 
 export interface KlintMouse {
   x: number;
@@ -60,7 +55,11 @@ export default function useKlint() {
     const imagesRef = useRef<Map<string, HTMLImageElement>>(new Map());
 
     const loadImage = useCallback(
-      async (key: string, url: string): Promise<HTMLImageElement> => {
+      async (
+        key: string,
+        url: string,
+        options?: { crossOrigin?: string }
+      ): Promise<HTMLImageElement> => {
         return new Promise((resolve, reject) => {
           const img = new Image();
           img.onload = () => {
@@ -70,6 +69,8 @@ export default function useKlint() {
             resolve(img);
           };
           img.onerror = reject;
+          // Set crossOrigin to 'anonymous' by default
+          img.crossOrigin = options?.crossOrigin || "anonymous";
           img.src = url;
         });
       },
@@ -78,10 +79,11 @@ export default function useKlint() {
 
     const loadImages = useCallback(
       async (
-        imageMap: Record<string, string>
+        imageMap: Record<string, string>,
+        options?: { crossOrigin?: string }
       ): Promise<Map<string, HTMLImageElement>> => {
         const promises = Object.entries(imageMap).map(([key, url]) =>
-          loadImage(key, url).then(
+          loadImage(key, url, options).then(
             (img: HTMLImageElement) => [key, img] as [string, HTMLImageElement]
           )
         );
