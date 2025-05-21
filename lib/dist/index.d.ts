@@ -652,6 +652,7 @@ interface KlintCanvasOptions {
     nocanvas?: string;
     fps?: number;
     unsafemode?: string;
+    dpr?: number | "default";
     origin?: "corner" | "center";
 }
 type KlintConfig = Partial<Pick<KlintContext, (typeof CONFIG_PROPS)[number]>>;
