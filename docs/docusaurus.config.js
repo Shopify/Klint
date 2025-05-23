@@ -50,6 +50,7 @@ const config = {
         docsRouteBasePath: "/",
       },
     ],
+    "./src/plugins/tailwind-config.js",
   ],
   markdown: {
     mermaid: true,

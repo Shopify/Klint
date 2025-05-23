@@ -27,7 +27,11 @@
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.7.0",
-    "@docusaurus/types": "3.7.0"
+    "@docusaurus/types": "3.7.0",
+    "@shopify/klint": "^0.0.98",
+    "@tailwindcss/postcss": "^4.1.7",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.1.7"
   },
   "browserslist": {
     "production": [
