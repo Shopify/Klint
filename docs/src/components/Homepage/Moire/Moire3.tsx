@@ -20,8 +20,8 @@ export default function Moire3() {
   }
 
   function drawLiness(K: KlintContext, unit, gridSize, offsetMultiplier) {
-    const offsetX = Math.sin(K.time / 50) * 2;
-    const offsetY = Math.cos(K.time / 50) * 2;
+    const offsetX = Math.sin(K.time / 50) * 4;
+    const offsetY = Math.cos(K.time / 50) * 4;
 
     K.push();
     K.translate(offsetX * offsetMultiplier * 1, offsetY * -1);
@@ -39,7 +39,7 @@ export default function Moire3() {
   const draw = (K: KlintContext) => {
     useDev();
     const gridSize = 200;
-    const unit = K.width / gridSize / 2;
+    const unit = K.width / gridSize / 1.5;
     K.noStroke;
     K.blend("source-over");
     K.fillColor("white");
@@ -67,12 +67,12 @@ export default function Moire3() {
         off.rectangle(0, 0, off.width, off.height);
         off.blend("xor");
         off.textFont("sans-serif");
-        off.textSize(300);
-        off.textSpacing("letter", -50);
+        off.textSize(150);
+        off.textSpacing("letter", -44);
         off.textWeight("900");
         off.fillColor("black");
         off.alignText("center", "middle");
-        off.text("hello.", off.width / 2, off.height / 2);
+        off.text("that's a-moire", off.width / 2, off.height / 2);
         off.blend("source-over");
       }
     );
