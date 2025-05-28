@@ -32,6 +32,16 @@ function HomepageHeader() {
               Moire
             </Link>
           </li>
+          <li>
+            <Link className="button" to="/moire2">
+              Moire2
+            </Link>
+          </li>
+          <li>
+            <Link className="button" to="/moire3">
+              Moire3
+            </Link>
+          </li>
         </ul>
       </div>
     </header>

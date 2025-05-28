@@ -27,12 +27,10 @@ export default function Miore() {
   const draw = (K: KlintContext) => {
     useDev();
     const gridSize = 100;
-    const unit = K.width / gridSize / 3;
+    const unit = (K.width / gridSize) * 1.5;
     K.blend("source-over");
     K.fillColor("white");
     K.rectangle(-K.width / 2, -K.height / 2, K.width * 2, K.height * 2);
-    // K.fillColor("#000000");
-    // drawGrid(K, unit, gridSize);
 
     K.blend("multiply");
     K.fillColor("#00ffff");
@@ -43,7 +41,6 @@ export default function Miore() {
 
     K.fillColor("#ff00ff");
     K.push();
-    // K.rotate((K.time * Math.PI) / 1000);
     drawGrid(K, unit, gridSize);
     K.pop();
 
