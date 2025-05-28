@@ -27,6 +27,11 @@ function HomepageHeader() {
               Swans, no 17
             </Link>
           </li>
+          <li>
+            <Link className="button" to="/moire">
+              Moire
+            </Link>
+          </li>
         </ul>
       </div>
     </header>
