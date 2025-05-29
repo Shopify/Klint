@@ -42,6 +42,16 @@ function HomepageHeader() {
               Moire3
             </Link>
           </li>
+          <li>
+            <Link className="button" to="/draw">
+              Draw
+            </Link>
+          </li>
+          <li>
+            <Link className="button" to="/mandala">
+              Mandala
+            </Link>
+          </li>
         </ul>
       </div>
     </header>
