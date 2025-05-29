@@ -1,5 +1,5 @@
 import React from "react";
-import Swans17 from "@site/src/components/Homepage/Paintings/Swans17";
+import Swans17 from "@site/src/components/Paintings/Swans17";
 
 export default function Swans17Page() {
   return (

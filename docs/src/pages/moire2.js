@@ -1,5 +1,5 @@
 import React from "react";
-import Moire2 from "@site/src/components/Homepage/Moire/Moire2";
+import Moire2 from "@site/src/components/Experiments/Moire2";
 
 export default function Moire2Page() {
   return (
