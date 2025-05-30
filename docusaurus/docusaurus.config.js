@@ -77,6 +77,7 @@ module.exports = {
         indexPages: true,
         docsRouteBasePath: "/",
       },
+      "./src/plugins/tailwind-config.js",
     ],
   ],
   themes: ["@shopify/docusaurus-shopify-theme", "@shopify/docusaurus-docuchat"],
