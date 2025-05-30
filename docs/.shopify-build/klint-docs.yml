@@ -1,0 +1,14 @@
+containers:
+  default:
+    build:
+      from: ubuntu-24
+      type: ci
+      workdir: docs/
+      configuration_in_workdir: true
+
+steps:
+  - label: Tests
+    timeout: 5m
+    run:
+        - cd docs/
+        - echo "Hello World"
