@@ -55,6 +55,11 @@ function HomepageHeader() {
               Mandala2
             </Link>
           </li>
+          <li>
+            <Link className="button" to="/experiments/slimeMould">
+              Slime Mould
+            </Link>
+          </li>
         </ul>
       </div>
     </header>
