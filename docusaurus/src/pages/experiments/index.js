@@ -60,6 +60,11 @@ function HomepageHeader() {
               Slime Mould
             </Link>
           </li>
+          <li>
+            <Link className="button" to="/experiments/Stripes">
+              Hi Josh
+            </Link>
+          </li>
         </ul>
       </div>
     </header>
