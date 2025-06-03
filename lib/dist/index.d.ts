@@ -49,6 +49,9 @@ declare const KlintFunctions: {
     readonly beginShape: (ctx: KlintContexts) => () => void;
     readonly beginContour: (ctx: KlintContexts) => () => void;
     readonly vertex: (ctx: KlintContexts) => (x: number, y: number) => void;
+    readonly bezierVertex: (ctx: KlintContexts) => (cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number) => void;
+    readonly quadraticVertex: (ctx: KlintContexts) => (cpx: number, cpy: number, x: number, y: number) => void;
+    readonly arcVertex: (ctx: KlintContexts) => (x1: number, y1: number, x2: number, y2: number, radius: number) => void;
     readonly endContour: (ctx: KlintContexts) => (forceRevert?: boolean) => void;
     readonly endShape: (ctx: KlintContexts) => (close?: boolean) => void;
     readonly gradient: (ctx: KlintContexts) => (x1?: number, y1?: number, x2?: number, y2?: number) => CanvasGradient;
@@ -605,15 +608,41 @@ interface KlintElements {
 
 declare const EPSILON = 0.0001;
 type KlintContexts = KlintContext | KlintOffscreenContext;
+type CurveVertex = {
+    type: "line";
+    x: number;
+    y: number;
+} | {
+    type: "bezier";
+    cp1x: number;
+    cp1y: number;
+    cp2x: number;
+    cp2y: number;
+    x: number;
+    y: number;
+} | {
+    type: "quadratic";
+    cpx: number;
+    cpy: number;
+    x: number;
+    y: number;
+} | {
+    type: "arc";
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+    radius: number;
+};
 interface KlintOffscreenContext extends CanvasRenderingContext2D, KlintFunctions, KlintElements {
     width: number;
     height: number;
     __dpr: number;
     __startedShape: boolean;
-    __currentShape: number[][] | null;
+    __currentShape: CurveVertex[] | null;
     __startedContour: boolean;
-    __currentContours: number[][][] | null;
-    __currentContour: number[][] | null;
+    __currentContours: CurveVertex[][] | null;
+    __currentContour: CurveVertex[] | null;
     __isReadyToDraw: boolean;
     __isMainContext: boolean;
     __imageOrigin: "corner" | "center";
@@ -766,4 +795,4 @@ declare const useStorage: <T extends object = Record<string, unknown>>(initialPr
     store: T;
 };
 
-export { CONFIG_PROPS, EPSILON, Klint, type KlintCanvasOptions, type KlintConfig, type KlintContext, type KlintContextWrapper, type KlintContexts, KlintCoreFunctions, KlintFunctions, type KlintMouse, type KlintOffscreenContext, type KlintProps, type KlintScroll, useKlint, useProps, useStorage };
+export { CONFIG_PROPS, type CurveVertex, EPSILON, Klint, type KlintCanvasOptions, type KlintConfig, type KlintContext, type KlintContextWrapper, type KlintContexts, KlintCoreFunctions, KlintFunctions, type KlintMouse, type KlintOffscreenContext, type KlintProps, type KlintScroll, useKlint, useProps, useStorage };

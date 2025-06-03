@@ -8,6 +8,27 @@ export const EPSILON = 0.0001;
 
 export type KlintContexts = KlintContext | KlintOffscreenContext;
 
+export type CurveVertex =
+  | { type: "line"; x: number; y: number }
+  | {
+      type: "bezier";
+      cp1x: number;
+      cp1y: number;
+      cp2x: number;
+      cp2y: number;
+      x: number;
+      y: number;
+    }
+  | { type: "quadratic"; cpx: number; cpy: number; x: number; y: number }
+  | {
+      type: "arc";
+      x1: number;
+      y1: number;
+      x2: number;
+      y2: number;
+      radius: number;
+    };
+
 export interface KlintOffscreenContext
   extends CanvasRenderingContext2D,
     KlintFunctions,
@@ -16,10 +37,10 @@ export interface KlintOffscreenContext
   height: number;
   __dpr: number;
   __startedShape: boolean;
-  __currentShape: number[][] | null;
+  __currentShape: CurveVertex[] | null;
   __startedContour: boolean;
-  __currentContours: number[][][] | null;
-  __currentContour: number[][] | null;
+  __currentContours: CurveVertex[][] | null;
+  __currentContour: CurveVertex[] | null;
   __isReadyToDraw: boolean;
   __isMainContext: boolean;
   __imageOrigin: "corner" | "center";

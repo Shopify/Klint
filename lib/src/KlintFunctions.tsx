@@ -337,10 +337,7 @@ export const KlintFunctions = {
     ctx.__currentContours = [];
   },
   beginContour: (ctx: KlintContexts) => () => {
-    if (!ctx.__startedShape) return;
-    if (ctx.__startedContour && ctx.__currentContour?.length) {
-      ctx.__currentContours?.push([...ctx.__currentContour]);
-    }
+    if (!ctx.__startedShape || ctx.__startedContour) return;
     ctx.__startedContour = true;
     ctx.__currentContour = [];
   },
@@ -349,8 +346,42 @@ export const KlintFunctions = {
     const points = ctx.__startedContour
       ? ctx.__currentContour
       : ctx.__currentShape;
-    points?.push([x, y]);
+    points?.push({ type: "line", x, y });
   },
+  bezierVertex:
+    (ctx: KlintContexts) =>
+    (
+      cp1x: number,
+      cp1y: number,
+      cp2x: number,
+      cp2y: number,
+      x: number,
+      y: number
+    ) => {
+      if (!ctx.__startedShape) return;
+      const points = ctx.__startedContour
+        ? ctx.__currentContour
+        : ctx.__currentShape;
+      points?.push({ type: "bezier", cp1x, cp1y, cp2x, cp2y, x, y });
+    },
+  quadraticVertex:
+    (ctx: KlintContexts) =>
+    (cpx: number, cpy: number, x: number, y: number) => {
+      if (!ctx.__startedShape) return;
+      const points = ctx.__startedContour
+        ? ctx.__currentContour
+        : ctx.__currentShape;
+      points?.push({ type: "quadratic", cpx, cpy, x, y });
+    },
+  arcVertex:
+    (ctx: KlintContexts) =>
+    (x1: number, y1: number, x2: number, y2: number, radius: number) => {
+      if (!ctx.__startedShape) return;
+      const points = ctx.__startedContour
+        ? ctx.__currentContour
+        : ctx.__currentShape;
+      points?.push({ type: "arc", x1, y1, x2, y2, radius });
+    },
   endContour:
     (ctx: KlintContexts) =>
     (forceRevert = true) => {
@@ -372,22 +403,63 @@ export const KlintFunctions = {
       const points = ctx.__currentShape;
       if (!points?.length) return;
 
-      const drawPath = (points: number[][], close = false) => {
-        ctx.moveTo(points[0][0], points[0][1]);
-        for (let i = 1; i < points.length; i++) {
-          ctx.lineTo(points[i][0], points[i][1]);
-        }
-        if (close) {
-          const [firstX, firstY] = points[0];
-          const lastPoint = points[points.length - 1];
-          if (lastPoint[0] !== firstX || lastPoint[1] !== firstY) {
-            ctx.lineTo(firstX, firstY);
+      const drawPath = (points: any[], close = false) => {
+        if (points.length === 0) return;
+
+        const firstPoint = points[0];
+        // Move to first point regardless of type
+        const startX =
+          firstPoint.type === "line"
+            ? firstPoint.x
+            : firstPoint.type === "bezier"
+            ? firstPoint.x
+            : firstPoint.type === "quadratic"
+            ? firstPoint.x
+            : firstPoint.x2; // arc
+        const startY =
+          firstPoint.type === "line"
+            ? firstPoint.y
+            : firstPoint.type === "bezier"
+            ? firstPoint.y
+            : firstPoint.type === "quadratic"
+            ? firstPoint.y
+            : firstPoint.y2; // arc
+        ctx.moveTo(startX, startY);
+
+        for (let i = 0; i < points.length; i++) {
+          const point = points[i];
+
+          switch (point.type) {
+            case "line":
+              if (i > 0) ctx.lineTo(point.x, point.y);
+              break;
+            case "bezier":
+              ctx.bezierCurveTo(
+                point.cp1x,
+                point.cp1y,
+                point.cp2x,
+                point.cp2y,
+                point.x,
+                point.y
+              );
+              break;
+            case "quadratic":
+              ctx.quadraticCurveTo(point.cpx, point.cpy, point.x, point.y);
+              break;
+            case "arc":
+              ctx.arcTo(point.x1, point.y1, point.x2, point.y2, point.radius);
+              break;
           }
         }
+
+        if (close && points.length > 1) {
+          ctx.closePath();
+        }
       };
+
       ctx.beginPath();
       drawPath(points, close);
-      ctx.__currentContours?.forEach((contour: number[][]) =>
+      ctx.__currentContours?.forEach((contour: any[]) =>
         drawPath(contour, true)
       );
       ctx.drawIfVisible();
@@ -480,7 +552,26 @@ export const KlintFunctions = {
       const t = (n - A) / (B - A);
       return ctx.lerp(C, D, t, bounded);
     },
-
+  bezierLerp: () => (a: number, b: number, c: number, d: number, t: number) => {
+    // Cubic Bezier interpolation: (1-t)^3*a + 3(1-t)^2*t*b + 3(1-t)*t^2*c + t^3*d
+    const u = 1 - t;
+    return (
+      u * u * u * a + 3 * u * u * t * b + 3 * u * t * t * c + t * t * t * d
+    );
+  },
+  bezierTangent:
+    () => (a: number, b: number, c: number, d: number, t: number) => {
+      // Cubic Bezier tangent: derivative of cubic bezier at t
+      const u = 1 - t;
+      return (
+        3 * d * t * t -
+        3 * c * t * t +
+        6 * c * u * t -
+        6 * b * u * t +
+        3 * b * u * u -
+        3 * a * u * u
+      );
+    },
   textFont: (ctx: KlintContexts) => (font: string) => {
     ctx.__textFont = font;
   },
