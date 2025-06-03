@@ -40,16 +40,16 @@ function draw() {
 
 // Klint equivalent in React
 function MySketch() {
-  /* preload is not mandatory */
-  /* setup is not needed, Klint will create and side the canvas to its container */
+  const { context } = useKlint();
+  
   const draw = (K) => {
-    K.background(220);
+    K.background("#dcdcdc");
     K.fillColor("red");
     K.noStroke();
-    K.circle(K.width/2, K.height/2, 100);
+    K.circle(K.width/2, K.height/2, 50); // Note: radius, not diameter
   };
   
-  return <Klint draw={draw} />;
+  return <Klint context={context} draw={draw} />;
 }
 ```
 
@@ -80,8 +80,9 @@ Due to compatibility with the underlying Canvas API, some function names in Klin
 - `fill()` becomes `K.fillColor()`
 - `stroke()` becomes `K.strokeColor()`
 - Text functions are prefixed with `text` (e.g., `K.textSize()`, `K.textFont()`)
+- Circles use radius instead of diameter: `K.circle(x, y, radius)`
 
-These naming differences ensure that Klint's functions don't collide with native Canvas API methods.
+These naming differences ensure that Klint's functions don't collide with native Canvas API methods while providing a more consistent API.
 
 ## Share Your Work
 

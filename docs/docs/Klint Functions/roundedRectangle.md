@@ -1,41 +1,86 @@
 # roundedRectangle
 
 ```ts
-roundedRectangle(x: number, y: number, width: number, radius: number | number[], height?: number) => void
+roundedRectangle(
+  x: number, 
+  y: number, 
+  width: number, 
+  radius: number | number[],
+  height?: number
+) => void
 ```
 
-Draws a rectangle with rounded corners.
+Draws a rectangle with rounded corners on the canvas.
 
 ## Parameters
-- `x`: X-coordinate (depends on rectangle origin mode)
-- `y`: Y-coordinate (depends on rectangle origin mode)
-- `width`: Width of rectangle
-- `radius`: Corner radius or array of four corner radii [topLeft, topRight, bottomRight, bottomLeft]
-- `height`: Optional height (if omitted, creates a square with width=height)
+- `x`: The x-coordinate (position depends on rectangle origin setting)
+- `y`: The y-coordinate (position depends on rectangle origin setting)
+- `width`: The width of the rectangle
+- `radius`: Radius for rounded corners. Can be:
+  - A single number (all corners equally rounded)
+  - An array of 4 numbers [topLeft, topRight, bottomRight, bottomLeft]
+- `height`: Optional. The height of the rectangle (defaults to width for a square)
+
+## Returns
+- `void`
+
+## Related Functions
+
+```ts
+rectangle(x: number, y: number, width: number, height?: number) => void // Rectangle without rounded corners
+setRectOrigin(type: "center" | "corner") => void // Set rectangle origin point
+```
 
 ## Example
 ```tsx
 // Basic rounded rectangle
-roundedRectangle(50, 50, 200, 100, 20)
+K.roundedRectangle(50, 50, 100, 15, 80)
 
-// Rounded square
-roundedRectangle(300, 50, 150, 15)
+// Rounded square (height defaults to width)
+K.roundedRectangle(200, 50, 80, 10)
 
-// Different radii for each corner
-roundedRectangle(50, 200, 200, [5, 15, 30, 0], 100)
+// Different corner radii
+K.fillColor("purple")
+K.roundedRectangle(50, 200, 150, [0, 20, 40, 10], 100)
+
+// Styled rounded rectangle
+K.fillColor("coral")
+K.strokeColor("navy")
+K.strokeWidth(2)
+K.roundedRectangle(250, 150, 120, 25, 80)
+
+// Rounded rectangle from center
+K.setRectOrigin("center")
+K.roundedRectangle(200, 200, 150, 20, 100)
 
 // In JSX component
 const draw = (K: KlintContext) => {
-  K.setRectOrigin("center")
-  K.fillColor("green")
-  K.strokeColor("black")
-  K.roundedRectangle(K.width/2, K.height/2, 200, 20, 100)
+  // Modern UI card
+  K.fillColor("#ffffff")
+  K.strokeColor("#e0e0e0")
+  K.strokeWidth(1)
+  K.roundedRectangle(50, 50, K.width - 100, 12, 200)
+  
+  // Dynamic corner radius
+  const radius = 5 + Math.sin(K.time) * 15
+  K.fillColor("rgba(0, 150, 255, 0.8)")
+  K.noStroke()
+  K.roundedRectangle(100, 300, 200, radius, 60)
+  
+  // Button-like element
+  K.fillColor("#007bff")
+  K.roundedRectangle(150, 400, 100, 8, 40)
+  K.fillColor("white")
+  K.textAlign("center", "middle")
+  K.text("Button", 200, 420)
 }
 ```
 
 ## Notes
-- Origin position controlled by `setRectOrigin()`:
-  - "corner" (default): x,y is top-left corner
-  - "center": x,y is center of rectangle
-- Uses current fill and stroke styles
-- When providing an array of radii, follows CSS order: topLeft, topRight, bottomRight, bottomLeft 
+- Rectangle position depends on the rectangle origin setting (corner or center)
+- Default origin is "corner" (top-left), can be changed with `K.setRectOrigin("center")`
+- When using the array form for radius, the order is [topLeft, topRight, bottomRight, bottomLeft]
+- If width and height are equal, creates a rounded square
+- Use current fill and stroke styles
+- Perfect for modern UI elements, cards, and buttons
+- For rectangles without rounded corners, use `K.rectangle()` instead 

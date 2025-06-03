@@ -6,14 +6,17 @@ Klint provides React hooks for managing state, handling input, and loading resou
 
 ```tsx
 const { 
-  context,      // KlintContext instance 
-  useMouse,     // Mouse tracking hook
-  useWindow,    // Window/resize events hook
-  useImage      // Image loading hook
+  context,        // KlintContext instance 
+  KlintMouse,     // Mouse tracking hook factory
+  KlintImage,     // Image loading hook factory
+  KlintWindow,    // Window/resize events hook factory
+  KlintScroll,    // Scroll handling hook factory
+  KlintGesture,   // Touch gesture handling hook factory
+  useDev          // Development utilities
 } = useKlint()
 ```
 
-The main hook that initializes Klint and provides access to sub-hooks.
+The main hook that initializes Klint and provides access to sub-hook factories.
 
 ## useStorage
 
@@ -21,7 +24,7 @@ The main hook that initializes Klint and provides access to sub-hooks.
 const P = useStorage<StorageType>(initialValues)
 ```
 
-Provides persistent storage across renders. 
+Provides persistent storage across renders that survives component re-renders.
 
 ### Methods
 - `get(key)`: Get a stored value
@@ -29,66 +32,120 @@ Provides persistent storage across renders.
 - `has(key)`: Check if key exists
 - `delete(key)`: Remove a stored value
 
-## useMouse
+## useProps
+
+```tsx
+const P = useProps<PropsType>(props)
+```
+
+Provides reactive access to props that can be updated and accessed consistently.
+
+## KlintMouse
 
 ```tsx
 const { 
   mouse,          // Current mouse state
   onClick,        // Register click handler
-  onMove,         // Register move handler
-  onDown,         // Register mousedown handler
-  onUp,           // Register mouseup handler
-  onDrag,         // Register drag handler
-  onOver,         // Register mouseover handler
-  onOut           // Register mouseout handler
-} = useMouse()
+  onMouseIn,      // Register mouse enter handler
+  onMouseOut,     // Register mouse leave handler
+  onMouseDown,    // Register mousedown handler
+  onMouseUp       // Register mouseup handler
+} = KlintMouse()
 ```
 
 Tracks mouse state and registers event handlers.
 
 ### Mouse properties
-- `x`, `y`: Current position
+- `x`, `y`: Current position (relative to canvas origin)
 - `px`, `py`: Previous position
-- `dx`, `dy`: Delta since last frame
+- `vx`, `vy`: Velocity (change in position)
+- `angle`: Angle of movement
 - `isPressed`: Boolean indicating mouse pressed state
+- `isHover`: Boolean indicating if mouse is over canvas
 
-## useImage
+## KlintImage
 
 ```tsx
 const { 
-  images,          // Object containing loaded images
-  loadImages,      // Function to load images
-  isLoading        // Boolean loading state
-} = useImage()
+  images,          // Proxy object containing loaded images
+  loadImage,       // Function to load a single image
+  loadImages,      // Function to load multiple images
+  getImage,        // Get image by key
+  hasImage,        // Check if image exists
+  clearImages      // Clear all loaded images
+} = KlintImage()
 ```
 
-Handles image loading.
+Handles image loading with promise-based API.
 
 ### Methods
-- `loadImages(imageMap)`: Asynchronously loads images from URLs
+- `loadImage(key, url, options?)`: Load a single image
+- `loadImages(imageMap, options?)`: Load multiple images from URL map
+- `images[key]` or `images.get(key)`: Access loaded images
 
-## useWindow
+## KlintWindow
 
 ```tsx
 const { 
   onResize,        // Register resize handler
-  window           // Window dimensions
-} = useWindow()
+  onBlur,          // Register window blur handler
+  onFocus,         // Register window focus handler
+  onVisibilityChange, // Register visibility change handler
+  window           // Window state
+} = KlintWindow()
 ```
 
-Tracks window state and handles resize events.
+Tracks window state and handles window events.
+
+## KlintScroll
+
+```tsx
+const { 
+  scroll,          // Current scroll state
+  onScroll         // Register scroll handler
+} = KlintScroll()
+```
+
+Tracks scroll events and provides scroll state.
+
+### Scroll properties
+- `distance`: Total scroll distance
+- `velocity`: Scroll velocity
+- `lastTime`: Last scroll event timestamp
+
+## KlintGesture
+
+```tsx
+const { 
+  gesture,         // Current gesture state
+  onTouchStart,    // Register touch start handler
+  onTouchMove,     // Register touch move handler
+  onTouchEnd,      // Register touch end handler
+  onTouchCancel    // Register touch cancel handler
+} = KlintGesture()
+```
+
+Handles touch gestures for mobile devices.
+
+### Gesture properties
+- `active`: Boolean indicating if gesture is active
+- `touches`: Current touch list
+- `scale`: Pinch scale factor
+- `rotation`: Rotation angle
+- `deltaX`, `deltaY`: Movement delta
+- `velocityX`, `velocityY`: Movement velocity
 
 ## Example
 
 ```tsx
-import { Klint, useKlint, useStorage, useImage, type KlintContext } from "klint";
+import { Klint, useKlint, useStorage, type KlintContext } from "@shopify/klint";
 
 export function KlintCanvas() {
   // Initialize hooks
-  const { context, useMouse, useWindow } = useKlint();
-  const { mouse, onClick } = useMouse();
-  const { onResize } = useWindow();
-  const { images, loadImages } = useImage();
+  const { context, KlintMouse, KlintImage, KlintWindow } = useKlint();
+  const { mouse, onClick } = KlintMouse();
+  const { onResize } = KlintWindow();
+  const { images, loadImages } = KlintImage();
   
   // Set up storage
   const P = useStorage({
@@ -97,7 +154,7 @@ export function KlintCanvas() {
   });
 
   // Set up event handlers
-  onClick(() => {
+  onClick((ctx, e) => {
     P.set("clickCount", P.get("clickCount") + 1);
     P.set("lastPosition", { x: mouse.x, y: mouse.y });
   });
@@ -144,5 +201,7 @@ export function KlintCanvas() {
 - `useKlint()` should be called only once per component
 - Pass the context from `useKlint()` to the `<Klint>` component
 - Storage persists between renders and is reactive
-- Event handlers registered with mouse functions can be cleaned up automatically
-- The `loadImages` function from `useImage` returns a promise that resolves when all images are loaded 
+- Event handlers are automatically cleaned up on component unmount
+- The `loadImages` function returns a promise that resolves when all images are loaded
+- Mouse coordinates are relative to the canvas origin setting
+- Touch gestures work on mobile devices and touch-enabled screens 
