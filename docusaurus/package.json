@@ -32,10 +32,10 @@
     "@docusaurus/tsconfig": "3.8.0",
     "@docusaurus/types": "3.8.0",
     "@shopify/klint": "^0.0.98",
-    "typescript": "~5.6.2",
-    "@tailwindcss/postcss": "^4.1.7",
+    "@tailwindcss/postcss": "^4.1.8",
     "postcss": "^8.5.3",
-    "tailwindcss": "^4.1.7"
+    "tailwindcss": "^4.1.7",
+    "typescript": "~5.6.2"
   },
   "browserslist": {
     "production": [
