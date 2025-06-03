@@ -16,19 +16,27 @@
 
 #### Fixes
 - [ ] Arguments order is wrong on roundedRect
-- [ ] Dissociate Klint and the 2D context : confusing autocomplete
+    [ ] Update docs
 - [ ] Line breaks in text()
 - [ ] CSS text style cloner : https://blog.steveasleep.com/how-to-draw-multi-line-text-on-an-html-canvas-in-2021
 - [ ] Paragraph break : https://stackoverflow.com/questions/5026961/html5-canvas-ctx-filltext-wont-do-line-breaks
 - [ ] clip
 - [ ] Triangle strip and Quad strip
-- [ ] Add other types of vertices : bezierTo(), quadraticTo(), arcTo(),
+- [x] Add other types of vertices : bezierTo(), quadraticTo(), arcTo(),
+    [x] Added 'revert' flag for contours
+    [x] Make Tests docs
+    [x] Update docs
 - [ ] Filters
-- [ ] Add url params
-- [ ] Make vectors 3D
+
+- [ ] Make vectors 3D + add cross and 3d transforms
 - [ ] Add PI and TWO_PI
-- [ ] useImage not working like i wanted it to, inconsistent
-- [ ] Essential plugins to be included in the library
+- [x] Essential plugins to be included in the library
+    [ ] Update docs
+
+### Considerations 
+- [ ] Dissociate Klint and the 2D context : confusing autocomplete
+- [ ] Create a singe useFrame() hook similar to Three Fiber
+- [ ] Add url params
 
 ### Doc
 - [ ] Update dependency
