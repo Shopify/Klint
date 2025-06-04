@@ -94,6 +94,7 @@ declare const KlintFunctions: {
     readonly saveConfig: (ctx: KlintContexts) => (from?: KlintContexts) => KlintConfig;
     readonly restoreConfig: (ctx: KlintContexts) => (config: KlintConfig) => void;
     readonly resizeCanvas: (ctx: KlintContexts) => (width: number, height: number) => void;
+    readonly clipTo: (ctx: KlintContexts) => (callback: (K: KlintContexts | KlintContext) => void, revert?: boolean) => void;
 };
 
 interface KlintColor {

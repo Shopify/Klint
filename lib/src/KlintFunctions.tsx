@@ -848,4 +848,32 @@ export const KlintFunctions = {
       ctx.translate(ctx.width * 0.5, ctx.height * 0.5);
     }
   },
+  clipTo:
+    (ctx: KlintContexts) =>
+    (
+      callback: (K: KlintContexts | KlintContext) => void,
+      revert: boolean = false
+    ) => {
+      ctx.save();
+      ctx.beginPath();
+      const originalFillStyle = ctx.fillStyle;
+      const originalStrokeStyle = ctx.strokeStyle;
+      ctx.fillStyle = "white";
+      ctx.strokeStyle = "white";
+      const originalFill = ctx.fill;
+      const originalStroke = ctx.stroke;
+      const originalDrawIfVisible = ctx.drawIfVisible;
+      callback(ctx);
+      ctx.fill = originalFill;
+      ctx.stroke = originalStroke;
+      ctx.drawIfVisible = originalDrawIfVisible;
+      ctx.fillStyle = originalFillStyle;
+      ctx.strokeStyle = originalStrokeStyle;
+
+      if (revert) {
+        ctx.clip("evenodd");
+      } else {
+        ctx.clip();
+      }
+    },
 } as const;
