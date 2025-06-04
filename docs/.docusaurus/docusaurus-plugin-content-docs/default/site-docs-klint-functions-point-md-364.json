@@ -1,0 +1,24 @@
+{
+  "id": "Klint Functions/point",
+  "title": "point",
+  "description": "Draws a point (dot) on the canvas.",
+  "source": "@site/docs/Klint Functions/point.md",
+  "sourceDirName": "Klint Functions",
+  "slug": "/Klint Functions/point",
+  "permalink": "/docs/Klint Functions/point",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/Klint Functions/point.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "opacity",
+    "permalink": "/docs/Klint Functions/opacity"
+  },
+  "next": {
+    "title": "polygon",
+    "permalink": "/docs/Klint Functions/polygon"
+  }
+}

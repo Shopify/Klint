@@ -1,0 +1,24 @@
+{
+  "id": "Klint/lifecycle",
+  "title": "Lifecycle",
+  "description": "Understanding Klint's lifecycle is essential for creating efficient canvas animations in React. This document explains how Klint components initialize, update, and render.",
+  "source": "@site/docs/Klint/lifecycle.md",
+  "sourceDirName": "Klint",
+  "slug": "/Klint/lifecycle",
+  "permalink": "/docs/Klint/lifecycle",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/Klint/lifecycle.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "Klint Hooks",
+    "permalink": "/docs/Klint/klint-hooks"
+  },
+  "next": {
+    "title": "Using Klint with React",
+    "permalink": "/docs/Klint/using-react"
+  }
+}

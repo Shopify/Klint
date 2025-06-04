@@ -1,0 +1,24 @@
+{
+  "id": "Klint Functions/image",
+  "title": "image",
+  "description": "Draws an image on the canvas. Can crop and resize the source image if needed.",
+  "source": "@site/docs/Klint Functions/image.md",
+  "sourceDirName": "Klint Functions",
+  "slug": "/Klint Functions/image",
+  "permalink": "/docs/Klint Functions/image",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/Klint Functions/image.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "gradient",
+    "permalink": "/docs/Klint Functions/gradient"
+  },
+  "next": {
+    "title": "line",
+    "permalink": "/docs/Klint Functions/line"
+  }
+}

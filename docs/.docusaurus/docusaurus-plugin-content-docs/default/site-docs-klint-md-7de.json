@@ -1,0 +1,26 @@
+{
+  "id": "introduction",
+  "title": "👋 Introduction",
+  "description": "Klint is p5.js-like React component that comes with a lot of cool plugins to make your creative development easier and (i hope), more enjoyable. It's focused on 2D graphics, using the webCanvas API. Klint fully embraces the limitations of the 2D canvas at it's core, nothing fancy, nothing outstanding, just rewrote so it makes more sense (no longer defining number with strings) just a reliable component to make 2D graphics, motion design, UX or generative art.",
+  "source": "@site/docs/Klint.md",
+  "sourceDirName": ".",
+  "slug": "/",
+  "permalink": "/docs/",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/Klint.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1,
+    "id": "introduction",
+    "title": "👋 Introduction",
+    "slug": "/"
+  },
+  "sidebar": "sidebar",
+  "next": {
+    "title": "👋 Klint",
+    "permalink": "/docs/klint"
+  }
+}

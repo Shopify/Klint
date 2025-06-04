@@ -1,0 +1,24 @@
+{
+  "id": "Plugins/Color",
+  "title": "Color",
+  "description": "",
+  "source": "@site/docs/Plugins/Color.md",
+  "sourceDirName": "Plugins",
+  "slug": "/Plugins/Color",
+  "permalink": "/docs/Plugins/Color",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/Plugins/Color.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "👋 Plugins",
+    "permalink": "/docs/plugins"
+  },
+  "next": {
+    "title": "Create a Page",
+    "permalink": "/docs/tutorial-basics/create-a-page"
+  }
+}

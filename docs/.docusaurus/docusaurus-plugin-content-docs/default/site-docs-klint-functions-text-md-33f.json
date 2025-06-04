@@ -1,0 +1,24 @@
+{
+  "id": "Klint Functions/text",
+  "title": "text",
+  "description": "Draws text on the canvas.",
+  "source": "@site/docs/Klint Functions/text.md",
+  "sourceDirName": "Klint Functions",
+  "slug": "/Klint Functions/text",
+  "permalink": "/docs/Klint Functions/text",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/Klint Functions/text.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "strokeWidth",
+    "permalink": "/docs/Klint Functions/strokeWidth"
+  },
+  "next": {
+    "title": "👋 Plugins",
+    "permalink": "/docs/plugins"
+  }
+}

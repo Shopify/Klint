@@ -1,0 +1,30 @@
+{
+  "id": "Klint Functions/klintfunctions-text-styling",
+  "title": "Styling Text",
+  "description": "Klint provides various functions for styling and rendering text.",
+  "source": "@site/docs/Klint Functions/text-styling.md",
+  "sourceDirName": "Klint Functions",
+  "slug": "/klinfunctions-text-styling",
+  "permalink": "/docs/klinfunctions-text-styling",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/Klint Functions/text-styling.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 7,
+  "frontMatter": {
+    "sidebar_position": 7,
+    "id": "klintfunctions-text-styling",
+    "title": "Styling Text",
+    "slug": "/klinfunctions-text-styling"
+  },
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "Manipulating Pixels",
+    "permalink": "/docs/klinfunctions-pixels"
+  },
+  "next": {
+    "title": "addColorStop",
+    "permalink": "/docs/Klint Functions/addColorStop"
+  }
+}

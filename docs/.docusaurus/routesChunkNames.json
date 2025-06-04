@@ -1,0 +1,282 @@
+{
+  "/__docusaurus/debug-5ff": {
+    "__comp": "__comp---theme-debug-config-23-a-2ff",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    }
+  },
+  "/__docusaurus/debug/config-5ba": {
+    "__comp": "__comp---theme-debug-config-23-a-2ff",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    }
+  },
+  "/__docusaurus/debug/content-a2b": {
+    "__comp": "__comp---theme-debug-contentba-8-ce7",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    },
+    "__props": "__props---docusaurus-debug-content-3-c-0-be2"
+  },
+  "/__docusaurus/debug/globalData-c3c": {
+    "__comp": "__comp---theme-debug-global-dataede-0fa",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    }
+  },
+  "/__docusaurus/debug/metadata-156": {
+    "__comp": "__comp---theme-debug-site-metadata-68-e-3d4",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    }
+  },
+  "/__docusaurus/debug/registry-88c": {
+    "__comp": "__comp---theme-debug-registry-679-501",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    }
+  },
+  "/__docusaurus/debug/routes-000": {
+    "__comp": "__comp---theme-debug-routes-946-699",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    }
+  },
+  "/markdown-page-3d7": {
+    "__comp": "__comp---theme-mdx-page-1-f-3-b90",
+    "__context": {
+      "plugin": "plugin---markdown-pagea-74-7b5"
+    },
+    "content": "content---markdown-page-393-028"
+  },
+  "/search-822": {
+    "__comp": "__comp---theme-search-page-1-a-4-d6f",
+    "__context": {
+      "plugin": "plugin---search-138-688"
+    }
+  },
+  "/docs-5ab": {
+    "__comp": "__comp---theme-docs-root-5-e-9-0b6",
+    "__context": {
+      "plugin": "plugin---docsaba-d7c"
+    }
+  },
+  "/docs-d01": {
+    "__comp": "__comp---theme-doc-version-roota-7-b-5de",
+    "__props": "__props---docs-005-788"
+  },
+  "/docs-d74": {
+    "__comp": "__comp---theme-doc-roota-94-67a"
+  },
+  "/docs/-dbb": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-a-09-789"
+  },
+  "/docs/klinfunctions-fill-stroke-3b2": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-fill-stroke-functionsef-7-3a4"
+  },
+  "/docs/klinfunctions-pixels-0d4": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-pixel-manipulation-797-119"
+  },
+  "/docs/klinfunctions-text-styling-02f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-text-stylingd-83-f88"
+  },
+  "/docs/Klint Functions/addColorStop-b6d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-add-color-stopa-08-29f"
+  },
+  "/docs/Klint Functions/arc-aa3": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-arc-9-b-6-b2f"
+  },
+  "/docs/Klint Functions/background-0f2": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-background-58-d-0dd"
+  },
+  "/docs/Klint Functions/beginShape-adc": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-begin-shape-871-de3"
+  },
+  "/docs/Klint Functions/blend-0f7": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-blend-6-cf-a28"
+  },
+  "/docs/Klint Functions/circle-9b6": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-circle-023-5d0"
+  },
+  "/docs/Klint Functions/conicGradient-666": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-conic-gradient-5-cb-332"
+  },
+  "/docs/Klint Functions/createOffscreen-14c": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-create-offscreenc-00-a96"
+  },
+  "/docs/Klint Functions/disk-d19": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-disk-63-a-3e4"
+  },
+  "/docs/Klint Functions/ellipse-ce1": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-ellipsef-9-c-f58"
+  },
+  "/docs/Klint Functions/fillColor-f2f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-fill-color-740-ffb"
+  },
+  "/docs/Klint Functions/gradient-412": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-gradientcfe-80e"
+  },
+  "/docs/Klint Functions/image-f8f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-image-4-ac-e7c"
+  },
+  "/docs/Klint Functions/line-a8d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-lined-6-f-b52"
+  },
+  "/docs/Klint Functions/math-utils-a45": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-math-utils-2-f-7-8de"
+  },
+  "/docs/Klint Functions/noFill-885": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-no-fill-99-a-0e1"
+  },
+  "/docs/Klint Functions/noStroke-0d1": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-no-stroke-0-e-6-1fe"
+  },
+  "/docs/Klint Functions/opacity-47e": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-opacity-4-fb-fbd"
+  },
+  "/docs/Klint Functions/point-4c3": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-point-364-1f8"
+  },
+  "/docs/Klint Functions/polygon-303": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-polygon-417-642"
+  },
+  "/docs/Klint Functions/pop-11f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-pop-8-e-9-d3d"
+  },
+  "/docs/Klint Functions/push-10d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-push-5-ce-12b"
+  },
+  "/docs/Klint Functions/radialGradient-19d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-radial-gradient-109-d0f"
+  },
+  "/docs/Klint Functions/rectangle-944": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-rectangleebb-d97"
+  },
+  "/docs/Klint Functions/roundedRectangle-8f8": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-rounded-rectangle-68-d-3ed"
+  },
+  "/docs/Klint Functions/strokeCap-d03": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-stroke-capdae-e58"
+  },
+  "/docs/Klint Functions/strokeColor-109": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-stroke-color-86-e-51a"
+  },
+  "/docs/Klint Functions/strokeJoin-049": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-stroke-joinf-6-e-df8"
+  },
+  "/docs/Klint Functions/strokeWidth-8f1": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-stroke-width-718-9b1"
+  },
+  "/docs/Klint Functions/text-285": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-text-33-f-2a7"
+  },
+  "/docs/klint-introduction-690": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klinta-56-9f3"
+  },
+  "/docs/Klint/klint-component-8ea": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-klint-componentb-9-c-63d"
+  },
+  "/docs/Klint/klint-hooks-029": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-klint-hooksa-13-4b8"
+  },
+  "/docs/Klint/lifecycle-fb0": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-lifecycle-4-ef-b09"
+  },
+  "/docs/Klint/using-react-27c": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-using-react-3-a-9-71a"
+  },
+  "/docs/klintfunctions-canvas-e47": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-canvas-settingsce-8-54b"
+  },
+  "/docs/klintfunctions-core-292": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-core-functionse-11-790"
+  },
+  "/docs/klintfunctions-introduction-3b8": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klintfunctions-9-fe-1fb"
+  },
+  "/docs/klintfunctions-time-566": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klint-functions-time-management-929-ae2"
+  },
+  "/docs/plugins-58f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-plugins-0-fc-4d6"
+  },
+  "/docs/Plugins/Color-fcc": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-plugins-color-86-d-537"
+  },
+  "/docs/tutorial-basics/congratulations-96b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-tutorial-basics-congratulations-822-958"
+  },
+  "/docs/tutorial-basics/create-a-blog-post-ff1": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-tutorial-basics-create-a-blog-post-533-e85"
+  },
+  "/docs/tutorial-basics/create-a-document-aee": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-tutorial-basics-create-a-document-1-e-4-078"
+  },
+  "/docs/tutorial-basics/create-a-page-5e6": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-tutorial-basics-create-a-page-5-c-8-e19"
+  },
+  "/docs/tutorial-basics/deploy-your-site-03a": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-tutorial-basics-deploy-your-sitef-55-a3f"
+  },
+  "/docs/tutorial-basics/markdown-features-cc1": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-tutorial-basics-markdown-features-18-c-a79"
+  },
+  "/-2e1": {
+    "__comp": "__comp---site-src-pages-index-jsc-4-f-f99",
+    "__context": {
+      "plugin": "plugin---markdown-pagea-74-7b5"
+    },
+    "config": "config---5-e-9-4f3"
+  }
+}

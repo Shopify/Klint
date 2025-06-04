@@ -1,0 +1,30 @@
+{
+  "id": "Klint Functions/klintfunctions-core",
+  "title": "Core Klint Functions",
+  "description": "Klint provides core functions for controlling canvas behavior and lifecycle.",
+  "source": "@site/docs/Klint Functions/core-functions.md",
+  "sourceDirName": "Klint Functions",
+  "slug": "/klintfunctions-core",
+  "permalink": "/docs/klintfunctions-core",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/Klint Functions/core-functions.md",
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 3,
+  "frontMatter": {
+    "sidebar_position": 3,
+    "id": "klintfunctions-core",
+    "title": "Core Klint Functions",
+    "slug": "/klintfunctions-core"
+  },
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "Canvas Settings",
+    "permalink": "/docs/klintfunctions-canvas"
+  },
+  "next": {
+    "title": "Fill and Stroke",
+    "permalink": "/docs/klinfunctions-fill-stroke"
+  }
+}

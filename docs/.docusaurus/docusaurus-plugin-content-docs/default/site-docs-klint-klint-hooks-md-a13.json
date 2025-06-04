@@ -1,0 +1,24 @@
+{
+  "id": "Klint/klint-hooks",
+  "title": "Klint Hooks",
+  "description": "Klint provides React hooks for managing state, handling input, and loading resources.",
+  "source": "@site/docs/Klint/klint-hooks.md",
+  "sourceDirName": "Klint",
+  "slug": "/Klint/klint-hooks",
+  "permalink": "/docs/Klint/klint-hooks",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/Klint/klint-hooks.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "Klint Component",
+    "permalink": "/docs/Klint/klint-component"
+  },
+  "next": {
+    "title": "Lifecycle",
+    "permalink": "/docs/Klint/lifecycle"
+  }
+}

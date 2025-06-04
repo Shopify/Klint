@@ -1,0 +1,24 @@
+{
+  "id": "Klint Functions/noFill",
+  "title": "noFill",
+  "description": "Disables filling for shapes and text.",
+  "source": "@site/docs/Klint Functions/noFill.md",
+  "sourceDirName": "Klint Functions",
+  "slug": "/Klint Functions/noFill",
+  "permalink": "/docs/Klint Functions/noFill",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/Klint Functions/noFill.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "Math Utility Functions",
+    "permalink": "/docs/Klint Functions/math-utils"
+  },
+  "next": {
+    "title": "noStroke",
+    "permalink": "/docs/Klint Functions/noStroke"
+  }
+}

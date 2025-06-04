@@ -1,0 +1,24 @@
+{
+  "id": "Klint Functions/fillColor",
+  "title": "fillColor",
+  "description": "Sets the fill color for shapes and text.",
+  "source": "@site/docs/Klint Functions/fillColor.md",
+  "sourceDirName": "Klint Functions",
+  "slug": "/Klint Functions/fillColor",
+  "permalink": "/docs/Klint Functions/fillColor",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/Klint Functions/fillColor.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "ellipse",
+    "permalink": "/docs/Klint Functions/ellipse"
+  },
+  "next": {
+    "title": "gradient",
+    "permalink": "/docs/Klint Functions/gradient"
+  }
+}

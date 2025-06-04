@@ -1,0 +1,24 @@
+{
+  "id": "Klint/klint-component",
+  "title": "Klint Component",
+  "description": "The Klint component is the main entry point for rendering canvas graphics in React applications.",
+  "source": "@site/docs/Klint/klint-component.md",
+  "sourceDirName": "Klint",
+  "slug": "/Klint/klint-component",
+  "permalink": "/docs/Klint/klint-component",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/Klint/klint-component.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "👋 Hello World",
+    "permalink": "/docs/klint-introduction"
+  },
+  "next": {
+    "title": "Klint Hooks",
+    "permalink": "/docs/Klint/klint-hooks"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "Klint/using-react",
+  "title": "Using Klint with React",
+  "description": "Klint is designed specifically for React, integrating with its component model while carefully avoiding unnecessary re-renders. Understanding this architecture is key to building performant canvas applications.",
+  "source": "@site/docs/Klint/using-react.md",
+  "sourceDirName": "Klint",
+  "slug": "/Klint/using-react",
+  "permalink": "/docs/Klint/using-react",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/Klint/using-react.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "Lifecycle",
+    "permalink": "/docs/Klint/lifecycle"
+  },
+  "next": {
+    "title": "👋 Klint Functions",
+    "permalink": "/docs/klintfunctions-introduction"
+  }
+}

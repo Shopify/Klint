@@ -1,0 +1,24 @@
+{
+  "id": "Klint Functions/line",
+  "title": "line",
+  "description": "Draws a straight line between two points.",
+  "source": "@site/docs/Klint Functions/line.md",
+  "sourceDirName": "Klint Functions",
+  "slug": "/Klint Functions/line",
+  "permalink": "/docs/Klint Functions/line",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/Klint Functions/line.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "image",
+    "permalink": "/docs/Klint Functions/image"
+  },
+  "next": {
+    "title": "Math Utility Functions",
+    "permalink": "/docs/Klint Functions/math-utils"
+  }
+}

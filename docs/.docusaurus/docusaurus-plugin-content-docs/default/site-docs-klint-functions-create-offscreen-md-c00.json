@@ -1,0 +1,24 @@
+{
+  "id": "Klint Functions/createOffscreen",
+  "title": "createOffscreen",
+  "description": "Creates an offscreen canvas for drawing operations outside the main canvas.",
+  "source": "@site/docs/Klint Functions/createOffscreen.md",
+  "sourceDirName": "Klint Functions",
+  "slug": "/Klint Functions/createOffscreen",
+  "permalink": "/docs/Klint Functions/createOffscreen",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/Klint Functions/createOffscreen.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "conicGradient",
+    "permalink": "/docs/Klint Functions/conicGradient"
+  },
+  "next": {
+    "title": "disk",
+    "permalink": "/docs/Klint Functions/disk"
+  }
+}

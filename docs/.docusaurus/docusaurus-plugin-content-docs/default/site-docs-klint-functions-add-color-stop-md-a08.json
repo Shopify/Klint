@@ -1,0 +1,24 @@
+{
+  "id": "Klint Functions/addColorStop",
+  "title": "addColorStop",
+  "description": "Adds a color stop to a gradient.",
+  "source": "@site/docs/Klint Functions/addColorStop.md",
+  "sourceDirName": "Klint Functions",
+  "slug": "/Klint Functions/addColorStop",
+  "permalink": "/docs/Klint Functions/addColorStop",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/Klint Functions/addColorStop.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "Styling Text",
+    "permalink": "/docs/klinfunctions-text-styling"
+  },
+  "next": {
+    "title": "arc",
+    "permalink": "/docs/Klint Functions/arc"
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "Klint Functions/fill-and-stroke",
+  "title": "Fill & Stroke Functions",
+  "description": "Klint provides functions to control the fill and stroke styles of shapes.",
+  "source": "@site/docs/Klint Functions/fill-and-stroke.md",
+  "sourceDirName": "Klint Functions",
+  "slug": "/Klint Functions/fill-and-stroke",
+  "permalink": "/docs/Klint Functions/fill-and-stroke",
+  "draft": false,
+  "unlisted": false,
+  "editUrl": "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/docs/Klint Functions/fill-and-stroke.md",
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "ellipse",
+    "permalink": "/docs/Klint Functions/ellipse"
+  },
+  "next": {
+    "title": "fillColor",
+    "permalink": "/docs/Klint Functions/fillColor"
+  }
+}
