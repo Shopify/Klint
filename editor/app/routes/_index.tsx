@@ -2,10 +2,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Editor } from "@monaco-editor/react";
 // import  from "@/Klint/src/useKlint";
 // import * as Plugins from "~/plugins";
-import { useKlint, Klint, type KlintContext } from "klint";
-const defaultCode = `
-const {mouse} = K.useMouse();
+import { useKlint, Klint, type KlintContext } from "../../../lib/src";
 
+const defaultCode = `
 function preload(K) {
   console.log(K, "Welcome to Klint ! 🎨");
 }
@@ -20,15 +19,26 @@ function setup(K) {
 function draw(K) {
   K.background('rgba(125, 0, 255, 255)');
   K.fillColor("#FFF");
-  K.circle(K.width * .5, K.height / 2 + Math.sin(K.frame * 0.03) * 300, 100)
+  // Mouse is available directly on K after being extended in preload
+  const mouseX = K.mouse ? K.mouse.x : K.width * 0.5;
+  const mouseY = K.mouse ? K.mouse.y : K.height * 0.5;
+  K.circle(mouseX, mouseY + Math.sin(K.frame * 0.03) * 100, 50);
 }
 
 `;
 
+// Define the return type for evaluated user code
+interface UserCode {
+  preload?: (K: KlintContext) => Promise<void> | void;
+  setup?: (K: KlintContext) => void;
+  draw?: (K: KlintContext) => void;
+}
+
 // Separate Klint Canvas component
 function KlintCanvas({ code }: { code: string }) {
-  const { context, useMouse } = useKlint();
-  const mouseHook = useMouse();
+  const klintHook = useKlint();
+  const { KlintMouse } = klintHook;
+  const mouseHook = KlintMouse();
   const [error, setError] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
 
@@ -38,14 +48,15 @@ function KlintCanvas({ code }: { code: string }) {
   }, []);
 
   // Create a sandbox environment with hooks available
-  const createSandbox = useCallback(() => {
+  const createSandbox = useCallback((): UserCode => {
     try {
-      // Create a sandbox with hooks available
+      // Create a mock context for code evaluation (not runtime execution)
+      // The real context will be passed to preload/setup/draw when they're called
       const sandbox = {
         K: {
-          ...context,
+          // Provide mock mouse hook access for code evaluation
           useMouse: () => mouseHook,
-          // Add other hooks here
+          // Add other hooks here as needed
         },
         console: console,
       };
@@ -73,7 +84,7 @@ function KlintCanvas({ code }: { code: string }) {
       );
 
       // Execute the code with the sandbox
-      const result = userCode(sandbox.K);
+      const result = userCode(sandbox.K) as UserCode;
       setError(null);
       return result;
     } catch (err) {
@@ -81,10 +92,10 @@ function KlintCanvas({ code }: { code: string }) {
       setError(err instanceof Error ? err.message : String(err));
       return { preload: undefined, setup: undefined, draw: undefined };
     }
-  }, [code, context, mouseHook]);
+  }, [code, mouseHook]);
 
   // Create a ref to hold the evaluated code
-  const userCodeRef = useRef(null);
+  const userCodeRef = useRef<UserCode | null>(null);
 
   // Update the code when it changes
   useEffect(() => {
@@ -95,9 +106,14 @@ function KlintCanvas({ code }: { code: string }) {
 
   const preload = useCallback(
     async (K: KlintContext) => {
-      // Extend K with the entire hook, not just mouse
-      K.extend("useMouse", () => mouseHook);
-      // Add other hooks here
+      // Extend K with mouse data directly
+      K.extend("mouse", mouseHook.mouse);
+      // Add mouse event handlers
+      K.extend("onMouseClick", mouseHook.onClick);
+      K.extend("onMouseIn", mouseHook.onMouseIn);
+      K.extend("onMouseOut", mouseHook.onMouseOut);
+      K.extend("onMouseDown", mouseHook.onMouseDown);
+      K.extend("onMouseUp", mouseHook.onMouseUp);
 
       if (userCodeRef.current?.preload) {
         try {
@@ -159,7 +175,7 @@ function KlintCanvas({ code }: { code: string }) {
 
   return (
     <Klint
-      context={context}
+      context={klintHook.context}
       preload={preload}
       setup={setup}
       draw={draw}
