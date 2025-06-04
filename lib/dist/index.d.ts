@@ -65,6 +65,8 @@ declare const KlintFunctions: {
     readonly squareDistance: () => (x1: number, y1: number, x2: number, y2: number) => number;
     readonly dot: () => (x1: number, y1: number, x2: number, y2: number) => number;
     readonly remap: (ctx: KlintContexts) => (n: number, A: number, B: number, C: number, D: number, bounded?: boolean) => number;
+    readonly bezierLerp: () => (a: number, b: number, c: number, d: number, t: number) => number;
+    readonly bezierTangent: () => (a: number, b: number, c: number, d: number, t: number) => number;
     readonly textFont: (ctx: KlintContexts) => (font: string) => void;
     readonly textSize: (ctx: KlintContexts) => (size: number) => void;
     readonly textStyle: (ctx: KlintContexts) => (style: string) => void;
@@ -73,7 +75,7 @@ declare const KlintFunctions: {
     readonly textSpacing: (ctx: KlintContexts) => (kind: "letter" | "word", value: number) => void;
     readonly computeTextStyle: (ctx: KlintContexts) => () => void;
     readonly alignText: (ctx: KlintContexts) => (horizontal: CanvasTextAlign, vertical?: CanvasTextBaseline) => void;
-    readonly textLeading: (ctx: KlintContexts) => (spacing: number) => void;
+    readonly textLeading: (ctx: KlintContexts) => (spacing: number) => number;
     readonly computeFont: (ctx: KlintContexts) => () => void;
     readonly textWidth: (ctx: KlintContexts) => (text: string) => number;
     readonly text: (ctx: KlintContexts) => (text: string | number | undefined, x: number, y: number, maxWidth?: number | undefined) => void;
@@ -651,6 +653,7 @@ interface KlintOffscreenContext extends CanvasRenderingContext2D, KlintFunctions
     __computedTextFont: string;
     __textFont: string;
     __textSize: number;
+    __textLeading: number | undefined;
     __textStyle: string;
     __textWeight: string;
     __textAlignment: {
@@ -689,7 +692,7 @@ interface KlintContextWrapper {
     context: KlintContext | null;
     initCoreContext: (canvas: HTMLCanvasElement, options: KlintCanvasOptions) => KlintContext;
 }
-declare const CONFIG_PROPS: readonly ["lineWidth", "strokeStyle", "lineJoin", "lineCap", "fillStyle", "font", "textAlign", "textBaseline", "textRendering", "wordSpacing", "letterSpacing", "globalAlpha", "globalCompositeOperation", "origin", "transform", "__imageOrigin", "__rectangleOrigin", "__textFont", "__textWeight", "__textStyle", "__textSize", "__textAlignment", "__isPlaying"];
+declare const CONFIG_PROPS: readonly ["lineWidth", "strokeStyle", "lineJoin", "lineCap", "fillStyle", "font", "textAlign", "textBaseline", "textRendering", "wordSpacing", "letterSpacing", "globalAlpha", "globalCompositeOperation", "origin", "transform", "__imageOrigin", "__rectangleOrigin", "__textFont", "__textWeight", "__textStyle", "__textSize", "__textLeading", "__textAlignment", "__isPlaying"];
 interface KlintProps {
     context: KlintContextWrapper;
     draw: (ctx: KlintContext) => void;

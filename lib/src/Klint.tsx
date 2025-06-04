@@ -49,6 +49,7 @@ export interface KlintOffscreenContext
   __computedTextFont: string;
   __textFont: string;
   __textSize: number;
+  __textLeading: number | undefined;
   __textStyle: string;
   __textWeight: string;
   __textAlignment: {
@@ -135,6 +136,7 @@ export const CONFIG_PROPS = [
   "__textWeight",
   "__textStyle",
   "__textSize",
+  "__textLeading",
   "__textAlignment",
   "__isPlaying",
 ] as const;

@@ -112,6 +112,7 @@ export const KlintCoreFunctions = {
       context.__textWeight = "normal";
       context.__textStyle = "normal";
       context.__textSize = 120;
+      context.__textLeading = undefined;
       context.__textAlignment = {
         horizontal: "left" as CanvasTextAlign,
         vertical: "top" as CanvasTextBaseline,
@@ -612,7 +613,8 @@ export const KlintFunctions = {
       ctx.__textAlignment.vertical = vertical ?? ctx.__textAlignment.vertical;
     },
   textLeading: (ctx: KlintContexts) => (spacing: number) => {
-    ctx.lineHeight = `${spacing}px`;
+    ctx.__textLeading = spacing;
+    return ctx.__textLeading;
   },
   computeFont: (ctx: KlintContexts) => () => {
     ctx.computeTextStyle();
@@ -639,10 +641,50 @@ export const KlintFunctions = {
       if (ctx.textBaseline !== ctx.__textAlignment.vertical) {
         ctx.textBaseline = ctx.__textAlignment.vertical;
       }
-      if (ctx.checkTransparency("fill"))
-        ctx.fillText(String(text), x, y, maxWidth);
-      if (ctx.checkTransparency("stroke"))
-        ctx.strokeText(String(text), x, y, maxWidth);
+
+      const textString = String(text);
+
+      // Check if text contains line breaks
+      if (textString.includes("\n")) {
+        const lines = textString.split("\n");
+
+        // Calculate line height - use ctx.__textLeading if set, otherwise use font metrics
+        const firstLineMetrics = ctx.measureText(lines[0] || "M");
+        const defaultLineHeight =
+          firstLineMetrics.actualBoundingBoxAscent +
+          firstLineMetrics.actualBoundingBoxDescent;
+        const lineHeight = ctx.__textLeading ?? ctx.__textSize * 1.2;
+
+        // Calculate total block height
+        const totalHeight =
+          lines.length * lineHeight - (lineHeight - defaultLineHeight);
+
+        // Adjust starting Y position based on vertical alignment
+        let startY = y;
+        if (ctx.__textAlignment.vertical === "middle") {
+          startY = y - totalHeight / 2 + defaultLineHeight / 2;
+        } else if (ctx.__textAlignment.vertical === "bottom") {
+          startY = y - totalHeight + defaultLineHeight;
+        } else if (ctx.__textAlignment.vertical === "top") {
+          startY = y + defaultLineHeight / 2;
+        }
+
+        // Draw each line
+        lines.forEach((line, index) => {
+          const lineY = startY + index * lineHeight;
+
+          if (ctx.checkTransparency("fill"))
+            ctx.fillText(line, x, lineY, maxWidth);
+          if (ctx.checkTransparency("stroke"))
+            ctx.strokeText(line, x, lineY, maxWidth);
+        });
+      } else {
+        // Single line - original behavior
+        if (ctx.checkTransparency("fill"))
+          ctx.fillText(textString, x, y, maxWidth);
+        if (ctx.checkTransparency("stroke"))
+          ctx.strokeText(textString, x, y, maxWidth);
+      }
     },
 
   // DO NOT use putImageData for images you can draw : https://www.measurethat.net/Benchmarks/Show/9510/0/putimagedata-vs-drawimage

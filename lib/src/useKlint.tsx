@@ -701,6 +701,7 @@ export default function useKlint() {
     context.__textWeight = "normal";
     context.__textStyle = "normal";
     context.__textSize = 72;
+    context.__textLeading = undefined;
     context.__textAlignment = {
       horizontal: "left" as CanvasTextAlign,
       vertical: "top" as CanvasTextBaseline,
@@ -712,6 +713,7 @@ export default function useKlint() {
     // Add Klint Elements
     context.Color = new Color();
     context.createVector = (x = 0, y = 0) => new Vector(x, y);
+    context.Vector = new Vector();
     context.Easing = new Easing(context);
     context.State = new State();
     context.Time = new Time(context);

@@ -15,9 +15,9 @@
 
 
 #### Fixes
-- [ ] Arguments order is wrong on roundedRect
-    [ ] Update docs
-- [ ] Line breaks in text()
+- [x] Arguments order is wrong on roundedRect
+    [x] Update docs
+- [x] Line breaks in text()
 - [ ] CSS text style cloner : https://blog.steveasleep.com/how-to-draw-multi-line-text-on-an-html-canvas-in-2021
 - [ ] Paragraph break : https://stackoverflow.com/questions/5026961/html5-canvas-ctx-filltext-wont-do-line-breaks
 - [ ] clip
@@ -27,7 +27,6 @@
     [x] Make Tests docs
     [x] Update docs
 - [ ] Filters
-
 - [ ] Make vectors 3D + add cross and 3d transforms
 - [ ] Add PI and TWO_PI
 - [x] Essential plugins to be included in the library

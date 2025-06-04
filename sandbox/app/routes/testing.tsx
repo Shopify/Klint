@@ -15,6 +15,7 @@ export function KlintCanvas() {
   const setup = (K: KlintContext) => {
     K.textFont("Inter");
     K.textSize(64);
+    // K.textLeading(60);
     K.noStroke();
     K.alignText("center", "middle");
     K.setImageOrigin("center");
@@ -22,205 +23,149 @@ export function KlintCanvas() {
   };
 
   const draw = (K: KlintContext) => {
-    K.background(`rgba(0, 0, 0, 1)`);
-
-    K.fillColor("rgba(255, 100, 100, 0.8)");
-    K.strokeColor("white");
-    K.strokeWidth(2);
-
-    // Test 1: Basic bezier curve shape
+    K.background(`#222`);
     K.push();
-    K.translate(100, 100);
-    K.beginShape();
-    K.vertex(0, 0);
-    K.bezierVertex(50, -50, 100, 50, 150, 0);
-    K.vertex(150, 100);
-    K.bezierVertex(100, 150, 50, 150, 0, 100);
-    K.endShape(true);
+    K.fillColor("cyan");
+    // K.textSize(24);
+    K.alignText("center", "middle");
+    K.text("Line 1\nLine 2\nLine 3", K.width / 2, K.height / 2);
     K.pop();
+    // // Helper function to draw alignment guides
+    // const drawGuides = (x: number, y: number, label: string) => {
+    //   K.strokeColor("rgba(255, 255, 255, 0.3)");
+    //   K.strokeWidth(1);
+    //   // Vertical line
+    //   K.line(x, y - 100, x, y + 100);
+    //   // Horizontal line
+    //   K.line(x - 100, y, x + 100, y);
+    //   // Center point
+    //   K.fillColor("red");
+    //   K.circle(x, y, 3);
 
-    // Test 2: Quadratic curve flower
-    K.push();
-    K.translate(400, 100);
-    K.fillColor("rgba(100, 255, 100, 0.8)");
-    K.beginShape();
-    const petals = 6;
-    for (let i = 0; i < petals; i++) {
-      const angle = (i * Math.PI * 2) / petals;
-      const nextAngle = ((i + 1) * Math.PI * 2) / petals;
+    //   // Label
+    //   K.fillColor("white");
+    //   K.textSize(12);
+    //   K.alignText("center", "bottom");
+    //   K.text(label, x, y - 110);
+    // };
 
-      const x1 = Math.cos(angle) * 30;
-      const y1 = Math.sin(angle) * 30;
-      const x2 = Math.cos(nextAngle) * 30;
-      const y2 = Math.sin(nextAngle) * 30;
+    // // Test 1: Basic multi-line text with default alignment
+    // const x1 = 150,
+    //   y1 = 150;
+    // drawGuides(x1, y1, "Default (left, top)");
+    // K.push();
+    // K.fillColor("cyan");
+    // K.textSize(24);
+    // K.alignText("left", "top");
+    // K.text("Line 1\nLine 2\nLine 3", x1, y1);
+    // K.pop();
+    // // Test 2: Center horizontal, middle vertical
+    // const x2 = 450,
+    //   y2 = 150;
+    // drawGuides(x2, y2, "Center, Middle");
+    // K.push();
+    // K.fillColor("yellow");
+    // K.textSize(24);
+    // K.alignText("center", "middle");
+    // K.text("Centered\nText Block\nWith Three Lines", x2, y2);
 
-      // Control point further out
-      const cpx = Math.cos(angle + Math.PI / petals) * 60;
-      const cpy = Math.sin(angle + Math.PI / petals) * 60;
+    // // Test 3: Right horizontal, bottom vertical
+    // const x3 = 750,
+    //   y3 = 150;
+    // drawGuides(x3, y3, "Right, Bottom");
+    // K.push();
+    // K.fillColor("lightgreen");
+    // K.textSize(24);
+    // K.alignText("right", "bottom");
+    // K.text("Right Aligned\nBottom Aligned\nText Block", x3, y3);
 
-      if (i === 0) K.vertex(x1, y1);
-      K.quadraticVertex(cpx, cpy, x2, y2);
-    }
-    K.endShape(true);
-    K.pop();
+    // // Test 4: Custom line height
+    // const x4 = 150,
+    //   y4 = 350;
+    // drawGuides(x4, y4, "Custom Line Height");
+    // K.push();
+    // K.fillColor("orange");
+    // K.textSize(20);
+    // K.alignText("left", "top");
+    // K.textLeading(40); // Set custom line height
+    // K.text("Line 1\nLine 2\nLine 3\nLine 4", x4, y4);
+    // K.pop();
+    // // Test 5: Large text with center alignment
+    // const x5 = 450,
+    //   y5 = 350;
+    // drawGuides(x5, y5, "Large Text");
+    // K.push();
+    // K.fillColor("magenta");
+    // K.textSize(32);
+    // K.alignText("center", "middle");
+    // K.textLeading(45);
+    // K.text("BIG\nTEXT\nBLOCK", x5, y5);
+    // K.pop();
+    // // Test 6: Mixed content (numbers and text)
+    // const x6 = 750,
+    //   y6 = 350;
+    // drawGuides(x6, y6, "Mixed Content");
+    // K.push();
+    // K.fillColor("lightblue");
+    // K.textSize(18);
+    // K.alignText("right", "middle");
+    // K.textLeading(25);
+    // K.text("Score: 1000\nLevel: 5\nLives: 3\nTime: 60s", x6, y6);
+    // K.pop();
+    // // Test 7: Animation with multi-line text
+    // const x7 = 300,
+    //   y7 = 550;
+    // drawGuides(x7, y7, "Animated");
+    // K.push();
+    // const time = K.time * 0.001;
+    // const animatedText = `Frame: ${K.frame}\nTime: ${time.toFixed(
+    //   1
+    // )}s\nAnimated!`;
 
-    // Test 3: Arc-based rounded rectangle
-    K.push();
-    K.translate(700, 100);
-    K.fillColor("rgba(100, 100, 255, 0.8)");
-    K.beginShape();
-    const w = 120,
-      h = 80,
-      r = 20;
-    K.vertex(r, 0);
-    K.vertex(w - r, 0);
-    K.arcVertex(w, 0, w, r, r);
-    K.vertex(w, h - r);
-    K.arcVertex(w, h, w - r, h, r);
-    K.vertex(r, h);
-    K.arcVertex(0, h, 0, h - r, r);
-    K.vertex(0, r);
-    K.arcVertex(0, 0, r, 0, r);
-    K.endShape(true);
-    K.pop();
-
-    // Test 4: Mixed curve types in one shape
-    K.push();
-    K.translate(100, 300);
-    K.fillColor("rgba(255, 255, 100, 0.8)");
-    K.beginShape();
-    K.vertex(0, 50);
-    K.bezierVertex(0, 0, 50, 0, 50, 50); // bezier curve
-    K.vertex(100, 50); // line
-    K.quadraticVertex(150, 25, 200, 50); // quadratic curve
-    K.vertex(200, 100); // line
-    K.arcVertex(175, 125, 150, 100, 25); // arc
-    K.vertex(50, 100); // line
-    K.endShape(true);
-    K.pop();
-
-    // Test 5: Shape with contour (hole) using curves
-    K.push();
-    K.translate(400, 300);
-    K.fillColor("rgba(255, 100, 255, 0.8)");
-    K.beginShape();
-
-    // Outer shape - heart-like using bezier curves
-    K.vertex(0, 30);
-    K.bezierVertex(-30, 0, -60, 0, -60, 30);
-    K.bezierVertex(-60, 60, -30, 90, 0, 120);
-    K.bezierVertex(30, 90, 60, 60, 60, 30);
-    K.bezierVertex(60, 0, 30, 0, 0, 30);
-
-    // Inner contour (hole) - circular using quadratic approximation
-    K.beginContour();
-    const holeRadius = 25;
-    const steps = 8;
-    for (let i = 0; i < steps; i++) {
-      const angle = (i * Math.PI * 2) / steps;
-      const nextAngle = ((i + 1) * Math.PI * 2) / steps;
-      const midAngle = (angle + nextAngle) / 2;
-
-      const x1 = Math.cos(angle) * holeRadius;
-      const y1 = Math.sin(angle) * holeRadius + 50;
-      const x2 = Math.cos(nextAngle) * holeRadius;
-      const y2 = Math.sin(nextAngle) * holeRadius + 50;
-
-      // Control point slightly outside for smooth curve
-      const cpx = Math.cos(midAngle) * (holeRadius * 1.2);
-      const cpy = Math.sin(midAngle) * (holeRadius * 1.2) + 50;
-
-      if (i === 0) K.vertex(x1, y1);
-      K.quadraticVertex(cpx, cpy, x2, y2);
-    }
-    K.endContour(false);
-    K.endShape(true);
-    K.pop();
-
-    // Test 6: Complex shape with multiple contours
-    K.push();
-    K.translate(700, 300);
-    K.fillColor("rgba(100, 255, 255, 0.8)");
-    K.beginShape();
-
-    // Outer rectangle with rounded corners using arcs
-    const ow = 150,
-      oh = 120,
-      or = 15;
-    K.vertex(or, 0);
-    K.vertex(ow - or, 0);
-    K.arcVertex(ow, 0, ow, or, or);
-    K.vertex(ow, oh - or);
-    K.arcVertex(ow, oh, ow - or, oh, or);
-    K.vertex(or, oh);
-    K.arcVertex(0, oh, 0, oh - or, or);
-    K.vertex(0, or);
-    K.arcVertex(0, 0, or, 0, or);
-
-    // First hole - bezier blob
-    K.beginContour();
-    K.vertex(40, 40);
-    K.bezierVertex(60, 30, 80, 50, 70, 70);
-    K.bezierVertex(60, 80, 40, 70, 30, 60);
-    K.bezierVertex(20, 50, 30, 30, 40, 40);
-    K.endContour(false);
-
-    // Second hole - star using mixed curves
-    K.beginContour();
-    const sx = 110,
-      sy = 60,
-      sr = 15;
-    K.vertex(sx, sy - sr);
-    K.quadraticVertex(sx + sr * 0.3, sy - sr * 0.3, sx + sr, sy);
-    K.quadraticVertex(sx + sr * 0.3, sy + sr * 0.3, sx, sy + sr);
-    K.quadraticVertex(sx - sr * 0.3, sy + sr * 0.3, sx - sr, sy);
-    K.quadraticVertex(sx - sr * 0.3, sy - sr * 0.3, sx, sy - sr);
-    K.endContour(false);
-
-    K.endShape(true);
-    K.pop();
-
-    // Test 7: Animated curves
-    K.push();
-    K.translate(100, 500);
-    K.fillColor("rgba(255, 255, 255, 0.9)");
-    K.strokeColor("red");
-    K.strokeWidth(3);
-
-    const t = K.time * 0.5;
-    K.beginShape();
-    K.vertex(0, 50);
-    K.bezierVertex(
-      50 + Math.sin(t) * 20,
-      0 + Math.cos(t * 1.3) * 15,
-      100 + Math.sin(t * 0.7) * 25,
-      100 + Math.cos(t * 0.9) * 20,
-      150,
-      50
-    );
-    K.vertex(150, 100);
-    K.quadraticVertex(
-      100 + Math.sin(t * 1.1) * 30,
-      125 + Math.cos(t * 0.8) * 15,
-      50,
-      100
-    );
-    K.arcVertex(25, 75, 0, 50, 25 + Math.sin(t * 2) * 5);
-    K.endShape(true);
-    K.pop();
-
-    // Debug info
-    K.fillColor("white");
-    K.textSize(16);
-    K.alignText("left", "top");
-    K.text("Curve Tests:", 20, 20);
-    K.text("1. Bezier blob (top-left)", 20, 40);
-    K.text("2. Quadratic flower (top-center)", 20, 60);
-    K.text("3. Arc rounded rect (top-right)", 20, 80);
-    K.text("4. Mixed curves (mid-left)", 20, 100);
-    K.text("5. Curves with hole (mid-center)", 20, 120);
-    K.text("6. Multiple holes (mid-right)", 20, 140);
-    K.text("7. Animated curves (bottom-left)", 20, 160);
+    // K.fillColor(`hsl(${time * 50}, 70%, 70%)`);
+    // K.textSize(20);
+    // K.alignText("center", "middle");
+    // K.textLeading(30);
+    // K.text(animatedText, x7, y7);
+    // K.pop();
+    // // Test 8: Long lines vs short lines
+    // const x8 = 600,
+    //   y8 = 550;
+    // drawGuides(x8, y8, "Mixed Line Lengths");
+    // K.push();
+    // K.fillColor("white");
+    // K.textSize(16);
+    // K.alignText("center", "middle");
+    // K.textLeading(22);
+    // K.text("Short\nThis is a much longer line\nMedium length\nA", x8, y8);
+    // K.pop();
+    // // Test 9: Single line (should work as before)
+    // const x9 = 150,
+    //   y9 = 650;
+    // drawGuides(x9, y9, "Single Line");
+    // K.push();
+    // K.fillColor("lightcoral");
+    // K.textSize(24);
+    // K.alignText("left", "middle");
+    // K.text("Single line text", x9, y9);
+    // K.pop();
+    // // Test 10: Empty lines
+    // const x10 = 750,
+    //   y10 = 650;
+    // drawGuides(x10, y10, "Empty Lines");
+    // K.push();
+    // K.fillColor("lightsteelblue");
+    // K.textSize(20);
+    // K.alignText("center", "middle");
+    // K.textLeading(30);
+    // K.text("Line 1\n\nLine 3\n\nLine 5", x10, y10);
+    // K.push();
+    // // Show instructions
+    // K.fillColor("white");
+    // K.textSize(14);
+    // K.alignText("left", "top");
+    // K.text("Red dots = anchor points | White lines = alignment guides", 20, 20);
+    // K.text("Testing multi-line text with \\n line breaks", 20, 40);
   };
 
   return (
