@@ -20,7 +20,9 @@
 - [x] Line breaks in text()
 - [ ] CSS text style cloner : https://blog.steveasleep.com/how-to-draw-multi-line-text-on-an-html-canvas-in-2021
 - [ ] Paragraph break : https://stackoverflow.com/questions/5026961/html5-canvas-ctx-filltext-wont-do-line-breaks
-- [ ] clip
+- [x] clip
+- [x] Review Editor
+- [x] Add keyboard listener
 - [ ] Triangle strip and Quad strip
 - [x] Add other types of vertices : bezierTo(), quadraticTo(), arcTo(),
     [x] Added 'revert' flag for contours
@@ -28,14 +30,14 @@
     [x] Update docs
 - [ ] Filters
 - [ ] Make vectors 3D + add cross and 3d transforms
-- [ ] Add PI and TWO_PI
 - [x] Essential plugins to be included in the library
-    [ ] Update docs
+    [x] Update docs
 
 ### Considerations 
 - [ ] Dissociate Klint and the 2D context : confusing autocomplete
 - [ ] Create a singe useFrame() hook similar to Three Fiber
 - [ ] Add url params
+- [ ] Add PI and TWO_PI
 
 ### Doc
 - [ ] Update dependency

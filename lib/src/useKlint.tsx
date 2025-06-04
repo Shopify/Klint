@@ -78,11 +78,36 @@ const DEFAULT_GESTURE_STATE: KlintGesture = {
   lastY: 0,
 };
 
+export interface KlintKeyboard {
+  pressedKeys: Set<string>;
+  modifiers: {
+    alt: boolean;
+    shift: boolean;
+    ctrl: boolean;
+    meta: boolean;
+  };
+  lastKey: string | null;
+  lastKeyTime: number;
+}
+
+const DEFAULT_KEYBOARD_STATE: KlintKeyboard = {
+  pressedKeys: new Set(),
+  modifiers: {
+    alt: false,
+    shift: false,
+    ctrl: false,
+    meta: false,
+  },
+  lastKey: null,
+  lastKeyTime: 0,
+};
+
 export default function useKlint() {
   const contextRef = useRef<KlintContext | null>(null);
   const mouseRef = useRef<KlintMouse | null>(null);
   const scrollRef = useRef<KlintScroll | null>(null);
   const gestureRef = useRef<KlintGesture | null>(null);
+  const keyboardRef = useRef<KlintKeyboard | null>(null);
 
   const useDev = () => {
     return;
@@ -617,6 +642,160 @@ export default function useKlint() {
     };
   };
 
+  const KlintKeyboard = () => {
+    if (!keyboardRef.current) {
+      keyboardRef.current = { ...DEFAULT_KEYBOARD_STATE };
+    }
+
+    const keyPressedCallbackRef = useRef<
+      Map<string, (ctx: KlintContext, e: KeyboardEvent) => void>
+    >(new Map());
+    const keyReleasedCallbackRef = useRef<
+      Map<string, (ctx: KlintContext, e: KeyboardEvent) => void>
+    >(new Map());
+    const keyComboCallbackRef = useRef<
+      Map<string, (ctx: KlintContext, e: KeyboardEvent) => void>
+    >(new Map());
+
+    useEffect(() => {
+      if (!contextRef.current) return;
+      const ctx = contextRef.current;
+
+      const updateModifiers = (e: KeyboardEvent) => {
+        if (!keyboardRef.current) return;
+        keyboardRef.current.modifiers.alt = e.altKey;
+        keyboardRef.current.modifiers.shift = e.shiftKey;
+        keyboardRef.current.modifiers.ctrl = e.ctrlKey;
+        keyboardRef.current.modifiers.meta = e.metaKey;
+      };
+
+      const normalizeKey = (key: string): string => {
+        // Normalize common key variations
+        const keyMap: Record<string, string> = {
+          " ": "Space",
+          Control: "Ctrl",
+          Escape: "Esc",
+        };
+        return keyMap[key] || key;
+      };
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (!keyboardRef.current) return;
+
+        const normalizedKey = normalizeKey(e.key);
+
+        // Update state
+        keyboardRef.current.pressedKeys.add(normalizedKey);
+        keyboardRef.current.lastKey = normalizedKey;
+        keyboardRef.current.lastKeyTime = performance.now();
+        updateModifiers(e);
+
+        // Check for individual key callbacks
+        const keyCallback = keyPressedCallbackRef.current.get(normalizedKey);
+        if (keyCallback) {
+          keyCallback(ctx, e);
+        }
+
+        // Check for combination callbacks
+        const pressedKeysArray = Array.from(
+          keyboardRef.current.pressedKeys
+        ).sort();
+        const comboKey = pressedKeysArray.join("+");
+        const comboCallback = keyComboCallbackRef.current.get(comboKey);
+        if (comboCallback) {
+          comboCallback(ctx, e);
+        }
+      };
+
+      const handleKeyUp = (e: KeyboardEvent) => {
+        if (!keyboardRef.current) return;
+
+        const normalizedKey = normalizeKey(e.key);
+
+        // Update state
+        keyboardRef.current.pressedKeys.delete(normalizedKey);
+        updateModifiers(e);
+
+        // Check for individual key callbacks
+        const keyCallback = keyReleasedCallbackRef.current.get(normalizedKey);
+        if (keyCallback) {
+          keyCallback(ctx, e);
+        }
+      };
+
+      // Listen on window for global keyboard events
+      window.addEventListener("keydown", handleKeyDown);
+      window.addEventListener("keyup", handleKeyUp);
+
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+        window.removeEventListener("keyup", handleKeyUp);
+      };
+    }, []);
+
+    // Helper to create combo key string
+    const createComboKey = (keys: string[]): string => {
+      return keys.map(normalizeKey).sort().join("+");
+    };
+
+    const normalizeKey = (key: string): string => {
+      const keyMap: Record<string, string> = {
+        " ": "Space",
+        Control: "Ctrl",
+        Escape: "Esc",
+      };
+      return keyMap[key] || key;
+    };
+
+    return {
+      keyboard: keyboardRef.current,
+
+      // Register callback for single key press
+      keyPressed: (
+        key: string,
+        callback: (ctx: KlintContext, e: KeyboardEvent) => void
+      ) => {
+        keyPressedCallbackRef.current.set(normalizeKey(key), callback);
+      },
+
+      // Register callback for single key release
+      keyReleased: (
+        key: string,
+        callback: (ctx: KlintContext, e: KeyboardEvent) => void
+      ) => {
+        keyReleasedCallbackRef.current.set(normalizeKey(key), callback);
+      },
+
+      // Register callback for key combination (e.g., ['Alt', 'Shift'])
+      keyCombo: (
+        keys: string[],
+        callback: (ctx: KlintContext, e: KeyboardEvent) => void
+      ) => {
+        const comboKey = createComboKey(keys);
+        keyComboCallbackRef.current.set(comboKey, callback);
+      },
+
+      // Utility functions
+      isPressed: (key: string): boolean => {
+        return keyboardRef.current?.pressedKeys.has(normalizeKey(key)) || false;
+      },
+
+      arePressed: (keys: string[]): boolean => {
+        if (!keyboardRef.current) return false;
+        return keys.every((key) =>
+          keyboardRef.current!.pressedKeys.has(normalizeKey(key))
+        );
+      },
+
+      // Clear all callbacks
+      clearCallbacks: () => {
+        keyPressedCallbackRef.current.clear();
+        keyReleasedCallbackRef.current.clear();
+        keyComboCallbackRef.current.clear();
+      },
+    };
+  };
+
   const KlintWindow = () => {
     const resizeCallbackRef = useRef<((ctx: KlintContext) => void) | null>(
       null
@@ -765,6 +944,7 @@ export default function useKlint() {
     KlintMouse,
     KlintScroll,
     KlintGesture,
+    KlintKeyboard,
     KlintWindow,
     KlintImage,
     togglePlay,
