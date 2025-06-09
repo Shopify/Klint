@@ -29,36 +29,36 @@
     [x] Make Tests docs
     [x] Update docs
 - [ ] Filters
-- [ ] Make vectors 3D + add cross and 3d transforms
+- [ ] Make vectors 3D + add cross, slerp and 3d transforms
 - [x] Essential plugins to be included in the library
     [x] Update docs
 
 ### Considerations 
 - [ ] Dissociate Klint and the 2D context : confusing autocomplete
 - [ ] Create a singe useFrame() hook similar to Three Fiber
-- [ ] Add url params
 - [ ] Add PI and TWO_PI
+- [ ] Consider url params
+- [x] Make the loadVideo hook 
+- [x] Make the useGestures hook 
+- [ ] Advanced Pixels array : load, set, copy & update => Done but considering removing it. Should set Canvas to willReadOften if loaded, needs to happen at preload stage
 
 ### Doc
-- [ ] Update dependency
+- [x] Update dependency
 - [ ] Build homepage
 
 ### Editor
-- [ ] Update dependency
-
-### Nice to have
-- [ ] Make the loadVideo hook 
-- [ ] Make the useGestures hook 
+- [ ] Consider url params
+- [x] Update dependency
 
 ## ELEMENTS
 - [ ] Hotspot : note ( Path 2D for custom shapes + ctx.isPointInPath()) 
-- [ ] Draggables 
 - [ ] Grids : 2D, responsive, radial 
 - [ ] Curve : Strips, rounding
-- [ ] Vector2D & Matrix
 - [ ] Noise + pseudo-random
-- [ ] Advanced Pixels array : load, set, copy & update => Done but considering removing it. Should set Canvas to willReadOften if loaded, needs to happen at preload stage
+
+
 ## EXTRAS PLUGINS
+- [ ] Draggables 
 - [ ] Catmull Curves : path smoothing and auto-rounded
 - [x] Easing 
 - [ ] Bezier + Bezier sampling + normals 
