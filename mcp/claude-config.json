@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "klint": {
+      "command": "node",
+      "args": ["dist/index.js"],
+      "cwd": "/absolute/path/to/Klint/mcp"
+    }
+  }
+}
