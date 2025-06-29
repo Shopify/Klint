@@ -35,7 +35,7 @@ const ShipItSchema = z.object({
 // Define tools
 const tools = [
     {
-        name: 'how-do-i',
+        name: 'klint-patterns',
         description: 'Convert a creative coding task into actionable Klint code patterns and functions',
         inputSchema: {
             type: 'object',
@@ -118,7 +118,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
     try {
         switch (name) {
-            case 'how-do-i': {
+            case 'klint-patterns': {
                 const { task, context } = HowDoISchema.parse(args);
                 const result = await klintContext.howDoI(task, context);
                 return {

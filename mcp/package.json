@@ -1,5 +1,5 @@
 {
-  "name": "klint-mcp-server",
+  "name": "@shopify/klint-mcp",
   "version": "1.0.0",
   "description": "MCP server for Klint creative coding framework",
   "main": "dist/index.js",
@@ -10,7 +10,9 @@
     "start": "node dist/index.js",
     "test": "node test-server.js",
     "dashboard": "node dashboard.js",
-    "dev:dashboard": "nodemon dashboard.js"
+    "dev:dashboard": "nodemon dashboard.js",
+    "setup": "node setup-cli.js",
+    "publish:prepare": "npm run build && npm run test"
   },
   "keywords": [
     "mcp",

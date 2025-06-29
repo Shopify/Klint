@@ -244,18 +244,26 @@ export class KlintContext {
 
     let response = `# ${functionName}\n\n`;
 
+    // Add installation note first
+    response += `## Getting Started\n`;
+    response += `If you haven't installed Klint yet:\n`;
+    response += `\`\`\`bash\nnpm install klint\n\`\`\`\n\n`;
+
     const docs = this.documentation.get(functionName);
     if (docs) {
-      response += docs + '\n\n';
+      response += `## Documentation\n${docs}\n\n`;
     } else {
-      response += `Function \`${functionName}\` not found in documentation.\n\n`;
+      response += `## Function Overview\n`;
+      response += `Function \`${functionName}\` - let me find similar functions and provide context.\n\n`;
       
       // Try to find similar functions
       const similar = this.findSimilarFunctions(functionName);
       if (similar.length > 0) {
-        response += 'Similar functions:\n';
+        response += '**Similar functions you might be looking for:**\n';
         similar.forEach(func => {
-          response += `- ${func}\n`;
+          const funcDocs = this.documentation.get(func);
+          const description = funcDocs ? funcDocs.split('\n')[0].replace(/^#\s*/, '') : 'Core Klint function';
+          response += `- **${func}**: ${description}\n`;
         });
         response += '\n';
       }
@@ -264,12 +272,52 @@ export class KlintContext {
     if (includeExamples) {
       const examples = this.findFunctionExamples(functionName);
       if (examples.length > 0) {
-        response += '## Examples:\n\n';
-        examples.forEach(example => {
-          response += `### ${example.name}\n\`\`\`tsx\n${example.code}\n\`\`\`\n\n`;
+        response += '## Working Examples\n\n';
+        response += 'Here are complete examples you can copy and run:\n\n';
+        examples.forEach((example, index) => {
+          response += `### Example ${index + 1}: ${example.name}\n`;
+          response += `\`\`\`tsx\nimport { useKlint } from 'klint';\n\n${example.code}\n\`\`\`\n\n`;
         });
+      } else {
+        // Generate a focused example
+        response += '## Quick Start Example\n\n';
+        response += `Here's a basic template to get you started with \`${functionName}\`:\n\n`;
+        response += `\`\`\`tsx\nimport { useKlint } from 'klint';\n\n`;
+        response += `export default function My${functionName}Sketch() {\n`;
+        response += `  const { Klint } = useKlint();\n\n`;
+        response += `  return (\n`;
+        response += `    <Klint\n`;
+        response += `      setup={(ctx) => {\n`;
+        response += `        // Setup your canvas\n`;
+        response += `        ctx.background('black');\n`;
+        response += `      }}\n`;
+        response += `      draw={(ctx) => {\n`;
+        response += `        // Use ${functionName} here\n`;
+        response += `        ctx.${functionName}(/* your parameters */);\n`;
+        response += `      }}\n`;
+        response += `    />\n`;
+        response += `  );\n`;
+        response += `}\n\`\`\`\n\n`;
       }
     }
+
+    // Add related functions and tips
+    const similar = this.findSimilarFunctions(functionName);
+    if (similar.length > 0) {
+      response += '## Related Functions\n\n';
+      response += 'Functions commonly used together:\n';
+      similar.slice(0, 5).forEach(func => {
+        const funcDocs = this.documentation.get(func);
+        const description = funcDocs ? funcDocs.split('\n')[0].replace(/^#\s*/, '') : 'Core function';
+        response += `- **${func}**: ${description}\n`;
+      });
+      response += '\n';
+    }
+
+    response += '## Need Help?\n\n';
+    response += '- Use the MCP `debug` tool if you encounter issues\n';
+    response += '- Use `how-do-i` for pattern-based examples\n';
+    response += '- Use `ship-it` when ready to deploy your sketch\n';
 
     return response;
   }
@@ -277,56 +325,125 @@ export class KlintContext {
   async debug(code: string, issue?: string): Promise<string> {
     await this.ensureInitialized();
 
-    let response = '# Klint Debug Assistant\n\n';
+    let response = '# 🔧 Klint Debug Assistant\n\n';
 
     if (issue) {
-      response += `## Issue: ${issue}\n\n`;
+      response += `## 🚨 Reported Issue\n**"${issue}"**\n\n`;
     }
 
-    response += '## Code Analysis:\n\n';
+    response += '## 🔍 Code Analysis\n\n';
 
-    // Common Klint issues to check for
+    // Enhanced analysis with more specific checks
     const issues = this.analyzeCode(code);
+    const codeLines = code.split('\n');
     
     if (issues.length > 0) {
-      response += '### Potential Issues Found:\n\n';
+      response += '### ❌ Issues Found:\n\n';
       issues.forEach((issue, index) => {
-        response += `${index + 1}. **${issue.type}**: ${issue.description}\n`;
+        response += `**${index + 1}. ${issue.type}**\n`;
+        response += `   Problem: ${issue.description}\n`;
         if (issue.suggestion) {
-          response += `   - **Fix**: ${issue.suggestion}\n`;
+          response += `   ✅ **Solution**: ${issue.suggestion}\n`;
         }
         response += '\n';
       });
     } else {
-      response += '✅ No obvious issues detected.\n\n';
+      response += '✅ **No obvious issues detected!** Your code looks clean.\n\n';
     }
 
-    // Performance suggestions
-    response += '## Performance Optimization:\n\n';
+    // Enhanced performance analysis
+    response += '## ⚡ Performance Analysis\n\n';
     response += this.generatePerformanceTips(code);
 
-    // Best practices
-    response += '\n## Best Practices Check:\n\n';
+    // Enhanced best practices with specific fixes
+    response += '\n## 📋 Best Practices Check\n\n';
     response += this.checkBestPractices(code);
+
+    // Add debugging workflow
+    response += '\n## 🛠️ Debugging Workflow\n\n';
+    response += 'If you\'re still having issues:\n\n';
+    response += '1. **Check the Browser Console** - Look for JavaScript errors\n';
+    response += '2. **Verify Canvas Rendering** - Ensure the canvas element is visible\n';
+    response += '3. **Test Incrementally** - Comment out complex parts and add them back\n';
+    response += '4. **Use Console Logging** - Add `console.log()` to track values\n';
+    response += '5. **Check Performance** - Use browser dev tools performance tab\n\n';
+
+    // Add common error patterns
+    response += '## 🎯 Common Error Patterns\n\n';
+    if (code.includes('undefined') || code.includes('null')) {
+      response += '❌ **Undefined/Null Values**: Check variable initialization\n';
+    }
+    if (code.includes('NaN')) {
+      response += '❌ **NaN Values**: Verify mathematical operations\n';
+    }
+    if (!code.includes('ctx.background') && code.includes('draw')) {
+      response += '⚠️  **Missing Background**: Consider adding `ctx.background()` to clear the canvas\n';
+    }
+    if (code.includes('Math.random') && code.includes('draw')) {
+      response += '💡 **Random in Draw Loop**: Move random generation to setup or use Time-based patterns\n';
+    }
+
+    // Installation check
+    if (!code.includes('useKlint') && !code.includes('import')) {
+      response += '\n## 📦 Installation Check\n\n';
+      response += 'Make sure Klint is properly installed:\n';
+      response += '```bash\nnpm install klint\n```\n\n';
+      response += 'And imported in your component:\n';
+      response += '```tsx\nimport { useKlint } from \'klint\';\n```\n\n';
+    }
 
     return response;
   }
 
-  async shipIt(code: string, target: 'react-component' | 'standalone' | 'npm-package'): Promise<string> {
+  async shipIt(code: string, target: 'react-component' | 'standalone' | 'npm-package' = 'react-component'): Promise<string> {
     await this.ensureInitialized();
 
-    let response = `# Ship It: ${target}\n\n`;
+    let response = `# 🚀 Ship It: ${target}\n\n`;
 
-    response += `## Production-Ready Code:\n\n`;
+    response += `## 🎯 Production-Ready Code\n\n`;
 
     const optimizedCode = this.optimizeForProduction(code, target);
+    response += 'Here\'s your optimized, production-ready code:\n\n';
     response += '```tsx\n' + optimizedCode + '\n```\n\n';
 
-    response += `## Deployment Checklist:\n\n`;
+    response += `## ✅ Pre-Deployment Checklist\n\n`;
     response += this.generateDeploymentChecklist(target);
 
-    response += `\n## Build Configuration:\n\n`;
+    response += `\n## ⚙️ Build Configuration\n\n`;
     response += this.generateBuildConfig(target);
+
+    // Add deployment guides based on target
+    response += `\n## 🌐 Deployment Options\n\n`;
+    if (target === 'react-component') {
+      response += `### Option 1: Embed in Existing React App\n`;
+      response += `1. Copy the component code above\n`;
+      response += `2. Install Klint: \`npm install klint\`\n`;
+      response += `3. Import and use in your app\n`;
+      response += `4. Build with your existing build process\n\n`;
+      
+      response += `### Option 2: Deploy to Vercel/Netlify\n`;
+      response += `1. Create a new React app: \`npx create-react-app my-klint-sketch\`\n`;
+      response += `2. Install Klint: \`npm install klint\`\n`;
+      response += `3. Replace src/App.js with your component\n`;
+      response += `4. Deploy to your platform of choice\n\n`;
+    }
+
+    response += `## 📊 Performance Monitoring\n\n`;
+    response += `After deployment, monitor:\n`;
+    response += `- Canvas rendering performance (aim for 60fps)\n`;
+    response += `- Memory usage (watch for memory leaks)\n`;
+    response += `- Bundle size (aim to keep Klint sketches under 1MB)\n`;
+    response += `- Mobile device compatibility\n\n`;
+
+    response += `## 🔧 Post-Deployment Optimization\n\n`;
+    response += `If performance issues arise:\n`;
+    response += `1. Use the MCP \`debug\` tool to analyze bottlenecks\n`;
+    response += `2. Consider reducing particle counts or complexity\n`;
+    response += `3. Implement level-of-detail based on device capabilities\n`;
+    response += `4. Use requestAnimationFrame wisely\n\n`;
+
+    response += `## 🎉 You're Ready!\n\n`;
+    response += `Your Klint sketch is production-ready. Happy shipping! 🎨\n`;
 
     return response;
   }

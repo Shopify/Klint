@@ -13,7 +13,7 @@ export declare class KlintContext {
     howDoI(task: string, context?: string): Promise<string>;
     explain(functionName: string, includeExamples?: boolean): Promise<string>;
     debug(code: string, issue?: string): Promise<string>;
-    shipIt(code: string, target: 'react-component' | 'standalone' | 'npm-package'): Promise<string>;
+    shipIt(code: string, target?: 'react-component' | 'standalone' | 'npm-package'): Promise<string>;
     private generateExampleCode;
     private generateGenericHelp;
     private findRelevantExamples;

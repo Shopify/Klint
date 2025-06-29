@@ -8,7 +8,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const serverPath = join(__dirname, "dist", "index.js");
 
 async function testImprovedTool() {
-  console.log('🎨 Testing Improved Klint MCP "how-do-i" Tool\n');
+  console.log('🎨 Testing Improved Klint MCP "klint-patterns" Tool\n');
 
   const testCases = [
     "How do i make a simple set of shapes move on a wave",
@@ -21,7 +21,7 @@ async function testImprovedTool() {
     console.log(`━━━ Query: "${query}" ━━━`);
 
     try {
-      const result = await callTool("how-do-i", { task: query });
+      const result = await callTool("klint-patterns", { task: query });
 
       // Extract key sections
       const lines = result.split("\n");
