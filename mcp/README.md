@@ -6,7 +6,7 @@ An Model Control Protocol (MCP) server designed specifically for the Klint creat
 
 The Klint MCP server provides four specialized tools:
 
-### 🤔 `how-do-i`
+### 🎨 `klint-patterns`
 Converts creative coding tasks into actionable Klint code patterns and functions with **intelligent pattern matching** and **working code examples**.
 
 **Features:**
@@ -76,7 +76,23 @@ Bundle and prepare Klint sketches for production deployment.
 }
 ```
 
-## Quick Start
+## Quick Setup
+
+### Option 1: Automated Setup (Recommended)
+
+1. **Navigate to the MCP directory and run setup**:
+   ```bash
+   cd mcp
+   npm install
+   npm run setup
+   ```
+
+This will automatically:
+- Build the MCP server
+- Configure Claude Desktop 
+- Provide next steps and usage examples
+
+### Option 2: Manual Setup
 
 1. **Setup:**
 ```bash

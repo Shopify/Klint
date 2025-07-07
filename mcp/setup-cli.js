@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { promises as fs } from "fs";
+import { promises as fs, readFileSync } from "fs";
 import { join, resolve } from "path";
 import { homedir } from "os";
 import { existsSync } from "fs";
@@ -37,7 +37,7 @@ function validateMcpDirectory() {
   }
 
   try {
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
     if (packageJson.name !== "@shopify/klint-mcp") {
       console.error("❌ Error: Not in the Klint MCP directory.");
       console.error("💡 Please run this command from the mcp directory.");

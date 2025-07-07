@@ -1,10 +1,23 @@
-import { promises as fs } from 'fs';
+import { promises as fs, existsSync } from 'fs';
 import { join, dirname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { cwd } from 'process';
 const __dirname = dirname(fileURLToPath(import.meta.url));
-// Use current working directory as base (should be the mcp directory when running)
-const PROJECT_ROOT = resolve(cwd(), '..');
+// Determine if we're running from npm package or development
+function getProjectRoot() {
+    const mcpDir = resolve(cwd());
+    // Check if we're in an npm package (docs folder exists in mcp dir)
+    const npmDocsPath = join(mcpDir, 'docs');
+    try {
+        if (existsSync(npmDocsPath)) {
+            return mcpDir; // Use mcp directory as root for npm package
+        }
+    }
+    catch { }
+    // Development mode - go up one level
+    return resolve(mcpDir, '..');
+}
+const PROJECT_ROOT = getProjectRoot();
 export class KlintContext {
     documentation = new Map();
     examples = new Map();
@@ -34,44 +47,68 @@ export class KlintContext {
         }
     }
     async loadDocumentation() {
-        const docsPath = join(PROJECT_ROOT, 'docusaurus/docs');
-        try {
-            // Load function documentation
-            const functionsPath = join(docsPath, 'Functions');
-            const functionFiles = await fs.readdir(functionsPath);
-            for (const file of functionFiles) {
-                if (file.endsWith('.md')) {
-                    const content = await fs.readFile(join(functionsPath, file), 'utf-8');
-                    const functionName = file.replace('.md', '');
-                    this.documentation.set(functionName, content);
+        // Try npm package structure first, then development structure
+        const possibleDocsPaths = [
+            join(PROJECT_ROOT, 'docs'), // npm package
+            join(PROJECT_ROOT, 'docusaurus/docs') // development
+        ];
+        for (const docsPath of possibleDocsPaths) {
+            try {
+                // Load function documentation
+                const functionsPath = join(docsPath, 'Functions');
+                const functionFiles = await fs.readdir(functionsPath);
+                for (const file of functionFiles) {
+                    if (file.endsWith('.md')) {
+                        const content = await fs.readFile(join(functionsPath, file), 'utf-8');
+                        const functionName = file.replace('.md', '');
+                        this.documentation.set(functionName, content);
+                    }
                 }
+                // Load element documentation
+                const elementsPath = join(docsPath, 'Elements');
+                const elementFiles = await fs.readdir(elementsPath);
+                for (const file of elementFiles) {
+                    if (file.endsWith('.md')) {
+                        const content = await fs.readFile(join(elementsPath, file), 'utf-8');
+                        const elementName = file.replace('.md', '');
+                        this.documentation.set(elementName, content);
+                    }
+                }
+                // If we successfully loaded docs, break
+                if (this.documentation.size > 0)
+                    break;
             }
-            // Load element documentation
-            const elementsPath = join(docsPath, 'Elements');
-            const elementFiles = await fs.readdir(elementsPath);
-            for (const file of elementFiles) {
-                if (file.endsWith('.md')) {
-                    const content = await fs.readFile(join(elementsPath, file), 'utf-8');
-                    const elementName = file.replace('.md', '');
-                    this.documentation.set(elementName, content);
-                }
+            catch (error) {
+                // Try next path
+                continue;
             }
         }
-        catch (error) {
-            console.warn('Could not load documentation:', error);
+        if (this.documentation.size === 0) {
+            console.warn('Could not load documentation from any path');
         }
     }
     async loadExamples() {
-        const examplesPath = join(PROJECT_ROOT, 'examples');
-        try {
-            const files = await fs.readdir(examplesPath);
-            for (const file of files) {
-                if (file.endsWith('.js') || file.endsWith('.ts')) {
-                    const content = await fs.readFile(join(examplesPath, file), 'utf-8');
-                    this.examples.set(file, content);
+        // Load basic examples
+        const possibleExamplesPaths = [
+            join(PROJECT_ROOT, 'examples'), // both npm and development
+        ];
+        for (const examplesPath of possibleExamplesPaths) {
+            try {
+                const files = await fs.readdir(examplesPath);
+                for (const file of files) {
+                    if (file.endsWith('.js') || file.endsWith('.ts')) {
+                        const content = await fs.readFile(join(examplesPath, file), 'utf-8');
+                        this.examples.set(file, content);
+                    }
                 }
+                break; // Success, no need to try other paths
             }
-            // Also load docusaurus component examples
+            catch (error) {
+                continue;
+            }
+        }
+        // Try to load docusaurus component examples (development only)
+        try {
             const docComponentsPath = join(PROJECT_ROOT, 'docusaurus/src/components/Experiments');
             const componentFiles = await fs.readdir(docComponentsPath);
             for (const file of componentFiles) {
@@ -82,19 +119,20 @@ export class KlintContext {
             }
         }
         catch (error) {
-            console.warn('Could not load examples:', error);
+            // Docusaurus examples not available (probably npm package), that's fine
         }
     }
     async loadFunctionInfo() {
+        // Try to load function definitions - only available in development
         try {
-            // Load function definitions from the lib source
             const klintFunctionsPath = join(PROJECT_ROOT, 'lib/src/KlintFunctions.tsx');
             const klintFunctionsContent = await fs.readFile(klintFunctionsPath, 'utf-8');
             // Parse function signatures and types
             this.parseFunctionInfo(klintFunctionsContent);
         }
         catch (error) {
-            console.warn('Could not load function info:', error);
+            // Function info not available (probably npm package), use basic info from docs
+            console.warn('Function definitions not available, using documentation-based info');
         }
     }
     parseFunctionInfo(content) {

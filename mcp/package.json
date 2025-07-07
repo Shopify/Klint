@@ -4,6 +4,14 @@
   "description": "MCP server for Klint creative coding framework",
   "main": "dist/index.js",
   "type": "module",
+  "files": [
+    "dist/",
+    "docs/",
+    "examples/",
+    "dashboard.js",
+    "setup-cli.js",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
@@ -12,6 +20,8 @@
     "dashboard": "node dashboard.js",
     "dev:dashboard": "nodemon dashboard.js",
     "setup": "node setup-cli.js",
+    "prepublishOnly": "npm run build && npm run copy-docs",
+    "copy-docs": "mkdir -p docs && cp -r ../docusaurus/docs/* docs/ && mkdir -p examples && cp -r ../examples/* examples/",
     "publish:prepare": "npm run build && npm run test"
   },
   "keywords": [
