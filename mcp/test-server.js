@@ -99,7 +99,7 @@ async function runTests() {
 
   const tests = [
     {
-      name: "how-do-i",
+      name: "klint-patterns",
       args: {
         task: "create animated circles",
         context: "for a loading animation",

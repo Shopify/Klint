@@ -14,6 +14,27 @@ class KlintMCPDashboard {
     this.init();
   }
 
+  // Utility function to escape HTML
+  escapeHtml(unsafe) {
+    if (typeof unsafe !== 'string') {
+      return String(unsafe);
+    }
+    return unsafe
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  // Create DOM element safely
+  createElement(tag, className, textContent) {
+    const elem = document.createElement(tag);
+    if (className) elem.className = className;
+    if (textContent) elem.textContent = textContent;
+    return elem;
+  }
+
   init() {
     this.connectSocket();
     this.loadInitialData();
@@ -136,47 +157,58 @@ class KlintMCPDashboard {
 
   updateRecentActivity(recentCalls) {
     const activityLog = document.getElementById("activityLog");
+    
+    // Clear existing content
+    while (activityLog.firstChild) {
+      activityLog.removeChild(activityLog.firstChild);
+    }
 
     if (recentCalls.length === 0) {
-      activityLog.innerHTML = `
-        <div class="activity-item placeholder">
-          <div class="activity-icon">💤</div>
-          <div class="activity-content">
-            <div class="activity-text">No recent activity</div>
-            <div class="activity-time">Waiting for tool calls...</div>
-          </div>
-        </div>
-      `;
+      const placeholder = this.createElement("div", "activity-item placeholder");
+      const icon = this.createElement("div", "activity-icon", "💤");
+      const content = this.createElement("div", "activity-content");
+      const text = this.createElement("div", "activity-text", "No recent activity");
+      const time = this.createElement("div", "activity-time", "Waiting for tool calls...");
+      
+      content.appendChild(text);
+      content.appendChild(time);
+      placeholder.appendChild(icon);
+      placeholder.appendChild(content);
+      activityLog.appendChild(placeholder);
       return;
     }
 
-    const items = recentCalls
-      .slice(0, 10)
-      .map((call) => {
-        const icon = call.success ? "✅" : "❌";
-        const statusClass = call.success ? "success" : "error";
-        const time = new Date(call.timestamp).toLocaleTimeString();
+    const fragment = document.createDocumentFragment();
+    
+    recentCalls.slice(0, 10).forEach((call) => {
+      const icon = call.success ? "✅" : "❌";
+      const statusClass = call.success ? "success" : "error";
+      const time = new Date(call.timestamp).toLocaleTimeString();
 
-        return `
-        <div class="activity-item ${statusClass}">
-          <div class="activity-icon">${icon}</div>
-          <div class="activity-content">
-            <div class="activity-text">
-              ${call.tool} ${call.success ? "completed" : "failed"}
-              ${
-                call.duration
-                  ? `<span class="activity-duration">${call.duration}ms</span>`
-                  : ""
-              }
-            </div>
-            <div class="activity-time">${time}</div>
-          </div>
-        </div>
-      `;
-      })
-      .join("");
+      const item = this.createElement("div", `activity-item ${statusClass}`);
+      const iconDiv = this.createElement("div", "activity-icon", icon);
+      const content = this.createElement("div", "activity-content");
+      const textDiv = this.createElement("div", "activity-text");
+      
+      // Create text content safely
+      textDiv.textContent = `${call.tool} ${call.success ? "completed" : "failed"}`;
+      
+      if (call.duration) {
+        textDiv.textContent += " ";
+        const duration = this.createElement("span", "activity-duration", `${call.duration}ms`);
+        textDiv.appendChild(duration);
+      }
+      
+      const timeDiv = this.createElement("div", "activity-time", time);
+      
+      content.appendChild(textDiv);
+      content.appendChild(timeDiv);
+      item.appendChild(iconDiv);
+      item.appendChild(content);
+      fragment.appendChild(item);
+    });
 
-    activityLog.innerHTML = items;
+    activityLog.appendChild(fragment);
   }
 
   addActivityItem(callInfo) {
@@ -192,24 +224,30 @@ class KlintMCPDashboard {
     const statusClass = callInfo.success ? "success" : "error";
     const time = new Date().toLocaleTimeString();
 
-    const itemHTML = `
-      <div class="activity-item ${statusClass}">
-        <div class="activity-icon">${icon}</div>
-        <div class="activity-content">
-          <div class="activity-text">
-            ${callInfo.tool} ${callInfo.success ? "completed" : "failed"}
-            ${
-              callInfo.duration
-                ? `<span class="activity-duration">${callInfo.duration}ms</span>`
-                : ""
-            }
-          </div>
-          <div class="activity-time">${time}</div>
-        </div>
-      </div>
-    `;
-
-    activityLog.insertAdjacentHTML("afterbegin", itemHTML);
+    // Create new activity item using safe DOM methods
+    const item = this.createElement("div", `activity-item ${statusClass}`);
+    const iconDiv = this.createElement("div", "activity-icon", icon);
+    const content = this.createElement("div", "activity-content");
+    const textDiv = this.createElement("div", "activity-text");
+    
+    // Create text content safely
+    textDiv.textContent = `${callInfo.tool} ${callInfo.success ? "completed" : "failed"}`;
+    
+    if (callInfo.duration) {
+      textDiv.textContent += " ";
+      const duration = this.createElement("span", "activity-duration", `${callInfo.duration}ms`);
+      textDiv.appendChild(duration);
+    }
+    
+    const timeDiv = this.createElement("div", "activity-time", time);
+    
+    content.appendChild(textDiv);
+    content.appendChild(timeDiv);
+    item.appendChild(iconDiv);
+    item.appendChild(content);
+    
+    // Insert at the beginning
+    activityLog.insertBefore(item, activityLog.firstChild);
 
     // Keep only recent items
     const items = activityLog.querySelectorAll(".activity-item");
@@ -237,11 +275,16 @@ class KlintMCPDashboard {
     const toolForm = document.getElementById("toolForm");
     const toolResult = document.getElementById("toolResult");
 
-    modalTitle.textContent = `Test ${toolName}`;
+    modalTitle.textContent = `Test ${this.escapeHtml(toolName)}`;
     toolResult.style.display = "none";
 
-    // Generate form based on tool
-    toolForm.innerHTML = this.generateToolForm(toolName);
+    // Clear previous form content
+    while (toolForm.firstChild) {
+      toolForm.removeChild(toolForm.firstChild);
+    }
+
+    // Generate form based on tool using DOM methods
+    this.createToolForm(toolName, toolForm);
 
     modal.classList.add("show");
   }
@@ -252,58 +295,124 @@ class KlintMCPDashboard {
     this.currentTool = null;
   }
 
-  generateToolForm(toolName) {
-    const forms = {
-      "how-do-i": `
-        <div class="form-group">
-          <label for="task">Task (required)</label>
-          <input type="text" id="task" placeholder="e.g., create animated particles" required>
-        </div>
-        <div class="form-group">
-          <label for="context">Context (optional)</label>
-          <textarea id="context" placeholder="Additional context about your project"></textarea>
-        </div>
-      `,
-      explain: `
-        <div class="form-group">
-          <label for="function">Function Name (required)</label>
-          <input type="text" id="function" placeholder="e.g., circle, translate, fillColor" required>
-        </div>
-        <div class="form-group">
-          <label for="includeExamples">Include Examples</label>
-          <select id="includeExamples">
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-          </select>
-        </div>
-      `,
-      debug: `
-        <div class="form-group">
-          <label for="code">Code (required)</label>
-          <textarea id="code" placeholder="Paste your Klint code here" required style="min-height: 120px;"></textarea>
-        </div>
-        <div class="form-group">
-          <label for="issue">Issue Description (optional)</label>
-          <input type="text" id="issue" placeholder="e.g., animation is slow, circles not showing">
-        </div>
-      `,
-      "ship-it": `
-        <div class="form-group">
-          <label for="code">Code (required)</label>
-          <textarea id="code" placeholder="Paste your Klint sketch code here" required style="min-height: 120px;"></textarea>
-        </div>
-        <div class="form-group">
-          <label for="target">Target Format</label>
-          <select id="target">
-            <option value="react-component">React Component</option>
-            <option value="standalone">Standalone App</option>
-            <option value="npm-package">NPM Package</option>
-          </select>
-        </div>
-      `,
+  createToolForm(toolName, container) {
+    const formConfigs = {
+      "klint-patterns": [
+        {
+          type: "input",
+          id: "task",
+          label: "Task (required)",
+          placeholder: "e.g., create animated particles",
+          required: true
+        },
+        {
+          type: "textarea",
+          id: "context",
+          label: "Context (optional)",
+          placeholder: "Additional context about your project"
+        }
+      ],
+      explain: [
+        {
+          type: "input",
+          id: "function",
+          label: "Function Name (required)",
+          placeholder: "e.g., circle, translate, fillColor",
+          required: true
+        },
+        {
+          type: "select",
+          id: "includeExamples",
+          label: "Include Examples",
+          options: [
+            { value: "true", text: "Yes" },
+            { value: "false", text: "No" }
+          ]
+        }
+      ],
+      debug: [
+        {
+          type: "textarea",
+          id: "code",
+          label: "Code (required)",
+          placeholder: "Paste your Klint code here",
+          required: true,
+          style: "min-height: 120px;"
+        },
+        {
+          type: "input",
+          id: "issue",
+          label: "Issue Description (optional)",
+          placeholder: "e.g., animation is slow, circles not showing"
+        }
+      ],
+      "ship-it": [
+        {
+          type: "textarea",
+          id: "code",
+          label: "Code (required)",
+          placeholder: "Paste your Klint sketch code here",
+          required: true,
+          style: "min-height: 120px;"
+        },
+        {
+          type: "select",
+          id: "target",
+          label: "Target Format",
+          options: [
+            { value: "react-component", text: "React Component" },
+            { value: "standalone", text: "Standalone App" },
+            { value: "npm-package", text: "NPM Package" }
+          ]
+        }
+      ]
     };
 
-    return forms[toolName] || "<p>Form not available for this tool.</p>";
+    const config = formConfigs[toolName];
+    if (!config) {
+      const p = document.createElement("p");
+      p.textContent = "Form not available for this tool.";
+      container.appendChild(p);
+      return;
+    }
+
+    config.forEach(field => {
+      const formGroup = document.createElement("div");
+      formGroup.className = "form-group";
+
+      const label = document.createElement("label");
+      label.htmlFor = field.id;
+      label.textContent = field.label;
+      formGroup.appendChild(label);
+
+      if (field.type === "input") {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.id = field.id;
+        input.placeholder = field.placeholder || "";
+        if (field.required) input.required = true;
+        formGroup.appendChild(input);
+      } else if (field.type === "textarea") {
+        const textarea = document.createElement("textarea");
+        textarea.id = field.id;
+        textarea.placeholder = field.placeholder || "";
+        if (field.required) textarea.required = true;
+        if (field.style) textarea.style.cssText = field.style;
+        formGroup.appendChild(textarea);
+      } else if (field.type === "select") {
+        const select = document.createElement("select");
+        select.id = field.id;
+        field.options.forEach(opt => {
+          const option = document.createElement("option");
+          option.value = opt.value;
+          option.textContent = opt.text;
+          select.appendChild(option);
+        });
+        formGroup.appendChild(select);
+      }
+
+      container.appendChild(formGroup);
+    });
   }
 
   async testTool() {
@@ -359,6 +468,12 @@ class KlintMCPDashboard {
         // Convert string booleans to actual booleans
         if (value === "true") value = true;
         if (value === "false") value = false;
+
+        // Validate field length for strings
+        if (typeof value === 'string' && value.length > 10000) {
+          console.warn(`Input truncated: ${input.id} exceeded 10000 characters`);
+          value = value.substring(0, 10000);
+        }
 
         formData[input.id] = value;
       }

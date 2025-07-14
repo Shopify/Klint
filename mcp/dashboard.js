@@ -30,6 +30,23 @@ const PORT = 3001;
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Add security headers
+app.use((req, res, next) => {
+  res.setHeader('Content-Security-Policy', 
+    "default-src 'self'; " +
+    "script-src 'self' 'unsafe-inline' https://cdn.socket.io; " +
+    "style-src 'self' 'unsafe-inline'; " +
+    "connect-src 'self' ws://localhost:* wss://localhost:*; " +
+    "img-src 'self' data:; " +
+    "font-src 'self';"
+  );
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
+
 app.use(express.static("dashboard-ui"));
 
 // Store for statistics and logs

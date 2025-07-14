@@ -1,5 +1,5 @@
 import { promises as fs, existsSync } from 'fs';
-import { join, dirname, resolve } from 'path';
+import { join, dirname, resolve, normalize } from 'path';
 import { fileURLToPath } from 'url';
 import { cwd } from 'process';
 
@@ -63,13 +63,25 @@ export class KlintContext {
     
     for (const docsPath of possibleDocsPaths) {
       try {
+        // Validate path is within project root
+        const normalizedPath = normalize(docsPath);
+        if (!normalizedPath.startsWith(normalize(PROJECT_ROOT))) {
+          continue;
+        }
+
         // Load function documentation
         const functionsPath = join(docsPath, 'Functions');
         const functionFiles = await fs.readdir(functionsPath);
         
         for (const file of functionFiles) {
-          if (file.endsWith('.md')) {
-            const content = await fs.readFile(join(functionsPath, file), 'utf-8');
+          if (file.endsWith('.md') && !file.includes('..')) {
+            const filePath = join(functionsPath, file);
+            // Validate file path
+            const normalizedFilePath = normalize(filePath);
+            if (!normalizedFilePath.startsWith(normalize(PROJECT_ROOT))) {
+              continue;
+            }
+            const content = await fs.readFile(filePath, 'utf-8');
             const functionName = file.replace('.md', '');
             this.documentation.set(functionName, content);
           }
@@ -80,8 +92,14 @@ export class KlintContext {
         const elementFiles = await fs.readdir(elementsPath);
         
         for (const file of elementFiles) {
-          if (file.endsWith('.md')) {
-            const content = await fs.readFile(join(elementsPath, file), 'utf-8');
+          if (file.endsWith('.md') && !file.includes('..')) {
+            const filePath = join(elementsPath, file);
+            // Validate file path
+            const normalizedFilePath = normalize(filePath);
+            if (!normalizedFilePath.startsWith(normalize(PROJECT_ROOT))) {
+              continue;
+            }
+            const content = await fs.readFile(filePath, 'utf-8');
             const elementName = file.replace('.md', '');
             this.documentation.set(elementName, content);
           }
@@ -108,11 +126,23 @@ export class KlintContext {
     
     for (const examplesPath of possibleExamplesPaths) {
       try {
+        // Validate path is within project root
+        const normalizedPath = normalize(examplesPath);
+        if (!normalizedPath.startsWith(normalize(PROJECT_ROOT))) {
+          continue;
+        }
+
         const files = await fs.readdir(examplesPath);
         
         for (const file of files) {
-          if (file.endsWith('.js') || file.endsWith('.ts')) {
-            const content = await fs.readFile(join(examplesPath, file), 'utf-8');
+          if ((file.endsWith('.js') || file.endsWith('.ts')) && !file.includes('..')) {
+            const filePath = join(examplesPath, file);
+            // Validate file path
+            const normalizedFilePath = normalize(filePath);
+            if (!normalizedFilePath.startsWith(normalize(PROJECT_ROOT))) {
+              continue;
+            }
+            const content = await fs.readFile(filePath, 'utf-8');
             this.examples.set(file, content);
           }
         }
@@ -125,12 +155,22 @@ export class KlintContext {
     // Try to load docusaurus component examples (development only)
     try {
       const docComponentsPath = join(PROJECT_ROOT, 'docusaurus/src/components/Experiments');
-      const componentFiles = await fs.readdir(docComponentsPath);
-      
-      for (const file of componentFiles) {
-        if (file.endsWith('.tsx') || file.endsWith('.ts')) {
-          const content = await fs.readFile(join(docComponentsPath, file), 'utf-8');
-          this.examples.set(`experiments/${file}`, content);
+      // Validate path is within project root
+      const normalizedPath = normalize(docComponentsPath);
+      if (normalizedPath.startsWith(normalize(PROJECT_ROOT))) {
+        const componentFiles = await fs.readdir(docComponentsPath);
+        
+        for (const file of componentFiles) {
+          if ((file.endsWith('.tsx') || file.endsWith('.ts')) && !file.includes('..')) {
+            const filePath = join(docComponentsPath, file);
+            // Validate file path
+            const normalizedFilePath = normalize(filePath);
+            if (!normalizedFilePath.startsWith(normalize(PROJECT_ROOT))) {
+              continue;
+            }
+            const content = await fs.readFile(filePath, 'utf-8');
+            this.examples.set(`experiments/${file}`, content);
+          }
         }
       }
     } catch (error) {
@@ -210,6 +250,41 @@ export class KlintContext {
         keywords: ['interactive', 'mouse', 'click', 'hover', 'touch', 'input'],
         functions: ['State', 'useKlint'],
         concept: 'interactivity',
+      },
+      {
+        keywords: ['text', 'font', 'typography', 'letters', 'characters', 'typeface'],
+        functions: ['text', 'font', 'textAlign', 'textBaseline', 'fillColor'],
+        concept: 'text and typography',
+      },
+      {
+        keywords: ['mask', 'clip', 'cutout', 'stencil', 'clipping'],
+        functions: ['beginContour', 'endContour', 'clip', 'beginShape', 'endShape'],
+        concept: 'masking and clipping',
+      },
+      {
+        keywords: ['blend', 'mix', 'composite', 'layer', 'opacity', 'merge'],
+        functions: ['blend', 'globalCompositeOperation', 'push', 'pop'],
+        concept: 'blending and compositing',
+      },
+      {
+        keywords: ['path', 'curve', 'bezier', 'smooth', 'spline', 'arc'],
+        functions: ['bezierVertex', 'quadraticVertex', 'arc', 'arcVertex', 'beginShape'],
+        concept: 'paths and curves',
+      },
+      {
+        keywords: ['image', 'pixel', 'filter', 'texture', 'bitmap', 'photo'],
+        functions: ['image', 'loadImage', 'pixel', 'getImageData', 'putImageData'],
+        concept: 'image processing',
+      },
+      {
+        keywords: ['noise', 'random', 'generative', 'procedural', 'perlin'],
+        functions: ['Math.random', 'noise', 'randomSeed', 'Time'],
+        concept: 'noise and randomness',
+      },
+      {
+        keywords: ['transform', 'matrix', 'skew', 'shear', 'distort'],
+        functions: ['translate', 'rotate', 'scale', 'push', 'pop', 'transform'],
+        concept: 'transformations',
       },
     ];
 
@@ -644,6 +719,75 @@ export default function GridPattern() {
             ctx.circle(centerX, centerY, size);
           }
         }
+      }}
+    />
+  );
+}`;
+    }
+
+    if (pattern.concept === 'text and typography') {
+      return `import { useKlint } from 'klint';
+
+export default function TextAnimation() {
+  const { Klint, Time } = useKlint();
+
+  return (
+    <Klint
+      setup={(ctx) => {
+        ctx.font('48px Arial');
+        ctx.textAlign('center');
+        ctx.textBaseline('middle');
+      }}
+      draw={(ctx) => {
+        ctx.background(20);
+        
+        // Animated text
+        const text = "KLINT";
+        const spacing = 60;
+        
+        for (let i = 0; i < text.length; i++) {
+          const x = ctx.width/2 + (i - text.length/2) * spacing;
+          const y = ctx.height/2 + Math.sin(Time.time * 0.02 + i * 0.5) * 30;
+          
+          ctx.fillColor(200 + i * 30, 100, 255);
+          ctx.text(text[i], x, y);
+        }
+      }}
+    />
+  );
+}`;
+    }
+
+    if (pattern.concept === 'paths and curves') {
+      return `import { useKlint } from 'klint';
+
+export default function CurvePaths() {
+  const { Klint, Time } = useKlint();
+
+  return (
+    <Klint
+      draw={(ctx) => {
+        ctx.background(20);
+        ctx.noFill();
+        ctx.strokeWidth(3);
+        ctx.strokeColor(100, 200, 255);
+        
+        // Create a flowing bezier curve
+        ctx.beginShape();
+        const points = 5;
+        for (let i = 0; i < points; i++) {
+          const x = (i / (points - 1)) * ctx.width;
+          const y = ctx.height/2 + Math.sin(Time.time * 0.01 + i) * 100;
+          
+          if (i === 0) {
+            ctx.vertex(x, y);
+          } else {
+            const cp1x = x - 50;
+            const cp1y = y + Math.cos(Time.time * 0.02 + i) * 50;
+            ctx.quadraticVertex(cp1x, cp1y, x, y);
+          }
+        }
+        ctx.endShape();
       }}
     />
   );

@@ -20,8 +20,8 @@
     "dashboard": "node dashboard.js",
     "dev:dashboard": "nodemon dashboard.js",
     "setup": "node setup-cli.js",
-    "prepublishOnly": "npm run build && npm run copy-docs",
-    "copy-docs": "mkdir -p docs && cp -r ../docusaurus/docs/* docs/ && mkdir -p examples && cp -r ../examples/* examples/",
+    "prepublishOnly": "npm run build && npm run prepare-publish",
+    "prepare-publish": "node scripts/prepare-publish.js",
     "publish:prepare": "npm run build && npm run test"
   },
   "keywords": [

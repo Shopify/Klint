@@ -13,6 +13,13 @@
 - [x] Vite hotreload creates slows down
 - [x] Window.resize event inconsistent
 
+### Elements 
+- [ ] Grids : 2D, responsive, radial 
+- [ ] Noise + pseudo-random
+- [ ] Refactor timeline
+- [ ] Controls
+- [ ] Recorder
+- [ ] Text To Points
 
 #### Fixes
 - [x] Arguments order is wrong on roundedRect
@@ -34,8 +41,8 @@
     [x] Update docs
 
 ### Considerations 
-- [ ] Dissociate Klint and the 2D context : confusing autocomplete
 - [ ] Create a singe useFrame() hook similar to Three Fiber
+- [x] Add relativeTo(), lookAt(), rotate(), fromAngle(), toScreen(), slerp()
 - [ ] Add PI and TWO_PI
 - [ ] Consider url params
 - [x] Make the loadVideo hook 
@@ -50,14 +57,10 @@
 - [ ] Consider url params
 - [x] Update dependency
 
-## ELEMENTS
-- [ ] Hotspot : note ( Path 2D for custom shapes + ctx.isPointInPath()) 
-- [ ] Grids : 2D, responsive, radial 
+##  PLUGINS
+- [ ] SDF effector
+- [ ] Hotspot : note ( Path 2D for custom shapes + ctx.isPointInPath())
 - [ ] Curve : Strips, rounding
-- [ ] Noise + pseudo-random
-
-
-## EXTRAS PLUGINS
 - [ ] Draggables 
 - [ ] Catmull Curves : path smoothing and auto-rounded
 - [x] Easing 
@@ -84,5 +87,5 @@
 - [ ] Bitmap font rendering => render to image, get atlas of chars on texture, text composer
 - [ ] True SSR => return base64
 - [ ] URL params => encode / decode
-- [ ] Opentype.js || typr.js support + text to points
+
 ---

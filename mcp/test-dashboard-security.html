@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard Security Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        .result { margin-top: 10px; padding: 10px; background: #f0f0f0; }
+        #activityLog { border: 1px solid #ddd; padding: 10px; min-height: 200px; }
+        .activity-item { margin: 5px 0; padding: 5px; background: #fff; }
+        .activity-duration { color: #666; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>Dashboard Security Test</h1>
+    
+    <div class="test">
+        <h2>Test 1: XSS in Tool Names</h2>
+        <button onclick="testXSSInToolName()">Run Test</button>
+        <div id="test1-result" class="result"></div>
+    </div>
+    
+    <div class="test">
+        <h2>Test 2: Activity Log</h2>
+        <div id="activityLog"></div>
+        <button onclick="testActivityLog()">Add Test Activities</button>
+    </div>
+    
+    <div class="test">
+        <h2>Test 3: Form Generation</h2>
+        <div id="toolForm"></div>
+        <button onclick="testFormGeneration()">Generate Form</button>
+    </div>
+
+    <!-- Include the dashboard script -->
+    <script src="dashboard-ui/dashboard.js"></script>
+    
+    <script>
+        // Mock socket.io for testing
+        window.io = function() {
+            return {
+                on: function() {},
+                emit: function() {}
+            };
+        };
+        
+        // Initialize dashboard
+        const dashboard = new KlintMCPDashboard();
+        
+        function testXSSInToolName() {
+            const maliciousCall = {
+                tool: '<script>alert("XSS")</script>',
+                success: true,
+                duration: 123,
+                timestamp: new Date()
+            };
+            
+            dashboard.addActivityItem(maliciousCall);
+            
+            const result = document.getElementById('test1-result');
+            const hasScript = document.querySelector('script[src*="alert"]');
+            
+            if (!hasScript && !document.body.innerHTML.includes('<script>')) {
+                result.innerHTML = '<span style="color: green;">✅ PASS: XSS attempt was properly escaped</span>';
+            } else {
+                result.innerHTML = '<span style="color: red;">❌ FAIL: XSS vulnerability detected</span>';
+            }
+        }
+        
+        function testActivityLog() {
+            const testCalls = [
+                {
+                    tool: 'klint-patterns <img src=x onerror=alert("XSS")>',
+                    success: true,
+                    duration: 150,
+                    timestamp: new Date()
+                },
+                {
+                    tool: 'debug&lt;script&gt;',
+                    success: false,
+                    duration: null,
+                    timestamp: new Date()
+                },
+                {
+                    tool: 'ship-it',
+                    success: true,
+                    duration: '<script>alert("duration XSS")</script>',
+                    timestamp: new Date()
+                }
+            ];
+            
+            dashboard.updateRecentActivity(testCalls);
+        }
+        
+        function testFormGeneration() {
+            dashboard.createToolForm('klint-patterns', document.getElementById('toolForm'));
+        }
+    </script>
+</body>
+</html>

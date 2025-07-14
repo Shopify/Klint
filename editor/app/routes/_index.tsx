@@ -268,26 +268,47 @@ export default function KlintEditor() {
     setCanvasKey((prev) => prev + 1);
   }, [code]);
 
+  // Function to clear the editor
+  const clearCode = useCallback(() => {
+    setCode("");
+    setRunningCode("");
+    setCanvasKey((prev) => prev + 1);
+  }, []);
+
   if (!isClient) {
     return <div style={{ height: "100vh", background: "#1e1e1e" }}></div>;
   }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <button
-        onClick={runCode}
-        style={{
-          padding: "8px 16px",
-          margin: "8px",
-          backgroundColor: "#4CAF50",
-          color: "white",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer",
-        }}
-      >
-        Run
-      </button>
+      <div style={{ display: "flex", gap: "8px", margin: "8px" }}>
+        <button
+          onClick={runCode}
+          style={{
+            padding: "8px 16px",
+            backgroundColor: "#4CAF50",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          Run
+        </button>
+        <button
+          onClick={clearCode}
+          style={{
+            padding: "8px 16px",
+            backgroundColor: "#f44336",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          Clear
+        </button>
+      </div>
       <div style={{ display: "flex", flex: 1 }}>
         <div style={{ flex: 1 }}>
           <Editor
