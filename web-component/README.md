@@ -167,7 +167,7 @@ See the [examples](./examples/) directory for comprehensive demos:
 - Chrome/Edge 90+
 - Firefox 90+
 - Safari 14+
-
+ 
 Requires support for:
 - Web Components (Custom Elements v1)
 - ES Modules
