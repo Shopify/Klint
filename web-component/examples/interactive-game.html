@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klint - Interactive Games</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: white;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .game {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .game h3 {
+            margin: 0 0 10px 0;
+            font-size: 20px;
+        }
+        .game p {
+            margin: 10px 0;
+            color: #ccc;
+            font-size: 14px;
+        }
+        klint {
+            border-radius: 4px;
+            border: 1px solid #444;
+            cursor: pointer;
+        }
+        .score {
+            margin: 10px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .controls {
+            margin: 10px 0;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            background: #007AFF;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0051D5;
+        }
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Interactive Games with Klint</h1>
+        <p>Simple games demonstrating interactive capabilities of Klint canvas.</p>
+        
+        <div class="games-grid">
+            <!-- Snake Game -->
+            <div class="game">
+                <h3>🐍 Snake</h3>
+                <klint id="snakeGame" width="400" height="400"></klint>
+                <div class="score">Score: <span id="snakeScore">0</span></div>
+                <div class="instructions">
+                    <strong>Controls:</strong> Arrow keys or WASD to move
+                </div>
+                <div class="controls">
+                    <button id="snakeStart">Start Game</button>
+                    <button id="snakeReset">Reset</button>
+                </div>
+            </div>
+            
+            <!-- Breakout Game -->
+            <div class="game">
+                <h3>🧱 Breakout</h3>
+                <klint id="breakoutGame" width="400" height="400"></klint>
+                <div class="score">
+                    Score: <span id="breakoutScore">0</span> | 
+                    Lives: <span id="breakoutLives">3</span>
+                </div>
+                <div class="instructions">
+                    <strong>Controls:</strong> Mouse to move paddle, Click to launch ball
+                </div>
+                <div class="controls">
+                    <button id="breakoutStart">Start Game</button>
+                    <button id="breakoutReset">Reset</button>
+                </div>
+            </div>
+            
+            <!-- Asteroids Game -->
+            <div class="game">
+                <h3>🚀 Asteroids</h3>
+                <klint id="asteroidsGame" width="400" height="400"></klint>
+                <div class="score">Score: <span id="asteroidsScore">0</span></div>
+                <div class="instructions">
+                    <strong>Controls:</strong> Arrow keys to move, Space to shoot
+                </div>
+                <div class="controls">
+                    <button id="asteroidsStart">Start Game</button>
+                    <button id="asteroidsReset">Reset</button>
+                </div>
+            </div>
+            
+            <!-- Memory Game -->
+            <div class="game">
+                <h3>🎴 Memory Match</h3>
+                <klint id="memoryGame" width="400" height="400"></klint>
+                <div class="score">
+                    Moves: <span id="memoryMoves">0</span> | 
+                    Pairs: <span id="memoryPairs">0</span>/8
+                </div>
+                <div class="instructions">
+                    <strong>Controls:</strong> Click cards to flip them
+                </div>
+                <div class="controls">
+                    <button id="memoryReset">New Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import '../klint-canvas.js';
+        
+        // Snake Game
+        const snakeCanvas = document.getElementById('snakeGame');
+        const snakeScoreEl = document.getElementById('snakeScore');
+        
+        let snake = [];
+        let direction = { x: 1, y: 0 };
+        let food = null;
+        let gameRunning = false;
+        let snakeScore = 0;
+        let gridSize = 20;
+        let cellSize = 20;
+        
+        snakeCanvas.setup = (ctx) => {
+            ctx.background('#111');
+            resetSnake();
+        };
+        
+        function resetSnake() {
+            snake = [
+                { x: 10, y: 10 },
+                { x: 9, y: 10 },
+                { x: 8, y: 10 }
+            ];
+            direction = { x: 1, y: 0 };
+            spawnFood();
+            snakeScore = 0;
+            snakeScoreEl.textContent = snakeScore;
+            gameRunning = false;
+        }
+        
+        function spawnFood() {
+            do {
+                food = {
+                    x: Math.floor(Math.random() * gridSize),
+                    y: Math.floor(Math.random() * gridSize)
+                };
+            } while (snake.some(segment => segment.x === food.x && segment.y === food.y));
+        }
+        
+        let snakeTimer = 0;
+        snakeCanvas.draw = (ctx) => {
+            ctx.background('#111');
+            
+            // Draw grid
+            ctx.strokeColor('#222');
+            ctx.strokeWidth(1);
+            for (let i = 0; i <= gridSize; i++) {
+                ctx.line(i * cellSize, 0, i * cellSize, ctx.height);
+                ctx.line(0, i * cellSize, ctx.width, i * cellSize);
+            }
+            
+            if (gameRunning) {
+                // Update snake
+                snakeTimer += ctx.deltaTime / 1000;
+                if (snakeTimer > 0.1) {
+                    snakeTimer = 0;
+                    
+                    // Move snake
+                    const head = { ...snake[0] };
+                    head.x += direction.x;
+                    head.y += direction.y;
+                    
+                    // Check collisions
+                    if (head.x < 0 || head.x >= gridSize || 
+                        head.y < 0 || head.y >= gridSize ||
+                        snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                        gameRunning = false;
+                        return;
+                    }
+                    
+                    snake.unshift(head);
+                    
+                    // Check food
+                    if (head.x === food.x && head.y === food.y) {
+                        snakeScore += 10;
+                        snakeScoreEl.textContent = snakeScore;
+                        spawnFood();
+                    } else {
+                        snake.pop();
+                    }
+                }
+            }
+            
+            // Draw food
+            if (food) {
+                ctx.fillColor('#ff6b6b');
+                ctx.circle(
+                    food.x * cellSize + cellSize / 2,
+                    food.y * cellSize + cellSize / 2,
+                    cellSize / 2 - 2
+                );
+            }
+            
+            // Draw snake
+            snake.forEach((segment, i) => {
+                const brightness = 255 - i * 5;
+                ctx.fillColor(`rgb(${brightness * 0.5}, ${brightness}, ${brightness * 0.5})`);
+                ctx.rectangle(
+                    segment.x * cellSize + 2,
+                    segment.y * cellSize + 2,
+                    cellSize - 4,
+                    cellSize - 4
+                );
+            });
+            
+            // Game over text
+            if (!gameRunning && snake.length > 0 && snakeScore > 0) {
+                ctx.fillColor('rgba(0, 0, 0, 0.7)');
+                ctx.rectangle(0, 0, ctx.width, ctx.height);
+                
+                ctx.fillColor('#fff');
+                ctx.textSize(24);
+                ctx.textWeight('bold');
+                ctx.alignText('center', 'middle');
+                ctx.text('GAME OVER', ctx.width / 2, ctx.height / 2);
+                
+                ctx.textSize(16);
+                ctx.textWeight('normal');
+                ctx.text(`Score: ${snakeScore}`, ctx.width / 2, ctx.height / 2 + 30);
+            }
+        };
+        
+        // Snake controls
+        window.addEventListener('keydown', (e) => {
+            if (!gameRunning) return;
+            
+            switch(e.key) {
+                case 'ArrowUp':
+                case 'w':
+                    if (direction.y === 0) direction = { x: 0, y: -1 };
+                    break;
+                case 'ArrowDown':
+                case 's':
+                    if (direction.y === 0) direction = { x: 0, y: 1 };
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                    if (direction.x === 0) direction = { x: -1, y: 0 };
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                    if (direction.x === 0) direction = { x: 1, y: 0 };
+                    break;
+            }
+        });
+        
+        document.getElementById('snakeStart').addEventListener('click', () => {
+            if (!gameRunning) {
+                gameRunning = true;
+                snakeTimer = 0;
+            }
+        });
+        
+        document.getElementById('snakeReset').addEventListener('click', () => {
+            resetSnake();
+        });
+        
+        // Breakout Game
+        const breakoutCanvas = document.getElementById('breakoutGame');
+        const breakoutScoreEl = document.getElementById('breakoutScore');
+        const breakoutLivesEl = document.getElementById('breakoutLives');
+        
+        let paddle = { x: 175, y: 370, width: 50, height: 10 };
+        let ball = { x: 200, y: 200, vx: 0, vy: 0, radius: 5 };
+        let bricks = [];
+        let breakoutScore = 0;
+        let lives = 3;
+        let breakoutRunning = false;
+        
+        function resetBreakout() {
+            // Initialize bricks
+            bricks = [];
+            const rows = 5;
+            const cols = 8;
+            const brickWidth = 40;
+            const brickHeight = 15;
+            const padding = 5;
+            
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    bricks.push({
+                        x: c * (brickWidth + padding) + 30,
+                        y: r * (brickHeight + padding) + 50,
+                        width: brickWidth,
+                        height: brickHeight,
+                        color: `hsl(${r * 40}, 70%, 50%)`,
+                        hit: false
+                    });
+                }
+            }
+            
+            ball.x = 200;
+            ball.y = 200;
+            ball.vx = 0;
+            ball.vy = 0;
+            breakoutScore = 0;
+            lives = 3;
+            breakoutRunning = false;
+            breakoutScoreEl.textContent = breakoutScore;
+            breakoutLivesEl.textContent = lives;
+        }
+        
+        breakoutCanvas.setup = (ctx) => {
+            ctx.background('#111');
+            resetBreakout();
+        };
+        
+        breakoutCanvas.draw = (ctx) => {
+            ctx.background('#111');
+            
+            // Update paddle position
+            const rect = breakoutCanvas.getBoundingClientRect();
+            const mouseX = (ctx.mouseX / rect.width) * ctx.width;
+            paddle.x = ctx.constrain(mouseX - paddle.width / 2, 0, ctx.width - paddle.width);
+            
+            if (breakoutRunning) {
+                // Update ball
+                ball.x += ball.vx;
+                ball.y += ball.vy;
+                
+                // Ball collision with walls
+                if (ball.x - ball.radius < 0 || ball.x + ball.radius > ctx.width) {
+                    ball.vx *= -1;
+                }
+                if (ball.y - ball.radius < 0) {
+                    ball.vy *= -1;
+                }
+                
+                // Ball out of bounds
+                if (ball.y - ball.radius > ctx.height) {
+                    lives--;
+                    breakoutLivesEl.textContent = lives;
+                    if (lives <= 0) {
+                        breakoutRunning = false;
+                    } else {
+                        ball.x = 200;
+                        ball.y = 200;
+                        ball.vx = 0;
+                        ball.vy = 0;
+                        breakoutRunning = false;
+                    }
+                }
+                
+                // Ball collision with paddle
+                if (ball.y + ball.radius > paddle.y &&
+                    ball.y - ball.radius < paddle.y + paddle.height &&
+                    ball.x > paddle.x &&
+                    ball.x < paddle.x + paddle.width) {
+                    ball.vy *= -1;
+                    // Add spin based on hit position
+                    const hitPos = (ball.x - paddle.x) / paddle.width;
+                    ball.vx = (hitPos - 0.5) * 8;
+                }
+                
+                // Ball collision with bricks
+                bricks.forEach(brick => {
+                    if (!brick.hit &&
+                        ball.x + ball.radius > brick.x &&
+                        ball.x - ball.radius < brick.x + brick.width &&
+                        ball.y + ball.radius > brick.y &&
+                        ball.y - ball.radius < brick.y + brick.height) {
+                        brick.hit = true;
+                        ball.vy *= -1;
+                        breakoutScore += 10;
+                        breakoutScoreEl.textContent = breakoutScore;
+                        
+                        // Check win
+                        if (bricks.every(b => b.hit)) {
+                            breakoutRunning = false;
+                        }
+                    }
+                });
+            }
+            
+            // Draw bricks
+            bricks.forEach(brick => {
+                if (!brick.hit) {
+                    ctx.fillColor(brick.color);
+                    ctx.rectangle(brick.x, brick.y, brick.width, brick.height);
+                }
+            });
+            
+            // Draw paddle
+            ctx.fillColor('#4ECDC4');
+            ctx.rectangle(paddle.x, paddle.y, paddle.width, paddle.height);
+            
+            // Draw ball
+            ctx.fillColor('#fff');
+            ctx.circle(ball.x, ball.y, ball.radius);
+            
+            // Start instruction
+            if (!breakoutRunning && ball.vx === 0 && ball.vy === 0 && lives > 0) {
+                ctx.fillColor('rgba(255, 255, 255, 0.5)');
+                ctx.textSize(16);
+                ctx.alignText('center', 'middle');
+                ctx.text('Click to launch ball', ctx.width / 2, ctx.height / 2);
+            }
+            
+            // Game over
+            if (lives <= 0) {
+                ctx.fillColor('rgba(0, 0, 0, 0.7)');
+                ctx.rectangle(0, 0, ctx.width, ctx.height);
+                
+                ctx.fillColor('#fff');
+                ctx.textSize(24);
+                ctx.textWeight('bold');
+                ctx.alignText('center', 'middle');
+                ctx.text('GAME OVER', ctx.width / 2, ctx.height / 2);
+                
+                ctx.textSize(16);
+                ctx.textWeight('normal');
+                ctx.text(`Final Score: ${breakoutScore}`, ctx.width / 2, ctx.height / 2 + 30);
+            }
+            
+            // Win
+            if (bricks.every(b => b.hit)) {
+                ctx.fillColor('rgba(0, 0, 0, 0.7)');
+                ctx.rectangle(0, 0, ctx.width, ctx.height);
+                
+                ctx.fillColor('#4ECDC4');
+                ctx.textSize(24);
+                ctx.textWeight('bold');
+                ctx.alignText('center', 'middle');
+                ctx.text('YOU WIN!', ctx.width / 2, ctx.height / 2);
+                
+                ctx.textSize(16);
+                ctx.textWeight('normal');
+                ctx.fillColor('#fff');
+                ctx.text(`Final Score: ${breakoutScore}`, ctx.width / 2, ctx.height / 2 + 30);
+            }
+        };
+        
+        breakoutCanvas.addEventListener('click', () => {
+            if (!breakoutRunning && ball.vx === 0 && ball.vy === 0 && lives > 0) {
+                ball.vx = (Math.random() - 0.5) * 4;
+                ball.vy = 4;
+                breakoutRunning = true;
+            }
+        });
+        
+        document.getElementById('breakoutStart').addEventListener('click', () => {
+            if (!breakoutRunning && ball.vx === 0 && ball.vy === 0 && lives > 0) {
+                ball.vx = (Math.random() - 0.5) * 4;
+                ball.vy = 4;
+                breakoutRunning = true;
+            }
+        });
+        
+        document.getElementById('breakoutReset').addEventListener('click', () => {
+            resetBreakout();
+        });
+        
+        // Asteroids Game
+        const asteroidsCanvas = document.getElementById('asteroidsGame');
+        const asteroidsScoreEl = document.getElementById('asteroidsScore');
+        
+        let ship = { x: 200, y: 200, angle: 0, vx: 0, vy: 0 };
+        let asteroids = [];
+        let bullets = [];
+        let asteroidsScore = 0;
+        let asteroidsRunning = false;
+        let keys = {};
+        
+        function createAsteroid(x, y, size) {
+            const vertices = [];
+            const points = 8 + Math.floor(Math.random() * 4);
+            for (let i = 0; i < points; i++) {
+                const angle = (i / points) * Math.PI * 2;
+                const radius = size * (0.8 + Math.random() * 0.4);
+                vertices.push({
+                    x: Math.cos(angle) * radius,
+                    y: Math.sin(angle) * radius
+                });
+            }
+            
+            return {
+                x, y,
+                vx: (Math.random() - 0.5) * 2,
+                vy: (Math.random() - 0.5) * 2,
+                size,
+                rotation: 0,
+                rotationSpeed: (Math.random() - 0.5) * 0.05,
+                vertices
+            };
+        }
+        
+        function resetAsteroids() {
+            ship = { x: 200, y: 200, angle: 0, vx: 0, vy: 0 };
+            asteroids = [];
+            bullets = [];
+            asteroidsScore = 0;
+            asteroidsScoreEl.textContent = asteroidsScore;
+            asteroidsRunning = false;
+            
+            // Create initial asteroids
+            for (let i = 0; i < 5; i++) {
+                let x, y;
+                do {
+                    x = Math.random() * 400;
+                    y = Math.random() * 400;
+                } while (Math.hypot(x - 200, y - 200) < 100);
+                
+                asteroids.push(createAsteroid(x, y, 30));
+            }
+        }
+        
+        asteroidsCanvas.setup = (ctx) => {
+            ctx.background('#000');
+            resetAsteroids();
+        };
+        
+        asteroidsCanvas.draw = (ctx) => {
+            ctx.background('rgba(0, 0, 0, 0.1)');
+            
+            if (asteroidsRunning) {
+                // Update ship
+                if (keys['ArrowLeft']) ship.angle -= 0.1;
+                if (keys['ArrowRight']) ship.angle += 0.1;
+                if (keys['ArrowUp']) {
+                    ship.vx += Math.cos(ship.angle) * 0.3;
+                    ship.vy += Math.sin(ship.angle) * 0.3;
+                }
+                
+                ship.vx *= 0.98;
+                ship.vy *= 0.98;
+                ship.x += ship.vx;
+                ship.y += ship.vy;
+                
+                // Wrap around
+                if (ship.x < 0) ship.x = ctx.width;
+                if (ship.x > ctx.width) ship.x = 0;
+                if (ship.y < 0) ship.y = ctx.height;
+                if (ship.y > ctx.height) ship.y = 0;
+                
+                // Update bullets
+                bullets = bullets.filter(bullet => {
+                    bullet.x += bullet.vx;
+                    bullet.y += bullet.vy;
+                    bullet.life--;
+                    return bullet.life > 0;
+                });
+                
+                // Update asteroids
+                asteroids.forEach(asteroid => {
+                    asteroid.x += asteroid.vx;
+                    asteroid.y += asteroid.vy;
+                    asteroid.rotation += asteroid.rotationSpeed;
+                    
+                    // Wrap around
+                    if (asteroid.x < -asteroid.size) asteroid.x = ctx.width + asteroid.size;
+                    if (asteroid.x > ctx.width + asteroid.size) asteroid.x = -asteroid.size;
+                    if (asteroid.y < -asteroid.size) asteroid.y = ctx.height + asteroid.size;
+                    if (asteroid.y > ctx.height + asteroid.size) asteroid.y = -asteroid.size;
+                });
+                
+                // Check bullet-asteroid collisions
+                const newAsteroids = [];
+                asteroids = asteroids.filter(asteroid => {
+                    let hit = false;
+                    bullets = bullets.filter(bullet => {
+                        const dist = Math.hypot(bullet.x - asteroid.x, bullet.y - asteroid.y);
+                        if (dist < asteroid.size) {
+                            hit = true;
+                            asteroidsScore += Math.floor(100 / asteroid.size);
+                            asteroidsScoreEl.textContent = asteroidsScore;
+                            
+                            // Split asteroid
+                            if (asteroid.size > 15) {
+                                for (let i = 0; i < 2; i++) {
+                                    newAsteroids.push(createAsteroid(
+                                        asteroid.x + (Math.random() - 0.5) * asteroid.size,
+                                        asteroid.y + (Math.random() - 0.5) * asteroid.size,
+                                        asteroid.size / 2
+                                    ));
+                                }
+                            }
+                            return false;
+                        }
+                        return true;
+                    });
+                    return !hit;
+                });
+                asteroids.push(...newAsteroids);
+                
+                // Check ship-asteroid collisions
+                asteroids.forEach(asteroid => {
+                    const dist = Math.hypot(ship.x - asteroid.x, ship.y - asteroid.y);
+                    if (dist < asteroid.size + 10) {
+                        asteroidsRunning = false;
+                    }
+                });
+                
+                // Check win
+                if (asteroids.length === 0) {
+                    asteroidsRunning = false;
+                }
+            }
+            
+            // Draw asteroids
+            ctx.strokeColor('#fff');
+            ctx.strokeWidth(2);
+            ctx.noFill();
+            asteroids.forEach(asteroid => {
+                ctx.push();
+                ctx.translate(asteroid.x, asteroid.y);
+                ctx.rotate(asteroid.rotation);
+                ctx.beginShape();
+                asteroid.vertices.forEach(v => {
+                    ctx.vertex(v.x, v.y);
+                });
+                ctx.endShape(true);
+                ctx.pop();
+            });
+            
+            // Draw ship
+            if (asteroidsRunning) {
+                ctx.push();
+                ctx.translate(ship.x, ship.y);
+                ctx.rotate(ship.angle);
+                ctx.strokeColor('#4ECDC4');
+                ctx.strokeWidth(2);
+                ctx.noFill();
+                ctx.beginShape();
+                ctx.vertex(10, 0);
+                ctx.vertex(-10, -7);
+                ctx.vertex(-5, 0);
+                ctx.vertex(-10, 7);
+                ctx.endShape(true);
+                
+                // Thruster
+                if (keys['ArrowUp'] && Math.random() > 0.3) {
+                    ctx.strokeColor('#ff6b6b');
+                    ctx.line(-5, -3, -12, 0);
+                    ctx.line(-5, 3, -12, 0);
+                }
+                ctx.pop();
+            }
+            
+            // Draw bullets
+            ctx.fillColor('#fff');
+            ctx.noStroke();
+            bullets.forEach(bullet => {
+                ctx.circle(bullet.x, bullet.y, 2);
+            });
+            
+            // Game over
+            if (!asteroidsRunning && asteroidsScore > 0 && asteroids.length > 0) {
+                ctx.fillColor('rgba(0, 0, 0, 0.7)');
+                ctx.rectangle(0, 0, ctx.width, ctx.height);
+                
+                ctx.fillColor('#fff');
+                ctx.textSize(24);
+                ctx.textWeight('bold');
+                ctx.alignText('center', 'middle');
+                ctx.text('GAME OVER', ctx.width / 2, ctx.height / 2);
+                
+                ctx.textSize(16);
+                ctx.textWeight('normal');
+                ctx.text(`Score: ${asteroidsScore}`, ctx.width / 2, ctx.height / 2 + 30);
+            }
+            
+            // Win
+            if (!asteroidsRunning && asteroids.length === 0) {
+                ctx.fillColor('rgba(0, 0, 0, 0.7)');
+                ctx.rectangle(0, 0, ctx.width, ctx.height);
+                
+                ctx.fillColor('#4ECDC4');
+                ctx.textSize(24);
+                ctx.textWeight('bold');
+                ctx.alignText('center', 'middle');
+                ctx.text('YOU WIN!', ctx.width / 2, ctx.height / 2);
+                
+                ctx.textSize(16);
+                ctx.textWeight('normal');
+                ctx.fillColor('#fff');
+                ctx.text(`Final Score: ${asteroidsScore}`, ctx.width / 2, ctx.height / 2 + 30);
+            }
+        };
+        
+        // Asteroids controls
+        window.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            
+            if (e.key === ' ' && asteroidsRunning) {
+                e.preventDefault();
+                bullets.push({
+                    x: ship.x + Math.cos(ship.angle) * 10,
+                    y: ship.y + Math.sin(ship.angle) * 10,
+                    vx: Math.cos(ship.angle) * 8,
+                    vy: Math.sin(ship.angle) * 8,
+                    life: 30
+                });
+            }
+        });
+        
+        window.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+        
+        document.getElementById('asteroidsStart').addEventListener('click', () => {
+            asteroidsRunning = true;
+        });
+        
+        document.getElementById('asteroidsReset').addEventListener('click', () => {
+            resetAsteroids();
+        });
+        
+        // Memory Game
+        const memoryCanvas = document.getElementById('memoryGame');
+        const memoryMovesEl = document.getElementById('memoryMoves');
+        const memoryPairsEl = document.getElementById('memoryPairs');
+        
+        let cards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let moves = 0;
+        let canFlip = true;
+        
+        const cardSymbols = ['🌟', '🎨', '🎯', '🎪', '🎭', '🎬', '🎮', '🎸'];
+        
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+        
+        function resetMemory() {
+            cards = [];
+            const symbols = [...cardSymbols, ...cardSymbols];
+            const shuffled = shuffleArray(symbols);
+            
+            for (let i = 0; i < 16; i++) {
+                const row = Math.floor(i / 4);
+                const col = i % 4;
+                cards.push({
+                    x: col * 90 + 55,
+                    y: row * 90 + 55,
+                    symbol: shuffled[i],
+                    flipped: false,
+                    matched: false,
+                    flipAnimation: 0
+                });
+            }
+            
+            flippedCards = [];
+            matchedPairs = 0;
+            moves = 0;
+            canFlip = true;
+            memoryMovesEl.textContent = moves;
+            memoryPairsEl.textContent = matchedPairs;
+        }
+        
+        memoryCanvas.setup = (ctx) => {
+            ctx.background('#2a2a2a');
+            resetMemory();
+        };
+        
+        memoryCanvas.draw = (ctx) => {
+            ctx.background('#2a2a2a');
+            
+            // Update flip animations
+            cards.forEach(card => {
+                if (card.flipped || card.matched) {
+                    card.flipAnimation = Math.min(1, card.flipAnimation + 0.1);
+                } else {
+                    card.flipAnimation = Math.max(0, card.flipAnimation - 0.1);
+                }
+            });
+            
+            // Check for matches
+            if (flippedCards.length === 2 && canFlip) {
+                canFlip = false;
+                setTimeout(() => {
+                    if (cards[flippedCards[0]].symbol === cards[flippedCards[1]].symbol) {
+                        cards[flippedCards[0]].matched = true;
+                        cards[flippedCards[1]].matched = true;
+                        matchedPairs++;
+                        memoryPairsEl.textContent = matchedPairs;
+                    } else {
+                        cards[flippedCards[0]].flipped = false;
+                        cards[flippedCards[1]].flipped = false;
+                    }
+                    flippedCards = [];
+                    canFlip = true;
+                }, 1000);
+            }
+            
+            // Draw cards
+            cards.forEach((card, i) => {
+                const scale = Math.abs(Math.cos(card.flipAnimation * Math.PI / 2));
+                
+                ctx.push();
+                ctx.translate(card.x, card.y);
+                ctx.scale(scale, 1);
+                
+                if (card.flipAnimation < 0.5) {
+                    // Back of card
+                    ctx.fillColor('#444');
+                    ctx.strokeColor('#666');
+                    ctx.strokeWidth(2);
+                    ctx.rectangle(-35, -35, 70, 70);
+                    
+                    // Pattern
+                    ctx.strokeColor('#555');
+                    ctx.strokeWidth(1);
+                    for (let j = -30; j <= 30; j += 10) {
+                        ctx.line(j, -35, j, 35);
+                        ctx.line(-35, j, 35, j);
+                    }
+                } else {
+                    // Front of card
+                    if (card.matched) {
+                        ctx.fillColor('#4ECDC4');
+                    } else {
+                        ctx.fillColor('#f0f0f0');
+                    }
+                    ctx.strokeColor('#333');
+                    ctx.strokeWidth(2);
+                    ctx.rectangle(-35, -35, 70, 70);
+                    
+                    // Symbol
+                    ctx.textSize(40);
+                    ctx.alignText('center', 'middle');
+                    ctx.text(card.symbol, 0, 0);
+                }
+                
+                ctx.pop();
+            });
+            
+            // Win message
+            if (matchedPairs === 8) {
+                ctx.fillColor('rgba(0, 0, 0, 0.7)');
+                ctx.rectangle(0, 0, ctx.width, ctx.height);
+                
+                ctx.fillColor('#4ECDC4');
+                ctx.textSize(24);
+                ctx.textWeight('bold');
+                ctx.alignText('center', 'middle');
+                ctx.text('YOU WIN!', ctx.width / 2, ctx.height / 2 - 20);
+                
+                ctx.textSize(16);
+                ctx.textWeight('normal');
+                ctx.fillColor('#fff');
+                ctx.text(`Completed in ${moves} moves`, ctx.width / 2, ctx.height / 2 + 20);
+            }
+        };
+        
+        memoryCanvas.addEventListener('click', (e) => {
+            if (!canFlip || matchedPairs === 8) return;
+            
+            const rect = memoryCanvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) * memoryCanvas.context.__dpr;
+            const y = (e.clientY - rect.top) * memoryCanvas.context.__dpr;
+            
+            cards.forEach((card, i) => {
+                const dist = Math.abs(x - card.x) + Math.abs(y - card.y);
+                if (dist < 35 && !card.flipped && !card.matched) {
+                    card.flipped = true;
+                    flippedCards.push(i);
+                    
+                    if (flippedCards.length === 2) {
+                        moves++;
+                        memoryMovesEl.textContent = moves;
+                    }
+                }
+            });
+        });
+        
+        document.getElementById('memoryReset').addEventListener('click', () => {
+            resetMemory();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klint - Data Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .chart {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .chart h3 {
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            color: #333;
+        }
+        klint {
+            border-radius: 4px;
+        }
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #f0f0f0;
+        }
+        button.active {
+            background: #007AFF;
+            color: white;
+            border-color: #007AFF;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Data Visualization with Klint</h1>
+        <p>Interactive charts and data visualizations using the Klint canvas.</p>
+        
+        <div class="grid">
+            <!-- Line Chart -->
+            <div class="chart">
+                <h3>Real-time Line Chart</h3>
+                <klint id="lineChart" width="400" height="300"></klint>
+                <div class="controls">
+                    <button id="addLineData">Add Data Point</button>
+                    <button id="clearLineData">Clear Data</button>
+                </div>
+            </div>
+            
+            <!-- Bar Chart -->
+            <div class="chart">
+                <h3>Animated Bar Chart</h3>
+                <klint id="barChart" width="400" height="300"></klint>
+                <div class="controls">
+                    <button id="randomizeBar">Randomize Data</button>
+                    <button id="sortBar">Sort Data</button>
+                </div>
+            </div>
+            
+            <!-- Pie Chart -->
+            <div class="chart">
+                <h3>Interactive Pie Chart</h3>
+                <klint id="pieChart" width="400" height="300"></klint>
+            </div>
+            
+            <!-- Scatter Plot -->
+            <div class="chart">
+                <h3>Scatter Plot with Correlation</h3>
+                <klint id="scatterPlot" width="400" height="300"></klint>
+                <div class="controls">
+                    <button id="newScatterData">New Dataset</button>
+                </div>
+            </div>
+            
+            <!-- Network Graph -->
+            <div class="chart">
+                <h3>Force-Directed Network</h3>
+                <klint id="networkGraph" width="400" height="300"></klint>
+            </div>
+            
+            <!-- Heatmap -->
+            <div class="chart">
+                <h3>Activity Heatmap</h3>
+                <klint id="heatmap" width="400" height="300"></klint>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import '../klint-canvas.js';
+        
+        // Utility functions
+        const lerp = (a, b, t) => a + (b - a) * t;
+        const map = (value, min1, max1, min2, max2) => 
+            ((value - min1) / (max1 - min1)) * (max2 - min2) + min2;
+        
+        // Line Chart
+        const lineChart = document.getElementById('lineChart');
+        let lineData = [];
+        let maxDataPoints = 50;
+        
+        lineChart.setup = (ctx) => {
+            ctx.background('#fafafa');
+        };
+        
+        lineChart.draw = (ctx) => {
+            ctx.background('#fafafa');
+            
+            const padding = 40;
+            const chartWidth = ctx.width - padding * 2;
+            const chartHeight = ctx.height - padding * 2;
+            
+            // Draw axes
+            ctx.strokeColor('#ddd');
+            ctx.strokeWidth(1);
+            ctx.line(padding, padding, padding, ctx.height - padding);
+            ctx.line(padding, ctx.height - padding, ctx.width - padding, ctx.height - padding);
+            
+            // Draw grid
+            ctx.strokeColor('#f0f0f0');
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + (chartHeight / 5) * i;
+                ctx.line(padding, y, ctx.width - padding, y);
+            }
+            
+            if (lineData.length > 1) {
+                // Find min/max
+                const values = lineData.map(d => d.value);
+                const minValue = Math.min(...values);
+                const maxValue = Math.max(...values);
+                
+                // Draw line
+                ctx.strokeColor('#007AFF');
+                ctx.strokeWidth(2);
+                ctx.noFill();
+                ctx.beginShape();
+                
+                lineData.forEach((point, i) => {
+                    const x = padding + (i / (maxDataPoints - 1)) * chartWidth;
+                    const y = padding + chartHeight - 
+                        ((point.value - minValue) / (maxValue - minValue)) * chartHeight;
+                    ctx.vertex(x, y);
+                });
+                ctx.endShape();
+                
+                // Draw points
+                ctx.fillColor('#007AFF');
+                ctx.noStroke();
+                lineData.forEach((point, i) => {
+                    const x = padding + (i / (maxDataPoints - 1)) * chartWidth;
+                    const y = padding + chartHeight - 
+                        ((point.value - minValue) / (maxValue - minValue)) * chartHeight;
+                    ctx.circle(x, y, 3);
+                });
+                
+                // Draw labels
+                ctx.fillColor('#666');
+                ctx.textSize(10);
+                ctx.alignText('right', 'middle');
+                ctx.text(maxValue.toFixed(0), padding - 5, padding);
+                ctx.text(minValue.toFixed(0), padding - 5, ctx.height - padding);
+            }
+            
+            // Title
+            ctx.fillColor('#333');
+            ctx.textSize(12);
+            ctx.alignText('center', 'bottom');
+            ctx.text('Time Series Data', ctx.width / 2, padding - 10);
+        };
+        
+        // Add data point periodically
+        setInterval(() => {
+            if (lineData.length < maxDataPoints) {
+                lineData.push({
+                    value: 50 + Math.sin(Date.now() * 0.001) * 30 + Math.random() * 20
+                });
+                if (lineData.length > maxDataPoints) {
+                    lineData.shift();
+                }
+            }
+        }, 500);
+        
+        document.getElementById('addLineData').addEventListener('click', () => {
+            lineData.push({
+                value: Math.random() * 100
+            });
+            if (lineData.length > maxDataPoints) {
+                lineData.shift();
+            }
+        });
+        
+        document.getElementById('clearLineData').addEventListener('click', () => {
+            lineData = [];
+        });
+        
+        // Bar Chart
+        const barChart = document.getElementById('barChart');
+        let barData = Array.from({length: 8}, () => ({
+            label: Math.random().toString(36).substr(2, 3).toUpperCase(),
+            value: Math.random() * 100,
+            targetValue: 0,
+            color: '#007AFF'
+        }));
+        
+        barChart.setup = (ctx) => {
+            ctx.background('#fafafa');
+            barData.forEach(bar => bar.targetValue = bar.value);
+        };
+        
+        barChart.draw = (ctx) => {
+            ctx.background('#fafafa');
+            
+            const padding = 40;
+            const chartWidth = ctx.width - padding * 2;
+            const chartHeight = ctx.height - padding * 2;
+            const barWidth = chartWidth / barData.length * 0.8;
+            const barSpacing = chartWidth / barData.length * 0.2;
+            
+            // Animate values
+            barData.forEach(bar => {
+                bar.value = lerp(bar.value, bar.targetValue, 0.1);
+            });
+            
+            const maxValue = Math.max(...barData.map(d => d.targetValue));
+            
+            // Draw bars
+            barData.forEach((bar, i) => {
+                const x = padding + i * (barWidth + barSpacing) + barSpacing / 2;
+                const barHeight = (bar.value / maxValue) * chartHeight;
+                const y = ctx.height - padding - barHeight;
+                
+                // Bar
+                ctx.fillColor(bar.color);
+                ctx.noStroke();
+                ctx.rectangle(x, y, barWidth, barHeight);
+                
+                // Value label
+                ctx.fillColor('#333');
+                ctx.textSize(10);
+                ctx.alignText('center', 'bottom');
+                ctx.text(Math.round(bar.value), x + barWidth / 2, y - 5);
+                
+                // Category label
+                ctx.alignText('center', 'top');
+                ctx.text(bar.label, x + barWidth / 2, ctx.height - padding + 5);
+            });
+            
+            // Axes
+            ctx.strokeColor('#ddd');
+            ctx.strokeWidth(1);
+            ctx.line(padding, padding, padding, ctx.height - padding);
+            ctx.line(padding, ctx.height - padding, ctx.width - padding, ctx.height - padding);
+        };
+        
+        document.getElementById('randomizeBar').addEventListener('click', () => {
+            barData.forEach(bar => {
+                bar.targetValue = Math.random() * 100;
+                bar.color = `hsl(${Math.random() * 360}, 70%, 50%)`;
+            });
+        });
+        
+        document.getElementById('sortBar').addEventListener('click', () => {
+            barData.sort((a, b) => b.targetValue - a.targetValue);
+        });
+        
+        // Pie Chart
+        const pieChart = document.getElementById('pieChart');
+        let pieData = [
+            { label: 'Category A', value: 30, color: '#FF6B6B' },
+            { label: 'Category B', value: 25, color: '#4ECDC4' },
+            { label: 'Category C', value: 20, color: '#45B7D1' },
+            { label: 'Category D', value: 15, color: '#96CEB4' },
+            { label: 'Category E', value: 10, color: '#FECA57' }
+        ];
+        let hoveredSlice = -1;
+        
+        pieChart.setup = (ctx) => {
+            ctx.background('#fafafa');
+        };
+        
+        pieChart.draw = (ctx) => {
+            ctx.background('#fafafa');
+            
+            const centerX = ctx.width / 2;
+            const centerY = ctx.height / 2;
+            const radius = Math.min(ctx.width, ctx.height) / 3;
+            
+            const total = pieData.reduce((sum, item) => sum + item.value, 0);
+            let currentAngle = -Math.PI / 2;
+            
+            pieData.forEach((slice, i) => {
+                const sliceAngle = (slice.value / total) * Math.PI * 2;
+                const isHovered = i === hoveredSlice;
+                const offset = isHovered ? 10 : 0;
+                
+                // Calculate offset position
+                const midAngle = currentAngle + sliceAngle / 2;
+                const offsetX = Math.cos(midAngle) * offset;
+                const offsetY = Math.sin(midAngle) * offset;
+                
+                // Draw slice
+                ctx.push();
+                ctx.translate(centerX + offsetX, centerY + offsetY);
+                
+                ctx.fillColor(slice.color);
+                ctx.strokeColor('#fff');
+                ctx.strokeWidth(2);
+                
+                ctx.beginShape();
+                ctx.vertex(0, 0);
+                const steps = 30;
+                for (let j = 0; j <= steps; j++) {
+                    const angle = currentAngle + (sliceAngle / steps) * j;
+                    const x = Math.cos(angle) * radius;
+                    const y = Math.sin(angle) * radius;
+                    ctx.vertex(x, y);
+                }
+                ctx.endShape(true);
+                
+                // Label
+                const labelAngle = currentAngle + sliceAngle / 2;
+                const labelRadius = radius * 0.7;
+                const labelX = Math.cos(labelAngle) * labelRadius;
+                const labelY = Math.sin(labelAngle) * labelRadius;
+                
+                ctx.fillColor('#fff');
+                ctx.textSize(12);
+                ctx.textWeight('bold');
+                ctx.alignText('center', 'middle');
+                ctx.text(`${slice.value}%`, labelX, labelY);
+                
+                ctx.pop();
+                
+                currentAngle += sliceAngle;
+            });
+            
+            // Legend
+            ctx.textWeight('normal');
+            pieData.forEach((slice, i) => {
+                const y = 20 + i * 20;
+                ctx.fillColor(slice.color);
+                ctx.rectangle(10, y - 6, 12, 12);
+                
+                ctx.fillColor('#333');
+                ctx.textSize(11);
+                ctx.alignText('left', 'middle');
+                ctx.text(slice.label, 28, y);
+            });
+        };
+        
+        pieChart.addEventListener('mousemove', (e) => {
+            const rect = pieChart.getBoundingClientRect();
+            const x = (e.clientX - rect.left) * pieChart.context.__dpr;
+            const y = (e.clientY - rect.top) * pieChart.context.__dpr;
+            
+            const centerX = pieChart.context.width / 2;
+            const centerY = pieChart.context.height / 2;
+            const dx = x - centerX;
+            const dy = y - centerY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const radius = Math.min(pieChart.context.width, pieChart.context.height) / 3;
+            
+            if (distance <= radius) {
+                let angle = Math.atan2(dy, dx) + Math.PI / 2;
+                if (angle < 0) angle += Math.PI * 2;
+                
+                const total = pieData.reduce((sum, item) => sum + item.value, 0);
+                let currentAngle = 0;
+                
+                hoveredSlice = -1;
+                for (let i = 0; i < pieData.length; i++) {
+                    const sliceAngle = (pieData[i].value / total) * Math.PI * 2;
+                    if (angle >= currentAngle && angle < currentAngle + sliceAngle) {
+                        hoveredSlice = i;
+                        break;
+                    }
+                    currentAngle += sliceAngle;
+                }
+            } else {
+                hoveredSlice = -1;
+            }
+        });
+        
+        // Scatter Plot
+        const scatterPlot = document.getElementById('scatterPlot');
+        let scatterData = [];
+        
+        function generateScatterData() {
+            const correlation = Math.random() * 2 - 1; // -1 to 1
+            const points = 50;
+            scatterData = [];
+            
+            for (let i = 0; i < points; i++) {
+                const x = Math.random() * 100;
+                const noise = (Math.random() - 0.5) * 30;
+                const y = 50 + correlation * (x - 50) + noise;
+                scatterData.push({ x, y: Math.max(0, Math.min(100, y)) });
+            }
+        }
+        
+        scatterPlot.setup = (ctx) => {
+            ctx.background('#fafafa');
+            generateScatterData();
+        };
+        
+        scatterPlot.draw = (ctx) => {
+            ctx.background('#fafafa');
+            
+            const padding = 40;
+            const chartWidth = ctx.width - padding * 2;
+            const chartHeight = ctx.height - padding * 2;
+            
+            // Draw axes
+            ctx.strokeColor('#ddd');
+            ctx.strokeWidth(1);
+            ctx.line(padding, padding, padding, ctx.height - padding);
+            ctx.line(padding, ctx.height - padding, ctx.width - padding, ctx.height - padding);
+            
+            // Draw grid
+            ctx.strokeColor('#f0f0f0');
+            for (let i = 0; i <= 10; i++) {
+                const x = padding + (chartWidth / 10) * i;
+                const y = padding + (chartHeight / 10) * i;
+                ctx.line(x, padding, x, ctx.height - padding);
+                ctx.line(padding, y, ctx.width - padding, y);
+            }
+            
+            // Draw points
+            scatterData.forEach(point => {
+                const x = padding + (point.x / 100) * chartWidth;
+                const y = padding + chartHeight - (point.y / 100) * chartHeight;
+                
+                ctx.fillColor('rgba(0, 122, 255, 0.6)');
+                ctx.noStroke();
+                ctx.circle(x, y, 5);
+            });
+            
+            // Calculate and draw trend line
+            if (scatterData.length > 2) {
+                const n = scatterData.length;
+                const sumX = scatterData.reduce((sum, p) => sum + p.x, 0);
+                const sumY = scatterData.reduce((sum, p) => sum + p.y, 0);
+                const sumXY = scatterData.reduce((sum, p) => sum + p.x * p.y, 0);
+                const sumX2 = scatterData.reduce((sum, p) => sum + p.x * p.x, 0);
+                
+                const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+                const intercept = (sumY - slope * sumX) / n;
+                
+                const y1 = slope * 0 + intercept;
+                const y2 = slope * 100 + intercept;
+                
+                ctx.strokeColor('rgba(255, 0, 0, 0.8)');
+                ctx.strokeWidth(2);
+                ctx.line(
+                    padding,
+                    padding + chartHeight - (y1 / 100) * chartHeight,
+                    ctx.width - padding,
+                    padding + chartHeight - (y2 / 100) * chartHeight
+                );
+                
+                // Show correlation coefficient
+                const meanX = sumX / n;
+                const meanY = sumY / n;
+                const num = scatterData.reduce((sum, p) => 
+                    sum + (p.x - meanX) * (p.y - meanY), 0);
+                const denX = Math.sqrt(scatterData.reduce((sum, p) => 
+                    sum + Math.pow(p.x - meanX, 2), 0));
+                const denY = Math.sqrt(scatterData.reduce((sum, p) => 
+                    sum + Math.pow(p.y - meanY, 2), 0));
+                const r = num / (denX * denY);
+                
+                ctx.fillColor('#333');
+                ctx.textSize(12);
+                ctx.alignText('left', 'top');
+                ctx.text(`Correlation: ${r.toFixed(3)}`, padding, padding);
+            }
+            
+            // Labels
+            ctx.fillColor('#666');
+            ctx.textSize(10);
+            ctx.alignText('center', 'top');
+            ctx.text('X Variable', ctx.width / 2, ctx.height - 10);
+            
+            ctx.push();
+            ctx.translate(15, ctx.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.text('Y Variable', 0, 0);
+            ctx.pop();
+        };
+        
+        document.getElementById('newScatterData').addEventListener('click', () => {
+            generateScatterData();
+        });
+        
+        // Network Graph
+        const networkGraph = document.getElementById('networkGraph');
+        let nodes = [];
+        let links = [];
+        
+        function generateNetwork() {
+            nodes = [];
+            links = [];
+            
+            // Create nodes
+            const nodeCount = 15;
+            for (let i = 0; i < nodeCount; i++) {
+                nodes.push({
+                    id: i,
+                    x: Math.random() * networkGraph.context.width,
+                    y: Math.random() * networkGraph.context.height,
+                    vx: 0,
+                    vy: 0,
+                    size: Math.random() * 10 + 5,
+                    color: networkGraph.context.Color.colors[
+                        Math.floor(Math.random() * networkGraph.context.Color.colors.length)
+                    ]
+                });
+            }
+            
+            // Create links
+            for (let i = 0; i < nodeCount * 1.5; i++) {
+                const source = Math.floor(Math.random() * nodeCount);
+                const target = Math.floor(Math.random() * nodeCount);
+                if (source !== target) {
+                    links.push({ source, target });
+                }
+            }
+        }
+        
+        networkGraph.setup = (ctx) => {
+            ctx.background('#fafafa');
+            generateNetwork();
+        };
+        
+        networkGraph.draw = (ctx) => {
+            ctx.background('rgba(250, 250, 250, 0.9)');
+            
+            // Apply forces
+            const centerX = ctx.width / 2;
+            const centerY = ctx.height / 2;
+            
+            // Update velocities
+            nodes.forEach((node, i) => {
+                // Center attraction
+                node.vx += (centerX - node.x) * 0.001;
+                node.vy += (centerY - node.y) * 0.001;
+                
+                // Node repulsion
+                nodes.forEach((other, j) => {
+                    if (i !== j) {
+                        const dx = node.x - other.x;
+                        const dy = node.y - other.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 100 && dist > 0) {
+                            const force = 50 / dist;
+                            node.vx += (dx / dist) * force;
+                            node.vy += (dy / dist) * force;
+                        }
+                    }
+                });
+                
+                // Link attraction
+                links.forEach(link => {
+                    if (link.source === i || link.target === i) {
+                        const other = nodes[link.source === i ? link.target : link.source];
+                        const dx = other.x - node.x;
+                        const dy = other.y - node.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist > 0) {
+                            const force = dist * 0.001;
+                            node.vx += dx * force;
+                            node.vy += dy * force;
+                        }
+                    }
+                });
+                
+                // Damping
+                node.vx *= 0.9;
+                node.vy *= 0.9;
+                
+                // Update position
+                node.x += node.vx;
+                node.y += node.vy;
+                
+                // Keep in bounds
+                node.x = ctx.constrain(node.x, node.size, ctx.width - node.size);
+                node.y = ctx.constrain(node.y, node.size, ctx.height - node.size);
+            });
+            
+            // Draw links
+            ctx.strokeColor('rgba(0, 0, 0, 0.2)');
+            ctx.strokeWidth(1);
+            links.forEach(link => {
+                const source = nodes[link.source];
+                const target = nodes[link.target];
+                ctx.line(source.x, source.y, target.x, target.y);
+            });
+            
+            // Draw nodes
+            nodes.forEach(node => {
+                ctx.fillColor(node.color);
+                ctx.strokeColor('#fff');
+                ctx.strokeWidth(2);
+                ctx.circle(node.x, node.y, node.size);
+            });
+        };
+        
+        // Heatmap
+        const heatmap = document.getElementById('heatmap');
+        const days = 52 * 7; // One year
+        let heatmapData = [];
+        
+        heatmap.setup = (ctx) => {
+            ctx.background('#fafafa');
+            
+            // Generate random activity data
+            for (let i = 0; i < days; i++) {
+                heatmapData.push(Math.random() * Math.random() * 10);
+            }
+        };
+        
+        heatmap.draw = (ctx) => {
+            ctx.background('#fafafa');
+            
+            const cellSize = 10;
+            const cellGap = 2;
+            const startX = 50;
+            const startY = 30;
+            
+            // Days of week labels
+            const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+            ctx.fillColor('#666');
+            ctx.textSize(9);
+            ctx.alignText('right', 'middle');
+            daysOfWeek.forEach((day, i) => {
+                ctx.text(day, startX - 5, startY + i * (cellSize + cellGap) + cellSize / 2);
+            });
+            
+            // Draw cells
+            heatmapData.forEach((value, i) => {
+                const week = Math.floor(i / 7);
+                const day = i % 7;
+                const x = startX + week * (cellSize + cellGap);
+                const y = startY + day * (cellSize + cellGap);
+                
+                // Color based on value
+                const intensity = value / 10;
+                if (intensity === 0) {
+                    ctx.fillColor('#eee');
+                } else {
+                    const hue = 120; // Green
+                    const sat = 50 + intensity * 50;
+                    const light = 85 - intensity * 35;
+                    ctx.fillColor(`hsl(${hue}, ${sat}%, ${light}%)`);
+                }
+                
+                ctx.noStroke();
+                ctx.rectangle(x, y, cellSize, cellSize);
+            });
+            
+            // Month labels
+            ctx.fillColor('#666');
+            ctx.textSize(9);
+            ctx.alignText('left', 'top');
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                          'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            months.forEach((month, i) => {
+                const weekOfYear = Math.floor((i * 30.5) / 7);
+                const x = startX + weekOfYear * (cellSize + cellGap);
+                ctx.text(month, x, startY - 10);
+            });
+            
+            // Legend
+            const legendY = startY + 8 * (cellSize + cellGap);
+            ctx.textSize(9);
+            ctx.alignText('right', 'middle');
+            ctx.text('Less', startX - 5, legendY + cellSize / 2);
+            
+            for (let i = 0; i <= 5; i++) {
+                const x = startX + i * (cellSize + cellGap);
+                const intensity = i / 5;
+                
+                if (i === 0) {
+                    ctx.fillColor('#eee');
+                } else {
+                    const hue = 120;
+                    const sat = 50 + intensity * 50;
+                    const light = 85 - intensity * 35;
+                    ctx.fillColor(`hsl(${hue}, ${sat}%, ${light}%)`);
+                }
+                
+                ctx.noStroke();
+                ctx.rectangle(x, legendY, cellSize, cellSize);
+            }
+            
+            ctx.fillColor('#666');
+            ctx.alignText('left', 'middle');
+            ctx.text('More', startX + 6 * (cellSize + cellGap) + 5, legendY + cellSize / 2);
+        };
+    </script>
+</body>
+</html>

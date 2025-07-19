@@ -1,0 +1,37 @@
+{
+  "name": "@shopify/klint-web-component",
+  "version": "1.0.0",
+  "description": "Web Component implementation of Klint canvas library",
+  "type": "module",
+  "main": "KlintWebComponent.js",
+  "module": "KlintWebComponent.js",
+  "browser": "KlintWebComponent.standalone.js",
+  "files": [
+    "KlintWebComponent.js",
+    "KlintWebComponent.standalone.js",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node build-standalone.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "canvas",
+    "creative-coding",
+    "web-component",
+    "klint",
+    "drawing",
+    "animation"
+  ],
+  "author": "Shopify",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Shopify/Klint.git",
+    "directory": "lib/src/web-component"
+  },
+  "bugs": {
+    "url": "https://github.com/Shopify/Klint/issues"
+  },
+  "homepage": "https://github.com/Shopify/Klint#readme"
+}
