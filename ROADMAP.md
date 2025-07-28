@@ -15,11 +15,11 @@
 
 ### Elements 
 - [ ] Grids : 2D, responsive, radial 
-- [ ] Noise + pseudo-random
-- [ ] Refactor timeline
-- [ ] Controls
-- [ ] Recorder
-- [ ] Text To Points
+- [ ] Noise + pseudo-random : https://github.com/sneha-belkhale/noisejs/blob/master/perlin.js
+- [ ] Refactor timeline : https://github.com/arthurcloche/mini-timeline
+- [ ] Controls 
+- [ ] Recorder : https://github.com/arthurcloche/canvas-recorder
+- [ ] Text To Points : https://github.com/arthurcloche/font-to-svg
 
 #### Fixes
 - [x] Arguments order is wrong on roundedRect

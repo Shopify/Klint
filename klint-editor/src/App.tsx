@@ -1,0 +1,274 @@
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Editor } from "@monaco-editor/react";
+import { useKlint, Klint, type KlintContext } from "@shopify/klint";
+
+const defaultCode = `
+function preload(K) {
+  console.log(K, "Welcome to Klint Editor! 🎨✨");
+}
+
+function setup(K) {
+  K.textFont("Inter");
+  K.textSize(64);
+  K.noStroke();
+  K.alignText("center", "middle");
+}
+
+function draw(K) {
+  K.background('rgba(125, 0, 255, 255)');
+  K.fillColor("#FFF");
+  // Mouse is available directly on K after being extended in preload
+  const mouseX = K.mouse ? K.mouse.x : K.width * 0.5;
+  const mouseY = K.mouse ? K.mouse.y : K.height * 0.5;
+  K.circle(mouseX, mouseY + Math.sin(K.frame * 0.03) * 100, 50);
+}
+
+`;
+
+// Define the return type for evaluated user code
+interface UserCode {
+  preload?: (K: KlintContext) => Promise<void> | void;
+  setup?: (K: KlintContext) => void;
+  draw?: (K: KlintContext) => void;
+}
+
+// Separate Klint Canvas component
+function KlintCanvas({ code }: { code: string }) {
+  const klintHook = useKlint();
+  const { KlintMouse } = klintHook;
+  const mouseHook = KlintMouse();
+  const [error, setError] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  // Set isClient to true after component mounts
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Create a sandbox environment with hooks available
+  const createSandbox = useCallback((): UserCode => {
+    try {
+      // Create a mock context for code evaluation (not runtime execution)
+      // The real context will be passed to preload/setup/draw when they're called
+      const sandbox = {
+        K: {
+          // Provide mock mouse hook access for code evaluation
+          useMouse: () => mouseHook,
+          // Add other hooks here as needed
+        },
+        console: console,
+      };
+
+      // Evaluate the code in the sandbox
+      const userCode = new Function(
+        "K",
+        `
+        "use strict";
+        let userPreload, userSetup, userDraw;
+        
+        // Make hooks available in global scope
+        const useMouse = K.useMouse;
+        
+        // Execute user code
+        ${code}
+        
+        // Return the lifecycle functions
+        return { 
+          preload: preload || userPreload, 
+          setup: setup || userSetup, 
+          draw: draw || userDraw 
+        };
+      `
+      );
+
+      // Execute the code with the sandbox
+      const result = userCode(sandbox.K) as UserCode;
+      setError(null);
+      return result;
+    } catch (err) {
+      console.error("Error evaluating code:", err);
+      setError(err instanceof Error ? err.message : String(err));
+      return { preload: undefined, setup: undefined, draw: undefined };
+    }
+  }, [code, mouseHook]);
+
+  // Create a ref to hold the evaluated code
+  const userCodeRef = useRef<UserCode | null>(null);
+
+  // Update the code when it changes
+  useEffect(() => {
+    if (isClient) {
+      userCodeRef.current = createSandbox();
+    }
+  }, [isClient, createSandbox]);
+
+  const preload = useCallback(
+    async (K: KlintContext) => {
+      // Extend K with mouse data directly
+      K.extend("mouse", mouseHook.mouse);
+      // Add mouse event handlers
+      K.extend("onMouseClick", mouseHook.onClick);
+      K.extend("onMouseIn", mouseHook.onMouseIn);
+      K.extend("onMouseOut", mouseHook.onMouseOut);
+      K.extend("onMouseDown", mouseHook.onMouseDown);
+      K.extend("onMouseUp", mouseHook.onMouseUp);
+
+      if (userCodeRef.current?.preload) {
+        try {
+          await userCodeRef.current.preload(K);
+        } catch (err) {
+          console.error("Error in preload:", err);
+          setError(err instanceof Error ? err.message : String(err));
+        }
+      }
+    },
+    [mouseHook]
+  );
+
+  const setup = useCallback((K: KlintContext) => {
+    if (userCodeRef.current?.setup) {
+      try {
+        userCodeRef.current.setup(K);
+      } catch (err) {
+        console.error("Error in setup:", err);
+        setError(err instanceof Error ? err.message : String(err));
+      }
+    }
+  }, []);
+
+  const draw = useCallback((K: KlintContext) => {
+    if (userCodeRef.current?.draw) {
+      try {
+        userCodeRef.current.draw(K);
+      } catch (err) {
+        console.error("Error in draw:", err);
+        setError(err instanceof Error ? err.message : String(err));
+      }
+    }
+  }, []);
+
+  if (!isClient) {
+    return (
+      <div style={{ width: "100%", height: "100%", background: "#000" }}></div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          background: "#300",
+          color: "#f88",
+          padding: "20px",
+          fontFamily: "monospace",
+          whiteSpace: "pre-wrap",
+        }}
+      >
+        {error}
+      </div>
+    );
+  }
+
+  return (
+    <Klint
+      context={klintHook.context}
+      preload={preload}
+      setup={setup}
+      draw={draw}
+      options={{
+        origin: "corner",
+        unsafemode: "true",
+      }}
+    />
+  );
+}
+
+function App() {
+  const [code, setCode] = useState(defaultCode);
+  const [runningCode, setRunningCode] = useState(defaultCode);
+  const [isClient, setIsClient] = useState(false);
+  const [canvasKey, setCanvasKey] = useState(0); // Add a key to force remount
+
+  // Set isClient to true after component mounts
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Function to run code and clear console
+  const runCode = useCallback(() => {
+    // Clear the console before running new code
+    console.clear();
+    setRunningCode(code);
+    // Increment the key to force a complete remount of the KlintCanvas
+    setCanvasKey((prev) => prev + 1);
+  }, [code]);
+
+  // Function to clear the editor
+  const clearCode = useCallback(() => {
+    setCode("");
+    setRunningCode("");
+    setCanvasKey((prev) => prev + 1);
+  }, []);
+
+  if (!isClient) {
+    return <div style={{ height: "100vh", background: "#1e1e1e" }}></div>;
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <div style={{ display: "flex", gap: "8px", margin: "8px" }}>
+        <button
+          onClick={runCode}
+          style={{
+            padding: "8px 16px",
+            backgroundColor: "#4CAF50",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          Run
+        </button>
+        <button
+          onClick={clearCode}
+          style={{
+            padding: "8px 16px",
+            backgroundColor: "#f44336",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+          }}
+        >
+          Clear
+        </button>
+      </div>
+      <div style={{ display: "flex", flex: 1 }}>
+        <div style={{ flex: 1 }}>
+          <Editor
+            height="100%"
+            defaultLanguage="javascript"
+            value={code}
+            onChange={(value) => setCode(value || "")}
+            options={{
+              minimap: { enabled: false },
+              fontSize: 14,
+              theme: "vs-dark",
+            }}
+            onMount={(editor) => {
+              editor.updateOptions({ theme: "vs-dark" });
+            }}
+          />
+        </div>
+        <div style={{ flex: 1, background: "#000" }}>
+          <KlintCanvas key={`${canvasKey}-${runningCode}`} code={runningCode} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default App;

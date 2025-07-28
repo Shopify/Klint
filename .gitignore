@@ -5,3 +5,5 @@ old
 /build
 .env
 
+.claude
+.vscode

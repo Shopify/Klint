@@ -9,28 +9,57 @@ MCP (Model Context Protocol) allows AI assistants like Claude to access speciali
 ## Quick Setup
 
 ### Prerequisites
-- [Claude Desktop](https://claude.ai/desktop) installed
-- Node.js and npm
+- [Claude Desktop](https://claude.ai/desktop) or [Cursor](https://cursor.sh/) installed
+- Node.js and npm (for the WebSocket client)
 
 ### Installation
 
-1. **Navigate to the MCP directory**:
-   ```bash
-   cd Klint/mcp
-   npm install
-   npm run setup
+The Klint MCP server is hosted at `wss://klint.art/mcp`. To connect to it, you need to configure your AI assistant.
+
+#### For Claude Desktop
+
+1. **Find your Claude Desktop config file**:
+   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - **Windows**: `%APPDATA%/Claude/claude_desktop_config.json`
+   - **Linux**: `~/.config/claude/claude_desktop_config.json`
+
+2. **Add the Klint MCP server**:
+   ```json
+   {
+     "mcpServers": {
+       "klint": {
+         "command": "npx",
+         "args": ["-y", "@modelcontextprotocol/server-websocket", "wss://klint.art/mcp"]
+       }
+     }
+   }
    ```
 
-2. **Restart Claude Desktop**
+3. **Restart Claude Desktop**
 
-3. **Test it out** - Ask Claude:
-   > "How do I create animated particles with Klint?"
+#### For Cursor
 
-That's it! The setup script automatically configures everything.
+1. **Open Cursor Settings** (Cmd/Ctrl + ,)
+2. **Search for "MCP"** in settings
+3. **Add to MCP Servers**:
+   ```json
+   {
+     "klint": {
+       "command": "npx",
+       "args": ["-y", "@modelcontextprotocol/server-websocket", "wss://klint.art/mcp"]
+     }
+   }
+   ```
+4. **Restart Cursor**
+
+### Test It Out
+
+After configuration, restart your AI assistant and ask:
+> "How do I create animated particles with Klint?"
 
 ## Available Tools
 
-### 🎨 `how-do-i`
+### 🎨 `klint-patterns`
 Get working code examples for creative coding tasks.
 
 **Example prompts:**
@@ -65,7 +94,7 @@ Prepare your sketch for production deployment.
 
 **Claude:** I'll help you create shapes moving on a wave pattern using Klint.
 
-*[Claude automatically uses the how-do-i tool]*
+*[Claude automatically uses the klint-patterns tool]*
 
 Here's a complete working example:
 
@@ -108,45 +137,32 @@ This creates 8 circles that:
 - Have phase-shifted motion for a flowing effect
 - Change size subtly over time
 
-## Manual Configuration
+## How It Works
 
-If the automated setup doesn't work, you can configure Claude Desktop manually:
+The Klint MCP server is hosted as part of the Klint documentation site. When you configure your AI assistant with the WebSocket URL, it:
 
-1. **Find your Claude Desktop config file**:
-   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-   - **Windows**: `%APPDATA%/Claude/claude_desktop_config.json`
-   - **Linux**: `~/.config/claude/claude_desktop_config.json`
+1. Connects to our hosted MCP server at `wss://klint.art/mcp`
+2. Provides access to Klint-specific tools and knowledge
+3. Generates code examples based on our documentation and patterns
+4. Helps debug and optimize your creative coding sketches
 
-2. **Add the Klint MCP server**:
-   ```json
-   {
-     "mcpServers": {
-       "klint": {
-         "command": "node",
-         "args": ["dist/index.js"],
-         "cwd": "/path/to/Klint/mcp"
-       }
-     }
-   }
-   ```
-
-3. **Restart Claude Desktop**
+No local installation or server management required!
 
 ## Troubleshooting
 
 ### "Tools not available"
-- Make sure you've restarted Claude Desktop after setup
-- Check that the MCP server built successfully: `npm run build`
-- Verify your config file was updated correctly
+- Make sure you've restarted Claude Desktop or Cursor after adding the configuration
+- Verify the WebSocket URL is correct: `wss://klint.art/mcp`
+- Check that npx is available in your PATH
+
+### Connection Issues
+- Ensure you have an internet connection
+- Try the health check endpoint: `https://klint.art/api/health`
+- Verify the configuration JSON syntax is correct
 
 ### "Command not found" errors
-- Ensure Node.js is installed and in your PATH
-- Try building manually: `cd mcp && npm run build`
-
-### Development issues
-- Use the dashboard to test tools: `npm run dashboard`
-- Check server logs: `npm test`
-- Rebuild after changes: `npm run build`
+- Install Node.js and npm if not already installed
+- The `-y` flag in npx ensures the WebSocket client is downloaded automatically
 
 ## Why Use the MCP Server?
 
@@ -164,13 +180,30 @@ If the automated setup doesn't work, you can configure Claude Desktop manually:
 
 The Klint MCP server transforms your creative coding workflow from research-heavy to creation-focused.
 
+## API Endpoints
+
+### MCP Configuration Info
+**Endpoint:** `https://klint.art/api/mcp-info`
+
+Returns current MCP server configuration and installation instructions.
+
+### WebSocket MCP Server
+**Endpoint:** `wss://klint.art/mcp`
+
+The actual MCP server that your AI assistant connects to.
+
+### Health Check
+**Endpoint:** `https://klint.art/api/health`
+
+Verify the MCP service is running.
+
 ## Contributing
 
 The MCP server is part of the main Klint repository. To contribute:
 
-1. **Add new patterns** to `mcp/src/context.ts`
+1. **Add new patterns** to `docusaurus/mcp-server/src/context.ts`
 2. **Improve tool responses** based on user feedback
 3. **Add more documentation parsing** for better context
-4. **Extend the dashboard** with new monitoring features
+4. **Extend functionality** with new tools
 
 See the [main contributing guide](../../CONTRIBUTING.md) for more details. 

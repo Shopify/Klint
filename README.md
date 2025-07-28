@@ -1,117 +1,128 @@
 # 🎨 Klint
 
-Klint is p5.js-like React component that comes with a lot of cool plugins to make your creative development easier and (i hope), more enjoyable. It's focused on 2D graphics, using the webCanvas API. Klint fully embraces the limitations of the 2D canvas at it's core, nothing fancy, nothing outstanding, just rewrote so it makes more sense (no longer defining number with strings) just a reliable component to make 2D graphics, motion design, UX or generative art.
+Klint is a modern 2D canvas library for React, inspired by p5.js and Processing. It makes creative coding in React intuitive and powerful, perfect for generative art, data visualization, interactive graphics, and creative web experiences.
 
-## Getting Started
+## ✨ Features
 
-Klint is a _React Component_ written in TSX. You will need a React environment to use it.
+- 🎯 **React-first**: Built specifically for React with hooks and component patterns
+- 🎨 **Creative coding**: p5.js-like API with modern JavaScript/TypeScript
+- 🚀 **Performance**: Direct canvas access with minimal overhead
+- 🛠️ **Developer friendly**: Full TypeScript support and great tooling
+- 🔧 **Extensible**: Plugin system and easy customization
 
-> **Note:** If you're looking for a non-jsx version, p5.js might be a good pick.
+## 🚀 Quick Start
 
-## Getting Started
-
-This repository contains:
-
-1. 🎨 The core Klint library — TSX
-2. 📑 Documentation – Docusaurus
-3. 💻 Editor — Remix
-4. 🚀 Sandbox to play with Klint — Remix
-
-## Development and tests
-
-> **Important:** The Klint library isn't public yet, so you'll need to link it manually. We're working to resolve this soon but for now, you will need to add it to your npm package using npm link.
-
-1. Clone the repository
-
-   ```bash
-   git clone https://github.com/Shopify/klint.git
-   cd klint
-   ```
-
-2. Go to the lib folder and link it locally
-
-   ```bash
-   cd lib
-   npm link
-   ```
-
-3. In your working directory, link to the local Klint
-
-   ```bash
-   cd your-project
-   npm link klint
-   ```
-
-4. Run the dev server:
-
-   ```bash
-   npm run dev
-   ```
-
-5. When finished, unlink both in your project and the local repo
-
-   ```bash
-   # In your project
-   npm unlink klint
-
-   # In the Klint lib folder
-   npm unlink
-   ```
-
-6. If you change anything in the library, you will need to rebuild
-
-   ```bash
-   # In the Klint lib folder
-   npm build
-   npm link
-   ```
-
-7. I use Vitest for testing
-   ```bash
-   npm test
-   ```
-
-## Build
-
-There are two builds, minified or not.
+### Install Klint
 
 ```bash
-# In the Klint lib folder
-# For the minified
-npm build:minified
-# For the js build
-npm build
+npm install @shopify/klint
 ```
 
----
+### Basic Usage
 
-## The origin : Winter 24 Hackdays
+```jsx
+import { useKlint, Klint } from '@shopify/klint';
 
----
+function MySketch() {
+  const { context } = useKlint();
+  
+  const draw = (K) => {
+    K.background('#000');
+    K.fillColor('#ff6b6b');
+    K.circle(K.width/2, K.height/2, 50);
+  };
+  
+  return <Klint context={context} draw={draw} />;
+}
+```
 
-- 📖 [Vault](https://hackdays.shopify.io/projects/19268)
-- 📖 [Video](https://hackdays.shopify.io/projects/19268)
+## 🎮 Try the Editor
 
-### TL.DR
+Want to experiment with Klint interactively? Create a live editor environment:
 
-🛰️ I wanted to make an equivalent of p5.js that can be run on the server. The first goal was to make it a component but it spiraled into a little library which covers almost 90% of the p5.js 2D functionalities.
+```bash
+npx @shopify/klint klint-create-editor my-klint-project
+cd my-klint-project
+npm install
+npm run dev
+```
 
-### Participants
+This creates a Monaco-based editor with live preview - perfect for learning and prototyping!
 
-- 🔑 Arthur Cloche — @ac
+## 📚 Documentation
+
+- **[Getting Started Guide](https://klint.docs.shopify.io/)** - Learn the basics
+- **[API Reference](https://klint.docs.shopify.io/docs/Functions/introduction)** - Complete function reference  
+- **[Examples](https://klint.docs.shopify.io/experiments)** - See Klint in action
+- **[Lifecycle](https://klint.docs.shopify.io/docs/klint-introduction)** - Understand how Klint works with React
+
+## 🌟 Examples
+
+### Animated Circle
+```jsx
+function AnimatedCircle() {
+  const { context } = useKlint();
+  
+  const draw = (K) => {
+    K.background('rgba(0, 0, 0, 0.1)');
+    K.fillColor('#4ecdc4');
+    const x = K.width/2 + Math.cos(K.frame * 0.02) * 100;
+    const y = K.height/2 + Math.sin(K.frame * 0.02) * 100;
+    K.circle(x, y, 20);
+  };
+  
+  return <Klint context={context} draw={draw} />;
+}
+```
+
+### Interactive Drawing
+```jsx
+function InteractiveDrawing() {
+  const { context, KlintMouse } = useKlint();
+  const mouse = KlintMouse();
+  
+  const draw = (K) => {
+    if (mouse.pressed) {
+      K.fillColor('red');
+      K.circle(mouse.x, mouse.y, 10);
+    }
+  };
+  
+  return <Klint context={context} draw={draw} />;
+}
+```
+
+## 🛠️ Development
+
+**For contributors** who want to work on Klint itself:
+
+```bash
+git clone https://github.com/Shopify/klint.git
+cd klint
+npm install
+npm run build
+```
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for development guidelines.
+
+## 🏆 Origins
+
+Created during Shopify's Winter 2024 Hackdays by:
+- 🔑 Arthur Cloche — @ac  
 - 👩‍💻 Carolyn McNeillie — @Carolyn McNeillie
 - 👨‍💻 John Bogan — @bogan
-- 👨‍💻 Dane Sun - @Dane
+- 👨‍💻 Dane Sun - @Dane  
 - 👨‍💻 Eric Johnson - @Eric Johnson
 
-Guest appearance from :
-
+With support from:
 - 💡 Ateş Göral — @atesgoral
-- 💡 Josh Sanger — @josh.sanger
+- 💡 Josh Sanger — @josh.sanger  
 - 💡 Mikko Haapoja — @mikko
 
-## Reference Docs
+## 📄 License
 
-- [Klint Docs](https://klint.docs.shopify.io/)
-- [WebCanvasAPI](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
-- [p5.js](https://p5js.org/reference/)
+MIT
+
+---
+
+**Ready to create?** Start with `npx @shopify/klint klint-create-editor my-project` 🎨

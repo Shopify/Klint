@@ -1,0 +1,37 @@
+{
+  "name": "klint-mcp-server",
+  "version": "1.0.0",
+  "description": "Hosted MCP server for Klint creative coding framework",
+  "main": "hosted-server.js",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node hosted-server.js",
+    "start:api": "node server.js",
+    "dev:server": "nodemon hosted-server.js"
+  },
+  "keywords": [
+    "mcp",
+    "klint",
+    "creative-coding",
+    "canvas"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "zod": "^3.23.8",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/ws": "^8.5.10",
+    "typescript": "^5.0.0",
+    "nodemon": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
