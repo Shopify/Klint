@@ -1,0 +1,23 @@
+{
+  "id": "functions/styling/strokeColor",
+  "title": "strokeColor",
+  "description": "Sets the color for lines and shape outlines.",
+  "source": "@site/docs/3-functions/styling/strokeColor.md",
+  "sourceDirName": "3-functions/styling",
+  "slug": "/functions/styling/strokeColor",
+  "permalink": "/docs/functions/styling/strokeColor",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "fillColor",
+    "permalink": "/docs/functions/styling/fillColor"
+  },
+  "next": {
+    "title": "strokeWidth",
+    "permalink": "/docs/functions/styling/strokeWidth"
+  }
+}

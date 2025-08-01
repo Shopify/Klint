@@ -1,0 +1,23 @@
+{
+  "id": "Functions/circle",
+  "title": "circle",
+  "description": "Draws a circle on the canvas.",
+  "source": "@site/docs/Functions/circle.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/circle",
+  "permalink": "/docs/Functions/circle",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "blend",
+    "permalink": "/docs/Functions/blend"
+  },
+  "next": {
+    "title": "conicGradient",
+    "permalink": "/docs/Functions/conicGradient"
+  }
+}

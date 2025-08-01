@@ -1,0 +1,26 @@
+{
+  "id": "nav/nav",
+  "title": "Customising your navigation sidebar",
+  "description": "(I can be deleted/replaced with your content)",
+  "source": "@site/docs/nav/nav.md",
+  "sourceDirName": "nav",
+  "slug": "/nav/",
+  "permalink": "/docs/nav/",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {
+    "id": "nav",
+    "title": "Customising your navigation sidebar"
+  },
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "Fill and Stroke",
+    "permalink": "/docs/klinfunctions-fill-stroke"
+  },
+  "next": {
+    "title": "Just an extra page",
+    "permalink": "/docs/nav/text"
+  }
+}

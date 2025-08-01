@@ -1,0 +1,23 @@
+{
+  "id": "Functions/strokeCap",
+  "title": "strokeCap",
+  "description": "Sets the style of line endpoints.",
+  "source": "@site/docs/Functions/strokeCap.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/strokeCap",
+  "permalink": "/docs/Functions/strokeCap",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "scale",
+    "permalink": "/docs/Functions/scale"
+  },
+  "next": {
+    "title": "strokeColor",
+    "permalink": "/docs/Functions/strokeColor"
+  }
+}

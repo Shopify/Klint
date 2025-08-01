@@ -1,0 +1,23 @@
+{
+  "id": "Elements/Time",
+  "title": "Time",
+  "description": "The Time element provides advanced timeline management and animation sequencing capabilities for complex animations.",
+  "source": "@site/docs/Elements/Time.md",
+  "sourceDirName": "Elements",
+  "slug": "/Elements/Time",
+  "permalink": "/docs/Elements/Time",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "Thing",
+    "permalink": "/docs/Elements/Thing"
+  },
+  "next": {
+    "title": "Vector",
+    "permalink": "/docs/Elements/Vector"
+  }
+}

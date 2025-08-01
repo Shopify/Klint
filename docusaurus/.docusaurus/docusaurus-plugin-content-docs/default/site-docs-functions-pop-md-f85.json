@@ -1,0 +1,23 @@
+{
+  "id": "Functions/pop",
+  "title": "pop",
+  "description": "Restores the most recently saved drawing state from the stack.",
+  "source": "@site/docs/Functions/pop.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/pop",
+  "permalink": "/docs/Functions/pop",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "Math Utility Functions",
+    "permalink": "/docs/Functions/math-utils"
+  },
+  "next": {
+    "title": "push",
+    "permalink": "/docs/Functions/push"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "functions/paths/arcVertex",
+  "title": "arcVertex",
+  "description": "Adds an arc segment to the current shape being constructed with beginShape(). Creates a circular arc that connects the current point to a target point with a specified radius.",
+  "source": "@site/docs/3-functions/paths/arcVertex.md",
+  "sourceDirName": "3-functions/paths",
+  "slug": "/functions/paths/arcVertex",
+  "permalink": "/docs/functions/paths/arcVertex",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "quadraticVertex",
+    "permalink": "/docs/functions/paths/quadraticVertex"
+  },
+  "next": {
+    "title": "beginContour",
+    "permalink": "/docs/functions/paths/beginContour"
+  }
+}

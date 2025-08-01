@@ -1,0 +1,23 @@
+{
+  "id": "Functions/blend",
+  "title": "blend",
+  "description": "Sets the blend mode for how new shapes interact with existing content.",
+  "source": "@site/docs/Functions/blend.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/blend",
+  "permalink": "/docs/Functions/blend",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "background",
+    "permalink": "/docs/Functions/background"
+  },
+  "next": {
+    "title": "conicGradient",
+    "permalink": "/docs/Functions/conicGradient"
+  }
+}

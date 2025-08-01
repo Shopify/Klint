@@ -1,0 +1,23 @@
+{
+  "id": "functions/transforms/translate",
+  "title": "translate",
+  "description": "Translates (moves) the coordinate system origin by the specified amounts.",
+  "source": "@site/docs/3-functions/transforms/translate.md",
+  "sourceDirName": "3-functions/transforms",
+  "slug": "/functions/transforms/translate",
+  "permalink": "/docs/functions/transforms/translate",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "addColorStop",
+    "permalink": "/docs/functions/gradients/addColorStop"
+  },
+  "next": {
+    "title": "rotate",
+    "permalink": "/docs/functions/transforms/rotate"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "elements/Easing",
+  "title": "Easing",
+  "description": "The Easing element provides animation easing functions for smooth transitions and motion effects.",
+  "source": "@site/docs/4-elements/Easing.md",
+  "sourceDirName": "4-elements",
+  "slug": "/elements/Easing",
+  "permalink": "/docs/elements/Easing",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "Text",
+    "permalink": "/docs/elements/Text"
+  },
+  "next": {
+    "title": "👋 Plugins",
+    "permalink": "/docs/plugins"
+  }
+}

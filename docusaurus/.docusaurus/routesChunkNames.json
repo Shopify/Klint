@@ -1,0 +1,431 @@
+{
+  "/__docusaurus/debug-5ff": {
+    "__comp": "__comp---theme-debug-config-23-a-2ff",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    }
+  },
+  "/__docusaurus/debug/config-5ba": {
+    "__comp": "__comp---theme-debug-config-23-a-2ff",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    }
+  },
+  "/__docusaurus/debug/content-a2b": {
+    "__comp": "__comp---theme-debug-contentba-8-ce7",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    },
+    "__props": "__props---docusaurus-debug-content-3-c-0-be2"
+  },
+  "/__docusaurus/debug/globalData-c3c": {
+    "__comp": "__comp---theme-debug-global-dataede-0fa",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    }
+  },
+  "/__docusaurus/debug/metadata-156": {
+    "__comp": "__comp---theme-debug-site-metadata-68-e-3d4",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    }
+  },
+  "/__docusaurus/debug/registry-88c": {
+    "__comp": "__comp---theme-debug-registry-679-501",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    }
+  },
+  "/__docusaurus/debug/routes-000": {
+    "__comp": "__comp---theme-debug-routes-946-699",
+    "__context": {
+      "plugin": "plugin---docusaurus-debugb-38-ad3"
+    }
+  },
+  "/experiments/-960": {
+    "__comp": "__comp---site-src-pages-experiments-index-jscc-2-f44",
+    "__context": {
+      "plugin": "plugin---experiments-a-74-b9e"
+    },
+    "config": "config---experiments-5-e-9-68a"
+  },
+  "/experiments/draw-77e": {
+    "__comp": "__comp---site-src-pages-experiments-draw-jse-0-a-eb3",
+    "__context": {
+      "plugin": "plugin---experiments-a-74-b9e"
+    },
+    "config": "config---experiments-5-e-9-68a"
+  },
+  "/experiments/mandala-530": {
+    "__comp": "__comp---site-src-pages-experiments-mandala-js-935-f18",
+    "__context": {
+      "plugin": "plugin---experiments-a-74-b9e"
+    },
+    "config": "config---experiments-5-e-9-68a"
+  },
+  "/experiments/mandala2-024": {
+    "__comp": "__comp---site-src-pages-experiments-mandala-2-jsdf-1-776",
+    "__context": {
+      "plugin": "plugin---experiments-a-74-b9e"
+    },
+    "config": "config---experiments-5-e-9-68a"
+  },
+  "/experiments/moire-182": {
+    "__comp": "__comp---site-src-pages-experiments-moire-js-522-987",
+    "__context": {
+      "plugin": "plugin---experiments-a-74-b9e"
+    },
+    "config": "config---experiments-5-e-9-68a"
+  },
+  "/experiments/moire2-2d0": {
+    "__comp": "__comp---site-src-pages-experiments-moire-2-jsae-9-95d",
+    "__context": {
+      "plugin": "plugin---experiments-a-74-b9e"
+    },
+    "config": "config---experiments-5-e-9-68a"
+  },
+  "/experiments/moire3-e0e": {
+    "__comp": "__comp---site-src-pages-experiments-moire-3-js-01-c-705",
+    "__context": {
+      "plugin": "plugin---experiments-a-74-b9e"
+    },
+    "config": "config---experiments-5-e-9-68a"
+  },
+  "/experiments/palette-e18": {
+    "__comp": "__comp---site-src-pages-experiments-palette-js-9-b-2-947",
+    "__context": {
+      "plugin": "plugin---experiments-a-74-b9e"
+    },
+    "config": "config---experiments-5-e-9-68a"
+  },
+  "/experiments/slimeMould-8ce": {
+    "__comp": "__comp---site-src-pages-experiments-slime-mould-jsd-61-889",
+    "__context": {
+      "plugin": "plugin---experiments-a-74-b9e"
+    },
+    "config": "config---experiments-5-e-9-68a"
+  },
+  "/experiments/stripes-c20": {
+    "__comp": "__comp---site-src-pages-experiments-stripes-jsdf-6-f5b",
+    "__context": {
+      "plugin": "plugin---experiments-a-74-b9e"
+    },
+    "config": "config---experiments-5-e-9-68a"
+  },
+  "/experiments/swans17-d44": {
+    "__comp": "__comp---site-src-pages-experiments-swans-17-jsdf-0-6b7",
+    "__context": {
+      "plugin": "plugin---experiments-a-74-b9e"
+    },
+    "config": "config---experiments-5-e-9-68a"
+  },
+  "/markdown-page-3d7": {
+    "__comp": "__comp---theme-mdx-page-1-f-3-b90",
+    "__context": {
+      "plugin": "plugin---experiments-a-74-b9e"
+    },
+    "content": "content---markdown-page-393-028"
+  },
+  "/search-822": {
+    "__comp": "__comp---theme-search-page-1-a-4-d6f",
+    "__context": {
+      "plugin": "plugin---search-138-688"
+    }
+  },
+  "/docs-a1c": {
+    "__comp": "__comp---theme-docs-root-5-e-9-0b6",
+    "__context": {
+      "plugin": "plugin---docsaba-d7c"
+    }
+  },
+  "/docs-e9f": {
+    "__comp": "__comp---theme-doc-version-roota-7-b-5de",
+    "__props": "__props---docs-005-788"
+  },
+  "/docs-30e": {
+    "__comp": "__comp---theme-doc-roota-94-67a"
+  },
+  "/docs/-56e": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-c-37-4d0"
+  },
+  "/docs/advanced/klint-editor-b77": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-advanced-klint-editorca-9-155"
+  },
+  "/docs/advanced/mcp-server-af5": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-advanced-mcp-serverc-37-593"
+  },
+  "/docs/advanced/web-components-230": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-advanced-web-componentsbfb-498"
+  },
+  "/docs/core-concepts/coordinates-467": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-core-concepts-coordinates-9-c-5-747"
+  },
+  "/docs/core-concepts/klint-context-9f2": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-core-concepts-klint-context-6-ce-1b9"
+  },
+  "/docs/core-concepts/lifecycle-777": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-core-concepts-lifecycle-010-733"
+  },
+  "/docs/core-concepts/react-integration-f2a": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-core-concepts-react-integration-33-e-0c2"
+  },
+  "/docs/elements/Color-4d9": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-elements-color-940-d63"
+  },
+  "/docs/elements/Easing-e4d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-elements-easing-81-a-17a"
+  },
+  "/docs/elements/State-89b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-elements-stateefb-dd8"
+  },
+  "/docs/elements/Text-d97": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-elements-text-072-eee"
+  },
+  "/docs/elements/Thing-989": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-elements-thing-482-5a2"
+  },
+  "/docs/elements/Time-f28": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-elements-timee-95-031"
+  },
+  "/docs/elements/Vector-268": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-elements-vectorf-77-008"
+  },
+  "/docs/functions/canvas/background-eba": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-canvas-background-910-8ba"
+  },
+  "/docs/functions/drawing/arc-746": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-drawing-arc-116-f81"
+  },
+  "/docs/functions/drawing/circle-e26": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-drawing-circle-5-c-7-214"
+  },
+  "/docs/functions/drawing/disk-6b9": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-drawing-diskb-26-217"
+  },
+  "/docs/functions/drawing/ellipse-838": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-drawing-ellipsedf-4-aa5"
+  },
+  "/docs/functions/drawing/line-7c5": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-drawing-linefb-4-968"
+  },
+  "/docs/functions/drawing/point-29b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-drawing-pointc-71-786"
+  },
+  "/docs/functions/drawing/polygon-96c": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-drawing-polygonc-8-c-0ec"
+  },
+  "/docs/functions/drawing/rectangle-2ed": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-drawing-rectangleac-7-9fd"
+  },
+  "/docs/functions/drawing/roundedRectangle-738": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-drawing-rounded-rectanglef-21-57f"
+  },
+  "/docs/functions/gradients/addColorStop-73d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-gradients-add-color-stop-658-95a"
+  },
+  "/docs/functions/gradients/conicGradient-a29": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-gradients-conic-gradientf-55-b21"
+  },
+  "/docs/functions/gradients/gradient-6d6": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-gradients-gradientf-46-a25"
+  },
+  "/docs/functions/gradients/radialGradient-81b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-gradients-radial-gradient-0-b-5-2d9"
+  },
+  "/docs/functions/images/createOffscreen-6ca": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-images-create-offscreen-897-9c8"
+  },
+  "/docs/functions/images/image-c0f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-images-image-4-ed-d83"
+  },
+  "/docs/functions/paths/arcVertex-916": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-paths-arc-vertex-699-146"
+  },
+  "/docs/functions/paths/beginContour-2c5": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-paths-begin-contour-412-c2d"
+  },
+  "/docs/functions/paths/beginShape-7d1": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-paths-begin-shapee-9-f-1c3"
+  },
+  "/docs/functions/paths/bezierVertex-568": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-paths-bezier-vertex-5-ed-344"
+  },
+  "/docs/functions/paths/endContour-fbf": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-paths-end-contour-336-14e"
+  },
+  "/docs/functions/paths/endShape-928": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-paths-end-shape-7-a-4-e49"
+  },
+  "/docs/functions/paths/quadraticVertex-d8f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-paths-quadratic-vertexce-6-a4a"
+  },
+  "/docs/functions/paths/vertex-8db": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-paths-vertex-46-d-2b1"
+  },
+  "/docs/functions/styling/blend-fcc": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-styling-blendf-79-ed8"
+  },
+  "/docs/functions/styling/fillColor-a8a": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-styling-fill-colora-7-d-b50"
+  },
+  "/docs/functions/styling/noFill-275": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-styling-no-fill-700-bcf"
+  },
+  "/docs/functions/styling/noStroke-72f": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-styling-no-strokebdc-e56"
+  },
+  "/docs/functions/styling/opacity-13c": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-styling-opacity-7-e-4-085"
+  },
+  "/docs/functions/styling/strokeCap-c99": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-styling-stroke-cap-805-231"
+  },
+  "/docs/functions/styling/strokeColor-059": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-styling-stroke-color-54-d-a2b"
+  },
+  "/docs/functions/styling/strokeJoin-051": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-styling-stroke-joind-05-a86"
+  },
+  "/docs/functions/styling/strokeWidth-8ae": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-styling-stroke-width-843-a0e"
+  },
+  "/docs/functions/text/-73b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-text-567-4cf"
+  },
+  "/docs/functions/transforms/pop-f66": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-transforms-pop-2-bc-967"
+  },
+  "/docs/functions/transforms/push-ceb": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-transforms-pushaf-3-023"
+  },
+  "/docs/functions/transforms/rotate-704": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-transforms-rotatebe-5-df0"
+  },
+  "/docs/functions/transforms/scale-221": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-transforms-scaleaa-0-a10"
+  },
+  "/docs/functions/transforms/translate-f6e": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-transforms-translate-348-886"
+  },
+  "/docs/functions/utilities/math-utils-3c2": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-functions-utilities-math-utilse-39-aa8"
+  },
+  "/docs/getting-started/installation-316": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-getting-started-installationcaa-fa4"
+  },
+  "/docs/getting-started/quick-start-d3b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-getting-started-quick-start-707-53b"
+  },
+  "/docs/getting-started/typescript-ccf": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-getting-started-typescript-6-ae-efa"
+  },
+  "/docs/getting-started/useKlint-pattern-13b": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-getting-started-use-klint-pattern-738-ac3"
+  },
+  "/docs/klinfunctions-pixels-cc7": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klinfunctions-pixels-73-a-49d"
+  },
+  "/docs/klinfunctions-text-styling-55d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klinfunctions-text-styling-4-bc-3c6"
+  },
+  "/docs/klintfunctions-canvas-8b0": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klintfunctions-canvasee-2-32f"
+  },
+  "/docs/klintfunctions-time-645": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-klintfunctions-time-295-fb1"
+  },
+  "/docs/plugins-c5d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-pluginsee-9-c7e"
+  },
+  "/docs/reference/api-reference-784": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-reference-api-referencea-18-e92"
+  },
+  "/docs/reference/from-p5js-c53": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-reference-from-p-5-js-1-bd-0b0"
+  },
+  "/docs/reference/klint-component-19d": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-reference-klint-componentb-49-21c"
+  },
+  "/docs/reference/klint-hooks-756": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-reference-klint-hooks-90-d-f13"
+  },
+  "/docs/reference/troubleshooting-652": {
+    "__comp": "__comp---theme-doc-item-178-a40",
+    "content": "content---docs-reference-troubleshooting-111-5b7"
+  },
+  "/-2e1": {
+    "__comp": "__comp---site-src-pages-index-jsc-4-f-f99",
+    "__context": {
+      "plugin": "plugin---experiments-a-74-b9e"
+    },
+    "config": "config---experiments-5-e-9-68a"
+  }
+}

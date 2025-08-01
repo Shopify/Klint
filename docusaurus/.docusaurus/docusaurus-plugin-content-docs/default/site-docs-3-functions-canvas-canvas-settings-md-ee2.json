@@ -1,0 +1,29 @@
+{
+  "id": "functions/canvas/klintfunctions-canvas",
+  "title": "Canvas Settings",
+  "description": "Klint provides functions for configuring canvas behavior and origin settings.",
+  "source": "@site/docs/3-functions/canvas/canvas-settings.md",
+  "sourceDirName": "3-functions/canvas",
+  "slug": "/klintfunctions-canvas",
+  "permalink": "/docs/klintfunctions-canvas",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 2,
+  "frontMatter": {
+    "sidebar_position": 2,
+    "id": "klintfunctions-canvas",
+    "title": "Canvas Settings",
+    "slug": "/klintfunctions-canvas"
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "background",
+    "permalink": "/docs/functions/canvas/background"
+  },
+  "next": {
+    "title": "Math Utility Functions",
+    "permalink": "/docs/functions/utilities/math-utils"
+  }
+}

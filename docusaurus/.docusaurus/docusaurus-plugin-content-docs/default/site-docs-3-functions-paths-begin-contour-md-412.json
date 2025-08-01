@@ -1,0 +1,23 @@
+{
+  "id": "functions/paths/beginContour",
+  "title": "beginContour",
+  "description": "Starts a new contour (hole) within the current shape being constructed with beginShape().",
+  "source": "@site/docs/3-functions/paths/beginContour.md",
+  "sourceDirName": "3-functions/paths",
+  "slug": "/functions/paths/beginContour",
+  "permalink": "/docs/functions/paths/beginContour",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "arcVertex",
+    "permalink": "/docs/functions/paths/arcVertex"
+  },
+  "next": {
+    "title": "endContour",
+    "permalink": "/docs/functions/paths/endContour"
+  }
+}

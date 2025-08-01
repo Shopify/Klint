@@ -1,0 +1,23 @@
+{
+  "id": "Functions/noStroke",
+  "title": "noStroke",
+  "description": "Disables stroke (outlines) for shapes and text.",
+  "source": "@site/docs/Functions/noStroke.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/noStroke",
+  "permalink": "/docs/Functions/noStroke",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "noFill",
+    "permalink": "/docs/Functions/noFill"
+  },
+  "next": {
+    "title": "opacity",
+    "permalink": "/docs/Functions/opacity"
+  }
+}

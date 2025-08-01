@@ -1,0 +1,23 @@
+{
+  "id": "elements/Thing",
+  "title": "Thing",
+  "description": "The Thing element provides utility functions for debugging and development purposes.",
+  "source": "@site/docs/4-elements/Thing.md",
+  "sourceDirName": "4-elements",
+  "slug": "/elements/Thing",
+  "permalink": "/docs/elements/Thing",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "State",
+    "permalink": "/docs/elements/State"
+  },
+  "next": {
+    "title": "Text",
+    "permalink": "/docs/elements/Text"
+  }
+}

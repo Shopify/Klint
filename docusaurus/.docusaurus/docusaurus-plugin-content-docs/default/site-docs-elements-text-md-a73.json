@@ -1,0 +1,23 @@
+{
+  "id": "Elements/Text",
+  "title": "Text",
+  "description": "The Text element provides advanced text layout, measurement, and typography features for complex text rendering.",
+  "source": "@site/docs/Elements/Text.md",
+  "sourceDirName": "Elements",
+  "slug": "/Elements/Text",
+  "permalink": "/docs/Elements/Text",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "State",
+    "permalink": "/docs/Elements/State"
+  },
+  "next": {
+    "title": "Thing",
+    "permalink": "/docs/Elements/Thing"
+  }
+}

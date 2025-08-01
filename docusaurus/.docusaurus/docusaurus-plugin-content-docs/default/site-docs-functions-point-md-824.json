@@ -1,0 +1,23 @@
+{
+  "id": "Functions/point",
+  "title": "point",
+  "description": "Draws a point (dot) on the canvas.",
+  "source": "@site/docs/Functions/point.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/point",
+  "permalink": "/docs/Functions/point",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "opacity",
+    "permalink": "/docs/Functions/opacity"
+  },
+  "next": {
+    "title": "polygon",
+    "permalink": "/docs/Functions/polygon"
+  }
+}

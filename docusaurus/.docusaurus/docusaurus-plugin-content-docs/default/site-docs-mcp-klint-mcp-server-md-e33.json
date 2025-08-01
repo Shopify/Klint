@@ -1,0 +1,23 @@
+{
+  "id": "MCP/klint-mcp-server",
+  "title": "Klint MCP Server",
+  "description": "The Klint MCP (Model Context Protocol) server brings AI-powered assistance directly to your creative coding workflow. Ask Claude about Klint patterns, debug your sketches, and get production-ready code - all within your conversation.",
+  "source": "@site/docs/MCP/klint-mcp-server.md",
+  "sourceDirName": "MCP",
+  "slug": "/MCP/klint-mcp-server",
+  "permalink": "/docs/MCP/klint-mcp-server",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "Klint Hooks",
+    "permalink": "/docs/Klint/klint-hooks"
+  },
+  "next": {
+    "title": "👋 Plugins",
+    "permalink": "/docs/plugins"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "id": "getting-started/typescript",
+  "title": "TypeScript Setup",
+  "description": "Klint is built with TypeScript and provides comprehensive type definitions for a great developer experience.",
+  "source": "@site/docs/1-getting-started/typescript.md",
+  "sourceDirName": "1-getting-started",
+  "slug": "/getting-started/typescript",
+  "permalink": "/docs/getting-started/typescript",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 4,
+  "frontMatter": {
+    "sidebar_position": 4
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "The useKlint Pattern",
+    "permalink": "/docs/getting-started/useKlint-pattern"
+  },
+  "next": {
+    "title": "Lifecycle",
+    "permalink": "/docs/core-concepts/lifecycle"
+  }
+}

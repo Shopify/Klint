@@ -1,0 +1,23 @@
+{
+  "id": "Klint/klint-hooks",
+  "title": "Klint Hooks",
+  "description": "Klint provides React hooks for managing state, handling input, and loading resources.",
+  "source": "@site/docs/Klint/klint-hooks.md",
+  "sourceDirName": "Klint",
+  "slug": "/Klint/klint-hooks",
+  "permalink": "/docs/Klint/klint-hooks",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "Klint Component",
+    "permalink": "/docs/Klint/klint-component"
+  },
+  "next": {
+    "title": "Customising your navigation sidebar",
+    "permalink": "/docs/nav/"
+  }
+}

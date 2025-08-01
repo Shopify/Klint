@@ -1,0 +1,23 @@
+{
+  "id": "Functions/quadraticVertex",
+  "title": "quadraticVertex",
+  "description": "Adds a quadratic Bézier curve segment to the current shape being constructed with beginShape().",
+  "source": "@site/docs/Functions/quadraticVertex.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/quadraticVertex",
+  "permalink": "/docs/Functions/quadraticVertex",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "push",
+    "permalink": "/docs/Functions/push"
+  },
+  "next": {
+    "title": "radialGradient",
+    "permalink": "/docs/Functions/radialGradient"
+  }
+}

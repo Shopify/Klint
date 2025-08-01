@@ -1,0 +1,23 @@
+{
+  "id": "functions/drawing/line",
+  "title": "line",
+  "description": "Draws a straight line between two points.",
+  "source": "@site/docs/3-functions/drawing/line.md",
+  "sourceDirName": "3-functions/drawing",
+  "slug": "/functions/drawing/line",
+  "permalink": "/docs/functions/drawing/line",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "rectangle",
+    "permalink": "/docs/functions/drawing/rectangle"
+  },
+  "next": {
+    "title": "point",
+    "permalink": "/docs/functions/drawing/point"
+  }
+}

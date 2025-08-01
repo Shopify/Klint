@@ -1,0 +1,23 @@
+{
+  "id": "Functions/createOffscreen",
+  "title": "createOffscreen",
+  "description": "Creates an offscreen canvas for drawing operations outside the main canvas.",
+  "source": "@site/docs/Functions/createOffscreen.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/createOffscreen",
+  "permalink": "/docs/Functions/createOffscreen",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "background",
+    "permalink": "/docs/Functions/background"
+  },
+  "next": {
+    "title": "image",
+    "permalink": "/docs/Functions/image"
+  }
+}

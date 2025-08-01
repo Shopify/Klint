@@ -1,0 +1,23 @@
+{
+  "id": "Functions/disk",
+  "title": "disk",
+  "description": "Draws a circle or arc with optional sector closing.",
+  "source": "@site/docs/Functions/disk.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/disk",
+  "permalink": "/docs/Functions/disk",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "createOffscreen",
+    "permalink": "/docs/Functions/createOffscreen"
+  },
+  "next": {
+    "title": "ellipse",
+    "permalink": "/docs/Functions/ellipse"
+  }
+}

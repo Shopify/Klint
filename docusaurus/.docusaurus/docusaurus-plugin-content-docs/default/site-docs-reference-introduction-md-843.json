@@ -1,0 +1,29 @@
+{
+  "id": "reference/klint",
+  "title": "👋 Hello World",
+  "description": "Klint is a modern 2D canvas library designed to work seamlessly with React while providing a powerful, flexible API for creative coding. It builds upon the standard Canvas API with a more intuitive interface inspired by Processing and P5.js, but engineered for production React applications.",
+  "source": "@site/docs/reference/introduction.md",
+  "sourceDirName": "reference",
+  "slug": "/klint-introduction",
+  "permalink": "/docs/klint-introduction",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1,
+    "id": "klint",
+    "title": "👋 Hello World",
+    "slug": "/klint-introduction"
+  },
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "API Reference",
+    "permalink": "/docs/reference/api-reference"
+  },
+  "next": {
+    "title": "Migrating from p5.js",
+    "permalink": "/docs/reference/from-p5js"
+  }
+}

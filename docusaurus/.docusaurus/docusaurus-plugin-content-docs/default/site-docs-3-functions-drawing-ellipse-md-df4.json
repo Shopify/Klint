@@ -1,0 +1,23 @@
+{
+  "id": "functions/drawing/ellipse",
+  "title": "ellipse",
+  "description": "Draws an ellipse (oval) on the canvas.",
+  "source": "@site/docs/3-functions/drawing/ellipse.md",
+  "sourceDirName": "3-functions/drawing",
+  "slug": "/functions/drawing/ellipse",
+  "permalink": "/docs/functions/drawing/ellipse",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "docs",
+  "previous": {
+    "title": "disk",
+    "permalink": "/docs/functions/drawing/disk"
+  },
+  "next": {
+    "title": "roundedRectangle",
+    "permalink": "/docs/functions/drawing/roundedRectangle"
+  }
+}

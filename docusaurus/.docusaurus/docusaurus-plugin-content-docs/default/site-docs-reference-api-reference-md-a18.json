@@ -1,0 +1,26 @@
+{
+  "id": "reference/api-reference",
+  "title": "API Reference",
+  "description": "Complete reference for all Klint functions, organized by category.",
+  "source": "@site/docs/reference/api-reference.md",
+  "sourceDirName": "reference",
+  "slug": "/reference/api-reference",
+  "permalink": "/docs/reference/api-reference",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 3,
+  "frontMatter": {
+    "sidebar_position": 3
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Klint MCP Server",
+    "permalink": "/docs/advanced/mcp-server"
+  },
+  "next": {
+    "title": "Migrating from p5.js",
+    "permalink": "/docs/reference/from-p5js"
+  }
+}

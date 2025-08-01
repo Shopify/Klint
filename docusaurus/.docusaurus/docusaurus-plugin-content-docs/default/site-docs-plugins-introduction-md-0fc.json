@@ -1,0 +1,29 @@
+{
+  "id": "Plugins/plugins",
+  "title": "👋 Plugins",
+  "description": "",
+  "source": "@site/docs/Plugins/introduction.md",
+  "sourceDirName": "Plugins",
+  "slug": "/plugins",
+  "permalink": "/docs/plugins",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 1,
+  "frontMatter": {
+    "sidebar_position": 1,
+    "id": "plugins",
+    "title": "👋 Plugins",
+    "slug": "/plugins"
+  },
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "Klint MCP Server",
+    "permalink": "/docs/MCP/klint-mcp-server"
+  },
+  "next": {
+    "title": "Customising your navigation sidebar",
+    "permalink": "/docs/nav/"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "Functions/opacity",
+  "title": "opacity",
+  "description": "Sets the global alpha (transparency) for all subsequent drawing operations.",
+  "source": "@site/docs/Functions/opacity.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/opacity",
+  "permalink": "/docs/Functions/opacity",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "noStroke",
+    "permalink": "/docs/Functions/noStroke"
+  },
+  "next": {
+    "title": "pop",
+    "permalink": "/docs/Functions/pop"
+  }
+}

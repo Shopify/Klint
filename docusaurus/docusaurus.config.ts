@@ -46,6 +46,7 @@ const config: Config = {
         docsRouteBasePath: "/",
       },
     ],
+    "./plugins/api-docs-plugin.js",
   ],
   markdown: {
     mermaid: true,
@@ -64,7 +65,7 @@ const config: Config = {
       items: [
         {
           type: "docSidebar",
-          sidebarId: "sidebar",
+          sidebarId: "docs", // Changed from "sidebar" to "docs"
           position: "left",
           label: "Docs",
         },

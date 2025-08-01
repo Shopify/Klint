@@ -1,0 +1,26 @@
+{
+  "id": "getting-started/useKlint-pattern",
+  "title": "The useKlint Pattern",
+  "description": "The useKlint hook is the foundation of every Klint sketch. Understanding this pattern is crucial for building with Klint.",
+  "source": "@site/docs/1-getting-started/useKlint-pattern.md",
+  "sourceDirName": "1-getting-started",
+  "slug": "/getting-started/useKlint-pattern",
+  "permalink": "/docs/getting-started/useKlint-pattern",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 3,
+  "frontMatter": {
+    "sidebar_position": 3
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Quick Start",
+    "permalink": "/docs/getting-started/quick-start"
+  },
+  "next": {
+    "title": "TypeScript Setup",
+    "permalink": "/docs/getting-started/typescript"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "id": "reference/from-p5js",
+  "title": "Migrating from p5.js",
+  "description": "If you're coming from p5.js, this guide will help you transition to Klint.",
+  "source": "@site/docs/reference/from-p5js.md",
+  "sourceDirName": "reference",
+  "slug": "/reference/from-p5js",
+  "permalink": "/docs/reference/from-p5js",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 4,
+  "frontMatter": {
+    "sidebar_position": 4
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "API Reference",
+    "permalink": "/docs/reference/api-reference"
+  },
+  "next": {
+    "title": "Troubleshooting",
+    "permalink": "/docs/reference/troubleshooting"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "Elements/Color",
+  "title": "Color",
+  "description": "The Color element provides comprehensive color utilities, palette management, and color manipulation functions across multiple color spaces.",
+  "source": "@site/docs/Elements/Color.md",
+  "sourceDirName": "Elements",
+  "slug": "/Elements/Color",
+  "permalink": "/docs/Elements/Color",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "Math Utility Functions",
+    "permalink": "/docs/functions/utilities/math-utils"
+  },
+  "next": {
+    "title": "Easing",
+    "permalink": "/docs/Elements/Easing"
+  }
+}

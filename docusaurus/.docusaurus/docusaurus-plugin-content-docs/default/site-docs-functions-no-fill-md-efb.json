@@ -1,0 +1,23 @@
+{
+  "id": "Functions/noFill",
+  "title": "noFill",
+  "description": "Disables filling for shapes and text.",
+  "source": "@site/docs/Functions/noFill.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/noFill",
+  "permalink": "/docs/Functions/noFill",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "Math Utility Functions",
+    "permalink": "/docs/Functions/math-utils"
+  },
+  "next": {
+    "title": "noStroke",
+    "permalink": "/docs/Functions/noStroke"
+  }
+}

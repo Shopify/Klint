@@ -1,0 +1,23 @@
+{
+  "id": "Functions/beginShape",
+  "title": "beginShape",
+  "description": "Starts a new custom shape definition.",
+  "source": "@site/docs/Functions/beginShape.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/beginShape",
+  "permalink": "/docs/Functions/beginShape",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "beginContour",
+    "permalink": "/docs/Functions/beginContour"
+  },
+  "next": {
+    "title": "bezierVertex",
+    "permalink": "/docs/Functions/bezierVertex"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "Functions/background",
+  "title": "background",
+  "description": "Sets the canvas background color or clears the canvas.",
+  "source": "@site/docs/Functions/background.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/background",
+  "permalink": "/docs/Functions/background",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "Time Management",
+    "permalink": "/docs/klintfunctions-time"
+  },
+  "next": {
+    "title": "Math Utility Functions",
+    "permalink": "/docs/Functions/math-utils"
+  }
+}

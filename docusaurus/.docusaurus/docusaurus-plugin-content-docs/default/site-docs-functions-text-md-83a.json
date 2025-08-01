@@ -1,0 +1,23 @@
+{
+  "id": "Functions/text",
+  "title": "text",
+  "description": "Draws text on the canvas at the specified position. Supports multi-line text using \\n line breaks with proper alignment and spacing.",
+  "source": "@site/docs/Functions/text.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/text",
+  "permalink": "/docs/Functions/text",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "Math Utility Functions",
+    "permalink": "/docs/Functions/math-utils"
+  },
+  "next": {
+    "title": "👋 Hello World",
+    "permalink": "/docs/klint-introduction"
+  }
+}

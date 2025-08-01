@@ -1,0 +1,26 @@
+{
+  "id": "core-concepts/coordinates",
+  "title": "Canvas Coordinates",
+  "description": "Understanding the canvas coordinate system is essential for positioning elements correctly in Klint.",
+  "source": "@site/docs/2-core-concepts/coordinates.md",
+  "sourceDirName": "2-core-concepts",
+  "slug": "/core-concepts/coordinates",
+  "permalink": "/docs/core-concepts/coordinates",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "sidebarPosition": 4,
+  "frontMatter": {
+    "sidebar_position": 4
+  },
+  "sidebar": "docs",
+  "previous": {
+    "title": "Using Klint with React",
+    "permalink": "/docs/core-concepts/react-integration"
+  },
+  "next": {
+    "title": "circle",
+    "permalink": "/docs/functions/drawing/circle"
+  }
+}

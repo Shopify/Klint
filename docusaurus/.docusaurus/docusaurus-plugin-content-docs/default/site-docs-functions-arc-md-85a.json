@@ -1,0 +1,23 @@
+{
+  "id": "Functions/arc",
+  "title": "arc",
+  "description": "Draws an arc (a portion of a circle) on the canvas.",
+  "source": "@site/docs/Functions/arc.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/arc",
+  "permalink": "/docs/Functions/arc",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "addColorStop",
+    "permalink": "/docs/Functions/addColorStop"
+  },
+  "next": {
+    "title": "arcVertex",
+    "permalink": "/docs/Functions/arcVertex"
+  }
+}

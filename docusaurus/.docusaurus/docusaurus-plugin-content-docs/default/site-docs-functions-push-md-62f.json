@@ -1,0 +1,23 @@
+{
+  "id": "Functions/push",
+  "title": "push",
+  "description": "Saves the current drawing state (transformations, styles, etc.) to the stack.",
+  "source": "@site/docs/Functions/push.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/push",
+  "permalink": "/docs/Functions/push",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "pop",
+    "permalink": "/docs/Functions/pop"
+  },
+  "next": {
+    "title": "rotate",
+    "permalink": "/docs/Functions/rotate"
+  }
+}

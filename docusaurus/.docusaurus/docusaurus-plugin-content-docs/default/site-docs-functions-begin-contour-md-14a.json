@@ -1,0 +1,23 @@
+{
+  "id": "Functions/beginContour",
+  "title": "beginContour",
+  "description": "Starts a new contour (hole) within the current shape being constructed with beginShape().",
+  "source": "@site/docs/Functions/beginContour.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/beginContour",
+  "permalink": "/docs/Functions/beginContour",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "background",
+    "permalink": "/docs/Functions/background"
+  },
+  "next": {
+    "title": "beginShape",
+    "permalink": "/docs/Functions/beginShape"
+  }
+}

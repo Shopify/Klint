@@ -1,0 +1,23 @@
+{
+  "id": "Functions/conicGradient",
+  "title": "conicGradient",
+  "description": "Creates a conic (angular) gradient for fills or strokes.",
+  "source": "@site/docs/Functions/conicGradient.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/conicGradient",
+  "permalink": "/docs/Functions/conicGradient",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "background",
+    "permalink": "/docs/Functions/background"
+  },
+  "next": {
+    "title": "createOffscreen",
+    "permalink": "/docs/Functions/createOffscreen"
+  }
+}

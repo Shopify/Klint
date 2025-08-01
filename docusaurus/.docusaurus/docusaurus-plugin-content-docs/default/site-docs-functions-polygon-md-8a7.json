@@ -1,0 +1,23 @@
+{
+  "id": "Functions/polygon",
+  "title": "polygon",
+  "description": "Draws a regular polygon centered at the specified coordinates.",
+  "source": "@site/docs/Functions/polygon.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/polygon",
+  "permalink": "/docs/Functions/polygon",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "point",
+    "permalink": "/docs/Functions/point"
+  },
+  "next": {
+    "title": "pop",
+    "permalink": "/docs/Functions/pop"
+  }
+}

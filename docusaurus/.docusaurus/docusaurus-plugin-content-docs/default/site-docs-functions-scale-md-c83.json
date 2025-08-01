@@ -1,0 +1,23 @@
+{
+  "id": "Functions/scale",
+  "title": "scale",
+  "description": "Scales the coordinate system by the specified factors.",
+  "source": "@site/docs/Functions/scale.md",
+  "sourceDirName": "Functions",
+  "slug": "/Functions/scale",
+  "permalink": "/docs/Functions/scale",
+  "draft": false,
+  "unlisted": false,
+  "tags": [],
+  "version": "current",
+  "frontMatter": {},
+  "sidebar": "sidebar",
+  "previous": {
+    "title": "rotate",
+    "permalink": "/docs/Functions/rotate"
+  },
+  "next": {
+    "title": "text",
+    "permalink": "/docs/Functions/text"
+  }
+}
