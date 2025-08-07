@@ -1,6 +1,61 @@
 version: 2
+enable-beta-ecosystems: true
+registries:
+  github-com:
+    type: git
+    url: https://github.com
+    username: ${{secrets.DEPENDENCIES_GITHUB_USER}}
+    password: ${{secrets.DEPENDENCIES_GITHUB_TOKEN}}
+  npm-registry-npm-shopify-io-node:
+    type: npm-registry
+    url: https://npm.shopify.io/node
+    token: ${{secrets.NPM_REGISTRY_NPM_SHOPIFY_IO_NODE_TOKEN}}
 updates:
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
-      interval: weekly
+      interval: daily
+    cooldown:
+      default-days: 90
+  - package-ecosystem: github-actions
+    directory: "/.github/workflows"
+    registries: "*"
+    schedule:
+      interval: daily
+    cooldown:
+      default-days: 90
+  - package-ecosystem: npm
+    directory: "/docusaurus"
+    registries: "*"
+    schedule:
+      interval: daily
+    cooldown:
+      default-days: 90
+  - package-ecosystem: npm
+    directory: "/editor"
+    registries: "*"
+    schedule:
+      interval: daily
+    cooldown:
+      default-days: 90
+  - package-ecosystem: npm
+    directory: "/lib"
+    registries: "*"
+    schedule:
+      interval: daily
+    cooldown:
+      default-days: 90
+  - package-ecosystem: npm
+    directory: "/mcp"
+    registries: "*"
+    schedule:
+      interval: daily
+    cooldown:
+      default-days: 90
+  - package-ecosystem: npm
+    directory: "/sandbox"
+    registries: "*"
+    schedule:
+      interval: daily
+    cooldown:
+      default-days: 90
