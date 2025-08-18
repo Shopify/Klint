@@ -1,7 +1,7 @@
 import { useRef, useCallback, useEffect, useMemo } from "react";
 import { KlintFunctions, KlintCoreFunctions } from "./KlintFunctions";
 import { KlintCanvasOptions, KlintContext } from "./Klint";
-import { Color, Vector, Easing, State, Time, Text, Thing } from "./elements";
+import { Color, Vector, Easing, State, Time, Text, Thing, Grid, Strip, Noise, Sprites } from "./elements";
 
 // Export Vector type as KlintVector
 export type KlintVector = Vector;
@@ -211,6 +211,8 @@ export default function useKlint() {
       if (!contextRef.current?.canvas) return;
       const canvas = contextRef.current.canvas;
       const ctx = contextRef.current;
+      const controller = new AbortController();
+      const { signal } = controller;
 
       const updateMousePosition = (e: MouseEvent) => {
         const rect = canvas.getBoundingClientRect();
@@ -264,21 +266,14 @@ export default function useKlint() {
         if (clickCallbackRef.current) clickCallbackRef.current(ctx, e);
       };
 
-      canvas.addEventListener("mousemove", updateMousePosition);
-      canvas.addEventListener("mousedown", handleMouseDown);
-      canvas.addEventListener("mouseup", handleMouseUp);
-      canvas.addEventListener("mouseenter", handleMouseEnter);
-      canvas.addEventListener("mouseleave", handleMouseLeave);
-      canvas.addEventListener("click", handleClick);
+      canvas.addEventListener("mousemove", updateMousePosition, { signal });
+      canvas.addEventListener("mousedown", handleMouseDown, { signal });
+      canvas.addEventListener("mouseup", handleMouseUp, { signal });
+      canvas.addEventListener("mouseenter", handleMouseEnter, { signal });
+      canvas.addEventListener("mouseleave", handleMouseLeave, { signal });
+      canvas.addEventListener("click", handleClick, { signal });
 
-      return () => {
-        canvas.removeEventListener("mousemove", updateMousePosition);
-        canvas.removeEventListener("mousedown", handleMouseDown);
-        canvas.removeEventListener("mouseup", handleMouseUp);
-        canvas.removeEventListener("mouseenter", handleMouseEnter);
-        canvas.removeEventListener("mouseleave", handleMouseLeave);
-        canvas.removeEventListener("click", handleClick);
-      };
+      return () => controller.abort();
     });
 
     return {
@@ -308,6 +303,8 @@ export default function useKlint() {
       if (!contextRef.current?.canvas) return;
       const canvas = contextRef.current.canvas;
       const ctx = contextRef.current;
+      const controller = new AbortController();
+      const { signal } = controller;
 
       const handleScroll = (e: WheelEvent) => {
         e.preventDefault();
@@ -325,8 +322,8 @@ export default function useKlint() {
         }
       };
 
-      canvas.addEventListener("wheel", handleScroll);
-      return () => canvas.removeEventListener("wheel", handleScroll);
+      canvas.addEventListener("wheel", handleScroll, { signal });
+      return () => controller.abort();
     });
 
     return {
@@ -572,19 +569,21 @@ export default function useKlint() {
         }
       };
 
+      const controller = new AbortController();
+      const { signal } = controller;
+
       canvas.addEventListener("touchstart", handleTouchStart, {
         passive: false,
+        signal,
       });
-      canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
-      canvas.addEventListener("touchend", handleTouchEnd);
-      canvas.addEventListener("touchcancel", handleTouchCancel);
+      canvas.addEventListener("touchmove", handleTouchMove, { 
+        passive: false,
+        signal,
+      });
+      canvas.addEventListener("touchend", handleTouchEnd, { signal });
+      canvas.addEventListener("touchcancel", handleTouchCancel, { signal });
 
-      return () => {
-        canvas.removeEventListener("touchstart", handleTouchStart);
-        canvas.removeEventListener("touchmove", handleTouchMove);
-        canvas.removeEventListener("touchend", handleTouchEnd);
-        canvas.removeEventListener("touchcancel", handleTouchCancel);
-      };
+      return () => controller.abort();
     }, []);
 
     return {
@@ -660,6 +659,8 @@ export default function useKlint() {
     useEffect(() => {
       if (!contextRef.current) return;
       const ctx = contextRef.current;
+      const controller = new AbortController();
+      const { signal } = controller;
 
       const updateModifiers = (e: KeyboardEvent) => {
         if (!keyboardRef.current) return;
@@ -724,13 +725,10 @@ export default function useKlint() {
       };
 
       // Listen on window for global keyboard events
-      window.addEventListener("keydown", handleKeyDown);
-      window.addEventListener("keyup", handleKeyUp);
+      window.addEventListener("keydown", handleKeyDown, { signal });
+      window.addEventListener("keyup", handleKeyUp, { signal });
 
-      return () => {
-        window.removeEventListener("keydown", handleKeyDown);
-        window.removeEventListener("keyup", handleKeyUp);
-      };
+      return () => controller.abort();
     }, []);
 
     // Helper to create combo key string
@@ -809,6 +807,8 @@ export default function useKlint() {
     useEffect(() => {
       if (!contextRef.current) return;
       const ctx = contextRef.current;
+      const controller = new AbortController();
+      const { signal } = controller;
 
       const handleResize = () => {
         if (resizeCallbackRef.current) resizeCallbackRef.current(ctx);
@@ -829,20 +829,12 @@ export default function useKlint() {
         }
       };
 
-      window.addEventListener("resize", handleResize);
-      window.addEventListener("blur", handleBlur);
-      window.addEventListener("focus", handleFocus);
-      document.addEventListener("visibilitychange", handleVisibilityChange);
+      window.addEventListener("resize", handleResize, { signal });
+      window.addEventListener("blur", handleBlur, { signal });
+      window.addEventListener("focus", handleFocus, { signal });
+      document.addEventListener("visibilitychange", handleVisibilityChange, { signal });
 
-      return () => {
-        window.removeEventListener("resize", handleResize);
-        window.removeEventListener("blur", handleBlur);
-        window.removeEventListener("focus", handleFocus);
-        document.removeEventListener(
-          "visibilitychange",
-          handleVisibilityChange
-        );
-      };
+      return () => controller.abort();
     }, []);
 
     return {
@@ -898,6 +890,10 @@ export default function useKlint() {
     context.Time = new Time(context);
     context.Text = new Text(context);
     context.Thing = new Thing(context);
+    context.Grid = new Grid(context);
+    context.Strip = new Strip(context);
+    context.Noise = new Noise(context);
+    context.Sprites = new Sprites(context);
 
     // Add Klint core functions
     Object.entries(KlintCoreFunctions).forEach(([name, fn]) => {

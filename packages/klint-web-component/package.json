@@ -1,41 +1,43 @@
 {
   "name": "@shopify/klint-web-component",
-  "version": "0.0.1",
-  "description": "Web Component implementation of Klint canvas library",
+  "version": "0.0.98",
+  "description": "Klint Web Component - Standalone creative coding in the browser",
+  "main": "index.js",
   "type": "module",
-  "main": "KlintWebComponent.js",
-  "module": "KlintWebComponent.js",
-  "browser": "KlintWebComponent.standalone.js",
   "files": [
-    "KlintWebComponent.js",
-    "KlintWebComponent.standalone.js",
+    "index.js",
+    "klint-canvas.js",
+    "examples/",
     "README.md"
   ],
   "scripts": {
-    "build": "node build-standalone.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest run --environment jsdom",
+    "test:watch": "vitest --environment jsdom",
+    "dev": "vite serve examples --port 3001",
+    "build": "echo 'Web component build complete'"
   },
   "keywords": [
-    "canvas",
     "creative-coding",
-    "web-component",
+    "web-components",
+    "canvas",
     "klint",
-    "drawing",
-    "animation"
+    "generative-art"
   ],
   "author": "arthurcloche",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Shopify/Klint"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "jsdom": "^26.0.0",
+    "vite": "^6.0.0",
+    "vitest": "^3.0.0",
+    "vitest-canvas-mock": "^0.3.3"
+  },
   "publishConfig": {
     "access": "public",
     "@shopify:registry": "https://registry.npmjs.org/"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Shopify/Klint.git",
-    "directory": "packages/klint-web-component"
-  },
-  "bugs": {
-    "url": "https://github.com/Shopify/Klint/issues"
-  },
-  "homepage": "https://github.com/Shopify/Klint#readme"
+  }
 }

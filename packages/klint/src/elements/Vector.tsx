@@ -150,7 +150,7 @@ class Vector implements KlintVector {
    * @returns The angle in radians
    */
   angle(): number {
-    return Math.atan2(-this.x, -this.y) + Math.PI;
+    return Math.atan2(this.y, this.x);
   }
 
   /**

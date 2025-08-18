@@ -1,0 +1,232 @@
+#!/bin/bash
+
+# Klint Dev Sandbox Generator
+# Creates a lightweight Vite setup for quick Klint prototyping
+
+PROJECT_DIR="${1:-.}"
+PROJECT_NAME=$(basename "$PROJECT_DIR")
+
+echo "🏖️  Creating Klint dev sandbox in $PROJECT_DIR..."
+
+# Create directory if it doesn't exist
+mkdir -p "$PROJECT_DIR"
+cd "$PROJECT_DIR"
+
+# Create src directory
+mkdir -p src
+
+# Create package.json
+cat > package.json << EOF
+{
+  "name": "$PROJECT_NAME",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@shopify/klint": "^0.0.98",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0"
+  }
+}
+EOF
+
+# Create vite.config.ts
+cat > vite.config.ts << 'EOF'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: 3000,
+    open: true
+  }
+});
+EOF
+
+# Create tsconfig.json
+cat > tsconfig.json << 'EOF'
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}
+EOF
+
+# Create tsconfig.node.json
+cat > tsconfig.node.json << 'EOF'
+{
+  "compilerOptions": {
+    "composite": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["vite.config.ts"]
+}
+EOF
+
+# Create index.html
+cat > index.html << 'EOF'
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Klint Sandbox</title>
+    <style>
+      body { margin: 0; padding: 0; background: #111; }
+      #root { width: 100vw; height: 100vh; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+EOF
+
+# Create src/main.tsx
+cat > src/main.tsx << 'EOF'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.tsx";
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+EOF
+
+# Create src/App.tsx with a simple example
+cat > src/App.tsx << 'EOF'
+import { useKlint, Klint } from "@shopify/klint";
+
+export default function App() {
+  const { context, KlintMouse } = useKlint();
+  const mouse = KlintMouse();
+
+  const setup = (K: any) => {
+    K.textFont("Inter, sans-serif");
+    K.textSize(48);
+    K.alignText("center", "middle");
+    K.noStroke();
+  };
+
+  const draw = (K: any) => {
+    // Background with trailing effect
+    K.background("rgba(20, 20, 40, 0.1)");
+    
+    // Mouse-following circle
+    const mouseX = mouse.x || K.width / 2;
+    const mouseY = mouse.y || K.height / 2;
+    
+    // Animated circle
+    K.fillColor("#00ff88");
+    const size = 50 + Math.sin(K.frame * 0.02) * 20;
+    K.circle(mouseX, mouseY, size);
+    
+    // Some text
+    K.fillColor("#ffffff");
+    K.text("Klint Dev Sandbox", K.width / 2, K.height / 2 + 150);
+    K.textSize(24);
+    K.text("Move your mouse around!", K.width / 2, K.height / 2 + 200);
+    
+    // Corner info
+    K.textSize(16);
+    K.alignText("left", "top");
+    K.text(\`Frame: \${K.frame}\`, 20, 20);
+    K.text(\`Mouse: \${Math.round(mouseX)}, \${Math.round(mouseY)}\`, 20, 40);
+  };
+
+  return (
+    <Klint
+      context={context}
+      setup={setup}
+      draw={draw}
+      options={{
+        origin: "corner"
+      }}
+    />
+  );
+}
+EOF
+
+# Create .gitignore
+cat > .gitignore << 'EOF'
+node_modules
+dist
+.env
+.DS_Store
+EOF
+
+# Create README.md
+cat > README.md << 'EOF'
+# Klint Dev Sandbox
+
+A lightweight development environment for prototyping with Klint.
+
+## Quick Start
+
+\`\`\`bash
+npm install
+npm run dev
+\`\`\`
+
+## What's included
+
+- ⚡ Vite for fast hot reload
+- 🎨 Klint pre-configured
+- 🖱️ Mouse interactions ready
+- 📱 Responsive canvas
+
+## Tips
+
+- Edit \`src/App.tsx\` to create your sketch
+- Use \`setup(K)\` for initialization
+- Use \`draw(K)\` for your main loop  
+- The canvas fills the entire viewport
+- Hot reload updates instantly
+
+Happy creative coding! 🎨
+EOF
+
+echo "✅ Klint dev sandbox created successfully!"
+echo ""
+echo "🚀 Quick start:"
+echo "  cd $PROJECT_DIR"
+echo "  npm install"
+echo "  npm run dev"
+echo ""
+echo "The sandbox will open at http://localhost:3000"
+echo "Perfect for quick prototyping and creative experiments! 🎨" 

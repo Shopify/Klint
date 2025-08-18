@@ -11,8 +11,10 @@ export {
   useKlint,
   useProps,
   useStorage,
+  // Types
   type KlintMouse,
   type KlintScroll,
+  // Functions
   KlintCoreFunctions,
   KlintFunctions,
 };

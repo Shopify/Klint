@@ -150,24 +150,60 @@ class Color {
     ];
   }
 
-  get coral() { return this.colors[0]; }
-  get brown() { return this.colors[1]; }
-  get mustard() { return this.colors[2]; }
-  get crimson() { return this.colors[3]; }
-  get navy() { return this.colors[4]; }
-  get sky() { return this.colors[5]; }
-  get olive() { return this.colors[6]; }
-  get charcoal() { return this.colors[7]; }
-  get peach() { return this.colors[8]; }
-  get rose() { return this.colors[9]; }
-  get plum() { return this.colors[10]; }
-  get sage() { return this.colors[11]; }
-  get drab() { return this.colors[12]; }
-  get taupe() { return this.colors[13]; }
-  get midnight() { return this.colors[14]; }
-  get golden() { return this.colors[15]; }
-  get orange() { return this.colors[16]; }
-  get slate() { return this.colors[17]; }
+  get coral() {
+    return this.colors[0];
+  }
+  get brown() {
+    return this.colors[1];
+  }
+  get mustard() {
+    return this.colors[2];
+  }
+  get crimson() {
+    return this.colors[3];
+  }
+  get navy() {
+    return this.colors[4];
+  }
+  get sky() {
+    return this.colors[5];
+  }
+  get olive() {
+    return this.colors[6];
+  }
+  get charcoal() {
+    return this.colors[7];
+  }
+  get peach() {
+    return this.colors[8];
+  }
+  get rose() {
+    return this.colors[9];
+  }
+  get plum() {
+    return this.colors[10];
+  }
+  get sage() {
+    return this.colors[11];
+  }
+  get drab() {
+    return this.colors[12];
+  }
+  get taupe() {
+    return this.colors[13];
+  }
+  get midnight() {
+    return this.colors[14];
+  }
+  get golden() {
+    return this.colors[15];
+  }
+  get orange() {
+    return this.colors[16];
+  }
+  get slate() {
+    return this.colors[17];
+  }
 
   hex(color) {
     return color;
@@ -202,10 +238,11 @@ class Easing {
     this.linear = (t) => t;
     this.easeInQuad = (t) => t * t;
     this.easeOutQuad = (t) => t * (2 - t);
-    this.easeInOutQuad = (t) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    this.easeInOutQuad = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
     this.easeInCubic = (t) => t * t * t;
-    this.easeOutCubic = (t) => (--t) * t * t + 1;
-    this.easeInOutCubic = (t) => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+    this.easeOutCubic = (t) => --t * t * t + 1;
+    this.easeInOutCubic = (t) =>
+      t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
   }
 }
 
@@ -245,10 +282,12 @@ class Thing {
 
 // Klint Functions
 const KlintFunctions = {
-  extend: (ctx) => (name, data, enforceReplace = false) => {
-    if (name in ctx && !enforceReplace) return;
-    ctx[name] = data;
-  },
+  extend:
+    (ctx) =>
+    (name, data, enforceReplace = false) => {
+      if (name in ctx && !enforceReplace) return;
+      ctx[name] = data;
+    },
 
   background: (ctx) => (color) => {
     ctx.resetTransform();
@@ -343,17 +382,19 @@ const KlintFunctions = {
     ctx.drawIfVisible();
   },
 
-  disk: (ctx) => (x, y, radius, startAngle = 0, endAngle = Math.PI * 2, closed = true) => {
-    ctx.beginPath();
-    if (closed) {
-      ctx.moveTo(x, y);
-      ctx.arc(x, y, radius, startAngle, endAngle);
-      ctx.lineTo(x, y);
-    } else {
-      ctx.arc(x, y, radius, startAngle, endAngle);
-    }
-    ctx.drawIfVisible();
-  },
+  disk:
+    (ctx) =>
+    (x, y, radius, startAngle = 0, endAngle = Math.PI * 2, closed = true) => {
+      ctx.beginPath();
+      if (closed) {
+        ctx.moveTo(x, y);
+        ctx.arc(x, y, radius, startAngle, endAngle);
+        ctx.lineTo(x, y);
+      } else {
+        ctx.arc(x, y, radius, startAngle, endAngle);
+      }
+      ctx.drawIfVisible();
+    },
 
   rectangle: (ctx) => (x, y, width, height) => {
     const originType = ctx.__rectangleOrigin || ctx.__canvasOrigin || "corner";
@@ -375,18 +416,20 @@ const KlintFunctions = {
     ctx.drawIfVisible();
   },
 
-  polygon: (ctx) => (x, y, radius, sides, radius2, rotation = 0) => {
-    ctx.beginPath();
-    for (let i = 0; i < sides; i++) {
-      const angle = (i * 2 * Math.PI) / sides + rotation;
-      const pointX = x + radius * Math.cos(angle);
-      const pointY = y + (radius2 ? radius2 : radius) * Math.sin(angle);
-      if (i === 0) ctx.moveTo(pointX, pointY);
-      else ctx.lineTo(pointX, pointY);
-    }
-    ctx.closePath();
-    ctx.drawIfVisible();
-  },
+  polygon:
+    (ctx) =>
+    (x, y, radius, sides, radius2, rotation = 0) => {
+      ctx.beginPath();
+      for (let i = 0; i < sides; i++) {
+        const angle = (i * 2 * Math.PI) / sides + rotation;
+        const pointX = x + radius * Math.cos(angle);
+        const pointY = y + (radius2 ? radius2 : radius) * Math.sin(angle);
+        if (i === 0) ctx.moveTo(pointX, pointY);
+        else ctx.lineTo(pointX, pointY);
+      }
+      ctx.closePath();
+      ctx.drawIfVisible();
+    },
 
   beginShape: (ctx) => () => {
     if (ctx.__startedShape) return;
@@ -434,127 +477,143 @@ const KlintFunctions = {
     points?.push({ type: "arc", x1, y1, x2, y2, radius });
   },
 
-  endContour: (ctx) => (forceRevert = true) => {
-    if (!ctx.__startedContour || !ctx.__currentContour?.length) return;
-    const contourPoints = [...ctx.__currentContour];
-    if (forceRevert) {
-      contourPoints.reverse();
-    }
-    ctx.__currentContours?.push(contourPoints);
-    ctx.__currentContour = null;
-    ctx.__startedContour = false;
-  },
+  endContour:
+    (ctx) =>
+    (forceRevert = true) => {
+      if (!ctx.__startedContour || !ctx.__currentContour?.length) return;
+      const contourPoints = [...ctx.__currentContour];
+      if (forceRevert) {
+        contourPoints.reverse();
+      }
+      ctx.__currentContours?.push(contourPoints);
+      ctx.__currentContour = null;
+      ctx.__startedContour = false;
+    },
 
-  endShape: (ctx) => (close = false) => {
-    if (!ctx.__startedShape) return;
-    if (ctx.__startedContour) ctx.endContour();
+  endShape:
+    (ctx) =>
+    (close = false) => {
+      if (!ctx.__startedShape) return;
+      if (ctx.__startedContour) ctx.endContour();
 
-    const points = ctx.__currentShape;
-    if (!points?.length) return;
+      const points = ctx.__currentShape;
+      if (!points?.length) return;
 
-    const drawPath = (points, close = false) => {
-      if (points.length === 0) return;
+      const drawPath = (points, close = false) => {
+        if (points.length === 0) return;
 
-      const firstPoint = points[0];
-      const startX = firstPoint.x || firstPoint.x2;
-      const startY = firstPoint.y || firstPoint.y2;
-      ctx.moveTo(startX, startY);
+        const firstPoint = points[0];
+        const startX = firstPoint.x || firstPoint.x2;
+        const startY = firstPoint.y || firstPoint.y2;
+        ctx.moveTo(startX, startY);
 
-      for (let i = 0; i < points.length; i++) {
-        const point = points[i];
+        for (let i = 0; i < points.length; i++) {
+          const point = points[i];
 
-        switch (point.type) {
-          case "line":
-            if (i > 0) ctx.lineTo(point.x, point.y);
-            break;
-          case "bezier":
-            ctx.bezierCurveTo(
-              point.cp1x,
-              point.cp1y,
-              point.cp2x,
-              point.cp2y,
-              point.x,
-              point.y
-            );
-            break;
-          case "quadratic":
-            ctx.quadraticCurveTo(point.cpx, point.cpy, point.x, point.y);
-            break;
-          case "arc":
-            ctx.arcTo(point.x1, point.y1, point.x2, point.y2, point.radius);
-            break;
+          switch (point.type) {
+            case "line":
+              if (i > 0) ctx.lineTo(point.x, point.y);
+              break;
+            case "bezier":
+              ctx.bezierCurveTo(
+                point.cp1x,
+                point.cp1y,
+                point.cp2x,
+                point.cp2y,
+                point.x,
+                point.y
+              );
+              break;
+            case "quadratic":
+              ctx.quadraticCurveTo(point.cpx, point.cpy, point.x, point.y);
+              break;
+            case "arc":
+              ctx.arcTo(point.x1, point.y1, point.x2, point.y2, point.radius);
+              break;
+          }
         }
-      }
 
-      if (close && points.length > 1) {
-        ctx.closePath();
-      }
-    };
+        if (close && points.length > 1) {
+          ctx.closePath();
+        }
+      };
 
-    ctx.beginPath();
-    drawPath(points, close);
-    ctx.__currentContours?.forEach((contour) =>
-      drawPath(contour, true)
-    );
-    ctx.drawIfVisible();
-    ctx.__currentShape = null;
-    ctx.__currentContours = null;
-    ctx.__startedShape = false;
-  },
+      ctx.beginPath();
+      drawPath(points, close);
+      ctx.__currentContours?.forEach((contour) => drawPath(contour, true));
+      ctx.drawIfVisible();
+      ctx.__currentShape = null;
+      ctx.__currentContours = null;
+      ctx.__startedShape = false;
+    },
 
-  gradient: (ctx) => (x1 = 0, y1 = 0, x2 = ctx.width, y2 = ctx.width) => {
-    return ctx.createLinearGradient(x1, y1, x2, y2);
-  },
+  gradient:
+    (ctx) =>
+    (x1 = 0, y1 = 0, x2 = ctx.width, y2 = ctx.width) => {
+      return ctx.createLinearGradient(x1, y1, x2, y2);
+    },
 
-  radialGradient: (ctx) => (
-    x1 = ctx.width / 2,
-    y1 = ctx.height / 2,
-    r1 = 0,
-    x2 = ctx.width / 2,
-    y2 = ctx.height / 2,
-    r2 = Math.min(ctx.width, ctx.height)
-  ) => {
-    return ctx.createRadialGradient(x1, y1, r1, x2, y2, r2);
-  },
+  radialGradient:
+    (ctx) =>
+    (
+      x1 = ctx.width / 2,
+      y1 = ctx.height / 2,
+      r1 = 0,
+      x2 = ctx.width / 2,
+      y2 = ctx.height / 2,
+      r2 = Math.min(ctx.width, ctx.height)
+    ) => {
+      return ctx.createRadialGradient(x1, y1, r1, x2, y2, r2);
+    },
 
-  conicGradient: (ctx) => (angle = 0, x1 = ctx.width / 2, y1 = ctx.height / 2) => {
-    return ctx.createConicGradient(angle, x1, y1);
-  },
+  conicGradient:
+    (ctx) =>
+    (angle = 0, x1 = ctx.width / 2, y1 = ctx.height / 2) => {
+      return ctx.createConicGradient(angle, x1, y1);
+    },
 
-  addColorStop: () => (gradient, offset = 0, color = "#000") => {
-    return gradient.addColorStop(offset, color);
-  },
+  addColorStop:
+    () =>
+    (gradient, offset = 0, color = "#000") => {
+      return gradient.addColorStop(offset, color);
+    },
 
   constrain: () => (val, floor, ceil) => {
     return Math.max(floor, Math.min(val, ceil));
   },
 
-  lerp: (ctx) => (A, B, mix, bounded = true) => {
-    return A + (B - A) * (bounded ? ctx.constrain(mix, 0, 1) : mix);
-  },
+  lerp:
+    (ctx) =>
+    (A, B, mix, bounded = true) => {
+      return A + (B - A) * (bounded ? ctx.constrain(mix, 0, 1) : mix);
+    },
 
-  fract: () => (n, mod, mode = "precise") => {
-    if (mode === "faster") {
-      const floor = (x) => x >> 0;
-      return n - floor(n / mod) * mod;
-    }
-    if (mode === "fast") {
-      return n - ~~(n / mod) * mod;
-    }
-    if (n >= 0) return n % mod;
-    return mod - (-n % mod);
-  },
+  fract:
+    () =>
+    (n, mod, mode = "precise") => {
+      if (mode === "faster") {
+        const floor = (x) => x >> 0;
+        return n - floor(n / mod) * mod;
+      }
+      if (mode === "fast") {
+        return n - ~~(n / mod) * mod;
+      }
+      if (n >= 0) return n % mod;
+      return mod - (-n % mod);
+    },
 
-  distance: (ctx) => (x1, y1, x2, y2, mode = "precise") => {
-    if (mode === "faster") {
-      const dx = Math.abs(x2 - x1);
-      const dy = Math.abs(y2 - y1);
-      return dx + dy - Math.min(dx, dy) * 0.3;
-    }
-    if (mode === "fast")
-      return ctx.squareDistance(x1, y1, x2, y2) * Math.SQRT1_2;
-    return Math.hypot(x2 - x1, y2 - y1);
-  },
+  distance:
+    (ctx) =>
+    (x1, y1, x2, y2, mode = "precise") => {
+      if (mode === "faster") {
+        const dx = Math.abs(x2 - x1);
+        const dy = Math.abs(y2 - y1);
+        return dx + dy - Math.min(dx, dy) * 0.3;
+      }
+      if (mode === "fast")
+        return ctx.squareDistance(x1, y1, x2, y2) * Math.SQRT1_2;
+      return Math.hypot(x2 - x1, y2 - y1);
+    },
 
   squareDistance: () => (x1, y1, x2, y2) => {
     return (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
@@ -564,10 +623,12 @@ const KlintFunctions = {
     return x1 * x2 + y1 * y2;
   },
 
-  remap: (ctx) => (n, A, B, C, D, bounded = true) => {
-    const t = (n - A) / (B - A);
-    return ctx.lerp(C, D, t, bounded);
-  },
+  remap:
+    (ctx) =>
+    (n, A, B, C, D, bounded = true) => {
+      const t = (n - A) / (B - A);
+      return ctx.lerp(C, D, t, bounded);
+    },
 
   bezierLerp: () => (a, b, c, d, t) => {
     const u = 1 - t;
@@ -604,17 +665,19 @@ const KlintFunctions = {
     ctx.__textWeight = weight || "normal";
   },
 
-  textQuality: (ctx) => (quality = "auto") => {
-    if (quality === "speed") {
-      ctx.textRendering = "optimizeSpeed";
-    } else if (quality === "auto") {
-      ctx.textRendering = "auto";
-    } else if (quality === "legibility") {
-      ctx.textRendering = "optimizeLegibility";
-    } else if (quality === "precision") {
-      ctx.textRendering = "geometricPrecision";
-    }
-  },
+  textQuality:
+    (ctx) =>
+    (quality = "auto") => {
+      if (quality === "speed") {
+        ctx.textRendering = "optimizeSpeed";
+      } else if (quality === "auto") {
+        ctx.textRendering = "auto";
+      } else if (quality === "legibility") {
+        ctx.textRendering = "optimizeLegibility";
+      } else if (quality === "precision") {
+        ctx.textRendering = "geometricPrecision";
+      }
+    },
 
   textSpacing: (ctx) => (kind, value) => {
     ctx[`${kind}Spacing`] = `${value}px`;
@@ -644,65 +707,81 @@ const KlintFunctions = {
     return ctx.measureText(text).width;
   },
 
-  text: (ctx) => (text, x, y, maxWidth = undefined) => {
-    if (text === undefined) return;
-    ctx.computeFont();
+  text:
+    (ctx) =>
+    (text, x, y, maxWidth = undefined) => {
+      if (text === undefined) return;
+      ctx.computeFont();
 
-    if (ctx.textAlign !== ctx.__textAlignment.horizontal) {
-      ctx.textAlign = ctx.__textAlignment.horizontal;
-    }
-    if (ctx.textBaseline !== ctx.__textAlignment.vertical) {
-      ctx.textBaseline = ctx.__textAlignment.vertical;
-    }
-
-    const textString = String(text);
-
-    if (textString.includes("\n")) {
-      const lines = textString.split("\n");
-      const firstLineMetrics = ctx.measureText(lines[0] || "M");
-      const defaultLineHeight =
-        firstLineMetrics.actualBoundingBoxAscent +
-        firstLineMetrics.actualBoundingBoxDescent;
-      const lineHeight = ctx.__textLeading ?? ctx.__textSize * 1.2;
-      const totalHeight =
-        lines.length * lineHeight - (lineHeight - defaultLineHeight);
-
-      let startY = y;
-      if (ctx.__textAlignment.vertical === "middle") {
-        startY = y - totalHeight / 2 + defaultLineHeight / 2;
-      } else if (ctx.__textAlignment.vertical === "bottom") {
-        startY = y - totalHeight + defaultLineHeight;
-      } else if (ctx.__textAlignment.vertical === "top") {
-        startY = y + defaultLineHeight / 2;
+      if (ctx.textAlign !== ctx.__textAlignment.horizontal) {
+        ctx.textAlign = ctx.__textAlignment.horizontal;
+      }
+      if (ctx.textBaseline !== ctx.__textAlignment.vertical) {
+        ctx.textBaseline = ctx.__textAlignment.vertical;
       }
 
-      lines.forEach((line, index) => {
-        const lineY = startY + index * lineHeight;
+      const textString = String(text);
+
+      if (textString.includes("\n")) {
+        const lines = textString.split("\n");
+        const firstLineMetrics = ctx.measureText(lines[0] || "M");
+        const defaultLineHeight =
+          firstLineMetrics.actualBoundingBoxAscent +
+          firstLineMetrics.actualBoundingBoxDescent;
+        const lineHeight = ctx.__textLeading ?? ctx.__textSize * 1.2;
+        const totalHeight =
+          lines.length * lineHeight - (lineHeight - defaultLineHeight);
+
+        let startY = y;
+        if (ctx.__textAlignment.vertical === "middle") {
+          startY = y - totalHeight / 2 + defaultLineHeight / 2;
+        } else if (ctx.__textAlignment.vertical === "bottom") {
+          startY = y - totalHeight + defaultLineHeight;
+        } else if (ctx.__textAlignment.vertical === "top") {
+          startY = y + defaultLineHeight / 2;
+        }
+
+        lines.forEach((line, index) => {
+          const lineY = startY + index * lineHeight;
+          if (ctx.checkTransparency("fill"))
+            ctx.fillText(line, x, lineY, maxWidth);
+          if (ctx.checkTransparency("stroke"))
+            ctx.strokeText(line, x, lineY, maxWidth);
+        });
+      } else {
         if (ctx.checkTransparency("fill"))
-          ctx.fillText(line, x, lineY, maxWidth);
+          ctx.fillText(textString, x, y, maxWidth);
         if (ctx.checkTransparency("stroke"))
-          ctx.strokeText(line, x, lineY, maxWidth);
-      });
-    } else {
-      if (ctx.checkTransparency("fill"))
-        ctx.fillText(textString, x, y, maxWidth);
-      if (ctx.checkTransparency("stroke"))
-        ctx.strokeText(textString, x, y, maxWidth);
-    }
-  },
+          ctx.strokeText(textString, x, y, maxWidth);
+      }
+    },
 
   image: (ctx) => (image, x, y, arg3, arg4, arg5, arg6, arg7, arg8) => {
     const sourceImage = "canvas" in image ? image.canvas : image;
 
     if (arg5 !== undefined) {
       const [sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight] = [
-        x, y, arg3, arg4, arg5, arg6, arg7, arg8,
+        x,
+        y,
+        arg3,
+        arg4,
+        arg5,
+        arg6,
+        arg7,
+        arg8,
       ];
       const adjustedX = ctx.__imageOrigin === "center" ? dx - dWidth / 2 : dx;
       const adjustedY = ctx.__imageOrigin === "center" ? dy - dHeight / 2 : dy;
       ctx.drawImage(
-        sourceImage, sx, sy, sWidth, sHeight,
-        adjustedX, adjustedY, dWidth, dHeight
+        sourceImage,
+        sx,
+        sy,
+        sWidth,
+        sHeight,
+        adjustedX,
+        adjustedY,
+        dWidth,
+        dHeight
       );
       return;
     }
@@ -738,18 +817,28 @@ const KlintFunctions = {
     ctx.putImageData(imageData, 0, 0);
   },
 
-  readPixels: (ctx) => (x, y, w = 1, h = 1) => {
-    const imageData = ctx.getImageData(x, y, w, h);
-    return Array.from(imageData.data);
-  },
+  readPixels:
+    (ctx) =>
+    (x, y, w = 1, h = 1) => {
+      const imageData = ctx.getImageData(x, y, w, h);
+      return Array.from(imageData.data);
+    },
 
-  scaleTo: () => (originWidth, originHeight, destinationWidth, destinationHeight, cover = false) => {
-    const widthRatio = destinationWidth / originWidth;
-    const heightRatio = destinationHeight / originHeight;
-    return cover
-      ? Math.max(widthRatio, heightRatio)
-      : Math.min(widthRatio, heightRatio);
-  },
+  scaleTo:
+    () =>
+    (
+      originWidth,
+      originHeight,
+      destinationWidth,
+      destinationHeight,
+      cover = false
+    ) => {
+      const widthRatio = destinationWidth / originWidth;
+      const heightRatio = destinationHeight / originHeight;
+      return cover
+        ? Math.max(widthRatio, heightRatio)
+        : Math.min(widthRatio, heightRatio);
+    },
 
   opacity: (ctx) => (value) => {
     ctx.globalAlpha = ctx.constrain(value, 0, 1);
@@ -775,17 +864,16 @@ const KlintFunctions = {
     Object.assign(ctx, config);
   },
 
-  toBase64: (ctx) => (type = "image/png", quality) => {
-    const canvas = ctx.canvas;
-    return canvas.toDataURL(type, quality);
-  },
+  toBase64:
+    (ctx) =>
+    (type = "image/png", quality) => {
+      const canvas = ctx.canvas;
+      return canvas.toDataURL(type, quality);
+    },
 
   saveConfig: (ctx) => (from) => {
     return Object.fromEntries(
-      CONFIG_PROPS.map((key) => [
-        key,
-        from?.[key] ?? ctx[key],
-      ])
+      CONFIG_PROPS.map((key) => [key, from?.[key] ?? ctx[key]])
     );
   },
 
@@ -804,29 +892,31 @@ const KlintFunctions = {
     }
   },
 
-  clipTo: (ctx) => (callback, revert = false) => {
-    ctx.save();
-    ctx.beginPath();
-    const originalFillStyle = ctx.fillStyle;
-    const originalStrokeStyle = ctx.strokeStyle;
-    ctx.fillStyle = "white";
-    ctx.strokeStyle = "white";
-    const originalFill = ctx.fill;
-    const originalStroke = ctx.stroke;
-    const originalDrawIfVisible = ctx.drawIfVisible;
-    callback(ctx);
-    ctx.fill = originalFill;
-    ctx.stroke = originalStroke;
-    ctx.drawIfVisible = originalDrawIfVisible;
-    ctx.fillStyle = originalFillStyle;
-    ctx.strokeStyle = originalStrokeStyle;
+  clipTo:
+    (ctx) =>
+    (callback, revert = false) => {
+      ctx.save();
+      ctx.beginPath();
+      const originalFillStyle = ctx.fillStyle;
+      const originalStrokeStyle = ctx.strokeStyle;
+      ctx.fillStyle = "white";
+      ctx.strokeStyle = "white";
+      const originalFill = ctx.fill;
+      const originalStroke = ctx.stroke;
+      const originalDrawIfVisible = ctx.drawIfVisible;
+      callback(ctx);
+      ctx.fill = originalFill;
+      ctx.stroke = originalStroke;
+      ctx.drawIfVisible = originalDrawIfVisible;
+      ctx.fillStyle = originalFillStyle;
+      ctx.strokeStyle = originalStrokeStyle;
 
-    if (revert) {
-      ctx.clip("evenodd");
-    } else {
-      ctx.clip();
-    }
-  },
+      if (revert) {
+        ctx.clip("evenodd");
+      } else {
+        ctx.clip();
+      }
+    },
 };
 
 // Klint Core Functions
@@ -852,10 +942,12 @@ const KlintCoreFunctions = {
 
   redraw: () => () => {},
 
-  extend: (ctx) => (name, data, enforceReplace = false) => {
-    if (name in ctx && !enforceReplace) return;
-    ctx[name] = data;
-  },
+  extend:
+    (ctx) =>
+    (name, data, enforceReplace = false) => {
+      if (name in ctx && !enforceReplace) return;
+      ctx[name] = data;
+    },
 
   passImage: () => (element) => {
     if (!element.complete) {
@@ -877,10 +969,7 @@ const KlintCoreFunctions = {
 
   saveConfig: (ctx) => (from) => {
     return Object.fromEntries(
-      CONFIG_PROPS.map((key) => [
-        key,
-        from?.[key] ?? ctx[key],
-      ])
+      CONFIG_PROPS.map((key) => [key, from?.[key] ?? ctx[key]])
     );
   },
 
@@ -943,7 +1032,7 @@ const KlintCoreFunctions = {
         context.translate(context.width * 0.5, context.height * 0.5);
       }
     }
-    
+
     if (callback) {
       callback(context);
     }
@@ -972,15 +1061,25 @@ const KlintCoreFunctions = {
 // Web Component
 class KlintCanvas extends HTMLElement {
   static observedAttributes = [
-    'width', 'height', 'fps', 'dpr', 'origin', 'alpha', 
-    'autoplay', 'noloop', 'static', 'ignoreResize', 
-    'nocanvas', 'willreadfrequently', 'unsafemode'
+    "width",
+    "height",
+    "fps",
+    "dpr",
+    "origin",
+    "alpha",
+    "autoplay",
+    "noloop",
+    "static",
+    "ignoreResize",
+    "nocanvas",
+    "willreadfrequently",
+    "unsafemode",
   ];
 
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' });
-    
+    this.attachShadow({ mode: "open" });
+
     // Internal state
     this._canvas = null;
     this._context = null;
@@ -989,14 +1088,14 @@ class KlintCanvas extends HTMLElement {
     this._intersectionObserver = null;
     this._isVisible = true;
     this._options = { ...DEFAULT_OPTIONS };
-    
+
     // User callbacks
     this._setup = null;
     this._draw = null;
     this._preload = null;
     this.onResize = null;
     this.onVisible = null;
-    
+
     // Bind methods
     this._animate = this._animate.bind(this);
   }
@@ -1015,14 +1114,14 @@ class KlintCanvas extends HTMLElement {
 
   attributeChangedCallback(name, oldValue, newValue) {
     if (oldValue === newValue) return;
-    
+
     this._options[name] = newValue;
-    
-    if (this._context && (name === 'width' || name === 'height')) {
+
+    if (this._context && (name === "width" || name === "height")) {
       this._updateCanvasSize();
     }
-    
-    if (this._context && name === 'fps') {
+
+    if (this._context && name === "fps") {
       this._context.fps = parseFloat(newValue) || DEFAULT_FPS;
     }
   }
@@ -1048,13 +1147,13 @@ class KlintCanvas extends HTMLElement {
       </style>
       <canvas></canvas>
     `;
-    
-    this._canvas = this.shadowRoot.querySelector('canvas');
+
+    this._canvas = this.shadowRoot.querySelector("canvas");
   }
 
   _initializeCanvas() {
     if (!this._canvas) return;
-    
+
     // Update options from attributes
     for (const attr of KlintCanvas.observedAttributes) {
       const value = this.getAttribute(attr);
@@ -1062,31 +1161,31 @@ class KlintCanvas extends HTMLElement {
         this._options[attr] = value;
       }
     }
-    
+
     const defaultDPR = window.devicePixelRatio || 3;
     const dpr = this._options.dpr
       ? this._options.dpr === "default"
         ? defaultDPR
         : parseFloat(this._options.dpr)
       : defaultDPR;
-    
+
     this._context = this._createContext(this._canvas);
     if (!this._context) return;
-    
+
     this._context.__dpr = dpr;
     this._context.fps = parseFloat(this._options.fps) || DEFAULT_FPS;
-    
+
     this._updateCanvasSize();
   }
 
   _createContext(canvas) {
-    const ctx = canvas.getContext('2d', {
-      alpha: this._options.alpha !== 'false',
-      willReadFrequently: this._options.willreadfrequently === 'true'
+    const ctx = canvas.getContext("2d", {
+      alpha: this._options.alpha !== "false",
+      willReadFrequently: this._options.willreadfrequently === "true",
     });
-    
+
     if (!ctx) return null;
-    
+
     // Initialize context properties
     ctx.width = 0;
     ctx.height = 0;
@@ -1109,9 +1208,9 @@ class KlintCanvas extends HTMLElement {
     ctx.__textWeight = "normal";
     ctx.__textAlignment = {
       horizontal: "left",
-      vertical: "top"
+      vertical: "top",
     };
-    
+
     // Animation properties
     ctx.frame = 0;
     ctx.time = 0;
@@ -1123,7 +1222,7 @@ class KlintCanvas extends HTMLElement {
     ctx.__offscreens = new Map();
     ctx.__isPreloaded = false;
     ctx.__isSetup = false;
-    
+
     // Add Element classes
     ctx.Color = new Color();
     ctx.createVector = (x = 0, y = 0) => new Vector(x, y);
@@ -1132,38 +1231,43 @@ class KlintCanvas extends HTMLElement {
     ctx.Time = new Time();
     ctx.Text = new Text();
     ctx.Thing = new Thing();
-    
+
     // Augment with Klint functions
     Object.entries(KlintFunctions).forEach(([name, fn]) => {
       ctx[name] = fn(ctx);
     });
-    
+
     Object.entries(KlintCoreFunctions).forEach(([name, fn]) => {
       ctx[name] = fn(ctx);
     });
-    
+
     return ctx;
   }
 
   _updateCanvasSize(shouldRedraw = false) {
     if (!this._canvas || !this._context) return;
-    
+
     const rect = this.getBoundingClientRect();
-    const width = parseFloat(this.getAttribute('width')) || rect.width;
-    const height = parseFloat(this.getAttribute('height')) || rect.height;
-    
+    const width = parseFloat(this.getAttribute("width")) || rect.width;
+    const height = parseFloat(this.getAttribute("height")) || rect.height;
+
     const config = this._context.saveConfig();
     this._context.dpr = this._context.__dpr;
     this._canvas.width = this._context.width = ~~(width * this._context.__dpr);
-    this._canvas.height = this._context.height = ~~(height * this._context.__dpr);
+    this._canvas.height = this._context.height = ~~(
+      height * this._context.__dpr
+    );
     this._canvas.style.width = `${width}px`;
     this._canvas.style.height = `${height}px`;
     this._context.restoreConfig(config);
-    
+
     if (this._options.origin === "center") {
-      this._context.translate(this._canvas.width * 0.5, this._canvas.height * 0.5);
+      this._context.translate(
+        this._canvas.width * 0.5,
+        this._canvas.height * 0.5
+      );
     }
-    
+
     if (shouldRedraw && this._draw) {
       this._draw(this._context);
     }
@@ -1177,13 +1281,15 @@ class KlintCanvas extends HTMLElement {
         if (this.onResize) {
           this.onResize(this._context);
         }
-        this.dispatchEvent(new CustomEvent('klint-resize', { 
-          detail: { context: this._context } 
-        }));
+        this.dispatchEvent(
+          new CustomEvent("klint-resize", {
+            detail: { context: this._context },
+          })
+        );
       });
       this._resizeObserver.observe(this);
     }
-    
+
     // Intersection observer
     this._intersectionObserver = new IntersectionObserver(
       (entries) => {
@@ -1192,12 +1298,14 @@ class KlintCanvas extends HTMLElement {
           if (this.onVisible) {
             this.onVisible(this._context);
           }
-          this.dispatchEvent(new CustomEvent('klint-visible', { 
-            detail: { 
-              context: this._context, 
-              visible: entry.isIntersecting 
-            } 
-          }));
+          this.dispatchEvent(
+            new CustomEvent("klint-visible", {
+              detail: {
+                context: this._context,
+                visible: entry.isIntersecting,
+              },
+            })
+          );
         });
       },
       { threshold: 0.1, root: null, rootMargin: "50px" }
@@ -1208,21 +1316,24 @@ class KlintCanvas extends HTMLElement {
   _parseScriptTag() {
     const script = this.querySelector('script[type="text/klint"]');
     if (!script) return;
-    
+
     try {
       // Create a function scope and extract the functions
       const code = script.textContent;
-      const func = new Function('exports', code + '\n' + 
-        'if (typeof setup !== "undefined") exports.setup = setup;\n' +
-        'if (typeof draw !== "undefined") exports.draw = draw;\n' +
-        'if (typeof preload !== "undefined") exports.preload = preload;\n' +
-        'if (typeof onResize !== "undefined") exports.onResize = onResize;\n' +
-        'if (typeof onVisible !== "undefined") exports.onVisible = onVisible;'
+      const func = new Function(
+        "exports",
+        code +
+          "\n" +
+          'if (typeof setup !== "undefined") exports.setup = setup;\n' +
+          'if (typeof draw !== "undefined") exports.draw = draw;\n' +
+          'if (typeof preload !== "undefined") exports.preload = preload;\n' +
+          'if (typeof onResize !== "undefined") exports.onResize = onResize;\n' +
+          'if (typeof onVisible !== "undefined") exports.onVisible = onVisible;'
       );
-      
+
       const exports = {};
       func(exports);
-      
+
       // Assign the functions
       if (exports.setup) this.setup = exports.setup;
       if (exports.draw) this.draw = exports.draw;
@@ -1230,35 +1341,35 @@ class KlintCanvas extends HTMLElement {
       if (exports.onResize) this.onResize = exports.onResize;
       if (exports.onVisible) this.onVisible = exports.onVisible;
     } catch (error) {
-      console.error('Error parsing Klint script:', error);
+      console.error("Error parsing Klint script:", error);
     }
   }
 
   async _initialize() {
     if (!this._context) return;
-    
+
     const unsafeMode = this._options.unsafemode === "true";
     if (!unsafeMode && this._context.__isReadyToDraw) return;
-    
+
     try {
       // Preload phase
       if (this._preload && (unsafeMode || !this._context.__isPreloaded)) {
         await this._preload(this._context);
         if (!unsafeMode) this._context.__isPreloaded = true;
       }
-      
+
       // Setup phase
       if (this._setup && (unsafeMode || !this._context.__isSetup)) {
         this._setup(this._context);
         if (!unsafeMode) this._context.__isSetup = true;
       }
-      
+
       // Initial draw
       if (this._draw && !this._context.__isReadyToDraw) {
         this._draw(this._context);
         this._context.__isReadyToDraw = true;
       }
-      
+
       // Handle static mode
       if (this._options.static === "true") {
         this._handleStaticMode();
@@ -1268,14 +1379,15 @@ class KlintCanvas extends HTMLElement {
           this._animate();
         }
       }
-      
+
       // Dispatch ready event
-      this.dispatchEvent(new CustomEvent('klint-ready', { 
-        detail: { context: this._context } 
-      }));
-      
+      this.dispatchEvent(
+        new CustomEvent("klint-ready", {
+          detail: { context: this._context },
+        })
+      );
     } catch (error) {
-      console.error('Klint initialization error:', error);
+      console.error("Klint initialization error:", error);
     }
   }
 
@@ -1283,25 +1395,25 @@ class KlintCanvas extends HTMLElement {
     if (!this._context || !this._isVisible) return;
     if (!this._context.__isReadyToDraw) return;
     if (!this._context.__isPlaying) return;
-    
+
     const now = timestamp;
     const target = 1000 / this._context.fps;
-    
+
     if (!this._context.__lastTargetTime) {
       this._context.__lastTargetTime = now;
       this._context.__lastRealTime = now;
     }
-    
+
     const sinceLast = now - this._context.__lastTargetTime;
     const epsilon = 5;
-    
+
     if (sinceLast >= target - epsilon) {
       this._context.deltaTime = now - this._context.__lastRealTime;
-      
+
       if (this._draw) {
         this._draw(this._context);
       }
-      
+
       if (this._context.time > 1e7) this._context.time = 0;
       if (this._context.frame > 1e7) this._context.frame = 0;
       this._context.time += this._context.deltaTime / 1000; // Convert to seconds
@@ -1309,22 +1421,22 @@ class KlintCanvas extends HTMLElement {
       this._context.__lastTargetTime = now;
       this._context.__lastRealTime = now;
     }
-    
+
     this._animationFrameId = requestAnimationFrame(this._animate);
   }
 
   _handleStaticMode() {
     try {
       const imageUrl = this._canvas.toDataURL("image/png");
-      const img = document.createElement('img');
+      const img = document.createElement("img");
       img.src = imageUrl;
       img.alt = this._context.__description || DEFAULT_ALT;
-      
+
       // Replace canvas with image
-      this._canvas.style.display = 'none';
+      this._canvas.style.display = "none";
       this.shadowRoot.appendChild(img);
     } catch (error) {
-      console.error('Error creating static image:', error);
+      console.error("Error creating static image:", error);
     }
   }
 
@@ -1332,11 +1444,11 @@ class KlintCanvas extends HTMLElement {
     if (this._animationFrameId) {
       cancelAnimationFrame(this._animationFrameId);
     }
-    
+
     if (this._resizeObserver) {
       this._resizeObserver.disconnect();
     }
-    
+
     if (this._intersectionObserver) {
       this._intersectionObserver.disconnect();
     }
@@ -1346,36 +1458,36 @@ class KlintCanvas extends HTMLElement {
   get context() {
     return this._context;
   }
-  
+
   set setup(fn) {
     this._setup = fn;
     if (this._context && !this._context.__isSetup) {
       this._initialize();
     }
   }
-  
+
   get setup() {
     return this._setup;
   }
-  
+
   set draw(fn) {
     this._draw = fn;
     if (this._context && !this._context.__isReadyToDraw) {
       this._initialize();
     }
   }
-  
+
   get draw() {
     return this._draw;
   }
-  
+
   set preload(fn) {
     this._preload = fn;
     if (this._context && !this._context.__isPreloaded) {
       this._initialize();
     }
   }
-  
+
   get preload() {
     return this._preload;
   }
@@ -1405,6 +1517,6 @@ class KlintCanvas extends HTMLElement {
 }
 
 // Register the custom element
-customElements.define('klint', KlintCanvas);
+customElements.define("klint-canvas", KlintCanvas);
 
 export default KlintCanvas;

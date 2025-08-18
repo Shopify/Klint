@@ -102,7 +102,6 @@ cd klint
 npm install
 npm run build
 ```
-
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for development guidelines.
 
 ## 🏆 Origins
@@ -126,3 +125,4 @@ MIT
 ---
 
 **Ready to create?** Start with `npx @shopify/klint klint-create-editor my-project` 🎨
+

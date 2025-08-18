@@ -497,6 +497,10 @@ export const KlintFunctions = {
       return gradient.addColorStop(offset, color);
     },
 
+  PI: () => Math.PI,
+  TWO_PI: () => Math.PI * 2,
+  TAU: () => Math.PI * 2,
+
   constrain: () => (val: number, floor: number, ceil: number) => {
     return Math.max(floor, Math.min(val, ceil));
   },
@@ -685,6 +689,136 @@ export const KlintFunctions = {
         if (ctx.checkTransparency("stroke"))
           ctx.strokeText(textString, x, y, maxWidth);
       }
+    },
+
+  paragraph:
+    (ctx: KlintContexts) =>
+    (
+      text: string | number | undefined,
+      x: number,
+      y: number,
+      width: number,
+      options?: {
+        justification?: "left" | "center" | "right" | "justified";
+        overflow?: number;
+        break?: "words" | "letters";
+      }
+    ) => {
+      if (text === undefined) return;
+      ctx.computeFont();
+
+      const textString = String(text);
+      const justification = options?.justification || "left";
+      const overflow = options?.overflow || 0;
+      const breakMode = options?.break || "words";
+
+      // Save current text alignment
+      const originalAlign = ctx.textAlign;
+      const originalBaseline = ctx.textBaseline;
+
+      // Set alignment for paragraph
+      if (justification === "center") {
+        ctx.textAlign = "center";
+      } else if (justification === "right") {
+        ctx.textAlign = "right";
+      } else {
+        ctx.textAlign = "left";
+      }
+      ctx.textBaseline = "top";
+
+      // Split text into words or characters based on break mode
+      const tokens =
+        breakMode === "letters"
+          ? textString.split("")
+          : textString.split(/\s+/);
+
+      const lines: string[] = [];
+      let currentLine = "";
+
+      // Build lines based on width constraint
+      for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+        const testLine = currentLine
+          ? breakMode === "letters"
+            ? currentLine + token
+            : currentLine + " " + token
+          : token;
+
+        const metrics = ctx.measureText(testLine);
+
+        if (metrics.width > width && currentLine !== "") {
+          // Line exceeds width, save current line and start new one
+          lines.push(currentLine);
+          currentLine = token;
+        } else {
+          currentLine = testLine;
+        }
+      }
+
+      // Add remaining text as last line
+      if (currentLine) {
+        lines.push(currentLine);
+      }
+
+      // Calculate line height
+      const lineHeight = ctx.__textLeading ?? ctx.__textSize * 1.2;
+
+      // Handle overflow - limit lines if overflow is set
+      let linesToDraw = lines;
+      if (overflow > 0 && lines.length * lineHeight > overflow) {
+        const maxLines = Math.floor(overflow / lineHeight);
+        linesToDraw = lines.slice(0, maxLines);
+      }
+
+      // Draw each line
+      linesToDraw.forEach((line, index) => {
+        const lineY = y + index * lineHeight;
+        let lineX = x;
+
+        // Adjust x position based on justification
+        if (justification === "center") {
+          lineX = x + width / 2;
+        } else if (justification === "right") {
+          lineX = x + width;
+        } else if (
+          justification === "justified" &&
+          index < linesToDraw.length - 1
+        ) {
+          // Justify all lines except the last one
+          const words = line.split(/\s+/);
+          if (words.length > 1) {
+            // Calculate space width needed for justification
+            const textWidth = ctx.measureText(words.join("")).width;
+            const totalSpaceWidth = width - textWidth;
+            const spaceWidth = totalSpaceWidth / (words.length - 1);
+
+            // Draw each word individually with calculated spacing
+            let currentX = x;
+            words.forEach((word, wordIndex) => {
+              if (ctx.checkTransparency("fill")) {
+                ctx.fillText(word, currentX, lineY);
+              }
+              if (ctx.checkTransparency("stroke")) {
+                ctx.strokeText(word, currentX, lineY);
+              }
+              currentX += ctx.measureText(word).width + spaceWidth;
+            });
+            return; // Skip normal drawing for justified line
+          }
+        }
+
+        // Draw line normally (non-justified)
+        if (ctx.checkTransparency("fill")) {
+          ctx.fillText(line, lineX, lineY);
+        }
+        if (ctx.checkTransparency("stroke")) {
+          ctx.strokeText(line, lineX, lineY);
+        }
+      });
+
+      // Restore original alignment
+      ctx.textAlign = originalAlign;
+      ctx.textBaseline = originalBaseline;
     },
 
   // DO NOT use putImageData for images you can draw : https://www.measurethat.net/Benchmarks/Show/9510/0/putimagedata-vs-drawimage
@@ -876,4 +1010,50 @@ export const KlintFunctions = {
         ctx.clip();
       }
     },
+
+  canIuseFilter: (ctx: KlintContexts) => () => {
+    return ctx.filter !== undefined && ctx.filter !== null;
+  },
+
+  blur: (ctx: KlintContexts) => (radius: number) => {
+    if (ctx.filter === undefined || ctx.filter === null) return;
+    ctx.filter = `blur(${radius}px)`;
+  },
+
+  SVGfilter: (ctx: KlintContexts) => (url: string) => {
+    if (ctx.filter === undefined || ctx.filter === null) return;
+    if (!url || !url.startsWith("url(")) return;
+    ctx.filter = url;
+  },
+
+  dropShadow:
+    (ctx: KlintContexts) =>
+    (offsetX: number, offsetY: number, blurRadius: number, color: string) => {
+      if (ctx.filter === undefined || ctx.filter === null) return;
+      ctx.filter = `drop-shadow(${offsetX}px ${offsetY}px ${blurRadius}px ${color})`;
+    },
+
+  grayscale: (ctx: KlintContexts) => (amount: number) => {
+    if (ctx.filter === undefined || ctx.filter === null) return;
+    const value = ctx.constrain(amount, 0, 1);
+    ctx.filter = `grayscale(${value})`;
+  },
+
+  hue: (ctx: KlintContexts) => (angle: number) => {
+    if (ctx.filter === undefined || ctx.filter === null) return;
+    const degrees = (angle * 180) / Math.PI;
+    ctx.filter = `hue-rotate(${degrees}deg)`;
+  },
+
+  invert: (ctx: KlintContexts) => (amount: number) => {
+    if (ctx.filter === undefined || ctx.filter === null) return;
+    const value = ctx.constrain(amount, 0, 1);
+    ctx.filter = `invert(${value})`;
+  },
+
+  filterOpacity: (ctx: KlintContexts) => (value: number) => {
+    if (ctx.filter === undefined || ctx.filter === null) return;
+    const amount = ctx.constrain(value, 0, 1);
+    ctx.filter = `opacity(${amount})`;
+  },
 } as const;

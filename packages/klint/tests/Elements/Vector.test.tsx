@@ -131,7 +131,7 @@ describe("Vector Element", () => {
     it("should calculate angle (2D angle ignoring z)", () => {
       const v = new Vector(1, 1, 5);
       const angle = v.angle();
-      expect(angle).toBeCloseTo((Math.PI * 3) / 4, 10);
+      expect(angle).toBeCloseTo(Math.PI / 4, 10);
     });
   });
 

@@ -3,29 +3,21 @@
 ## 💾 Roadmap to Klint 1.0 
 #### ( Non-exhaustive and probably highly underestimated ) 
 - [ ] Core library 
-- [ ] Essentials plugins 
-- [ ] Tests 
+- [ ] Plugins 
+- [ ] Editor 
 - [ ] Docs 
 
 ## 0.1.0
 ### Core
 #### Bugs
-- [x] Vite hotreload creates slows down
+- [ ] Vite hotreload creates slows down
 - [x] Window.resize event inconsistent
+- [x] Refactor event listener to abort controler
 
-### Elements 
-- [ ] Grids : 2D, responsive, radial 
-- [ ] Noise + pseudo-random : https://github.com/sneha-belkhale/noisejs/blob/master/perlin.js
-- [ ] Refactor timeline : https://github.com/arthurcloche/mini-timeline
-- [ ] Controls 
-- [ ] Recorder : https://github.com/arthurcloche/canvas-recorder
-- [ ] Text To Points : https://github.com/arthurcloche/font-to-svg
-
-#### Fixes
+#### Fixes + upgrades
 - [x] Arguments order is wrong on roundedRect
     [x] Update docs
 - [x] Line breaks in text()
-- [ ] CSS text style cloner : https://blog.steveasleep.com/how-to-draw-multi-line-text-on-an-html-canvas-in-2021
 - [ ] Paragraph break : https://stackoverflow.com/questions/5026961/html5-canvas-ctx-filltext-wont-do-line-breaks
 - [x] clip
 - [x] Review Editor
@@ -35,15 +27,49 @@
     [x] Added 'revert' flag for contours
     [x] Make Tests docs
     [x] Update docs
-- [ ] Filters
-- [ ] Make vectors 3D + add cross, slerp and 3d transforms
+- [x] Filters
+- [x] Make vectors 3D + add cross, slerp and 3d transforms
 - [x] Essential plugins to be included in the library
     [x] Update docs
+
+### Elements 
+- [ ] Basic Grids : 2D, radial 
+- [ ] Responsive grid : CSS-like responsivenes - to think about
+- [ ] Noise + pseudo-random : https://github.com/sneha-belkhale/noisejs/blob/master/perlin.js
+- [ ] Refactor timeline : https://github.com/arthurcloche/mini-timeline
+- [ ] Controls : test Leva
+- [ ] SDF effector : shader like advanced dist function 
+- [ ] Hotspot : note ( Path 2D for custom shapes + ctx.isPointInPath())
+- [ ] Draggables 
+- [x] Easing 
+- [x] Bezier + Bezier sampling + normals 
+- [ ] Svg Filter
+- [x] Timeline 
+- [ ] Text Animation
+- [ ] Sprites  : https://developer.mozilla.org/en-US/docs/Web/API/Window/createImageBitmap
+- [ ] Shader Filter => wegGPU applied on canvas, 'afterDraw()'
+- [ ] From Bytes, From base64
+
+###  Plugins
+- [ ] Text To Points : https://github.com/arthurcloche/font-to-svg
+- [ ] Recorder : use miniRecorder
+- [ ] Projector 
+- [ ] Polyline 2D
+- [ ] Quadtree
+- [ ] Svg parsing + rendering 
+- [ ] Catmull Curve :  path smoothing and auto-rounded Strips, rounding
+- [ ] 2D shapes builder : constructive geometry 
+- [ ] Advanced bezier : see bezier.js
+- [ ] Springs
+- [ ] Particles 
+- [ ] Worker
+- [ ] Bitmap font rendering => render to image, get atlas of chars on texture, text composer
+- [ ] True SSR => return base64
 
 ### Considerations 
 - [ ] Create a singe useFrame() hook similar to Three Fiber
 - [x] Add relativeTo(), lookAt(), rotate(), fromAngle(), toScreen(), slerp()
-- [ ] Add PI and TWO_PI
+- [x] Add PI and TWO_PI
 - [ ] Consider url params
 - [x] Make the loadVideo hook 
 - [x] Make the useGestures hook 
@@ -54,38 +80,6 @@
 - [ ] Build homepage
 
 ### Editor
-- [ ] Consider url params
+- [ ] Add ID to session
+- [ ] Make Quick version
 - [x] Update dependency
-
-##  PLUGINS
-- [ ] SDF effector
-- [ ] Hotspot : note ( Path 2D for custom shapes + ctx.isPointInPath())
-- [ ] Curve : Strips, rounding
-- [ ] Draggables 
-- [ ] Catmull Curves : path smoothing and auto-rounded
-- [x] Easing 
-- [ ] Bezier + Bezier sampling + normals 
-- [ ] Svg parsing + rendering 
-- [ ] Svg Filter
-- [ ] Vector3D
-- [ ] Vector4D
-- [ ] Projector 
-- [x] Timeline 
-- [ ] Polyline 2D
-- [x] Text Animation
-- [ ] 2D shapes builder
-- [ ] Sprites  : https://developer.mozilla.org/en-US/docs/Web/API/Window/createImageBitmap
-- [ ] Exports : ffmpeg + svg
-- [ ] Shader Filter => wegGPU applied on canvas, 'afterDraw()'
-- [ ] From Bytes, From Float
----
-## EXTRAS EXTRAS PLUGINS
-### will be in an external examples folder
-- [ ] Quadtree
-- [ ] Particles 
-- [ ] Worker
-- [ ] Bitmap font rendering => render to image, get atlas of chars on texture, text composer
-- [ ] True SSR => return base64
-- [ ] URL params => encode / decode
-
----

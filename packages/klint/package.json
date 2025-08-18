@@ -9,7 +9,8 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "klint-create-editor": "./bin/create-editor"
+    "klint-create-editor": "./bin/create-editor",
+    "klint-create-sandbox": "./bin/create-sandbox"
   },
   "exports": {
     ".": {
@@ -17,7 +18,6 @@
       "require": "./dist/index.cjs",
       "types": "./dist/index.d.ts"
     },
-    "./mcp": "@shopify/klint-mcp",
     "./web-component": "@shopify/klint-web-component",
     "./plugins": "@shopify/klint-plugins"
   },

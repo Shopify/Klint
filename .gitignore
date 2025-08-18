@@ -1,9 +1,12 @@
 node_modules
-old 
-
-/.cache
-/build
+.DS_Store
+dist/
+build/
 .env
+.env.local
+sandbox/
 
-.claude
-.vscode
+mcp-server
+klint-web-component
+
+prompt
