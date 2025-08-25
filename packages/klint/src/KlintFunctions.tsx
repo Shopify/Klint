@@ -7,7 +7,7 @@ import {
   EPSILON,
   KlintConfig,
 } from "./Klint";
-import { Color, Vector, Easing, State, Time, Text, Thing } from "./elements";
+import { Vector } from "./elements";
 
 // Klint Core functions
 export type KlintCoreFunctions = {

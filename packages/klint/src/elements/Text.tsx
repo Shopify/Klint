@@ -124,7 +124,6 @@ class Text implements KlintText {
     } = {}
   ) => {
     const ctx = this.context;
-    // Use nullish coalescing for defaults
     const {
       maxWidth = 0,
       lineSpacing = 0,
@@ -132,16 +131,10 @@ class Text implements KlintText {
       wordSpacing = 0,
     } = options;
     ctx.computeFont();
-
-    // Early return for invalid maxWidth
     if (maxWidth < this.textBounds(" ").width * 2 && maxWidth !== 0) {
       return [];
     }
-
-    // Split text into lines first
     const lines = text.split("\n");
-
-    // Calculate total height first
     const lineHeights = lines.map((line) => this.getTextMetrics(line).height);
     const totalHeight =
       lineHeights.reduce((sum, height) => sum + height, 0) +

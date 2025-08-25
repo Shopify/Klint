@@ -217,6 +217,30 @@ export default function Klint({
     null
   );
   const [isVisible, setIsVisible] = useState(true);
+
+  // HMR cleanup for development
+  useEffect(() => {
+    // Vite HMR
+    if (typeof import.meta !== "undefined" && (import.meta as any).hot) {
+      (import.meta as any).hot.dispose(() => {
+        console.log("[Klint] Component unmounting due to HMR");
+        // Force cleanup of any pending animations
+        if (contextRef.current) {
+          contextRef.current.__isPlaying = false;
+        }
+      });
+    }
+
+    // Webpack HMR fallback
+    if (typeof module !== "undefined" && (module as any).hot) {
+      (module as any).hot.dispose(() => {
+        console.log("[Klint] Component unmounting due to Webpack HMR");
+        if (contextRef.current) {
+          contextRef.current.__isPlaying = false;
+        }
+      });
+    }
+  }, []);
   const __options = {
     ...DEFAULT_OPTIONS,
     ...options,

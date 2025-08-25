@@ -1,38 +1,32 @@
 import Color from "../elements/Color";
 import Easing from "../elements/Easing";
-import State from "../elements/State";
 import Vector from "../elements/Vector";
-import Time from "../elements/Time";
 import Text from "../elements/Text";
 import Thing from "../elements/Thing";
 import Grid from "../elements/Grid";
 import Strip from "../elements/Strip";
 import Noise from "../elements/Noise";
-import Sprites from "../elements/Sprites";
+import Hotspot from "../elements/Hotspot";
 
 export interface KlintElements {
   Color: Color;
   Easing: Easing;
-  State: State;
   Vector: Vector;
-  Time: Time;
   Text: Text;
   Thing: Thing;
   Grid: Grid;
   Strip: Strip;
   Noise: Noise;
-  Sprites: Sprites;
+  Hotspot: Hotspot;
 }
 
 // Re-export all stable plugins
 export { default as Color } from "../elements/Color";
 export { default as Easing } from "../elements/Easing";
-export { default as State } from "../elements/State";
 export { default as Vector } from "../elements/Vector";
-export { default as Time } from "../elements/Time";
 export { default as Text } from "../elements/Text";
 export { default as Thing } from "../elements/Thing";
 export { default as Grid } from "../elements/Grid";
 export { default as Strip } from "../elements/Strip";
 export { default as Noise } from "../elements/Noise";
-export { default as Sprites } from "../elements/Sprites";
+export { default as Hotspot } from "../elements/Hotspot";

@@ -1,7 +1,4 @@
-import { KlintContexts } from "../Klint";
-
 interface KlintEasing {
-  context: KlintContexts;
   normalize: (val: number) => number;
   expand: (val: number) => number;
   inout: (val: number, power?: number) => number;
@@ -13,11 +10,6 @@ interface KlintEasing {
 }
 
 class Easing implements KlintEasing {
-  context: KlintContexts;
-  constructor(ctx: KlintContexts) {
-    this.context = ctx;
-  }
-
   normalize = (val: number) => {
     return val * 0.5 + 0.5;
   };

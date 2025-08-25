@@ -18,7 +18,6 @@
       "require": "./dist/index.cjs",
       "types": "./dist/index.d.ts"
     },
-    "./web-component": "@shopify/klint-web-component",
     "./plugins": "@shopify/klint-plugins"
   },
   "repository": {

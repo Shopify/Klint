@@ -1,7 +1,17 @@
 import { useRef, useCallback, useEffect, useMemo } from "react";
 import { KlintFunctions, KlintCoreFunctions } from "./KlintFunctions";
 import { KlintCanvasOptions, KlintContext } from "./Klint";
-import { Color, Vector, Easing, State, Time, Text, Thing, Grid, Strip, Noise, Sprites } from "./elements";
+import {
+  Color,
+  Vector,
+  Easing,
+  Text,
+  Thing,
+  Grid,
+  Strip,
+  Noise,
+  Hotspot,
+} from "./elements";
 
 // Export Vector type as KlintVector
 export type KlintVector = Vector;
@@ -110,7 +120,32 @@ export default function useKlint() {
   const keyboardRef = useRef<KlintKeyboard | null>(null);
 
   const useDev = () => {
-    return;
+    useEffect(() => {
+      if (process.env.NODE_ENV === "development") {
+        if (typeof import.meta !== "undefined" && (import.meta as any).hot) {
+          console.log("[Klint] hot updated - clearing non-context state");
+          if (contextRef.current) {
+            const ctx = contextRef.current;
+            ctx.frame = 0;
+            ctx.time = 0;
+            ctx.__offscreens?.clear();
+            ctx.__startedShape = false;
+            ctx.__currentShape = null;
+            ctx.__startedContour = false;
+            ctx.__currentContours = null;
+            ctx.__currentContour = null;
+            ctx.__isReadyToDraw = true;
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+          }
+        }
+      }
+    }, []);
+    useEffect(() => {
+      if (process.env.NODE_ENV === "development" && contextRef.current) {
+        console.log("[Klint] hot updated - clearing context state");
+        contextRef.current.__isReadyToDraw = true;
+      }
+    });
   };
 
   const KlintImage = () => {
@@ -576,7 +611,7 @@ export default function useKlint() {
         passive: false,
         signal,
       });
-      canvas.addEventListener("touchmove", handleTouchMove, { 
+      canvas.addEventListener("touchmove", handleTouchMove, {
         passive: false,
         signal,
       });
@@ -794,6 +829,296 @@ export default function useKlint() {
     };
   };
 
+  const KlintTimeline = () => {
+    const timelinesRef = useRef<Map<string, any>>(new Map());
+    const callbacksRef = useRef<{
+      start: Array<() => void>;
+      end: Array<() => void>;
+      loop: Array<() => void>;
+    }>({ start: [], end: [], loop: [] });
+
+    const Timeline = {
+      create: <T extends Record<string, any>>(
+        setup: (timeline: any) => T,
+        options: {
+          defaultEasing?: (t: number) => number;
+          defaultLoop?: number;
+        } = {}
+      ): T & { update: (progress: number) => void } => {
+        const tracks = new Map<any, any>();
+        const parents = new Set<any>();
+        let currentProgress = 0;
+        let hasStarted = false;
+        let hasEnded = false;
+
+        const defaultEasing = options.defaultEasing || ((t: number) => t);
+        const defaultLoop = options.defaultLoop || 0;
+
+        // Helper for safe callback execution
+        const executeCallback = (
+          callback: () => void,
+          errorMsg = "Callback error"
+        ) => {
+          try {
+            callback();
+          } catch (e) {
+            console.warn(`${errorMsg}:`, e);
+          }
+        };
+
+        // Keyframe builder
+        function createKeyframes() {
+          const segments: any[] = [];
+          let currentPos = 0;
+          let loopCount = defaultLoop;
+          let parentTrack: any = undefined;
+
+          const parseEasingCallback = (
+            easing?: ((t: number) => number) | (() => void),
+            callback?: () => void
+          ) => {
+            if (
+              typeof easing === "function" &&
+              typeof callback === "undefined"
+            ) {
+              if (easing.length === 0) {
+                return {
+                  easing: defaultEasing,
+                  callback: easing as () => void,
+                };
+              }
+              return {
+                easing: easing as (t: number) => number,
+                callback: undefined,
+              };
+            }
+            return {
+              easing: (easing as (t: number) => number) || defaultEasing,
+              callback,
+            };
+          };
+
+          const builder = {
+            start(value: number, delay = 0, callback?: () => void) {
+              segments.push({ pos: delay, value, callback, type: "start" });
+              currentPos = delay;
+              return builder;
+            },
+
+            at(
+              progress: number,
+              value: number,
+              easing?: (t: number) => number,
+              callback?: () => void
+            ) {
+              const { easing: finalEasing, callback: finalCallback } =
+                parseEasingCallback(easing, callback);
+              segments.push({
+                pos: progress,
+                value,
+                easing: finalEasing,
+                callback: finalCallback,
+                type: "tween",
+              });
+              currentPos = progress;
+              return builder;
+            },
+
+            then(
+              value: number,
+              duration: number,
+              easing?: (t: number) => number,
+              callback?: () => void
+            ) {
+              const { easing: finalEasing, callback: finalCallback } =
+                parseEasingCallback(easing, callback);
+              const nextPos = currentPos + duration;
+              segments.push({
+                pos: nextPos,
+                value,
+                easing: finalEasing,
+                callback: finalCallback,
+                type: "tween",
+              });
+              currentPos = nextPos;
+              return builder;
+            },
+
+            loop(count = Infinity) {
+              loopCount = count;
+              return builder;
+            },
+
+            _compile: () => {
+              segments.sort((a, b) => a.pos - b.pos);
+              return { segments, loopCount, parentTrack };
+            },
+          };
+
+          return builder;
+        }
+
+        function interpolateTrack(compiled: any, progress: number): number {
+          const { segments } = compiled;
+          if (!segments.length) return 0;
+
+          progress = Math.max(0, Math.min(1, progress));
+
+          const valueSegments = segments.filter(
+            (seg: any) => seg.type !== "callback"
+          );
+          if (!valueSegments.length) return 0;
+
+          let prevSeg = valueSegments[0];
+
+          for (let i = 1; i < valueSegments.length; i++) {
+            const seg = valueSegments[i];
+
+            if (progress <= seg.pos) {
+              if (
+                seg.type === "tween" &&
+                prevSeg.value !== undefined &&
+                seg.value !== undefined
+              ) {
+                const t = (progress - prevSeg.pos) / (seg.pos - prevSeg.pos);
+                const easedT = seg.easing ? seg.easing(t) : t;
+                return prevSeg.value + (seg.value - prevSeg.value) * easedT;
+              }
+              return seg.value || 0;
+            }
+
+            if (seg.value !== undefined) {
+              prevSeg = seg;
+            }
+          }
+
+          return prevSeg.value || 0;
+        }
+
+        const timeline = {
+          track: (keyframesOrFn: any): any => {
+            const compiled =
+              typeof keyframesOrFn === "function"
+                ? timeline.keyframes(keyframesOrFn)
+                : keyframesOrFn;
+
+            const track = {
+              ...compiled,
+              currentValue: 0,
+              getValue: (progress: number) =>
+                interpolateTrack(compiled, progress),
+              get current(): number {
+                return this.currentValue;
+              },
+              value: function () {
+                return this.currentValue;
+              },
+            };
+
+            tracks.set(track, compiled);
+            return track;
+          },
+
+          keyframes: (fn: (kf: any) => void) => {
+            const kf = createKeyframes();
+            fn(kf);
+            return kf._compile();
+          },
+
+          stagger: (count: number, offset: number, keyframesFn: any): any[] => {
+            const compiled = timeline.keyframes(keyframesFn);
+            return Array.from({ length: count }, (_, i) => {
+              const track = {
+                ...compiled,
+                currentValue: 0,
+                staggerDelay: i * offset,
+                getValue: (progress: number) => {
+                  const staggeredProgress = Math.max(0, progress - i * offset);
+                  const normalizedProgress = Math.min(
+                    1,
+                    staggeredProgress / (1 - i * offset)
+                  );
+                  return normalizedProgress > 0
+                    ? interpolateTrack(compiled, normalizedProgress)
+                    : 0;
+                },
+                get current(): number {
+                  return this.currentValue;
+                },
+                value: function () {
+                  return this.currentValue;
+                },
+              };
+              tracks.set(track, compiled);
+              return track;
+            });
+          },
+
+          update: (progress: number) => {
+            const prevProgress = currentProgress;
+            currentProgress = progress;
+
+            // Fire timeline start callbacks
+            if (!hasStarted && progress > 0) {
+              hasStarted = true;
+              callbacksRef.current.start.forEach((cb) =>
+                executeCallback(cb, "Start callback error")
+              );
+            }
+
+            // Fire timeline end callbacks
+            if (!hasEnded && progress >= 1) {
+              hasEnded = true;
+              callbacksRef.current.end.forEach((cb) =>
+                executeCallback(cb, "End callback error")
+              );
+            }
+
+            // Reset flags if rewinding
+            if (progress < prevProgress) {
+              if (progress === 0) {
+                hasStarted = false;
+                hasEnded = false;
+              } else if (progress < 1) {
+                hasEnded = false;
+              }
+            }
+
+            for (const [track, compiled] of tracks) {
+              track.currentValue = track.getValue(progress);
+
+              // Handle callbacks
+              if (compiled.segments) {
+                compiled.segments.forEach((seg: any) => {
+                  if (
+                    seg.callback &&
+                    seg.pos <= progress &&
+                    seg.pos > prevProgress
+                  ) {
+                    executeCallback(seg.callback);
+                  }
+                });
+              }
+            }
+          },
+
+          progress: () => currentProgress,
+        };
+
+        // Execute setup
+        const result = setup(timeline);
+        return { ...result, update: timeline.update };
+      },
+    };
+
+    return {
+      Timeline,
+      onStart: (fn: () => void) => callbacksRef.current.start.push(fn),
+      onEnd: (fn: () => void) => callbacksRef.current.end.push(fn),
+      onLoop: (fn: () => void) => callbacksRef.current.loop.push(fn),
+    };
+  };
+
   const KlintWindow = () => {
     const resizeCallbackRef = useRef<((ctx: KlintContext) => void) | null>(
       null
@@ -832,7 +1157,9 @@ export default function useKlint() {
       window.addEventListener("resize", handleResize, { signal });
       window.addEventListener("blur", handleBlur, { signal });
       window.addEventListener("focus", handleFocus, { signal });
-      document.addEventListener("visibilitychange", handleVisibilityChange, { signal });
+      document.addEventListener("visibilitychange", handleVisibilityChange, {
+        signal,
+      });
 
       return () => controller.abort();
     }, []);
@@ -885,15 +1212,13 @@ export default function useKlint() {
     context.Color = new Color();
     context.createVector = (x = 0, y = 0) => new Vector(x, y);
     context.Vector = new Vector();
-    context.Easing = new Easing(context);
-    context.State = new State();
-    context.Time = new Time(context);
+    context.Easing = new Easing();
     context.Text = new Text(context);
     context.Thing = new Thing(context);
     context.Grid = new Grid(context);
     context.Strip = new Strip(context);
     context.Noise = new Noise(context);
-    context.Sprites = new Sprites(context);
+    context.Hotspot = new Hotspot(context);
 
     // Add Klint core functions
     Object.entries(KlintCoreFunctions).forEach(([name, fn]) => {
@@ -943,6 +1268,7 @@ export default function useKlint() {
     KlintKeyboard,
     KlintWindow,
     KlintImage,
+    KlintTimeline,
     togglePlay,
     useDev,
   };
