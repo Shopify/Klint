@@ -38,6 +38,9 @@
     "build": "tsup src/index.tsx --format esm,cjs --dts --external=react --external=react-dom --external=@shopify/klint",
     "build:minified": "tsup src/index.tsx --format esm,cjs --dts --minify --external=react --external=react-dom --external=@shopify/klint",
     "dev": "tsup src/index.tsx --format esm,cjs --dts --watch --external=react --external=react-dom --external=@shopify/klint",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:watch": "vitest --watch",
     "clean": "rimraf dist"
   },
   "peerDependencies": {
@@ -50,6 +53,8 @@
     "@types/react-dom": "^16.0.0",
     "rimraf": "^5.0.0",
     "tsup": "^8.4.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0",
+    "@vitest/ui": "^1.0.0"
   }
 }

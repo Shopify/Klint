@@ -1,155 +1,151 @@
-# Time
+# Timeline
 
-The Time element provides advanced timeline management and animation sequencing capabilities for complex animations.
+The Timeline provides advanced animation sequencing capabilities with keyframe-based animations. Unlike other elements, Timeline is accessed through the `useKlint` hook for optimal performance.
 
 ## Access
 
 ```tsx
-const draw = (K: KlintContext) => {
-  // Access the Time element
-  K.Time.timeline("main").use(K.time * 0.001).for(5);
-  const progress = K.Time.progress();
+function MyCanvas() {
+  const { KlintTimeline } = useKlint();
+  const { Timeline, onStart, onEnd } = KlintTimeline();
+
+  // Create timeline once (outside draw function)
+  const { scaleIn, scaleOut, staggerTracks } = Timeline.create((timeline) => {
+    const scaleIn = timeline.track((kf) =>
+      kf.start(0)
+        .then(1, 0.5)
+        .then(0, 1)
+    );
+
+    const scaleOut = timeline.track((kf) =>
+      kf.start(0.5)
+        .then(1.5, 0.3)
+        .then(1, 0.2)
+    );
+
+    const staggerTracks = timeline.stagger(5, 0.1, (keyframes) => {
+      keyframes.start(0).at(0.5, 1).at(1, 0);
+    });
+
+    return { scaleIn, scaleOut, staggerTracks };
+  });
+
+  const draw = (K: KlintContext) => {
+    const progress = (K.time * 0.001) % 1; // 0-1 over 1 second
+    
+    // Update timeline
+    scaleIn.update(progress);
+    
+    // Use timeline values
+    const a = scaleIn.current - scaleOut.current;
+    K.circle(100, 100, a * 50);
+  };
 }
 ```
 
 ## Core Methods
 
-### timeline(key)
+### Timeline.create(setup, options?)
 
-```ts
-timeline(key: string) => Time
-```
-
-Creates or switches to a named timeline. Each timeline maintains its own progress and duration.
+Creates a timeline with tracks and returns an object with your tracks and an update method.
 
 ```tsx
-// Create and switch to "intro" timeline
-K.Time.timeline("intro")
+const { fadeIn, slideIn } = Timeline.create((timeline) => {
+  const fadeIn = timeline.track((kf) =>
+    kf.start(0)
+      .then(1, 0.5)
+      .at(1, 0)
+  );
 
-// Create multiple timelines
-K.Time.timeline("main")
-K.Time.timeline("outro")
-K.Time.timeline("background")
+  const slideIn = timeline.track((kf) =>
+    kf.start(-100)
+      .then(0, 0.8, K.Easing.elasticOut)
+  );
+
+  return { fadeIn, slideIn };
+});
 ```
 
-### use(progress)
+### track.current / track.value()
 
-```ts
-use(progress: number) => Time
-```
-
-Sets the progress for the current timeline. Progress is automatically wrapped based on duration.
+Access the current value of a track. Both methods return the same value.
 
 ```tsx
-// Use global time as progress
-K.Time.timeline("main").use(K.time * 0.001)
+// Using .current property
+const alpha = fadeIn.current;
 
-// Use frame-based progress
-K.Time.timeline("loop").use(K.frame * 0.02)
+// Using .value() method  
+const position = slideIn.value();
 
-// Manual progress control
-K.Time.timeline("custom").use(someProgressValue)
+// Combined values
+const scale = fadeIn.current * slideIn.value();
 ```
 
-### for(duration)
+### track.update(progress)
 
-```ts
-for(duration: number) => Time
-```
-
-Sets the duration for the current timeline. This affects how progress wrapping works.
+Updates the timeline with progress (0-1). Call this once per frame.
 
 ```tsx
-// 5-second timeline
-K.Time.timeline("main").for(5)
-
-// 120-frame timeline
-K.Time.timeline("frameBasedAnim").for(120)
-
-// Infinite timeline (no wrapping)
-K.Time.timeline("infinite").for(0)
-```
-
-### progress()
-
-```ts
-progress() => number
-```
-
-Returns the current progress (0-1) of the active timeline.
-
-```tsx
-const p = K.Time.timeline("main").progress()
-
-// Use progress for animation
-const rotation = p * Math.PI * 2
-K.rotate(rotation)
+const draw = (K: KlintContext) => {
+  const progress = (K.time * 0.001) % 1;
+  fadeIn.update(progress);
+  
+  K.globalAlpha(fadeIn.current);
+  K.circle(100, 100, 50);
+};
 ```
 
 ## Advanced Methods
 
-### stagger(num, offset?, callback?)
+### timeline.stagger(count, offset, keyframes)
 
-```ts
-stagger(num: number, offset?: number, callback?: (progress: number, id: number, num: number) => void) => Time | Array<{id: number, progress: number}>
-```
-
-Creates staggered animations with delayed timing for multiple elements.
+Creates multiple tracks with staggered timing offsets.
 
 ```tsx
-// With callback - immediate execution
-K.Time.timeline("stagger").use(K.time * 0.001).for(3)
-K.Time.stagger(10, 0.1, (progress, id, num) => {
-  const x = 50 + id * 80
-  const y = 200 + progress * 200
-  
-  K.fillColor(`hsl(${id * 36}, 70%, 60%)`)
-  K.circle(x, y, 20 + progress * 10)
-})
+const { staggeredItems } = Timeline.create((timeline) => {
+  const staggeredItems = timeline.stagger(10, 0.1, (kf) => {
+    kf.start(0)
+      .then(1, 0.3)
+      .then(0, 0.7);
+  });
 
-// Without callback - returns array for manual iteration
-K.Time.timeline("delayed").use(K.time * 0.0005).for(4)
-const staggers = K.Time.stagger(8, 0.2)
-staggers.forEach((stagger, i) => {
-  const scale = 0.5 + stagger.progress * 1.5
-  K.push()
-  K.translate(100 + i * 60, 300)
-  K.scale(scale)
-  K.fillColor("cyan")
-  K.rectangle(-15, -15, 30, 30)
-  K.pop()
-})
+  return { staggeredItems };
+});
+
+const draw = (K: KlintContext) => {
+  const progress = (K.time * 0.001) % 1;
+  staggeredItems.update(progress);
+
+  staggeredItems.forEach((track, i) => {
+    const value = track.current;
+    K.fillColor(`hsl(${i * 36}, 70%, 60%)`);
+    K.circle(50 + i * 80, 200 + value * 100, 20);
+  });
+};
 ```
 
-### between(from?, to?, callback)
+### Keyframe Builder Methods
 
-```ts
-between(from?: number, to?: number, callback: (progress: number) => void) => Time
-```
+#### start(value, delay?, callback?)
+Sets the starting value of a track.
 
-Executes callback only when timeline progress is between specified range, with normalized progress.
+#### then(value, duration, easing?, callback?)
+Animates to a value over a duration.
+
+#### at(position, value, easing?, callback?)
+Sets a value at a specific position (0-1).
 
 ```tsx
-K.Time.timeline("sequence").use(K.time * 0.0008).for(6)
+const { complexAnim } = Timeline.create((timeline) => {
+  const complexAnim = timeline.track((kf) =>
+    kf.start(0, 0.1)           // Start at 0 after 0.1 delay
+      .then(100, 0.3)          // Move to 100 over 0.3 duration
+      .at(0.8, 50)             // At position 0.8, be at value 50
+      .then(0, 0.2)            // End at 0 over 0.2 duration
+  );
 
-// First third of timeline (0-2 seconds)
-K.Time.between(0, 0.33, (p) => {
-  K.fillColor(`rgba(255, 0, 0, ${p})`)
-  K.circle(200, 200, 50 + p * 50)
-})
-
-// Middle third (2-4 seconds)  
-K.Time.between(0.33, 0.66, (p) => {
-  K.fillColor("blue")
-  K.rectangle(100 + p * 200, 300, 50, 50)
-})
-
-// Final third (4-6 seconds)
-K.Time.between(0.66, 1, (p) => {
-  const eased = K.Easing.bounceOut(p)
-  K.fillColor("green")
-  K.circle(400, 100 + eased * 100, 30)
-})
+  return { complexAnim };
+});
 ```
 
 ## Animation Patterns
@@ -157,170 +153,128 @@ K.Time.between(0.66, 1, (p) => {
 ### Sequential Animation
 
 ```tsx
-const draw = (K: KlintContext) => {
-  K.background("#222")
-  
-  // 8-second sequence
-  K.Time.timeline("sequence").use(K.time * 0.001).for(8)
-  
-  // Phase 1: Fade in (0-2s)
-  K.Time.between(0, 0.25, (p) => {
-    K.opacity(p)
-    K.fillColor("white")
-    K.textAlign("center", "middle")
-    K.textSize(48)
-    K.text("Hello", K.width/2, K.height/2)
-  })
-  
-  // Phase 2: Scale up (2-4s)
-  K.Time.between(0.25, 0.5, (p) => {
-    const scale = 1 + p * 0.5
-    K.push()
-    K.translate(K.width/2, K.height/2)
-    K.scale(scale)
-    K.fillColor("yellow")
-    K.textAlign("center", "middle")
-    K.textSize(48)
-    K.text("World", 0, 0)
-    K.pop()
-  })
-  
-  // Phase 3: Rotate (4-6s)
-  K.Time.between(0.5, 0.75, (p) => {
-    const rotation = p * Math.PI * 2
-    K.push()
-    K.translate(K.width/2, K.height/2)
-    K.rotate(rotation)
-    K.fillColor("cyan")
-    K.rectangle(-50, -25, 100, 50)
-    K.pop()
-  })
-  
-  // Phase 4: Fade out (6-8s)
-  K.Time.between(0.75, 1, (p) => {
-    K.opacity(1 - p)
-    K.fillColor("red")
-    K.circle(K.width/2, K.height/2, 100)
-  })
+function SequenceCanvas() {
+  const { KlintTimeline } = useKlint();
+  const { Timeline } = KlintTimeline();
+
+  const { fadeIn, scaleUp, rotateAnim, fadeOut } = Timeline.create((timeline) => {
+    const fadeIn = timeline.track((kf) =>
+      kf.start(0).at(0.25, 1)
+    );
+    
+    const scaleUp = timeline.track((kf) =>
+      kf.start(1).at(0.25, 1).at(0.5, 1.5)
+    );
+    
+    const rotateAnim = timeline.track((kf) =>
+      kf.start(0).at(0.5, 0).at(0.75, Math.PI * 2)
+    );
+    
+    const fadeOut = timeline.track((kf) =>
+      kf.start(1).at(0.75, 1).at(1, 0)
+    );
+
+    return { fadeIn, scaleUp, rotateAnim, fadeOut };
+  });
+
+  const draw = (K: KlintContext) => {
+    K.background("#222");
+    
+    const progress = (K.time * 0.001 / 8) % 1; // 8-second cycle
+    fadeIn.update(progress);
+
+    K.push();
+    K.translate(K.width / 2, K.height / 2);
+    
+    // Apply all animations
+    K.globalAlpha(fadeIn.current * fadeOut.current);
+    K.scale(scaleUp.current);
+    K.rotate(rotateAnim.current);
+    
+    K.fillColor("white");
+    K.textAlign("center", "middle");
+    K.textSize(48);
+    K.text("Animated", 0, 0);
+    
+    K.pop();
+  };
 }
 ```
 
-### Parallel Timelines
+### Callbacks and Events
 
 ```tsx
-const draw = (K: KlintContext) => {
-  K.background("#111")
-  
-  // Background animation (slow, 10 seconds)
-  K.Time.timeline("background").use(K.time * 0.0001).for(10)
-  const bgProgress = K.Time.progress()
-  K.fillColor(`hsl(${bgProgress * 360}, 30%, 15%)`)
-  K.rectangle(0, 0, K.width, K.height)
-  
-  // Main content (fast, 2 seconds)  
-  K.Time.timeline("main").use(K.time * 0.001).for(2)
-  const mainProgress = K.Time.progress()
-  K.fillColor("white")
-  K.circle(
-    K.width/2 + Math.cos(mainProgress * Math.PI * 4) * 100,
-    K.height/2 + Math.sin(mainProgress * Math.PI * 4) * 100,
-    20
-  )
-  
-  // UI elements (medium, 5 seconds)
-  K.Time.timeline("ui").use(K.time * 0.0004).for(5)
-  const uiProgress = K.Time.progress()
-  K.fillColor(`rgba(255, 255, 255, ${0.5 + Math.sin(uiProgress * Math.PI * 2) * 0.3})`)
-  K.textAlign("center", "top")
-  K.textSize(24)
-  K.text(`Progress: ${Math.round(mainProgress * 100)}%`, K.width/2, 50)
-}
-```
+function CallbackCanvas() {
+  const { KlintTimeline } = useKlint();
+  const { Timeline, onStart, onEnd } = KlintTimeline();
 
-### Complex Staggered Animation
+  // Setup global callbacks
+  onStart(() => console.log("Animation started!"));
+  onEnd(() => console.log("Animation completed!"));
 
-```tsx
-const draw = (K: KlintContext) => {
-  K.background("#000")
-  
-  // Setup timeline
-  K.Time.timeline("wave").use(K.time * 0.0008).for(4)
-  
-  // Grid of staggered elements
-  const cols = 12
-  const rows = 8
-  K.Time.stagger(cols * rows, 0.05, (progress, id, total) => {
-    const col = Math.floor(id * cols) % cols
-    const row = Math.floor(id * cols / cols)
-    
-    const x = 50 + col * 50
-    const y = 50 + row * 60
-    
-    // Apply easing
-    const easedProgress = K.Easing.elasticOut(progress)
-    
-    // Size and color based on progress
-    const size = 5 + easedProgress * 25
-    const hue = (id * 15 + progress * 120) % 360
-    
-    K.fillColor(`hsl(${hue}, 80%, ${40 + progress * 40}%)`)
-    K.circle(x, y, size)
-  })
-}
-```
+  const { bounce } = Timeline.create((timeline) => {
+    const bounce = timeline.track((kf) =>
+      kf.start(0)
+        .then(100, 0.5, K.Easing.bounceOut, () => console.log("Bounced!"))
+        .then(0, 0.5)
+    );
 
-### Timeline Synchronization
+    return { bounce };
+  });
 
-```tsx
-const draw = (K: KlintContext) => {
-  // Initialize master timeline
-  if (!K.State.has('masterTime')) {
-    K.State.set('masterTime', 0)
-  }
-  
-  // Update master time
-  let masterTime = K.State.get('masterTime')
-  masterTime += K.deltaTime * 0.001  // seconds
-  K.State.set('masterTime', masterTime)
-  
-  K.background("#333")
-  
-  // Synchronized timelines
-  K.Time.timeline("sync1").use(masterTime).for(3)
-  K.Time.between(0, 1, (p) => {
-    K.fillColor("red")
-    K.circle(100, 200 + Math.sin(p * Math.PI * 2) * 50, 30)
-  })
-  
-  K.Time.timeline("sync2").use(masterTime * 2).for(3)  // Double speed
-  K.Time.between(0, 1, (p) => {
-    K.fillColor("blue")
-    K.circle(300, 200 + Math.sin(p * Math.PI * 2) * 50, 30)
-  })
-  
-  K.Time.timeline("sync3").use(masterTime * 0.5).for(3)  // Half speed
-  K.Time.between(0, 1, (p) => {
-    K.fillColor("green")
-    K.circle(500, 200 + Math.sin(p * Math.PI * 2) * 50, 30)
-  })
+  const draw = (K: KlintContext) => {
+    const progress = (K.time * 0.001) % 1;
+    bounce.update(progress);
+    
+    K.circle(K.width / 2, K.height / 2 + bounce.current, 20);
+  };
 }
 ```
 
 ## Best Practices
 
-- **Use meaningful timeline names**: "intro", "main", "outro" instead of "t1", "t2"
-- **Chain methods**: `K.Time.timeline("main").use(K.time * 0.001).for(5)`
-- **Normalize durations**: Use seconds for time-based, frames for frame-based
-- **Combine with Easing**: Apply easing functions to progress values for smoother animations
-- **Use `between()` for sequences**: Clean way to create multi-phase animations
-- **Leverage `stagger()`**: Perfect for grid animations, text reveals, particle systems
+### ✅ **DO: Create timelines outside draw function**
+```tsx
+// ✅ Good - created once
+const { anim } = Timeline.create((timeline) => { ... });
 
-## Notes
+const draw = (K) => {
+  anim.update(progress);
+  K.circle(100, 100, anim.current);
+};
+```
 
-- Default timeline duration is 480 frames (8 seconds at 60fps)
-- Progress automatically wraps when duration > 0
-- Each timeline maintains independent state
-- `stagger()` creates delayed animations with configurable offset
-- `between()` normalizes progress to 0-1 within the specified range
-- Method chaining allows concise timeline setup
-- Works seamlessly with `K.time`, `K.frame`, or custom progress sources 
+### ❌ **DON'T: Create timelines inside draw function**
+```tsx
+// ❌ Bad - creates new timeline every frame
+const draw = (K) => {
+  const { anim } = Timeline.create(...); // Performance issue!
+  K.circle(100, 100, anim.current);
+};
+```
+
+### ✅ **DO: Use meaningful track names**
+```tsx
+const { fadeIn, slideOut, pulseEffect } = Timeline.create(...);
+```
+
+### ✅ **DO: Combine tracks for complex animations**
+```tsx
+const opacity = fadeIn.current * fadeOut.current;
+const position = slideIn.current + offsetTrack.current;
+```
+
+### ✅ **DO: Use callbacks for synchronization**
+```tsx
+onStart(() => setState("animating"));
+onEnd(() => setState("complete"));
+```
+
+## Performance Notes
+
+- **Timeline creation is expensive** - Always create outside draw function
+- **Updates are cheap** - Call `track.update(progress)` every frame
+- **Value access is instant** - `track.current` and `track.value()` are O(1)
+- **Memory efficient** - Tracks persist between frames, no recreation
+- **Callback safe** - Error handling prevents crashes from user callbacks
+

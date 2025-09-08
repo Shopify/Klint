@@ -543,7 +543,7 @@ export function KlintCanvas() {
     // const { C, E } = K as unknown as { E: Easing; C: Color };
     K.background(`rgba(0, 0, 0, 1)`);
 
-    const margins = K.width * 0.2;
+    const margins = K.width * 0.8;
     const nx = 10;
     const ny = 10;
     const dx = (K.width - margins * 2) / (nx - 1);

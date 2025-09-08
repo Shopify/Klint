@@ -149,5 +149,4 @@ export class Delaunay {
   }
 }
 
-// Export the class directly for static import
-export { Delaunay };
+// Export already handled by class declaration

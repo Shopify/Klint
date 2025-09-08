@@ -10,54 +10,63 @@
 ## 0.1.0
 ### Core
 #### Bugs
-- [ ] Vite hotreload creates slows down
+- [x] Vite hotreload creates slows down : fix the useDev()
 - [x] Window.resize event inconsistent
 - [x] Refactor event listener to abort controler
 
+### Implemented — available for user test 
+- [ ] paragraph()
+- [ ] clip()
+- [ ] strip()
+- [ ] filters
+- [ ] 3D vector operations
+- [ ] grids
+
 #### Fixes + upgrades
+##### Library 
 - [x] Arguments order is wrong on roundedRect
-    [x] Update docs
 - [x] Line breaks in text()
-- [ ] Paragraph break : https://stackoverflow.com/questions/5026961/html5-canvas-ctx-filltext-wont-do-line-breaks
+- [x] Paragraph break : https://stackoverflow.com/questions/5026961/html5-canvas-ctx-filltext-wont-do-line-breaks
 - [x] clip
 - [x] Review Editor
 - [x] Add keyboard listener
-- [ ] Triangle strip and Quad strip
 - [x] Add other types of vertices : bezierTo(), quadraticTo(), arcTo(),
-    [x] Added 'revert' flag for contours
-    [x] Make Tests docs
-    [x] Update docs
 - [x] Filters
 - [x] Make vectors 3D + add cross, slerp and 3d transforms
 - [x] Essential plugins to be included in the library
     [x] Update docs
 
 ### Elements 
-- [ ] Basic Grids : 2D, radial 
-- [ ] Responsive grid : CSS-like responsivenes - to think about
-- [ ] Noise + pseudo-random : https://github.com/sneha-belkhale/noisejs/blob/master/perlin.js
-- [ ] Refactor timeline : https://github.com/arthurcloche/mini-timeline
-- [ ] Controls : test Leva
-- [ ] SDF effector : shader like advanced dist function 
-- [ ] Hotspot : note ( Path 2D for custom shapes + ctx.isPointInPath())
-- [ ] Draggables 
+- [x] Basic Grids : 2D, radial 
+- [x] Noise + pseudo-random : https://github.com/sneha-belkhale/noisejs/blob/master/perlin.js
+- [x] Refactor timeline : https://github.com/arthurcloche/mini-timeline
+- [x] Hotspot : note ( Path 2D for custom shapes + ctx.isPointInPath())
 - [x] Easing 
+- [x] Triangle strip and Quad strip
 - [x] Bezier + Bezier sampling + normals 
-- [ ] Svg Filter
 - [x] Timeline 
-- [ ] Text Animation
-- [ ] Sprites  : https://developer.mozilla.org/en-US/docs/Web/API/Window/createImageBitmap
-- [ ] Shader Filter => wegGPU applied on canvas, 'afterDraw()'
-- [ ] From Bytes, From base64
+- [ ] Text element : add animation callback
+
+
 
 ###  Plugins
+- [ ] Rubber Band 
+- [ ] Layouts : divided grids
+- [ ] Layers : pre-rendered offscreen canvas that can be redraw independtly
+- [ ] Shader Filter => wegGPU applied on canvas, 'afterDraw()'
+- [ ] Svg Filter
+- [ ] SDF effector : shader like advanced dist function 
+- [ ] Responsive grid/Layout : CSS-like responsivenes - to think about
+- [ ] Draggables 
+- [x] Font Parser
+- [x] Sprites  : https://developer.mozilla.org/en-US/docs/Web/API/Window/createImageBitmap
 - [ ] Text To Points : https://github.com/arthurcloche/font-to-svg
 - [ ] Recorder : use miniRecorder
 - [ ] Projector 
 - [ ] Polyline 2D
 - [ ] Quadtree
 - [ ] Svg parsing + rendering 
-- [ ] Catmull Curve :  path smoothing and auto-rounded Strips, rounding
+- [x] Catmull Curve :  path smoothing and auto-rounded Strips, rounding
 - [ ] 2D shapes builder : constructive geometry 
 - [ ] Advanced bezier : see bezier.js
 - [ ] Springs
@@ -67,6 +76,8 @@
 - [ ] True SSR => return base64
 
 ### Considerations 
+- [ ] From Bytes, From base64
+- [ ] Controls : test Leva
 - [ ] Create a singe useFrame() hook similar to Three Fiber
 - [x] Add relativeTo(), lookAt(), rotate(), fromAngle(), toScreen(), slerp()
 - [x] Add PI and TWO_PI
