@@ -328,3 +328,4 @@ class Performance implements KlintPerformance {
 
 export default Performance;
 
+
