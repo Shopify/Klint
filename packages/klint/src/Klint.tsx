@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState, useCallback } from "react";
 import { KlintFunctions, KlintCoreFunctions } from "./KlintFunctions";
 import { type KlintElements, Vector } from "./elements";
 
-const DEFAULT_FPS = 60;
+const DEFAULT_FPS = 60.0;
 const DEFAULT_ALT = "A beautiful artwork made with Klint Canvas";
 export const EPSILON = 0.0001;
 
