@@ -4,7 +4,7 @@ Understanding Klint's lifecycle is essential for creating efficient canvas anima
 
 ## Basic Usage: Just Draw
 
-At its simplest, Klint only requires a `draw` function:
+At its simplest, Klint only requires a `draw` function. Klint is thought to go through each frame, which is essential for making creative coding tools and apps. If you are making generative art or long-running sketches, prefer the use of the actual time and delatTime to make frame-indepedent animations :
 
 ```jsx
 function SimpleSketch() {
@@ -64,7 +64,7 @@ function ComplexSketch() {
     K.textSize(16);
     K.alignText("center");
     
-    // Create persistent objects
+    // Initialize persistent objects
     props.particles = Array(100).fill().map(() => ({
       x: Math.random() * K.width,
       y: Math.random() * K.height,
@@ -100,7 +100,7 @@ function ComplexSketch() {
 
 ### Preload Phase
 
-The `preload` function is asynchronous and runs before the first render:
+The `preload` function is asynchronous :
 
 ```jsx
 const preload = async (K) => {
@@ -111,15 +111,17 @@ const preload = async (K) => {
 Key characteristics:
 - **Runs once** when the component mounts
 - **Asynchronous** - can use `await` for loading resources
-- **Blocks rendering** until completed
-- **Automatically cleaned up** when component unmounts
+- **Blocks rendering** until completed, if you are loading a lot of stuff and expect a loading time, see the `loading` props.
+- **Automatically cleaned up** when component unmounts.
 
 Use preload for:
 - Loading images, fonts, and other external resources
-- Initializing plugins via `K.extend()`
+- Initializing plugins
+- Create custom functions via `K.extend()`
 - Creating offscreen buffers
 - Initializing large data structures
 - Fetching data from APIs
+
 
 ### Setup Phase
 
@@ -137,10 +139,12 @@ Key characteristics:
 - **Cached** - values set here persist across frames
 
 Use setup for:
-- Setting static configuration (font, text alignment, etc.)
+- Setting the initial configuration (font, text alignment, etc.)
 - Processing resources loaded in preload
 - Creating initial state for animation
 - Initializing values that don't need to change every frame
+
+If you need complex initialization, do not block the `preload`, initialize your value in `setup`. On top of this, your custom functions and plugins will then be available.
 
 ### Draw Phase
 
@@ -153,10 +157,10 @@ const draw = (K) => {
 ```
 
 Key characteristics:
-- **Runs repeatedly** (typically at 60fps)
-- **Performance-critical** - keep operations minimal
+- **Runs repeatedly** - Aiming at consistent 60fps, the frame rate can be adjusted in the options.
+- **Performance-critical** - Avoid as much as you can to compute anything in the draw loop, sometimes you won't be able to avoid it, i.e. when you draw something on the mouse or do update objects positions. A good practice is to draw anything that doesn't need to be updated, especially text, on an `offscreenContext` and render in layers. Images are cheap to render, when text is memory consuming. 
 - **Has access** to all properties set in preload and setup
-- **Synchronous** - doest not `await`, but you can use K.deltaTime to block the frames if needed.
+- **Synchronous** - doest not `await`, but you can use Klint.deltaTime to block the frames if needed.
 
 Use draw for:
 - Clearing/updating the canvas
@@ -166,7 +170,7 @@ Use draw for:
 
 ## Static Mode vs Animation
 
-Klint supports both static rendering and animation:
+Klint supports both static rendering and animation. The static mode will render the canvas onto an image and nuke everything else :
 
 ```jsx
 // Animated sketch (default)
@@ -177,8 +181,8 @@ Klint supports both static rendering and animation:
 ```
 
 In static mode:
-- The `draw` function runs only once
-- No animation loop is started
+- The `draw` function runs only once and convert the canvas to an image before removing it completly.
+- No animation loop is started, if you need a specific state of something, you will need to hardcode it.
 - Perfect for non-animated visualizations
 
 ## Lifecycle and React Rendering
@@ -186,20 +190,8 @@ In static mode:
 **Important:** Preload and setup functions are cached and run only once when the component mounts. They will not re-run on React re-renders unless the component is unmounted and remounted.
 
 If you need to respond to changing React props, you should:
-1. Pass them as additional props to your Klint component
+1. Pass them as additional props to your Klint component using the `useProps`
 2. Access them in your draw function
-
-```jsx
-function SketchWithProps({ color, size }) {
-  const draw = (K) => {
-    K.background("#333");
-    K.fillColor(color); // Use the prop directly
-    K.circle(K.width/2, K.height/2, size); // Use the prop directly
-  };
-  
-  return <Klint draw={draw} color={color} size={size} />;
-}
-```
 
 For more advanced React integration patterns, see our [Using Klint with React](/docs/using-react) guide.
 
@@ -209,5 +201,6 @@ Klint automatically cleans up resources when the component unmounts, including:
 - Stopping the animation loop
 - Removing event listeners
 - Cleaning up any resources loaded in preload
+- Reset completely the context, nothing is preserved.
 
-For custom cleanup, you can use React's `useEffect` hook with a cleanup function.
+For custom cleanup, you can use React's `useEffect` hook with a cleanup function, it won't be peak efficiency, but you will unsure that it does what you want it to do.

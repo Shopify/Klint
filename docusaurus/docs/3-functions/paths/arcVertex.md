@@ -4,7 +4,7 @@
 arcVertex(x1: number, y1: number, x2: number, y2: number, radius: number) => void
 ```
 
-Adds an arc segment to the current shape being constructed with `beginShape()`. Creates a circular arc that connects the current point to a target point with a specified radius.
+Adds an arc segment to the current shape being constructed with `beginShape()`. Creates a circular arc that connects the current point to a target point with a specified radius. 
 
 ## Parameters
 - `x1`: X coordinate of the first control point
@@ -146,7 +146,6 @@ const draw = (K: KlintContext) => {
 - More precise than bezier or quadratic curves for circular arcs
 - Works within both main shapes and contours (holes)
 - Can be mixed with `vertex()`, `bezierVertex()`, and `quadraticVertex()` in the same shape
-- Use current fill and stroke styles
 - Ideal for UI elements, buttons, and geometric shapes requiring precise circular arcs
 - The two control points define the tangent lines that the arc connects
 ``` 

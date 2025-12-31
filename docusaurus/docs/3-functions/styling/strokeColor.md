@@ -35,6 +35,7 @@ const draw = (K: KlintContext) => {
 
 ## Notes
 - Affects all subsequent stroke operations
-- Use `noStroke()` to disable stroke completely
+- Use `noStroke()` to disable stroke completely instead of reducing the stroke to `0`
 - Works with all CSS color formats
 - Can accept gradient objects from `gradient()`, `radialGradient()`, or `conicGradient()` 
+- Gradient on stroke will probably won't work as you expect them too.

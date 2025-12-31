@@ -117,6 +117,7 @@ export const KlintCoreFunctions = {
         horizontal: "left" as CanvasTextAlign,
         vertical: "top" as CanvasTextBaseline,
       };
+      context.__fillRule = "nonzero";
 
       // Add KlintFunctions if not ignored
       if (!options?.ignoreFunctions) {
@@ -241,8 +242,11 @@ export const KlintFunctions = {
     return true;
   },
   drawIfVisible: (ctx: KlintContexts) => () => {
-    if (ctx.checkTransparency("fill")) ctx.fill();
+    if (ctx.checkTransparency("fill")) ctx.fill(ctx.__fillRule || "nonzero");
     if (ctx.checkTransparency("stroke")) ctx.stroke();
+  },
+  fillRule: (ctx: KlintContexts) => (rule: CanvasFillRule) => {
+    ctx.__fillRule = rule;
   },
   line:
     (ctx: KlintContexts) =>
@@ -901,13 +905,11 @@ export const KlintFunctions = {
   },
   updatePixels:
     (ctx: KlintContexts) => (pixels: Uint8ClampedArray | number[]) => {
-      const imageData = new ImageData(
+      const pixelArray =
         pixels instanceof Uint8ClampedArray
-          ? pixels
-          : new Uint8ClampedArray(pixels),
-        ctx.width,
-        ctx.height
-      );
+          ? new Uint8ClampedArray(pixels)
+          : new Uint8ClampedArray(pixels);
+      const imageData = new ImageData(pixelArray, ctx.width, ctx.height);
       ctx.putImageData(imageData, 0, 0);
     },
   readPixels:
@@ -934,9 +936,11 @@ export const KlintFunctions = {
   opacity: (ctx: KlintContexts) => (value: number) => {
     ctx.globalAlpha = ctx.constrain(value, 0, 1);
   },
-  blend: (ctx: KlintContexts) => (blend: GlobalCompositeOperation) => {
-    ctx.globalCompositeOperation = blend;
-  },
+  blend:
+    (ctx: KlintContexts) => (blend: GlobalCompositeOperation | "default") => {
+      ctx.globalCompositeOperation =
+        blend === "default" ? "source-over" : blend;
+    },
   setCanvasOrigin: (ctx: KlintContexts) => (type: "center" | "corner") => {
     ctx.__canvasOrigin = type;
   },
@@ -986,29 +990,42 @@ export const KlintFunctions = {
     (ctx: KlintContexts) =>
     (
       callback: (K: KlintContexts | KlintContext) => void,
-      revert: boolean = false
+      fillRule?: CanvasFillRule
     ) => {
-      ctx.save();
-      ctx.beginPath();
-      const originalFillStyle = ctx.fillStyle;
-      const originalStrokeStyle = ctx.strokeStyle;
-      ctx.fillStyle = "white";
-      ctx.strokeStyle = "white";
+      // Build a clip path without painting; let caller manage push/pop
       const originalFill = ctx.fill;
       const originalStroke = ctx.stroke;
       const originalDrawIfVisible = ctx.drawIfVisible;
+      const originalBeginPath = ctx.beginPath;
+
+      // Suppress any drawing while constructing the clip path
+      ctx.fill = () => {};
+      ctx.stroke = () => {};
+      ctx.drawIfVisible = () => {};
+
+      // Start one fresh path; subsequent beginPath() inside callback won't reset it
+      let allowBeginPath = true;
+      ctx.beginPath = () => {
+        if (allowBeginPath) {
+          originalBeginPath.call(ctx);
+          allowBeginPath = false;
+        }
+      };
+
+      // Initialize the path
+      ctx.beginPath();
+
+      // Let user define the clipping shape(s)
       callback(ctx);
+
+      // Apply the clipping region with specified fillRule or default to nonzero
+      ctx.clip(fillRule || ctx.__fillRule || "nonzero");
+
+      // Restore patched methods
+      ctx.beginPath = originalBeginPath;
+      ctx.drawIfVisible = originalDrawIfVisible;
       ctx.fill = originalFill;
       ctx.stroke = originalStroke;
-      ctx.drawIfVisible = originalDrawIfVisible;
-      ctx.fillStyle = originalFillStyle;
-      ctx.strokeStyle = originalStrokeStyle;
-
-      if (revert) {
-        ctx.clip("evenodd");
-      } else {
-        ctx.clip();
-      }
     },
 
   canIuseFilter: (ctx: KlintContexts) => () => {

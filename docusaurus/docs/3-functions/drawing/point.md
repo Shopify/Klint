@@ -44,10 +44,12 @@ const draw = (K: KlintContext) => {
   K.point(K.mouseX, K.mouseY, 8)
 }
 ```
+A point is a one pixel long line. It's technically more efficient that drawing a circle, or a square with the appropriate stroke end, but it's less customizable and won't work with some functions like `Klint.clip` and scaling it will most likely create alliasing. It's more suited for particle system where you have to draw a lot.
+
 
 ## Notes
 - Points use the current stroke color (not fill color)
-- For very small points, use size 1 (default)
+- For very small points, use size 1 (default), which will draw a one pixel dot.
 - For larger points, consider using `K.circle()` with `K.noStroke()`
 - Useful for particle systems, stars, or data visualization
 - For many points, consider batch rendering for better performance 

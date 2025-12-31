@@ -17,16 +17,6 @@ Draws a rectangle on the canvas.
 - `width`: The width of the rectangle
 - `height`: Optional. The height of the rectangle (defaults to width for a square)
 
-## Returns
-- `void`
-
-## Related Functions
-
-```ts
-roundedRectangle(x: number, y: number, width: number, radius: number | number[], height?: number) => void // Rectangle with rounded corners
-setRectOrigin(type: "center" | "corner") => void // Set rectangle origin point
-```
-
 ## Example
 ```tsx
 // Basic rectangle
@@ -65,9 +55,6 @@ const draw = (K: KlintContext) => {
 ```
 
 ## Notes
-- Rectangle position depends on the rectangle origin setting (corner or center)
 - Default origin is "corner" (top-left), can be changed with `K.setRectOrigin("center")`
-- If width and height are equal, it will draw a square
-- For rounded corners, use `K.roundedRectangle()` instead
-- For better performance, reuse rectangles by changing properties rather than creating new ones
-- For a rectangle without fill, use `K.noFill()` before drawing
+- If width and height are equal or the height is not provided, it will draw a square
+- For rounded corners, use `K.roundedRectangle()`

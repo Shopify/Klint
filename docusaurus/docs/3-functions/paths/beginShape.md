@@ -84,12 +84,12 @@ const draw = (K: KlintContext) => {
 ```
 
 ## Notes
-- Used to create complex shapes not available as built-in functions
+- Everything gets computed when `K.endShape()` is called.
 - More efficient than drawing individual lines for complex shapes
 - Use `K.vertex()` to add straight line segments to the shape
 - Use `K.bezierVertex()`, `K.quadraticVertex()`, or `K.arcVertex()` to add curved segments
 - You can mix different curve types within the same shape
 - Use `K.beginContour()` and `K.endContour()` to create holes
-- Close the shape with `K.endShape(true)` or leave open with `K.endShape(false)`
+- Close the shape with `K.endShape(true)` or leave open with `K.endShape(''|false)`. You can also close the shape manually by adding a vertex, in this case, do not close it as it will draw an extra useless vertex.
 - For complex paths with holes, contours should have opposite winding direction from the main shape (typically main shape clockwise, holes counter-clockwise) 
 - All curve functions work within contours as well as the main shape 

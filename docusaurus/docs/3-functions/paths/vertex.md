@@ -112,6 +112,3 @@ const draw = (K: KlintContext) => {
 - Subsequent `vertex()` calls create lines from the previous point
 - Can be freely mixed with curve functions (`bezierVertex()`, `quadraticVertex()`, `arcVertex()`)
 - Works within both main shapes and contours (holes)
-- Use current fill and stroke styles
-- Essential building block for any custom shape or path
-- Perfect for creating polygons, stars, and geometric shapes 

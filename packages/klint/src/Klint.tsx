@@ -56,9 +56,20 @@ export interface KlintOffscreenContext
     horizontal: CanvasTextAlign;
     vertical: CanvasTextBaseline;
   };
+  __fillRule: CanvasFillRule;
   createVector: (x: number, y: number) => Vector;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
+}
+
+export interface KlintPerformanceMetrics {
+  fps: number;
+  frameTime: number; // Time taken to render last frame in ms
+  averageFrameTime: number; // Rolling average frame time
+  minFrameTime: number;
+  maxFrameTime: number;
+  droppedFrames: number; // Frames that took longer than target frame time
+  memoryUsage?: number; // If available (in MB)
 }
 
 export interface KlintContext
@@ -72,6 +83,7 @@ export interface KlintContext
   __lastRealTime: number;
   __isPlaying: boolean;
   __offscreens: Map<string, KlintOffscreenContext | HTMLImageElement>;
+  __performance?: KlintPerformanceMetrics;
 }
 
 export interface KlintCanvasOptions {
@@ -138,6 +150,7 @@ export const CONFIG_PROPS = [
   "__textSize",
   "__textLeading",
   "__textAlignment",
+  "__fillRule",
   "__isPlaying",
 ] as const;
 
@@ -149,14 +162,21 @@ export interface KlintProps {
   options?: KlintCanvasOptions;
   onResize?: (ctx: KlintContext) => void;
   onVisible?: (ctx: KlintContext) => void;
+  enablePerformanceTracking?: boolean;
 }
 
 function useAnimate(
   contextRef: React.RefObject<KlintContext | null>,
   draw: (context: KlintContext) => void,
-  isVisible: boolean
+  isVisible: boolean,
+  enablePerformanceTracking = false
 ) {
   const animationFrameId = useRef<number>(0);
+  const frameTimeHistoryRef = useRef<number[]>([]);
+  const frameStartTimeRef = useRef<number>(0);
+  const frameCountRef = useRef<number>(0);
+  const lastFpsUpdateRef = useRef<number>(0);
+  const droppedFramesRef = useRef<number>(0);
 
   const animate = useCallback(
     (timestamp = 0) => {
@@ -173,25 +193,79 @@ function useAnimate(
       if (!context.__lastTargetTime) {
         context.__lastTargetTime = now;
         context.__lastRealTime = now;
+        frameStartTimeRef.current = now;
+        lastFpsUpdateRef.current = now;
       }
 
       const sinceLast = now - context.__lastTargetTime;
       const epsilon = 5;
 
       if (sinceLast >= target - epsilon) {
+        const frameStart =
+          enablePerformanceTracking && context.__performance
+            ? performance.now()
+            : 0;
+
         context.deltaTime = now - context.__lastRealTime;
         draw(context);
         if (context.time > 1e7) context.time = 0;
         if (context.frame > 1e7) context.frame = 0;
-        context.time += context.deltaTime / DEFAULT_FPS; // Use actual seconds instead of dividing by FPS
+        context.time += context.deltaTime / 1000; // Convert ms to seconds
+
         context.frame++;
         context.__lastTargetTime = now;
         context.__lastRealTime = now;
+
+        // Performance tracking
+        if (enablePerformanceTracking && context.__performance) {
+          const frameTime = performance.now() - frameStart;
+          const targetFrameTime = 1000 / context.fps;
+
+          frameTimeHistoryRef.current.push(frameTime);
+          if (frameTimeHistoryRef.current.length > 60) {
+            frameTimeHistoryRef.current.shift(); // Keep last 60 frames
+          }
+
+          // Update metrics
+          const avgFrameTime =
+            frameTimeHistoryRef.current.reduce((a, b) => a + b, 0) /
+            frameTimeHistoryRef.current.length;
+          context.__performance.frameTime = frameTime;
+          context.__performance.averageFrameTime = avgFrameTime;
+          context.__performance.minFrameTime = Math.min(
+            ...frameTimeHistoryRef.current
+          );
+          context.__performance.maxFrameTime = Math.max(
+            ...frameTimeHistoryRef.current
+          );
+
+          if (frameTime > targetFrameTime * 1.1) {
+            droppedFramesRef.current++;
+          }
+          context.__performance.droppedFrames = droppedFramesRef.current;
+
+          // Update FPS every second
+          frameCountRef.current++;
+          if (now - lastFpsUpdateRef.current >= 1000) {
+            context.__performance.fps = frameCountRef.current;
+            frameCountRef.current = 0;
+            lastFpsUpdateRef.current = now;
+
+            // Memory usage if available
+            if (
+              typeof performance !== "undefined" &&
+              (performance as any).memory
+            ) {
+              context.__performance.memoryUsage =
+                (performance as any).memory.usedJSHeapSize / 1048576; // MB
+            }
+          }
+        }
       }
 
       animationFrameId.current = requestAnimationFrame(animate);
     },
-    [draw, isVisible, contextRef]
+    [draw, isVisible, contextRef, enablePerformanceTracking]
   );
 
   return {
@@ -208,6 +282,7 @@ export default function Klint({
   options = {},
   preload,
   onVisible,
+  enablePerformanceTracking = false,
 }: KlintProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -248,7 +323,12 @@ export default function Klint({
   const [toStaticImage, setStaticImage] = useState<string | null>(null);
 
   const initContext = context?.initCoreContext;
-  const { animate, animationFrameId } = useAnimate(contextRef, draw, isVisible);
+  const { animate, animationFrameId } = useAnimate(
+    contextRef,
+    draw,
+    isVisible,
+    enablePerformanceTracking
+  );
 
   const updateCanvasSize = (shouldRedraw = false) => {
     if (!containerRef.current || !contextRef.current || !canvasRef.current)
@@ -288,6 +368,18 @@ export default function Klint({
     if (!context) return;
 
     context.__dpr = dpr;
+
+    // Initialize performance tracking if enabled
+    if (enablePerformanceTracking) {
+      context.__performance = {
+        fps: 0,
+        frameTime: 0,
+        averageFrameTime: 0,
+        minFrameTime: Infinity,
+        maxFrameTime: 0,
+        droppedFrames: 0,
+      };
+    }
 
     if (__options.fps && __options.fps !== context.fps) {
       context.fps = __options.fps;

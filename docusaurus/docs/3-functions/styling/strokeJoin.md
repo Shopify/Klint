@@ -40,3 +40,4 @@ const draw = (K: KlintContext) => {
 - "round" creates rounded corners
 - "bevel" creates flattened (cut off) corners
 - Most visible with thick stroke widths 
+- Won't affect the end of the strokes, see `strokeCap`

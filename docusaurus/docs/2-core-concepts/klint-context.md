@@ -4,9 +4,9 @@ sidebar_position: 2
 
 # The Klint Context (K)
 
-The Klint Context, typically named `K`, is the enhanced canvas context that provides all drawing and utility functions.
+The Klint Context, typically named `K` in the documentation, is the enhanced canvas context that provides all drawing and utility functions. All the functions, patterns and plugins in Klint always reference this context, so you can always use any functions in any situations as long as you can reference it.
 
-## What is the K Object?
+## What is the Klint Context Object?
 
 The `K` parameter passed to your `setup`, `draw`, and `preload` functions is an enhanced version of the HTML Canvas 2D context. It includes:
 
@@ -14,7 +14,14 @@ The `K` parameter passed to your `setup`, `draw`, and `preload` functions is an 
 - Klint's creative coding functions
 - Canvas properties (width, height)
 - Animation properties (time, frame, deltaTime)
-- Utility functions
+- Anything attached to it with the useStorage or useProps hook
+- (Most) of the plugins
+
+## Enhanced 2D context 
+
+When available and to prevent duplicates, Klint will use the default 2D canvas API, one noticeable changes are that the actions are harmonized to functions.  In example, `ctx.font = "fontName"` becomes `K.font(fontName)` but since we cannot override the API, the `ctx.fill="#fff"` had to be adjusted to `K.fillColor('#fff')`. 
+
+But since it's `just` a 2D context, you can actually pick and choose which patterns you prefer, it doesn't make much of a difference for the drawing loop. The 2D API being natively imperative, we don't really update the context in real-time ( like in webGL/GPU ) but we make the values available for the next frame.
 
 ```tsx
 const draw = (K) => {
@@ -118,7 +125,7 @@ K.pop();
 
 ## Accessing Native Canvas
 
-The K object extends the native Canvas 2D context, so all standard methods are available:
+As briefly explained above, the Klint object extends the native Canvas 2D context, so all standard methods are available:
 
 ```tsx
 const draw = (K) => {
@@ -166,6 +173,8 @@ const draw = (K) => {
 
 ### Color Utilities
 
+The 2D API supports CSS color definition so you can easily jumps between color models without having to take care about converting from/to rgba.
+
 ```tsx
 const draw = (K) => {
   // HSL to RGB conversion
@@ -181,7 +190,7 @@ const draw = (K) => {
 
 ## Context State Management
 
-The K object maintains drawing state that can be saved and restored:
+The context object maintains drawing state that can be saved and restored. A good way to think about it is that you are printing on the canvas, unless you clear it and reset the transformation matrix, whatever you put on it will be remain there and will be affect the previous transformation. 
 
 ```tsx
 const draw = (K) => {
@@ -209,27 +218,6 @@ const draw = (K) => {
 
 ## Performance Considerations
 
-### Batch Similar Operations
-
-```tsx
-const draw = (K) => {
-  K.background('#000');
-  
-  // Good: Set style once, draw many
-  K.fillColor('white');
-  K.noStroke();
-  for (let i = 0; i < 1000; i++) {
-    K.circle(Math.random() * K.width, Math.random() * K.height, 2);
-  }
-  
-  // Bad: Changing styles in loop
-  for (let i = 0; i < 1000; i++) {
-    K.fillColor(`hsl(${i}, 70%, 50%)`); // Avoid this
-    K.circle(Math.random() * K.width, Math.random() * K.height, 2);
-  }
-};
-```
-
 ### Use Frame and DeltaTime
 
 ```tsx
@@ -241,18 +229,22 @@ const draw = (K) => {
   // This moves at same speed regardless of framerate
   position.x += distance;
   
-  // Framerate-dependent (avoid)
+  // Framerate-dependent
   position.x += 2; // Speed varies with framerate
 };
 ```
 
-## Custom Properties
+## Custom Properties : useProps() vs useStorage()
 
-You can access custom props passed to the Klint component:
+You can access custom props passed to the Klint component using the `useProps()` hook, as mentionned above, we are trying our hardest to not re-render, but sometime we can't avoid it so we are updating an object that will then make the updated props available to the draw loop. It's different from the `useStorage()` as the storage is pseudo-global state and expect you to update the values within the sketch, and will not trigger a re-render.
 
 ```tsx
 function MySketch({ particleCount, color }) {
   const { context } = useKlint();
+  const { 
+    particleCount : particleCount,
+    color : color
+  } = useProps()
   
   const draw = (K) => {
     // Access props through K.props
@@ -266,8 +258,6 @@ function MySketch({ particleCount, color }) {
   return <Klint 
     context={context} 
     draw={draw}
-    color={color}
-    particleCount={particleCount}
   />;
 }
 ```
@@ -285,14 +275,23 @@ const draw = (K) => {
   K.text(`Canvas: ${K.width}x${K.height}`, 10, 65);
 };
 ```
+## Drawing shapes, strokes or images
+It will probably happen that you will find yourself with many ways of doing something. 
+The rule of thumb in terms of efficiency on the 2D canvas is : 
+**Images > Strokes > Shapes > Text**
+An image is extremly cheap to render, if you can, draw on an offscreen canvas and render it.
+A stroke is cheaper than a shape, if you need to draw circles or rectangles in batch, use short lines with a thick stroke.
+A shape is more flexible and easy to stylize than a stroke but is generally more expensive, especially if you have to draw a lot of them.
+Text is the most expensive of them all, unless you need to animate your text, draw it to a texture and print that texture on the canvas. If you want fast text, consider rasterized text using the `FontParser` plugin that will let you draw text as solid or subdivided shapes.
+
 
 ## Best Practices
 
-1. **Use K prefix consistently** - Always access functions through `K.`
-2. **Prefer Klint functions** - They're optimized and more readable
-3. **Batch operations** - Set styles once, draw many times
-4. **Use push/pop** - Isolate transformations and style changes
-5. **Access props via K.props** - For dynamic component properties
+1. **Prefer Klint functions** - They're optimized, consistent across main and offscreen context, and more readable than their vanilla version.
+2. **Batch operations** - Set styles once, draw many times when you can.
+3. **Use push/pop** - Isolate transformations and style changes
+4. **Access props via useProps and update stored values with useStorage** - For dynamic component properties
+
 
 ## Next Steps
 

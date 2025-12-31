@@ -4,23 +4,10 @@
 rotate(angle: number) => void
 ```
 
-Rotates the coordinate system by the specified angle (in radians).
+Rotates the coordinate system by the specified angle (in radians). The rotation takes place around the (0,0), use `translate()` before `rotate()` to rotate around a different point.
 
 ## Parameters
 - `angle`: The rotation angle in radians (not degrees)
-
-## Returns
-- `void`
-
-## Related Functions
-
-```ts
-translate(x: number, y: number) => void   // Translate the coordinate system
-scale(x: number, y?: number) => void      // Scale the coordinate system
-push() => void                            // Save current transformation state
-pop() => void                             // Restore previous transformation state
-resetTransform() => void                  // Reset all transformations
-```
 
 ## Example
 ```tsx
@@ -124,7 +111,6 @@ const draw = (K: KlintContext) => {
 - Rotation is measured in radians, not degrees (2π radians = 360 degrees)
 - To convert degrees to radians: `radians = degrees * (Math.PI / 180)`
 - Rotation happens around the current coordinate system origin (0, 0)
-- Use `translate()` before `rotate()` to rotate around a different point
 - Rotations are cumulative - multiple `rotate()` calls add together
 - Use `push()` and `pop()` to save and restore transformation state
 - Positive angles rotate clockwise, negative angles rotate counter-clockwise

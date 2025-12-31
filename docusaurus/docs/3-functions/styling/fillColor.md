@@ -8,6 +8,7 @@ Sets the fill color for shapes and text.
 
 ## Parameters
 - `color`: CSS color string or gradient object.
+- `gradient`: A Canvas gradient.
 
 ## Example
 ```tsx
@@ -33,6 +34,6 @@ return <Klint draw={draw} />
 
 ## Notes
 - Affects all subsequent fill operations
+- Nestable using `push()` and `pop()`
 - Use `noFill()` to disable filling
-- Works with all CSS color formats
 - Can accept gradient objects from `gradient()`, `radialGradient()`, or `conicGradient()` 

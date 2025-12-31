@@ -43,13 +43,13 @@ export function KlintCanvas() {
 
     K.pop();
 
-    // Example 2: Inverted circular clip
+    // Example 2: Circular clip (inverted removed)
     K.push();
     K.translate(600, 200);
 
     K.clipTo((K) => {
       K.circle(0, 0, 80);
-    }, true); // revert = true
+    });
 
     // Draw something that will be clipped (everything EXCEPT the circle)
     K.fillColor("red");
@@ -80,13 +80,13 @@ export function KlintCanvas() {
 
     K.pop();
 
-    // Example 4: Inverted rectangle clip
+    // Example 4: Rectangle clip (inverted removed)
     K.push();
     K.translate(600, 450);
 
     K.clipTo((K) => {
       K.rectangle(-60, -40, 120, 80);
-    }, true); // revert = true
+    });
 
     // Draw pattern (everything EXCEPT the rectangle)
     for (let i = 0; i < 20; i++) {
@@ -104,9 +104,9 @@ export function KlintCanvas() {
     K.textSize(16);
     K.alignText("center", "top");
     K.text("Normal Circle Clip", 250, 100);
-    K.text("Inverted Circle Clip", 600, 100);
+    K.text("Circle Clip", 600, 100);
     K.text("Normal Rectangle Clip", 250, 350);
-    K.text("Inverted Rectangle Clip", 600, 350);
+    K.text("Rectangle Clip", 600, 350);
 
     // Instructions
     K.fillColor("white");
@@ -114,8 +114,8 @@ export function KlintCanvas() {
     K.alignText("left", "top");
     K.text("ClipTo Function Test:", 20, 20);
     K.textSize(12);
-    K.text("• Left side: Normal clipping (revert=false)", 20, 45);
-    K.text("• Right side: Inverted clipping (revert=true)", 20, 60);
+    K.text("• Left side: Normal clipping", 20, 45);
+    K.text("• Right side: Normal clipping", 20, 60);
   };
 
   return (

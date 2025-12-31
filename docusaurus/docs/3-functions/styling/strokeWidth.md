@@ -24,7 +24,9 @@ const draw = (K: KlintContext) => {
 return <Klint draw={draw} />
 ```
 
+The 2D canvas don't understand stroke position, it will always be centered along the path. If you want to have stroke on the inside/outside of the shape, slightly change the size of the shape by +/- half the stroke thickness.
+
 ## Notes
 - Affects all subsequent stroke operations (lines, shape outlines, stroke text)
-- Use `K.noStroke()` to disable stroke completely
-- Default is typically 1px
+- Use `K.noStroke()` to disable stroke completely instead of reducing it to `0`
+- Default is `1` which represent a 1px thickness.

@@ -150,11 +150,9 @@ K.endShape(true)
 
 ## Notes
 - Must be preceded by `beginContour()` and at least one vertex/curve function
-- By default (`forceRevert = true`), reverses vertex order for proper hole rendering
+- By default (`forceRevert = true`), reverses vertex order for proper hole rendering. If you already took care of this, do not add it or it will swap the order and break the fillrule. Use this in apps or tools when accessing this part is tricky for the user.
 - Use `forceRevert = false` when you've manually created counter-clockwise contours
 - Automatically called by `endShape()` if there's an open contour
 - Contours are always rendered as closed paths regardless of the outer shape's close setting
 - Multiple contours can be created within a single shape
 - All vertex and curve functions work the same within contours
-- Essential for creating complex shapes like letters, donuts, or decorative cutouts
-- The reversed winding ensures holes appear as transparent areas within filled shapes 

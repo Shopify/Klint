@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Quick Start
 
-Create your first Klint sketch in 2 minutes.
+Create your first Klint sketch in 2 minutes. Klint will take the size of its direct parent DOM element.
 
 ## The Minimal Sketch
 
@@ -28,7 +28,7 @@ function MySketch() {
 
 ## Add Animation
 
-Make it move by using the `K.time` property:
+Make it move by using the `Klint.frame` property, it represents the amount of frames ellapsed since the sketch has been started.
 
 ```tsx
 import { useKlint, Klint } from '@shopify/klint';
@@ -40,8 +40,8 @@ function AnimatedSketch() {
     K.background('#000');
     
     // Animate position with sine wave
-    const x = K.width/2 + Math.sin(K.time * 0.001) * 100;
-    const y = K.height/2 + Math.cos(K.time * 0.001) * 100;
+    const x = K.width/2 + Math.sin(K.frame * 0.001) * 100;
+    const y = K.height/2 + Math.cos(K.frame * 0.001) * 100;
     
     K.fillColor('#ff6b6b');
     K.circle(x, y, 30);
@@ -152,8 +152,6 @@ function CompleteSketch() {
     context={context} 
     setup={setup} 
     draw={draw}
-    width={800}
-    height={600}
   />;
 }
 ```

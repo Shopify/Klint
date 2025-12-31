@@ -7,6 +7,8 @@ import Grid from "../elements/Grid";
 import Strip from "../elements/Strip";
 import Noise from "../elements/Noise";
 import Hotspot from "../elements/Hotspot";
+import Performance from "../elements/Performance";
+import SSR from "../elements/SSR";
 
 export interface KlintElements {
   Color: Color;
@@ -18,6 +20,8 @@ export interface KlintElements {
   Strip: Strip;
   Noise: Noise;
   Hotspot: Hotspot;
+  Performance: Performance;
+  SSR: SSR;
 }
 
 // Re-export all stable plugins
@@ -30,3 +34,5 @@ export { default as Grid } from "../elements/Grid";
 export { default as Strip } from "../elements/Strip";
 export { default as Noise } from "../elements/Noise";
 export { default as Hotspot } from "../elements/Hotspot";
+export { default as Performance } from "../elements/Performance";
+export { default as SSR } from "../elements/SSR";

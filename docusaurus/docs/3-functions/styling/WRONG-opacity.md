@@ -7,20 +7,7 @@ opacity(value: number) => void
 Sets the global alpha (transparency) for all subsequent drawing operations.
 
 ## Parameters
-- `value`: Alpha value between 0 (transparent) and 1 (opaque)
-
-## Returns
-- `void`
-
-## Related Functions
-
-```ts
-blend(mode: GlobalCompositeOperation) => void // Set blending mode
-fillColor(color: string) => void             // Set fill color
-strokeColor(color: string) => void           // Set stroke color
-push() => void                               // Save current state including opacity
-pop() => void                                // Restore previous state
-```
+- `value`: Alpha value between 0 (transparent) and 1 (opaque) 
 
 ## Example
 ```tsx
@@ -129,111 +116,130 @@ const draw = (K: KlintContext) => {
 ### Fade In/Out
 
 ```tsx
-const draw = (K: KlintContext) => {
-  if (!K.State.has("fadeProgress")) {
-    K.State.set("fadeProgress", 0)
-    K.State.set("fadeDirection", 1)
-  }
+import { useKlint, useStorage } from '@shopify/klint';
+
+function FadeSketch() {
+  const { context } = useKlint();
+  const store = useStorage({
+    fadeProgress: 0,
+    fadeDirection: 1
+  });
   
-  let progress = K.State.get("fadeProgress")
-  const direction = K.State.get("fadeDirection")
+  const draw = (K: KlintContext) => {
+    let progress = store.get('fadeProgress');
+    const direction = store.get('fadeDirection');
+    
+    // Update fade progress
+    progress += direction * 0.02;
+    
+    // Reverse direction at ends
+    if (progress >= 1) {
+      progress = 1;
+      store.set('fadeDirection', -1);
+    } else if (progress <= 0) {
+      progress = 0;
+      store.set('fadeDirection', 1);
+    }
+    
+    store.set('fadeProgress', progress);
+    
+    K.background("#333");
+    
+    // Fade element
+    K.opacity(progress);
+    K.fillColor("cyan");
+    K.circle(K.width/2, K.height/2, 100);
+    
+    // UI (always visible)
+    K.opacity(1);
+    K.fillColor("white");
+    K.text(`Fade: ${Math.round(progress * 100)}%`, 20, 30);
+  };
   
-  // Update fade progress
-  progress += direction * 0.02
-  
-  // Reverse direction at ends
-  if (progress >= 1) {
-    progress = 1
-    K.State.set("fadeDirection", -1)
-  } else if (progress <= 0) {
-    progress = 0
-    K.State.set("fadeDirection", 1)
-  }
-  
-  K.State.set("fadeProgress", progress)
-  
-  K.background("#333")
-  
-  // Fade element
-  K.opacity(progress)
-  K.fillColor("cyan")
-  K.circle(K.width/2, K.height/2, 100)
-  
-  // UI (always visible)
-  K.opacity(1)
-  K.fillColor("white")
-  K.text(`Fade: ${Math.round(progress * 100)}%`, 20, 30)
+  return <Klint context={context} draw={draw} />;
 }
 ```
 
 ### Trail Effect
 
 ```tsx
-const draw = (K: KlintContext) => {
-  const { mouse } = KlintMouse()
+import { useKlint, useStorage } from '@shopify/klint';
+
+function TrailSketch() {
+  const { context, KlintMouse } = useKlint();
+  const mouse = KlintMouse();
+  const store = useStorage({ trail: [] });
   
-  // Initialize trail
-  if (!K.State.has("trail")) {
-    K.State.set("trail", [])
-  }
-  
-  const trail = K.State.get("trail")
-  
-  // Add current mouse position
-  trail.push({ x: mouse.x, y: mouse.y, age: 0 })
-  
-  // Update and remove old trail points
-  for (let i = trail.length - 1; i >= 0; i--) {
-    trail[i].age++
-    if (trail[i].age > 30) {
-      trail.splice(i, 1)
+  const draw = (K: KlintContext) => {
+    const trail = store.get('trail');
+    
+    // Add current mouse position
+    trail.push({ x: mouse.x, y: mouse.y, age: 0 });
+    
+    // Update and remove old trail points
+    for (let i = trail.length - 1; i >= 0; i--) {
+      trail[i].age++;
+      if (trail[i].age > 30) {
+        trail.splice(i, 1);
+      }
     }
-  }
+    
+    store.set('trail', trail);
+    
+    K.background("rgba(0, 0, 0, 0.1)"); // Slight fade background
+    
+    // Draw trail with fading opacity
+    trail.forEach((point, i) => {
+      const alpha = 1 - (point.age / 30);
+      K.opacity(alpha);
+      K.fillColor(`hsl(${i * 10}, 80%, 60%)`);
+      K.circle(point.x, point.y, 10 - point.age * 0.3);
+    });
+  };
   
-  K.background("rgba(0, 0, 0, 0.1)") // Slight fade background
-  
-  // Draw trail with fading opacity
-  trail.forEach((point, i) => {
-    const alpha = 1 - (point.age / 30)
-    K.opacity(alpha)
-    K.fillColor(`hsl(${i * 10}, 80%, 60%)`)
-    K.circle(point.x, point.y, 10 - point.age * 0.3)
-  })
+  return <Klint context={context} draw={draw} />;
 }
 ```
 
 ### UI Hover Effects
 
 ```tsx
-const draw = (K: KlintContext) => {
-  const { mouse } = KlintMouse()
+import { useKlint } from '@shopify/klint';
+
+function HoverSketch() {
+  const { context, KlintMouse } = useKlint();
+  const mouse = KlintMouse();
   
-  const buttons = [
-    { x: 100, y: 100, w: 120, h: 40, text: "Button 1" },
-    { x: 100, y: 160, w: 120, h: 40, text: "Button 2" },
-    { x: 100, y: 220, w: 120, h: 40, text: "Button 3" }
-  ]
+  const draw = (K: KlintContext) => {
+    const buttons = [
+      { x: 100, y: 100, w: 120, h: 40, text: "Button 1" },
+      { x: 100, y: 160, w: 120, h: 40, text: "Button 2" },
+      { x: 100, y: 220, w: 120, h: 40, text: "Button 3" }
+    ];
+    
+    K.background("#f5f5f5");
+    
+    buttons.forEach(btn => {
+      // Check if mouse is over button
+      const isHover = mouse.x > btn.x && mouse.x < btn.x + btn.w &&
+                      mouse.y > btn.y && mouse.y < btn.y + btn.h;
+      
+      // Set opacity based on hover
+      K.opacity(isHover ? 1 : 0.7);
+      
+      // Draw button
+      K.fillColor("#4a90e2");
+      K.roundedRectangle(btn.x, btn.y, btn.w, 8, btn.h);
+      
+      // Button text (always full opacity)
+      K.opacity(1);
+      K.fillColor("white");
+      K.textAlign("center", "middle");
+      K.text(btn.text, btn.x + btn.w/2, btn.y + btn.h/2);
+    });
+  };
   
-  K.background("#f5f5f5")
-  
-  buttons.forEach(btn => {
-    // Check if mouse is over button
-    const isHover = mouse.x > btn.x && mouse.x < btn.x + btn.w &&
-                    mouse.y > btn.y && mouse.y < btn.y + btn.h
-    
-    // Set opacity based on hover
-    K.opacity(isHover ? 1 : 0.7)
-    
-    // Draw button
-    K.fillColor("#4a90e2")
-    K.roundedRectangle(btn.x, btn.y, btn.w, 8, btn.h)
-    
-    // Button text (always full opacity)
-    K.opacity(1)
-    K.fillColor("white")
-    K.textAlign("center", "middle")
-    K.text(btn.text, btn.x + btn.w/2, btn.y + btn.h/2)
-  })
+  return <Klint context={context} draw={draw} />;
 }
 ```
 

@@ -4,20 +4,21 @@
 push() => void
 ```
 
-Saves the current drawing state (transformations, styles, etc.) to the stack.
+Saves the current drawing state (transformations, styles, etc.) to the stack. You can think about it as `grouping` element you want to affect. The transforms will affect all the elements in the groupd undistinctively. The `push` / `pop` gets computed alltogether and don't have awareness of what's both what's inside the stack and the transforms applied to it. You won't be able to ping a specific element, to isolate a single element, put it in an another `push`/`pop`.
 
-## Returns
-- `void`
+## What Gets Stored
 
-## Related Functions
-
-```ts
-pop() => void                             // Restore saved state
-resetTransform() => void                  // Reset all transformations
-translate(x: number, y: number) => void  // Translate coordinate system
-rotate(angle: number) => void             // Rotate coordinate system
-scale(x: number, y?: number) => void      // Scale coordinate system
-```
+The `pop()` function restores:
+- **Transformation matrix** (translate, rotate, scale operations)
+- **Fill style** (color, gradient, pattern)
+- **Stroke style** (color, gradient, pattern)
+- **Line width**
+- **Line cap and join styles**
+- **Global alpha** (opacity)
+- **Global composite operation** (blending mode)
+- **Clipping region**
+- **Font settings**
+- **Text alignment**
 
 ## Example
 ```tsx
@@ -74,20 +75,6 @@ const draw = (K: KlintContext) => {
   K.pop() // Restore original state
 }
 ```
-
-## What Gets Saved
-
-The `push()` function saves:
-- **Transformation matrix** (translate, rotate, scale operations)
-- **Fill style** (color, gradient, pattern)
-- **Stroke style** (color, gradient, pattern)
-- **Line width**
-- **Line cap and join styles**
-- **Global alpha** (opacity)
-- **Global composite operation** (blending mode)
-- **Clipping region**
-- **Font settings**
-- **Text alignment**
 
 ## Performance Considerations
 
@@ -176,10 +163,9 @@ const draw = (K: KlintContext) => {
 ```
 
 ## Notes
-- Every `push()` must be balanced with a corresponding `pop()`
+- Every `push()` must be balanced with a corresponding `pop()`, this can heavily mess up your visual.
 - Saves current state to a stack - multiple `push()` calls create nested saves
 - Use `push()` and `pop()` to isolate transformations and style changes
-- Similar to `save()` in the Canvas API, but with more intuitive naming
+- Port of `save()` in the Canvas API, but with more intuitive naming to match other libraries.
 - Canvas state stack has a limit (typically 32-64 levels) - avoid excessive nesting
 - For simple style changes, consider setting properties directly instead of push/pop
-- Essential for complex drawings with multiple coordinate systems 

@@ -9,7 +9,7 @@ circle(
 ) => void
 ```
 
-Draws a circle on the canvas.
+Draws a circle or an ellipse on the canvas.
 
 ## Parameters
 - `x`: The x-coordinate of the center of the circle
@@ -61,5 +61,3 @@ const draw = (K: KlintContext) => {
 - Circle is drawn from its center point
 - The radius is the distance from center to edge (not diameter)
 - If radius2 is provided, creates an ellipse with different x and y radii
-- For a circle without fill, use `K.noFill()` before drawing
-- For high-performance applications with many circles, consider batching similar circles together 

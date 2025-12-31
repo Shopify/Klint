@@ -33,4 +33,4 @@ const draw = (K: KlintContext) => {
 ## Notes
 - Uses current stroke style and width
 - No effect if stroke is disabled via `K.noStroke()`
-- For best performance with many lines, use `K.beginShape()` and `K.vertex()` 
+- For best performance with many lines or lines that needs to make shapes, use `K.beginShape()` and `K.vertex()` 

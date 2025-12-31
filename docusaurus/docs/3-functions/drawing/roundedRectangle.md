@@ -77,10 +77,8 @@ const draw = (K: KlintContext) => {
 ```
 
 ## Notes
-- Rectangle position depends on the rectangle origin setting (corner or center)
-- Default origin is "corner" (top-left), can be changed with `K.setRectOrigin("center")`
+- Follow the same origin as the `rectangle`. The default origin is "corner" (top-left), can be changed with `Klint.setRectOrigin("center")`
 - When using the array form for radius, the order is [topLeft, topRight, bottomRight, bottomLeft]
 - If width and height are equal, creates a rounded square
-- Use current fill and stroke styles
 - Perfect for modern UI elements, cards, and buttons
 - For rectangles without rounded corners, use `K.rectangle()` instead 

@@ -7,7 +7,7 @@ slug: /klinfunctions-text-styling
 
 # Text Styling Functions
 
-Klint provides various functions for styling and rendering text.
+Klint provides various functions for styling and rendering text. The 2D canvas API takes the font from the CSS imports, make sure the names are matching.
 
 ## textFont
 

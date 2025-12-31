@@ -29,4 +29,4 @@ const draw = (K: KlintContext) => {
 - Equivalent to setting `strokeColor("transparent")`
 - Affects all subsequent drawing operations until `strokeColor()` is called
 - Useful for creating clean filled shapes without outlines
-- Common in designs that need a flat, minimal appearance 
+- A shape with transparent `fill` and `stroke` is ignored

@@ -59,6 +59,7 @@ const draw = (K: KlintContext) => {
 ```
 
 ## Notes
+- If you need to draw a portion of circle, prefer the `disk`
 - Angles are measured in radians (0 to 2π), not degrees (0 to 360)
 - To convert degrees to radians: `radians = degrees * (Math.PI/180)`
 - For a complete circle, use `startAngle: 0` and `endAngle: Math.PI*2`

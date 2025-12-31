@@ -27,9 +27,6 @@ Draws an image on the canvas. Can crop and resize the source image if needed.
 - `sWidth` (optional): The width of the sub-rectangle of the source image to draw
 - `sHeight` (optional): The height of the sub-rectangle of the source image to draw
 
-## Returns
-- `void`
-
 ## Example
 ```tsx
 // Load and draw an image
@@ -53,37 +50,53 @@ img.onload = () => {
   K.image(img, 10, 10, 200, 200, 100, 100, 200, 200)
 }
 
-// In JSX component
-const draw = (K: KlintContext) => {
-  const img = K.useImage("assets/texture.png")
+// In JSX component with useKlint
+import { useKlint, Klint } from '@shopify/klint';
+
+function ImageSketch() {
+  const { context, KlintImage } = useKlint();
+  const images = KlintImage();
   
-  if (img) {
-    // Apply transformations
-    K.push()
-    K.translate(K.width/2, K.height/2)
-    K.rotate(K.frameCount * 0.01)
-    K.scale(0.5 + Math.sin(K.frameCount * 0.05) * 0.1)
+  const preload = async (K: KlintContext) => {
+    await images.loadImage('texture', 'assets/texture.png');
+  };
+  
+  const draw = (K: KlintContext) => {
+    const img = images.getImage('texture');
     
-    // Draw image centered
-    K.imageMode("center")
-    K.image(img, 0, 0)
-    K.pop()
-    
-    // Draw a tiled version with lower opacity
-    K.globalAlpha(0.3)
-    for (let x = 0; x < K.width; x += 50) {
-      for (let y = 0; y < K.height; y += 50) {
-        K.image(img, x, y, 50, 50)
+    if (img) {
+      // Apply transformations
+      K.push();
+      K.translate(K.width/2, K.height/2);
+      K.rotate(K.frame * 0.01);
+      K.scale(0.5 + Math.sin(K.frame * 0.05) * 0.1);
+      
+      // Draw image centered (set image origin to center)
+      K.setImageOrigin('center');
+      K.image(img, 0, 0);
+      K.pop();
+      
+      // Draw a tiled version with lower opacity
+      K.opacity(0.3);
+      K.setImageOrigin('corner'); // Reset to corner
+      for (let x = 0; x < K.width; x += 50) {
+        for (let y = 0; y < K.height; y += 50) {
+          K.image(img, x, y, 50, 50);
+        }
       }
+      K.opacity(1); // Reset opacity
     }
-  }
+  };
+  
+  return <Klint context={context} preload={preload} draw={draw} />;
 }
 ```
 
 ## Notes
-- Use `K.useImage()` hook in JSX components to load images
+- Use `KlintImage()` hook from `useKlint()` to load images in React components
 - Images default to being drawn at their natural size if width/height not specified
-- The position of the image is controlled by `K.imageMode()`: "corner" (default) or "center"
+- The position of the image is controlled by `setImageOrigin()`: "corner" (default) or "center"
 - For sprite sheets, use the crop parameters (sx, sy, sWidth, sHeight)
-- For smooth scaling, ensure the image is properly loaded before drawing
+- For smooth scaling, ensure the image is properly loaded before drawing (use `preload()`)
 - Be mindful of CORS restrictions when loading external images
+- Supports HTMLImageElement, HTMLCanvasElement, OffscreenCanvas, and KlintContext

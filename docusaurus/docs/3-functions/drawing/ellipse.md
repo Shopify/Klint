@@ -45,6 +45,4 @@ const draw = (K: KlintContext) => {
 
 ## Notes
 - If width and height are equal, it will draw a circle
-- Use `K.push()` and `K.pop()` when applying transformations like rotation
-- For efficient animation, prefer changing width/height over recreating the ellipse
 - Ellipses are drawn from center point, unlike rectangles which are drawn from top-left 

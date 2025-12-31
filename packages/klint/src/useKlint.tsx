@@ -11,6 +11,8 @@ import {
   Strip,
   Noise,
   Hotspot,
+  Performance,
+  SSR,
 } from "./elements";
 
 // Export Vector type as KlintVector
@@ -1204,6 +1206,7 @@ export default function useKlint() {
       horizontal: "left" as CanvasTextAlign,
       vertical: "top" as CanvasTextBaseline,
     };
+    context.__fillRule = "nonzero";
     context.__offscreens = new Map();
     context.__isPlaying = true;
     context.__currentContext = context;
@@ -1219,6 +1222,8 @@ export default function useKlint() {
     context.Strip = new Strip(context);
     context.Noise = new Noise(context);
     context.Hotspot = new Hotspot(context);
+    context.Performance = new Performance(context);
+    context.SSR = new SSR(context);
 
     // Add Klint core functions
     Object.entries(KlintCoreFunctions).forEach(([name, fn]) => {
@@ -1257,6 +1262,45 @@ export default function useKlint() {
     }
   }, []);
 
+  const KlintPerformance = () => {
+    const metricsRef = useRef<{
+      fps: number;
+      frameTime: number;
+      averageFrameTime: number;
+      minFrameTime: number;
+      maxFrameTime: number;
+      droppedFrames: number;
+      memoryUsage?: number;
+    } | null>(null);
+
+    useEffect(() => {
+      if (!contextRef.current?.__performance) return;
+
+      // Update metrics ref when performance data changes
+      const updateMetrics = () => {
+        if (contextRef.current?.__performance) {
+          metricsRef.current = { ...contextRef.current.__performance };
+        }
+      };
+
+      // Poll for updates (performance data is updated in animation loop)
+      const interval = setInterval(updateMetrics, 100);
+      return () => clearInterval(interval);
+    }, []);
+
+    return {
+      metrics: metricsRef.current,
+      getMetrics: () => contextRef.current?.__performance || null,
+      reset: () => {
+        if (contextRef.current?.__performance) {
+          contextRef.current.__performance.droppedFrames = 0;
+          contextRef.current.__performance.minFrameTime = Infinity;
+          contextRef.current.__performance.maxFrameTime = 0;
+        }
+      },
+    };
+  };
+
   return {
     context: {
       context: contextRef.current,
@@ -1269,6 +1313,7 @@ export default function useKlint() {
     KlintWindow,
     KlintImage,
     KlintTimeline,
+    KlintPerformance,
     togglePlay,
     useDev,
   };

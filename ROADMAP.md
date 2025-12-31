@@ -15,12 +15,12 @@
 - [x] Refactor event listener to abort controler
 
 ### Implemented — available for user test 
-- [ ] paragraph()
-- [ ] clip()
-- [ ] strip()
-- [ ] filters
-- [ ] 3D vector operations
-- [ ] grids
+- [x] paragraph()
+- [x] clip()
+- [x] strip()
+- [x] filters
+- [x] 3D vector operations
+- [x] grids
 
 #### Fixes + upgrades
 ##### Library 
@@ -34,7 +34,55 @@
 - [x] Filters
 - [x] Make vectors 3D + add cross, slerp and 3d transforms
 - [x] Essential plugins to be included in the library
-    [x] Update docs
+- [x] Update docs 
+<<<<<<< Current (Your changes)
+- [ ] loading / error state
+- [ ] Add KlintVideo - consider streaming data
+- [ ] Add fillrule : non-zero | even-odd
+- [ ] Add 'default' to K.blend() to reset to default
+
+#### Docs 
+- [ ] Review images-image.md
+- [ ] Review images-pixel-manipulation.md
+- [ ] Review styling-opacity : remove the Klint.State mention, replace with useStorage
+- [ ] Review text - text : not sure if accurate
+- [ ] Review text - text-styling : not sure if accurate
+- [ ] Review transforms - push : old
+- [ ] Review transforms - pop : old
+- [ ] Review transforms - resetTranform : missing
+- [ ] Review transforms - applyTransform : missing
+- [ ] Add missing functions and update according to lasts updates :
+    [ ] paragraph(),
+    [ ] clip()
+    [ ] strip()
+    [ ] filters
+    [ ] 3D vector operations
+    [ ] grids
+=======
+- [ ] loading state
+- [ ] Add KlintVideo - consider streaming data
+- [x] Add fillrule : non-zero | even-odd
+- [x] Add 'default' to K.blend() to reset to default
+
+#### Docs 
+- [x] Review images-image.md
+- [x] Review images-pixel-manipulation.md
+- [x] Review styling-opacity : remove the Klint.State mention, replace with useStorage
+- [ ] Review text - text : not sure if accurate
+- [ ] Review text - text-styling : not sure if accurate
+- [x] Review transforms - push : old
+- [x] Review transforms - pop : old
+- [x] Review transforms - resetTranform : missing
+- [x] Review transforms - applyTransform : missing
+- [x] Add missing functions and update according to lasts updates :
+    [x] paragraph(),
+    [x] clip()
+    [x] strip()
+    [x] filters
+    [ ] 3D vector operations (check Vector.md)
+    [ ] grids (check Grid element docs)
+>>>>>>> Incoming (Background Agent changes)
+
 
 ### Elements 
 - [x] Basic Grids : 2D, radial 
@@ -50,13 +98,13 @@
 
 
 ###  Plugins
+- [ ] Auto Responsive grid/Layout : CSS-like responsivenes - to think about
 - [ ] Rubber Band 
 - [ ] Layouts : divided grids
 - [ ] Layers : pre-rendered offscreen canvas that can be redraw independtly
 - [ ] Shader Filter => wegGPU applied on canvas, 'afterDraw()'
 - [ ] Svg Filter
 - [ ] SDF effector : shader like advanced dist function 
-- [ ] Responsive grid/Layout : CSS-like responsivenes - to think about
 - [ ] Draggables 
 - [x] Font Parser
 - [x] Sprites  : https://developer.mozilla.org/en-US/docs/Web/API/Window/createImageBitmap
@@ -76,15 +124,18 @@
 - [ ] True SSR => return base64
 
 ### Considerations 
+- [ ] a `center()` function
+- [ ] Await fontLoaded in preload()
 - [ ] From Bytes, From base64
 - [ ] Controls : test Leva
 - [ ] Create a singe useFrame() hook similar to Three Fiber
 - [x] Add relativeTo(), lookAt(), rotate(), fromAngle(), toScreen(), slerp()
 - [x] Add PI and TWO_PI
 - [ ] Consider url params
-- [x] Make the loadVideo hook 
 - [x] Make the useGestures hook 
 - [ ] Advanced Pixels array : load, set, copy & update => Done but considering removing it. Should set Canvas to willReadOften if loaded, needs to happen at preload stage
+- [ ] Add a monitor - will return 'good', 'okay', or 'bad' depending on the latency.
+- [ ] Add toDeg() and toRad()
 
 ### Doc
 - [x] Update dependency

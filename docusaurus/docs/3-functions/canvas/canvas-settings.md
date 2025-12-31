@@ -91,11 +91,14 @@ clear() // Just clear pixels, keep transforms
 
 ## resizeCanvas
 
+! Offscreen canvas only !
+
 ```ts
 resizeCanvas(width: number, height: number) => void
 ```
 
-Resizes the canvas dimensions (offscreen canvas only).
+Resizes the canvas dimensions.
+
 
 ```tsx
 resizeCanvas(800, 600) // Change canvas size

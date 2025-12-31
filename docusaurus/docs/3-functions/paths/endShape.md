@@ -82,7 +82,7 @@ const draw = (K: KlintContext) => {
 - Must be preceded by `beginShape()` and at least one vertex/curve function
 - Automatically handles any open contours by calling `endContour()` internally
 - When `close = true`, connects the last point back to the first point with a straight line
-- When `close = false`, leaves the path open
+- When `close = false` or left empty, leaves the path open
 - Renders the shape using current fill and stroke styles
 - Cleans up internal shape state after rendering
 - Can handle complex shapes with multiple holes/contours

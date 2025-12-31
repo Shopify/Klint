@@ -4,24 +4,13 @@
 translate(x: number, y: number) => void
 ```
 
-Translates (moves) the coordinate system origin by the specified amounts.
+Translates (moves) the coordinate system origin by the specified amounts. This is also used to change the origin of transformation for `scale`, `rotation` and `applyTransform`.
+
+For example, if you want to draw at the center of the canvas, you will use `translate(Klint.width/2, Klint.height/2)`. You can also use the canvas options `canvasOrigin = 'center'` that will do it for you when setting up the canvas.  
 
 ## Parameters
 - `x`: The horizontal distance to translate
 - `y`: The vertical distance to translate
-
-## Returns
-- `void`
-
-## Related Functions
-
-```ts
-rotate(angle: number) => void             // Rotate the coordinate system
-scale(x: number, y?: number) => void      // Scale the coordinate system
-push() => void                            // Save current transformation state
-pop() => void                             // Restore previous transformation state
-resetTransform() => void                  // Reset all transformations
-```
 
 ## Example
 ```tsx
@@ -96,8 +85,7 @@ const draw = (K: KlintContext) => {
 - Translation affects all subsequent drawing operations until reset or popped
 - Translations are cumulative - multiple `translate()` calls add together
 - Use `push()` and `pop()` to save and restore transformation state
-- Translation happens before drawing, not after
-- Useful for moving groups of objects together
-- Combined with rotation and scaling for complex transformations
+- Translation needs to happens before drawing, not after
+- Important for rotation and scaling as it moves the origin of transformation
 - Does not affect the canvas size, only the coordinate system origin
 - To reset all transformations, use `resetTransform()` 

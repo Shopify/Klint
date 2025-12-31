@@ -10,14 +10,13 @@ Draws text on the canvas at the specified position. Supports multi-line text usi
 - `text`: The text string or number to draw
 - `x`: The x-coordinate for the text
 - `y`: The y-coordinate for the text  
-- `maxWidth`: Optional maximum width for text wrapping
+- `maxWidth`: Optional maximum width for text fitting
 
-## Returns
-- `void`
+! The `maxWidth` option will try to fit the text in the width by scaling it, if you want proper line breaks, use `paragraph()` instead ! 
 
 ## Multi-line Text Support
 
-Text automatically supports line breaks using `\n` characters:
+Text automatically supports line breaks using `\n` characters, if you want proper line breaks, use `paragraph()` instead :
 
 ```tsx
 // Multi-line text with line breaks
@@ -187,12 +186,10 @@ const draw = (K: KlintContext) => {
 - **Line Height**: Use `textLeading()` to control spacing; defaults to 1.2x font size
 - **Performance**: For frequently changing multi-line text, consider using offscreen canvas
 - **Empty Lines**: `\n\n` creates empty lines with proper spacing
-- **Backward Compatibility**: Single-line text works exactly as before
-- **Mixed Content**: Numbers and text work seamlessly in multi-line blocks
-- **Dynamic Content**: Perfect for game UIs, dashboards, and real-time displays
+- **Dynamic Content**: Perfect for game UIs, dashboards, and real-time displays. If you need something like an FPS counter, prefer to pipe the data outside of the component and use HTML text on top of the canvas instead.
 - **Alignment Consistency**: All alignment settings work intuitively with multi-line text
 - Text uses the current fill color and stroke settings
-- Font, size, weight, and style settings apply to the entire text block
+- Font, size, weight, and style settings apply to the entire text block, for granular control, use multiple text blocks.
 - Use `textWidth()` for measuring individual lines for advanced layouts
 
 ```ts

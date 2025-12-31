@@ -1,6 +1,6 @@
 # Using Klint with React
 
-Klint is designed specifically for React, integrating with its component model while carefully avoiding unnecessary re-renders. Understanding this architecture is key to building performant canvas applications.
+Klint is designed specifically for React, integrating with its component model while carefully avoiding unnecessary re-renders. Understanding this architecture is key to building performant Klint applications.
 
 ## Architecture Overview
 
@@ -27,7 +27,7 @@ Klint's architecture is built around a fundamental principle: **canvas operation
 Here's how it works:
 
 1. The canvas element is created and managed using React's `useRef`
-2. The canvas context is initialized and stored in a ref via the `useKlint` hook
+2. The canvas context is separated from the canvas, initialized and stored in a ref via the `useKlint` hook
 3. Drawing operations modify the canvas directly without triggering React re-renders
 4. The render loop operates independently of React's update schedule
 
@@ -142,9 +142,28 @@ function ControlledSketch({ color, particleCount }) {
 }
 ```
 
-### Passing Image Resources
+### Passing Image and Video Resources
 
-When working with images, prefer passing loaded HTML Image elements rather than URLs:
+When working with images or videos, prefer the KlintImage and KlintVideo hook. Unless you really need it, i.e. an image needs to appear in HTML and on the Klint canvas, it's better to consider ressources loaded in Klint as completly independent from the DOM tree. Klint will always make sure you medias are ready when they hit the draw loop.
+
+If you need to pass the image from the parent component, pass it as a prop.
+
+Loaded in the preload :
+
+```jsx
+function KlintSketch({ image }) {
+  const draw = (K) => {
+    K.background("#333");
+    if (image) {
+      K.image(image, K.width/2, K.height/2);
+    }
+  };
+  
+  return <Klint draw={draw} />;
+}
+```
+
+Loaded from the parent : 
 
 ```jsx
 function ParentComponent() {
@@ -175,11 +194,6 @@ function KlintSketch({ image }) {
 }
 ```
 
-This approach:
-- Avoids loading images within Klint
-- Ensures images are fully loaded before rendering
-- Allows for better resource management
-- Can leverage React's suspense and error boundaries
 
 ## Best Practices
 
@@ -200,7 +214,7 @@ Instead, handle these aspects in your React components, and pass the final data 
 
 ### 2. Minimize React State Within Klint Components
 
-Avoid using React's `useState` within components that contain Klint, as state changes trigger re-renders. Instead:
+Do not use React's `useState` within components that contain Klint, as state changes trigger re-renders. Instead:
 
 - Use `useStorage` for Klint-specific state
 - Pass props from parent components when needed
@@ -208,7 +222,7 @@ Avoid using React's `useState` within components that contain Klint, as state ch
 
 ### 3. Handle Window Resize Events
 
-Klint provides built-in hooks for handling window resize events:
+Klint provides built-in hooks for handling window resize events, if you are on tight resources, consider using an `Observer`:
 
 ```jsx
 function MySketch() {
@@ -233,39 +247,8 @@ function MySketch() {
 }
 ```
 
-### 4. Use Error Boundaries
 
-Since Klint operations happen outside React's normal flow, wrap your Klint components in error boundaries:
-
-```jsx
-function KlintErrorBoundary({ children }) {
-  const [hasError, setHasError] = useState(false);
-  
-  useEffect(() => {
-    const handleError = (event) => {
-      console.error('Canvas error:', event.error);
-      setHasError(true);
-      event.preventDefault();
-    };
-    
-    window.addEventListener('error', handleError);
-    return () => window.removeEventListener('error', handleError);
-  }, []);
-  
-  if (hasError) {
-    return <div className="error">Canvas rendering error</div>;
-  }
-  
-  return children;
-}
-
-// Usage
-<KlintErrorBoundary>
-  <MyKlintComponent />
-</KlintErrorBoundary>
-```
-
-### 5. Beware of Closure Issues
+### 4. Beware of Closure Issues
 
 Since Klint functions run outside React's normal update cycle, you need to be careful with closures:
 
@@ -282,12 +265,15 @@ function MySketch({ color }) {
 
 // Better - passes props to Klint so they're accessible in current state
 function MySketch({ color }) {
+  const props = useProps({
+    color : color
+  })
   const draw = (K) => {
-    K.fillColor(K.props.color); // Access current value
+    K.fillColor(props.color); // Access current value
     K.circle(K.width/2, K.height/2, 100);
   };
   
-  return <Klint draw={draw} color={color} />;
+  return <Klint draw={draw} />;
 }
 ```
 
@@ -421,4 +407,4 @@ function MySketch() {
 }
 ```
 
-Remember that Klint's architecture is optimized for canvas rendering performance, but it comes with the responsibility to manage your application's data flow and component updates carefully.
+Remember that Klint's architecture is optimized for canvas rendering performance and does what i cans to save precious CPU cycles, but it comes with the responsibility to manage your application's data flow and component updates carefully.

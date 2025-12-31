@@ -10,7 +10,7 @@ createOffscreen(
 ) => KlintOffscreenContext | HTMLImageElement
 ```
 
-Creates an offscreen canvas for drawing operations outside the main canvas.
+Creates an offscreen canvas for drawing operations outside the main canvas. The best way to think about it is a transparent layer. 
 
 ## Parameters
 - `id`: Unique identifier for accessing the offscreen canvas later
@@ -30,19 +30,19 @@ Creates an offscreen canvas for drawing operations outside the main canvas.
 ## Example
 ```tsx
 // Basic usage
-const offscreen = createOffscreen("buffer", 200, 200)
+const offscreen = Klint.createOffscreen("buffer", 200, 200)
 offscreen.fillColor("red")
 offscreen.circle(100, 100, 50)
 
 // Draw to offscreen in callback
-createOffscreen("text", 300, 100, {}, (ctx) => {
+Klint.createOffscreen("text", 300, 100, {}, (ctx) => {
   ctx.fillColor("black")
   ctx.textSize(48)
   ctx.text("Hello World", 10, 50)
 })
 
 // Static offscreen for performance
-createOffscreen("static", 400, 400, { static: "true" }, (ctx) => {
+Klint.createOffscreen("static", 400, 400, { static: "true" }, (ctx) => {
   ctx.fillColor("blue")
   ctx.rectangle(0, 0, 400, 400)
 })
@@ -50,6 +50,8 @@ createOffscreen("static", 400, 400, { static: "true" }, (ctx) => {
 // Use offscreen in draw function
 const draw = (K: KlintContext) => {
   const buffer = K.getOffscreen("buffer")
+  // Draw on the buffer
+  buffer.background('coral')
   K.image(buffer, 100, 100)
 }
 
@@ -72,3 +74,4 @@ return <Klint preload={preload} draw={draw} />
 - Offscreens inherit the device pixel ratio from main canvas
 - Useful for caching complex drawings or pre-rendering content
 - In static mode, returns an HTMLImageElement instead of a context 
+- You can draw on the `Offscreen` at init time using the callback or during the `draw`. Drawing on the offscreen doesn't make the drawing operation cheaper.

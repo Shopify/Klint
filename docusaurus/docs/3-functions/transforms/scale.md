@@ -4,24 +4,11 @@
 scale(x: number, y?: number) => void
 ```
 
-Scales the coordinate system by the specified factors.
+Scales the coordinate system by the specified factors. The scale takes place around the (0,0), use `translate()` before `scale()` to rotate around a different point.
 
 ## Parameters
 - `x`: The horizontal scaling factor
 - `y`: Optional. The vertical scaling factor (defaults to x for uniform scaling)
-
-## Returns
-- `void`
-
-## Related Functions
-
-```ts
-translate(x: number, y: number) => void   // Translate the coordinate system
-rotate(angle: number) => void             // Rotate the coordinate system
-push() => void                            // Save current transformation state
-pop() => void                             // Restore previous transformation state
-resetTransform() => void                  // Reset all transformations
-```
 
 ## Example
 ```tsx

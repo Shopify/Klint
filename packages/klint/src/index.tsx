@@ -5,6 +5,7 @@ import { type KlintMouse, type KlintScroll } from "./useKlint";
 import { KlintCoreFunctions, KlintFunctions } from "./KlintFunctions";
 
 export * from "./Klint";
+export * from "./elements";
 
 export {
   Klint,
@@ -14,7 +15,12 @@ export {
   // Types
   type KlintMouse,
   type KlintScroll,
+  type KlintPerformanceMetrics,
   // Functions
   KlintCoreFunctions,
   KlintFunctions,
 };
+
+// Export element types
+export type { PerformanceWidgetOptions } from "./elements/Performance";
+export type { KlintServerRenderOptions } from "./elements/SSR";

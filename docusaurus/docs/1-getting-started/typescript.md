@@ -4,7 +4,7 @@ sidebar_position: 4
 
 # TypeScript Setup
 
-Klint is built with TypeScript and provides comprehensive type definitions for a great developer experience.
+Klint is built with TypeScript and provides comprehensive type definitions.
 
 ## Basic Setup
 
@@ -32,55 +32,13 @@ Key types you'll use:
 
 ```tsx
 import type { 
-  KlintContext,      // The K parameter type
+  KlintContexts, // A union of both the offscreen and main context, for lazy people
+  KlintContext, // The main context, the K parameter you will see in the docs. 
+  KlintOffscreenContext, // The K parameter type
   KlintProps,        // Props for Klint component
   KlintMouseState,   // Mouse state type
   KlintKeyState,     // Keyboard state type
-  DrawFunction,      // Type for draw function
-  SetupFunction,     // Type for setup function
-  PreloadFunction    // Type for preload function
 } from '@shopify/klint';
-```
-
-## Typing Functions
-
-### Draw Function
-
-```tsx
-import type { DrawFunction } from '@shopify/klint';
-
-const draw: DrawFunction = (K) => {
-  K.background('#000');
-  K.circle(K.width/2, K.height/2, 50);
-};
-
-// Or inline
-const draw = (K: KlintContext) => {
-  K.background('#000');
-  K.circle(K.width/2, K.height/2, 50);
-};
-```
-
-### Setup Function
-
-```tsx
-import type { SetupFunction } from '@shopify/klint';
-
-const setup: SetupFunction = (K) => {
-  K.textAlign('center', 'middle');
-  K.textSize(16);
-};
-```
-
-### Preload Function
-
-```tsx
-import type { PreloadFunction } from '@shopify/klint';
-
-const preload: PreloadFunction = async (K) => {
-  const img = await K.loadImage('/path/to/image.jpg');
-  return { img };
-};
 ```
 
 ## Typing Storage
@@ -202,7 +160,6 @@ function GameSketch() {
     highScore: 0
   });
   
-  // Rest of game logic...
 }
 ```
 
@@ -249,32 +206,6 @@ interface Shape {
 }
 ```
 
-## VSCode Configuration
-
-For the best TypeScript experience with Klint:
-
-1. **Install recommended extensions**:
-   - TypeScript and JavaScript Language Features
-   - ESLint
-   - Prettier
-
-2. **Configure tsconfig.json**:
-```json
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "jsx": "react-jsx",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "types": ["@shopify/klint"]
-  }
-}
-```
 
 ## Common TypeScript Patterns
 

@@ -25,11 +25,11 @@ yarn add @shopify/klint
 
 ## TypeScript Support
 
-Klint is written in TypeScript and includes type definitions out of the box. No additional `@types` packages needed!
+Klint is written in TypeScript and includes type definitions out of the box.
 
-## Verify Installation
+## First sketch
 
-Create a simple test component to verify everything is working:
+Create a simple component to see it working:
 
 ```tsx
 import { useKlint, Klint } from '@shopify/klint';

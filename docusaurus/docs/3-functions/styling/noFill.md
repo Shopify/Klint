@@ -30,3 +30,4 @@ const draw = (K: KlintContext) => {
 - Affects all subsequent drawing operations until `fillColor()` is called
 - Useful for creating outlined shapes
 - Can be combined with `strokeWidth()` to control outline thickness 
+- A shape with transparent `fill` and `stroke` is ignored

@@ -133,6 +133,7 @@ const draw = (K: KlintContext) => {
 
 ## Notes
 - Must be used within a `beginShape()` / `endShape()` block
+- A contour that will end up outside a shape will show as solid.
 - Creates holes or cutouts within the main shape
 - Can only be called when not already in a contour
 - All vertex and curve functions work within contours
@@ -140,4 +141,3 @@ const draw = (K: KlintContext) => {
 - Multiple contours can be created within a single shape
 - Must be closed with `endContour()` or will be automatically closed by `endShape()`
 - Perfect for creating complex shapes like letters, donuts, or decorative patterns
-- Works with any combination of straight lines and curves 

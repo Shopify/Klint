@@ -37,7 +37,7 @@ const draw = (K: KlintContext) => {
 ```
 
 ## Notes
-- Uses current fill and stroke styles
+- Do not animate the `rotation` parameter directly, prefer the `rotation` function.
 - Setting `radius2` creates shapes similar to stars or flower petals
 - With `sides = 4` and `rotation = Math.PI/4`, creates a diamond shape
-- Increasing `sides` to large values (>20) approximates a circle 
+- Increasing `sides` to large values (>20) approximates a circle, but prefer the `circle` unless you have a good reason

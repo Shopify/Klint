@@ -123,5 +123,3 @@ const draw = (K: KlintContext) => {
 - Perfect for simple curves like rounded corners or gentle arcs
 - Works within both main shapes and contours (holes)
 - Can be mixed with `vertex()`, `bezierVertex()`, and `arcVertex()` in the same shape
-- Use current fill and stroke styles
-- Ideal for organic shapes and UI elements with rounded edges 

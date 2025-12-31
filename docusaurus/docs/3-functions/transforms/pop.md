@@ -6,18 +6,19 @@ pop() => void
 
 Restores the most recently saved drawing state from the stack.
 
-## Returns
-- `void`
+## What Gets Restored
 
-## Related Functions
-
-```ts
-push() => void                            // Save current state
-resetTransform() => void                  // Reset all transformations
-translate(x: number, y: number) => void  // Translate coordinate system
-rotate(angle: number) => void             // Rotate coordinate system
-scale(x: number, y?: number) => void      // Scale coordinate system
-```
+The `pop()` function restores:
+- **Transformation matrix** (translate, rotate, scale operations)
+- **Fill style** (color, gradient, pattern)
+- **Stroke style** (color, gradient, pattern)
+- **Line width**
+- **Line cap and join styles**
+- **Global alpha** (opacity)
+- **Global composite operation** (blending mode)
+- **Clipping region**
+- **Font settings**
+- **Text alignment**
 
 ## Example
 ```tsx
@@ -71,20 +72,6 @@ const draw = (K: KlintContext) => {
   K.text("State Restored", 20, K.height - 30)
 }
 ```
-
-## What Gets Restored
-
-The `pop()` function restores:
-- **Transformation matrix** (translate, rotate, scale operations)
-- **Fill style** (color, gradient, pattern)
-- **Stroke style** (color, gradient, pattern)
-- **Line width**
-- **Line cap and join styles**
-- **Global alpha** (opacity)
-- **Global composite operation** (blending mode)
-- **Clipping region**
-- **Font settings**
-- **Text alignment**
 
 ## Error Handling
 
@@ -146,11 +133,7 @@ const draw = (K: KlintContext) => {
   K.text("Main Application", 20, 30)
   
   // Show modal without affecting main app
-  if (K.State.get("showModal")) {
-    drawModal(K, 100, 100, 400, 300, "Settings", "Configure your preferences")
-  }
-  
-  // Main app state is preserved
+  // Note: Use useStorage hook for state management
   K.text("App continues normally", 20, K.height - 30)
 }
 ```
@@ -158,30 +141,39 @@ const draw = (K: KlintContext) => {
 ### Animation Cleanup
 
 ```tsx
-const drawParticle = (K, particle) => {
-  K.push() // Isolate particle transformations
-  
-  K.translate(particle.x, particle.y)
-  K.rotate(particle.rotation)
-  K.scale(particle.scale)
-  K.opacity(particle.alpha)
-  
-  K.fillColor(particle.color)
-  K.circle(0, 0, particle.size)
-  
-  K.pop() // Clean up transformations
-}
+import { useKlint, useStorage } from '@shopify/klint';
 
-const draw = (K: KlintContext) => {
-  K.background("#111")
+function ParticleSketch() {
+  const { context } = useKlint();
+  const store = useStorage({ particles: [] });
   
-  const particles = K.State.get("particles") || []
+  const drawParticle = (K, particle) => {
+    K.push(); // Isolate particle transformations
+    
+    K.translate(particle.x, particle.y);
+    K.rotate(particle.rotation);
+    K.scale(particle.scale);
+    K.opacity(particle.alpha);
+    
+    K.fillColor(particle.color);
+    K.circle(0, 0, particle.size);
+    
+    K.pop(); // Clean up transformations
+  };
   
-  // Each particle renders independently
-  particles.forEach(particle => {
-    drawParticle(K, particle)
-    // No transformation spillover between particles
-  })
+  const draw = (K: KlintContext) => {
+    K.background("#111");
+    
+    const particles = store.get("particles") || [];
+    
+    // Each particle renders independently
+    particles.forEach(particle => {
+      drawParticle(K, particle);
+      // No transformation spillover between particles
+    });
+  };
+  
+  return <Klint context={context} draw={draw} />;
 }
 ```
 
@@ -249,7 +241,7 @@ const draw = (K: KlintContext) => {
 - `pop()` operations are relatively expensive - avoid in tight loops
 - Each `pop()` restores the entire saved state, not just transformations
 - Canvas maintains a state stack with limited depth (typically 32-64 levels)
-- Use push/pop strategically rather than for every small change
+- Use push/pop strategically, think about the layering and do not nest every single transform.
 
 ## Best Practices
 
@@ -281,10 +273,10 @@ K.pop()
 
 ## Notes
 
-- Every `pop()` must have a preceding `push()` call
+- Every `pop()` must have a preceding `push()` call, this can heavily mess up your visual.
 - Restores the exact state that was saved by the most recent `push()`
 - Essential for creating reusable drawing functions that don't affect global state
-- Similar to `restore()` in the Canvas API, but with more intuitive naming
+- Port of the `restore()` in the Canvas API, but with more intuitive naming to match other libraries.
 - Use push/pop pairs to create "scope" for transformations and style changes
 - Always balance push/pop calls to avoid state stack corruption
 - Consider using helper functions to ensure balanced push/pop operations 

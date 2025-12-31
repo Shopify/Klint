@@ -52,5 +52,6 @@ const draw = (K: KlintContext) => {
 ## Notes
 - Changes how new shapes interact with existing canvas content
 - Powerful for creating lighting effects, shadows, and color interactions
+- Does not match 1:1 the blending options you are most likely familiar with. 
 - Some modes may perform poorly on older browsers
-- Reset to normal drawing with `blend("source-over")` 
+- Reset to normal drawing with `blend("default")` 

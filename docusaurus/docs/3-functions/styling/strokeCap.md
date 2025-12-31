@@ -39,4 +39,4 @@ const draw = (K: KlintContext) => {
 - "round" adds a semicircle to the endpoint
 - "square" extends the line by half the line width
 - Most visible with thick stroke widths
-- No effect on closed shapes like circles and rectangles 
+- No effect on closed shapes like circles and rectangles, see `strokeJoin`

@@ -3,11 +3,10 @@
 ```ts
 background(color?: string) => void
 ```
-
-Sets the canvas background color or clears the canvas.
+Clears the canvas and sets its background color.
 
 ## Parameters
-- `color`: CSS color string. If omitted or "transparent", clears the canvas.
+- `color`: CSS color string or Klint color functions. If omitted or "transparent", only clears the canvas.
 
 ## Example
 ```tsx
