@@ -13,7 +13,7 @@
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
     "@remix-run/node": "^2.16.0",
-    "@remix-run/react": "^2.16.0",
+    "@remix-run/react": "^2.17.4",
     "@remix-run/serve": "^2.16.0",
     "@shopify/klint": "^0.0.98",
     "isbot": "^4.1.0",
