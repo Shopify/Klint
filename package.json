@@ -1,6 +1,6 @@
 {
   "name": "klint-monorepo",
-  "version": "0.0.98",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "description": "Klint - Modern creative coding library monorepo",
@@ -12,7 +12,7 @@
     "klint-editor"
   ],
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build:klint && npm run build:plugins",
     "build:klint": "npm run build --workspace=packages/klint",
     "build:plugins": "npm run build --workspace=packages/klint-plugins",
     "build:web-component": "npm run build --workspace=packages/klint-web-component",
@@ -27,7 +27,7 @@
     "clean": "npm run clean --workspaces --if-present",
     "version:sync": "node scripts/sync-versions.js",
     "install:all": "npm install",
-    "publish:all": "npm run build && npm publish --workspaces --if-present --access public",
+    "publish:all": "npm run build:klint && npm run build:plugins && npm publish --workspace=packages/klint --workspace=packages/klint-plugins --access public",
     "sandbox": "npx @shopify/klint klint-create-sandbox"
   },
   "devDependencies": {

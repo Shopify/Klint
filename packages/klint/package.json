@@ -2,7 +2,7 @@
   "name": "@shopify/klint",
   "author": "arthurcloche",
   "license": "MIT",
-  "version": "0.0.98",
+  "version": "0.1.0",
   "description": "A modern creative coding library",
   "type": "module",
   "main": "dist/index.cjs",
@@ -64,9 +64,9 @@
     "react-dom": ">=16.8.0"
   },
   "optionalDependencies": {
-    "@shopify/klint-mcp": "^0.0.98",
-    "@shopify/klint-plugins": "^0.0.98",
-    "@shopify/klint-web-component": "^0.0.98"
+    "@shopify/klint-mcp": "^0.1.0",
+    "@shopify/klint-plugins": "^0.1.0",
+    "@shopify/klint-web-component": "^0.1.0"
   },
   "devDependencies": {
     "@types/react": "^16.0.0",
