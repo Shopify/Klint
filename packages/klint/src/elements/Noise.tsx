@@ -1,5 +1,29 @@
 import { KlintContext } from "../Klint";
 
+type FbmOptions = {
+  octaves?: number;
+  lacunarity?: number;
+  gain?: number;
+  amplitude?: number;
+  frequency?: number;
+};
+
+type TurbulenceOptions = {
+  octaves?: number;
+};
+
+type RidgeOptions = {
+  octaves?: number;
+  amplitude?: number;
+  frequency?: number;
+  lacunarity?: number;
+  gain?: number;
+};
+
+type CellularOptions = {
+  distance?: "euclidean" | "manhattan";
+};
+
 /**
  * Noise Element for Klint
  * 
@@ -475,68 +499,188 @@ class Noise {
 
   /**
    * Fractal Brownian Motion (fBm) noise
-   * @param x - X coordinate
-   * @param y - Y coordinate (optional)
-   * @param z - Z coordinate (optional)
-   * @param octaves - Number of octaves (default: 4)
-   * @param lacunarity - Frequency multiplier (default: 2)
-   * @param gain - Amplitude multiplier (default: 0.5)
-   * @returns Noise value
+   * Supports options object for amplitude/frequency/lacunarity/gain/octaves.
    */
-  fbm(x: number, y?: number, z?: number, octaves: number = 4, lacunarity: number = 2, gain: number = 0.5): number {
+  fbm(
+    x: number,
+    y?: number | FbmOptions,
+    z?: number | FbmOptions,
+    options?: FbmOptions
+  ): number {
+    let yVal: number | undefined = undefined;
+    let zVal: number | undefined = undefined;
+    let opts: FbmOptions =
+      typeof y === "object"
+        ? y
+        : typeof z === "object"
+          ? (z as FbmOptions)
+          : {};
+
+    if (typeof y === "number") yVal = y;
+    if (typeof z === "number") zVal = z;
+    if (options) opts = { ...opts, ...options };
+
+    const octaves = opts.octaves ?? 4;
+    if (octaves <= 0) return 0;
+
+    let amplitude = opts.amplitude ?? 1;
+    let frequency = opts.frequency ?? 1;
+    const lacunarity = opts.lacunarity ?? 2;
+    const gain = opts.gain ?? 0.5;
+
     let value = 0;
-    let amplitude = 1;
-    let frequency = 1;
     let maxValue = 0;
-    
+
     for (let i = 0; i < octaves; i++) {
-      if (y === undefined) {
+      if (yVal === undefined) {
         value += amplitude * this.perlin(x * frequency);
-      } else if (z === undefined) {
-        value += amplitude * this.perlin(x * frequency, y * frequency);
+      } else if (zVal === undefined) {
+        value += amplitude * this.perlin(x * frequency, yVal * frequency);
       } else {
-        value += amplitude * this.perlin(x * frequency, y * frequency, z * frequency);
+        value += amplitude * this.perlin(x * frequency, yVal * frequency, zVal * frequency);
       }
-      
+
       maxValue += amplitude;
       amplitude *= gain;
       frequency *= lacunarity;
     }
-    
-    return value / maxValue;
+
+    return maxValue === 0 ? 0 : value / maxValue;
   }
 
   /**
    * Turbulence noise (absolute value of noise)
-   * @param x - X coordinate
-   * @param y - Y coordinate (optional)
-   * @param z - Z coordinate (optional)
-   * @param octaves - Number of octaves (default: 4)
-   * @returns Noise value
+   * Supports options object for octaves.
    */
-  turbulence(x: number, y?: number, z?: number, octaves: number = 4): number {
+  turbulence(
+    x: number,
+    y?: number | TurbulenceOptions,
+    z?: number | TurbulenceOptions,
+    options?: TurbulenceOptions
+  ): number {
+    let yVal: number | undefined = undefined;
+    let zVal: number | undefined = undefined;
+    let opts: TurbulenceOptions =
+      typeof y === "object"
+        ? y
+        : typeof z === "object"
+          ? (z as TurbulenceOptions)
+          : {};
+
+    if (typeof y === "number") yVal = y;
+    if (typeof z === "number") zVal = z;
+    if (options) opts = { ...opts, ...options };
+
+    const octaves = opts.octaves ?? 4;
+    if (octaves <= 0) return 0;
+
     let value = 0;
     let amplitude = 1;
     let frequency = 1;
     let maxValue = 0;
-    
+
     for (let i = 0; i < octaves; i++) {
       let noise = 0;
-      if (y === undefined) {
+      if (yVal === undefined) {
         noise = this.perlin(x * frequency);
-      } else if (z === undefined) {
-        noise = this.perlin(x * frequency, y * frequency);
+      } else if (zVal === undefined) {
+        noise = this.perlin(x * frequency, yVal * frequency);
       } else {
-        noise = this.perlin(x * frequency, y * frequency, z * frequency);
+        noise = this.perlin(x * frequency, yVal * frequency, zVal * frequency);
       }
-      
+
       value += amplitude * Math.abs(noise);
       maxValue += amplitude;
       amplitude *= 0.5;
       frequency *= 2;
     }
-    
-    return value / maxValue;
+
+    return maxValue === 0 ? 0 : value / maxValue;
+  }
+
+  /**
+   * Ridged multifractal noise (simple implementation)
+   */
+  ridge(
+    x: number,
+    y?: number | RidgeOptions,
+    options?: RidgeOptions
+  ): number {
+    let yVal: number | undefined = undefined;
+    let opts: RidgeOptions = typeof y === "object" ? y : {};
+    if (typeof y === "number") yVal = y;
+    if (options) opts = { ...opts, ...options };
+
+    const octaves = opts.octaves ?? 4;
+    if (octaves <= 0) return 0;
+
+    let amplitude = opts.amplitude ?? 1;
+    let frequency = opts.frequency ?? 1;
+    const lacunarity = opts.lacunarity ?? 2;
+    const gain = opts.gain ?? 0.5;
+
+    let value = 0;
+    let weight = 1;
+    let maxValue = 0;
+
+    for (let i = 0; i < octaves; i++) {
+      const n =
+        yVal === undefined
+          ? this.perlin(x * frequency)
+          : this.perlin(x * frequency, yVal * frequency);
+      let signal = 1 - Math.abs(n);
+      signal *= signal;
+      signal *= weight;
+      weight = signal * 2;
+      weight = Math.min(Math.max(weight, 0), 1);
+
+      value += signal * amplitude;
+      maxValue += amplitude;
+      amplitude *= gain;
+      frequency *= lacunarity;
+    }
+
+    return maxValue === 0 ? 0 : value / maxValue;
+  }
+
+  /**
+   * Cellular / Worley noise (2D simple implementation)
+   */
+  cellular(
+    x: number,
+    y?: number | CellularOptions,
+    options?: CellularOptions
+  ): number {
+    let yVal: number | undefined = undefined;
+    let opts: CellularOptions = typeof y === "object" ? y : {};
+    if (typeof y === "number") yVal = y;
+    if (options) opts = { ...opts, ...options };
+    if (yVal === undefined) yVal = 0;
+
+    const xi = Math.floor(x);
+    const yi = Math.floor(yVal);
+    const distance = opts.distance ?? "euclidean";
+
+    let minDist = Infinity;
+
+    for (let j = -1; j <= 1; j++) {
+      for (let i = -1; i <= 1; i++) {
+        const fx = i + this.hash(xi + i, yi + j);
+        const fy = j + this.hash(yi + j, xi + i);
+        const dx = fx + xi - x;
+        const dy = fy + yi - yVal;
+        const dist =
+          distance === "manhattan"
+            ? Math.abs(dx) + Math.abs(dy)
+            : Math.sqrt(dx * dx + dy * dy);
+        if (dist < minDist) minDist = dist;
+      }
+    }
+
+    // Normalize to [0,1] using maximal possible distance ~ sqrt(2)
+    const maxDist = Math.SQRT2;
+    const normalized = 1 - Math.min(minDist / maxDist, 1);
+    return normalized;
   }
 }
 

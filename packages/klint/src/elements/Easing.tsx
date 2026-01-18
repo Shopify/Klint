@@ -10,6 +10,9 @@ interface KlintEasing {
 }
 
 class Easing implements KlintEasing {
+  private zeroOut = (val: number) =>
+    Object.is(val, -0) || Math.abs(val) < 1e-12 ? 0 : val;
+
   normalize = (val: number) => {
     return val * 0.5 + 0.5;
   };
@@ -41,21 +44,21 @@ class Easing implements KlintEasing {
 
   overshootIn = (val: number) => {
     const k = 1.70158;
-    return val * val * (val * (k + 1) - k);
+    return this.zeroOut(val * val * (val * (k + 1) - k));
   };
 
   overshootOut = (val: number) => {
     const m = val - 1;
     const k = 1.70158;
-    return 1 + m * m * (m * (k + 1) + k);
+    return this.zeroOut(1 + m * m * (m * (k + 1) + k));
   };
 
   overshootInOut = (val: number) => {
     const m = val - 1;
     const t = val * 2;
     const k = 1.70158 * 1.525;
-    if (val < 0.5) return val * t * (t * (k + 1) - k);
-    return 1 + 2 * m * m * (2 * m * (k + 1) + k);
+    if (val < 0.5) return this.zeroOut(val * t * (t * (k + 1) - k));
+    return this.zeroOut(1 + 2 * m * m * (2 * m * (k + 1) + k));
   };
 
   bounceOut = (val: number) => {
