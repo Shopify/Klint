@@ -1,6 +1,6 @@
 {
   "name": "klint-monorepo",
-  "version": "0.1.4",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "description": "Klint - Modern creative coding library monorepo",
