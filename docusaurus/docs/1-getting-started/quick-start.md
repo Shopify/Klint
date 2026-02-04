@@ -60,7 +60,7 @@ import { useKlint, Klint } from '@shopify/klint';
 
 function InteractiveSketch() {
   const { context, KlintMouse } = useKlint();
-  const mouse = KlintMouse();
+  const { mouse } = KlintMouse();
   
   const draw = (K) => {
     K.background('#000');
@@ -114,7 +114,7 @@ import { useKlint, Klint } from '@shopify/klint';
 
 function CompleteSketch() {
   const { context, KlintMouse } = useKlint();
-  const mouse = KlintMouse();
+  const { mouse } = KlintMouse();
   
   const setup = (K) => {
     // Set up text styling

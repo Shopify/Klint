@@ -2,7 +2,7 @@
   "name": "@shopify/klint",
   "author": "arthurcloche",
   "license": "MIT",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A modern creative coding library",
   "type": "module",
   "main": "dist/index.cjs",
@@ -14,11 +14,15 @@
   },
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.cjs"
     },
-    "./plugins": "@shopify/klint-plugins"
+    "./plugins": {
+      "types": "./dist/plugins/index.d.ts",
+      "import": "./dist/plugins/index.js",
+      "require": "./dist/plugins/index.cjs"
+    }
   },
   "repository": {
     "type": "git",
@@ -50,9 +54,9 @@
     "url": "https://github.com/Shopify/Klint/issues"
   },
   "scripts": {
-    "build": "tsup src/index.tsx --format esm,cjs --dts --external=react --external=react-dom",
-    "build:minified": "tsup src/index.tsx --format esm,cjs --dts --minify --external=react --external=react-dom",
-    "dev": "tsup src/index.tsx --format esm,cjs --dts --watch --external=react --external=react-dom",
+    "build": "tsup src/index.tsx src/plugins/index.tsx --format esm,cjs --dts --external=react --external=react-dom",
+    "build:minified": "tsup src/index.tsx src/plugins/index.tsx --format esm,cjs --dts --minify --external=react --external=react-dom",
+    "dev": "tsup src/index.tsx src/plugins/index.tsx --format esm,cjs --dts --watch --external=react --external=react-dom",
     "test": "vitest run --environment jsdom",
     "test:watch": "vitest --environment jsdom",
     "lint": "eslint src --ext .ts,.tsx",

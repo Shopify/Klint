@@ -167,7 +167,7 @@ import { useKlint, useStorage } from '@shopify/klint';
 
 function TrailSketch() {
   const { context, KlintMouse } = useKlint();
-  const mouse = KlintMouse();
+  const { mouse } = KlintMouse();
   const store = useStorage({ trail: [] });
   
   const draw = (K: KlintContext) => {
@@ -208,7 +208,7 @@ import { useKlint } from '@shopify/klint';
 
 function HoverSketch() {
   const { context, KlintMouse } = useKlint();
-  const mouse = KlintMouse();
+  const { mouse } = KlintMouse();
   
   const draw = (K: KlintContext) => {
     const buttons = [

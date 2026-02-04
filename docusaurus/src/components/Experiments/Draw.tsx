@@ -5,7 +5,7 @@ import patterns from "./drawPatterns";
 export default function Draw() {
   const { context, useDev, KlintMouse } = useKlint();
   useDev();
-  const mouse = KlintMouse().mouse;
+  const { mouse } = KlintMouse();
   const cols = 8;
   const cellWidthRef = useRef<number>(null);
   const rowsRef = useRef<number>(null);
@@ -28,7 +28,7 @@ export default function Draw() {
     x: number,
     y: number,
     size: number,
-    value: number
+    value: number,
   ) {
     const gridSize = size / 9;
     const grid = patterns[value];
@@ -47,7 +47,7 @@ export default function Draw() {
           K.moveTo(x * size + j * gridSize, y * size + i * gridSize);
           K.lineTo(
             x * size + j * gridSize + gridSize,
-            y * size + i * gridSize + gridSize
+            y * size + i * gridSize + gridSize,
           );
           K.stroke();
           K.beginPath();

@@ -8,7 +8,7 @@ import { KlintContext } from "@shopify/klint";
  *
  * @example
  * ```tsx
- * import { CatmullRom } from '@shopify/klint-plugins';
+ * import { CatmullRom } from '@shopify/klint/plugins';
  *
  * const draw = (K) => {
  *   const points = [
@@ -30,7 +30,7 @@ export class CatmullRom {
   static interpolate(
     points: Array<{ x: number; y: number }>,
     tension: number = 0.5,
-    segments: number = 20
+    segments: number = 20,
   ): Array<{ x: number; y: number }> {
     if (points.length < 2) return points;
 
@@ -89,14 +89,14 @@ export class CatmullRom {
       closed?: boolean;
       strokeStyle?: string;
       lineWidth?: number;
-    }
+    },
   ): void {
     const { tension = 0.5, segments = 20, closed = false } = options || {};
 
     const interpolated = this.interpolate(
       closed ? [...points, points[0]] : points,
       tension,
-      segments
+      segments,
     );
 
     ctx.save();
@@ -132,14 +132,14 @@ export class CatmullRom {
       tension?: number;
       segments?: number;
       closed?: boolean;
-    }
+    },
   ): Path2D {
     const { tension = 0.5, segments = 20, closed = false } = options || {};
 
     const interpolated = this.interpolate(
       closed ? [...points, points[0]] : points,
       tension,
-      segments
+      segments,
     );
 
     const path = new Path2D();

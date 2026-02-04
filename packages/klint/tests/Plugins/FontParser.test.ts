@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, beforeAll, vi } from 'vitest';
-import FontParser from '../src/FontParser';
-import type { FontData, FontPathsResult, FontPointsResult } from '../src/FontParser';
+import FontParser from '../../src/plugins/FontParser';
+import type { FontData, FontPathsResult, FontPointsResult, FontTextOptions } from '../../src/plugins/FontParser';
 
 // Mock fetch for testing
 const mockFontBuffer = new ArrayBuffer(1000);

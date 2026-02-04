@@ -39,13 +39,13 @@ jobs:
       - name: Clean install (workaround for rollup optional deps bug)
         run: |
           rm -rf node_modules package-lock.json
-          npm install --workspace=packages/klint --workspace=packages/klint-plugins --include-workspace-root
+          npm install --workspace=packages/klint --include-workspace-root
 
       - name: Run tests
         run: npm run test --workspace=packages/klint
 
       - name: Build packages
-        run: npm run build:klint && npm run build:plugins
+        run: npm run build
 
       - name: Generate Release Notes
         id: release_notes
@@ -73,9 +73,7 @@ jobs:
             return notes;
 
       - name: Publish to npm (OIDC / Trusted Publishing)
-        run: |
-          npm publish --workspace=packages/klint --access public --provenance
-          npm publish --workspace=packages/klint-plugins --access public --provenance
+        run: npm publish --workspace=packages/klint --access public --provenance
         env:
           NPM_TOKEN: "" # Empty string forces OIDC
 

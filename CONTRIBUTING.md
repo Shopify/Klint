@@ -17,25 +17,26 @@ Thanks for your interest in contributing to Klint! This guide will help you get 
 
 3. **Build the library**
    ```bash
-   npm run build:klint
+   npm run build
    ```
 
 ## 📁 Repository Structure
 
-This is a monorepo containing several packages:
-
 ```
 klint/
 ├── packages/
-│   ├── klint/              # Core Klint library
-│   ├── klint-mcp/          # MCP server integration
-│   ├── klint-plugins/      # Plugin system
-│   └── klint-web-component/ # Web component version
+│   └── klint/              # Core Klint library + plugins
+│       └── src/
+│           ├── plugins/    # Optional plugins (FontParser, Delaunay, etc.)
+│           └── elements/   # Core elements (Color, Vector, Easing, etc.)
 ├── klint-editor/           # Interactive editor (working version)
 ├── docusaurus/             # Documentation site
-├── sandbox/                # Development sandbox
 └── examples/               # Example sketches
 ```
+
+**Import paths:**
+- Core: `import { Klint, useKlint } from '@shopify/klint'`
+- Plugins: `import { FontParser } from '@shopify/klint/plugins'`
 
 ## 🔧 Development Workflow
 

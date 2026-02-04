@@ -134,7 +134,7 @@ import { useKlint, Klint } from "@shopify/klint";
 
 export default function App() {
   const { context, KlintMouse } = useKlint();
-  const mouse = KlintMouse();
+  const { mouse } = KlintMouse();
 
   const setup = (K: any) => {
     K.textFont("Inter, sans-serif");
@@ -165,8 +165,8 @@ export default function App() {
     // Corner info
     K.textSize(16);
     K.alignText("left", "top");
-    K.text(\`Frame: \${K.frame}\`, 20, 20);
-    K.text(\`Mouse: \${Math.round(mouseX)}, \${Math.round(mouseY)}\`, 20, 40);
+    K.text(`Frame: ${K.frame}`, 20, 20);
+    K.text(`Mouse: ${Math.round(mouseX)}, ${Math.round(mouseY)}`, 20, 40);
   };
 
   return (

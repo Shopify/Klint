@@ -1,4 +1,4 @@
-import { KlintContext } from '@shopify/klint';
+import { KlintContext } from "@shopify/klint";
 
 /**
  * Sprite configuration
@@ -28,14 +28,14 @@ export interface Spritesheet {
 
 /**
  * Static Sprites Plugin
- * 
+ *
  * Manages spritesheets and sprite rendering without requiring Klint context initialization.
  * Context is only passed when drawing operations are needed.
- * 
+ *
  * @example
  * ```tsx
- * import { Sprites } from '@shopify/klint-plugins';
- * 
+ * import { Sprites } from '@shopify/klint/plugins';
+ *
  * const preload = async () => {
  *   await Sprites.load({
  *     name: 'player',
@@ -45,7 +45,7 @@ export interface Spritesheet {
  *     gap: 0
  *   });
  * };
- * 
+ *
  * const draw = (K) => {
  *   const sheet = Sprites.sheet('player');
  *   const frame = Math.floor(K.frame / 10) % sheet.numSprites;
@@ -63,7 +63,7 @@ export class Sprites {
    * @returns Promise that resolves when all sprites are loaded
    */
   static async load(...configs: SpriteConfig[]): Promise<void> {
-    const promises = configs.map(config => this.loadSingle(config));
+    const promises = configs.map((config) => this.loadSingle(config));
     await Promise.all(promises);
   }
 
@@ -74,26 +74,26 @@ export class Sprites {
    */
   private static async loadSingle(config: SpriteConfig): Promise<void> {
     const { name, url, spriteWidth, spriteHeight, gap = 0 } = config;
-    
+
     // Check if already loading
     if (this.loadingPromises.has(name)) {
       return this.loadingPromises.get(name)!;
     }
-    
+
     // Check if already loaded
     if (this.spritesheets.has(name)) {
       return Promise.resolve();
     }
-    
+
     // Create loading promise
     const loadPromise = new Promise<void>((resolve, reject) => {
       const img = new Image();
-      
+
       img.onload = () => {
         const cols = Math.floor((img.width + gap) / (spriteWidth + gap));
         const rows = Math.floor((img.height + gap) / (spriteHeight + gap));
         const numSprites = cols * rows;
-        
+
         const spritesheet: Spritesheet = {
           image: img,
           srcNaturalWidth: img.width,
@@ -103,24 +103,24 @@ export class Sprites {
           spriteHeight,
           gap,
           cols,
-          rows
+          rows,
         };
-        
+
         this.spritesheets.set(name, spritesheet);
         this.loadingPromises.delete(name);
         resolve();
       };
-      
+
       img.onerror = () => {
         this.loadingPromises.delete(name);
         reject(new Error(`Failed to load sprite: ${url}`));
       };
-      
+
       // Set crossOrigin to allow loading from different domains
       img.crossOrigin = "anonymous";
       img.src = url;
     });
-    
+
     this.loadingPromises.set(name, loadPromise);
     return loadPromise;
   }
@@ -157,22 +157,22 @@ export class Sprites {
       flipX?: boolean;
       flipY?: boolean;
       alpha?: number;
-    }
+    },
   ): void {
     const sheet = this.spritesheets.get(sheetName);
     if (!sheet) {
       console.warn(`Spritesheet '${sheetName}' not loaded`);
       return;
     }
-    
+
     // Calculate sprite position in sheet
     const spriteIndex = Math.floor(sprite) % sheet.numSprites;
     const col = spriteIndex % sheet.cols;
     const row = Math.floor(spriteIndex / sheet.cols);
-    
+
     const sx = col * (sheet.spriteWidth + sheet.gap);
     const sy = row * (sheet.spriteHeight + sheet.gap);
-    
+
     // Drawing dimensions
     const drawWidth = options?.width || sheet.spriteWidth;
     const drawHeight = options?.height || sheet.spriteHeight;
@@ -181,38 +181,42 @@ export class Sprites {
     const flipX = options?.flipX || false;
     const flipY = options?.flipY || false;
     const alpha = options?.alpha !== undefined ? options.alpha : 1;
-    
+
     // Save context state
     ctx.save();
-    
+
     // Apply transformations
     ctx.translate(x, y);
-    
+
     if (rotation !== 0) {
       ctx.rotate(rotation);
     }
-    
+
     if (flipX || flipY) {
       ctx.scale(flipX ? -1 : 1, flipY ? -1 : 1);
     }
-    
+
     if (scale !== 1) {
       ctx.scale(scale, scale);
     }
-    
+
     if (alpha !== 1) {
       ctx.globalAlpha = alpha;
     }
-    
+
     // Draw sprite
     ctx.drawImage(
       sheet.image,
-      sx, sy,
-      sheet.spriteWidth, sheet.spriteHeight,
-      -drawWidth / 2, -drawHeight / 2,
-      drawWidth, drawHeight
+      sx,
+      sy,
+      sheet.spriteWidth,
+      sheet.spriteHeight,
+      -drawWidth / 2,
+      -drawHeight / 2,
+      drawWidth,
+      drawHeight,
     );
-    
+
     // Restore context state
     ctx.restore();
   }
@@ -234,33 +238,37 @@ export class Sprites {
     x: number,
     y: number,
     width?: number,
-    height?: number
+    height?: number,
   ): void {
     const sheet = this.spritesheets.get(sheetName);
     if (!sheet) {
       console.warn(`Spritesheet '${sheetName}' not loaded`);
       return;
     }
-    
+
     // Calculate sprite position in sheet
     const spriteIndex = Math.floor(sprite) % sheet.numSprites;
     const col = spriteIndex % sheet.cols;
     const row = Math.floor(spriteIndex / sheet.cols);
-    
+
     const sx = col * (sheet.spriteWidth + sheet.gap);
     const sy = row * (sheet.spriteHeight + sheet.gap);
-    
+
     // Drawing dimensions
     const drawWidth = width || sheet.spriteWidth;
     const drawHeight = height || sheet.spriteHeight;
-    
+
     // Draw sprite
     ctx.drawImage(
       sheet.image,
-      sx, sy,
-      sheet.spriteWidth, sheet.spriteHeight,
-      x, y,
-      drawWidth, drawHeight
+      sx,
+      sy,
+      sheet.spriteWidth,
+      sheet.spriteHeight,
+      x,
+      y,
+      drawWidth,
+      drawHeight,
     );
   }
 
@@ -276,13 +284,13 @@ export class Sprites {
     sheetName: string,
     startSprite: number,
     endSprite: number,
-    frameDuration: number = 100
+    frameDuration: number = 100,
   ): SpriteAnimation {
     return new SpriteAnimation(
       sheetName,
       startSprite,
       endSprite,
-      frameDuration
+      frameDuration,
     );
   }
 
@@ -346,7 +354,7 @@ export class SpriteAnimation {
     sheetName: string,
     startSprite: number,
     endSprite: number,
-    frameDuration: number
+    frameDuration: number,
   ) {
     this.sheetName = sheetName;
     this.startSprite = startSprite;
@@ -361,13 +369,13 @@ export class SpriteAnimation {
    */
   update(deltaTime: number): void {
     if (!this.playing) return;
-    
+
     this.lastFrameTime += deltaTime;
-    
+
     if (this.lastFrameTime >= this.frameDuration) {
       this.lastFrameTime = 0;
       this.currentFrame++;
-      
+
       if (this.currentFrame > this.endSprite) {
         if (this.loop) {
           this.currentFrame = this.startSprite;
@@ -390,7 +398,7 @@ export class SpriteAnimation {
     ctx: KlintContext,
     x: number,
     y: number,
-    options?: Parameters<typeof Sprites.draw>[5]
+    options?: Parameters<typeof Sprites.draw>[5],
   ): void {
     Sprites.draw(ctx, this.sheetName, this.currentFrame, x, y, options);
   }
@@ -441,7 +449,7 @@ export class SpriteAnimation {
   setFrame(frame: number): void {
     this.currentFrame = Math.max(
       this.startSprite,
-      Math.min(this.endSprite, frame)
+      Math.min(this.endSprite, frame),
     );
   }
 

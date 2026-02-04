@@ -79,7 +79,7 @@ function AnimatedCircle() {
 ```jsx
 function InteractiveDrawing() {
   const { context, KlintMouse } = useKlint();
-  const mouse = KlintMouse();
+  const { mouse } = KlintMouse();
   
   const draw = (K) => {
     if (mouse.pressed) {

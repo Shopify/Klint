@@ -60,7 +60,7 @@ Use `KlintMouse` to track mouse position and state:
 ```tsx
 function MouseSketch() {
   const { context, KlintMouse } = useKlint();
-  const mouse = KlintMouse();
+  const { mouse } = KlintMouse();
   
   const draw = (K) => {
     K.background('#000');
@@ -193,7 +193,7 @@ function CompleteExample() {
     useWindow 
   } = useKlint();
   
-  const mouse = KlintMouse();
+  const { mouse } = KlintMouse();
   const keys = KlintKeys();
   const { onResize } = useWindow();
   

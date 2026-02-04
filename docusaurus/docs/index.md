@@ -108,7 +108,7 @@ Add mouse interaction with the `KlintMouse` hook:
 ```jsx
 function InteractiveSketch() {
   const { context, KlintMouse } = useKlint();
-  const mouse = KlintMouse();
+  const { mouse } = KlintMouse();
   
   const draw = (K) => {
     K.background('#000');

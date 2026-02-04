@@ -492,7 +492,7 @@ const draw = (K) => {
 Parse OpenType fonts for glyph-level access:
 
 ```tsx
-import { FontParser } from "@shopify/klint-plugins";
+import { FontParser } from "@shopify/klint/plugins";
 
 const preload = async () => {
   await FontParser.load("myFont", "/fonts/MyFont.otf");
@@ -517,7 +517,7 @@ const draw = (K) => {
 Smooth curves through points:
 
 ```tsx
-import { CatmullRom } from "@shopify/klint-plugins";
+import { CatmullRom } from "@shopify/klint/plugins";
 
 const points = [
   { x: 100, y: 100 },
@@ -536,7 +536,7 @@ K.endShape();
 Triangulation and Voronoi diagrams:
 
 ```tsx
-import { Delaunay } from "@shopify/klint-plugins";
+import { Delaunay } from "@shopify/klint/plugins";
 
 const points = Array(50)
   .fill(0)
@@ -558,7 +558,7 @@ for (const cell of voronoi.cellPolygons()) {
 Sprite sheet animations:
 
 ```tsx
-import { Sprites } from "@shopify/klint-plugins";
+import { Sprites } from "@shopify/klint/plugins";
 
 const sprite = Sprites.create(image, {
   frameWidth: 64,
@@ -578,7 +578,7 @@ const draw = (K) => {
 Entity management system:
 
 ```tsx
-import { Things } from "@shopify/klint-plugins";
+import { Things } from "@shopify/klint/plugins";
 
 const things = Things.create();
 

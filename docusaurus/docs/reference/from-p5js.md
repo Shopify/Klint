@@ -105,7 +105,7 @@ function draw() {
 **Klint**:
 ```tsx
 const { context, KlintMouse } = useKlint();
-const mouse = KlintMouse();
+const { mouse } = KlintMouse();
 
 const draw = (K) => {
   K.circle(mouse.x, mouse.y, 50);

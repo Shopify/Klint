@@ -202,7 +202,7 @@ const draw = (K) => {
 ```tsx
 function CanvasSketch() {
   const { context, KlintMouse } = useKlint();
-  const mouse = KlintMouse();
+  const { mouse } = KlintMouse();
   
   const draw = (K) => {
     K.background('#fff');
