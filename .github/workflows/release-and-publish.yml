@@ -35,6 +35,9 @@ jobs:
           cache: "npm"
           cache-dependency-path: "package-lock.json"
 
+      - name: Update npm to latest
+        run: npm install -g npm@latest
+
       - name: Install dependencies
         run: npm ci
 
@@ -73,6 +76,8 @@ jobs:
         run: |
           npm publish --workspace=packages/klint --access public --provenance
           npm publish --workspace=packages/klint-plugins --access public --provenance
+        env:
+          NPM_TOKEN: ''  # Empty string forces OIDC
 
       - name: Create GitHub Release
         uses: actions/create-release@v1
