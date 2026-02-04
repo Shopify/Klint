@@ -39,7 +39,7 @@ jobs:
         run: npm install -g npm@latest
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --workspace=packages/klint --workspace=packages/klint-plugins --include-workspace-root
 
       - name: Run tests
         run: npm run test --workspace=packages/klint
