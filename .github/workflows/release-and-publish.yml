@@ -77,7 +77,7 @@ jobs:
           npm publish --workspace=packages/klint --access public --provenance
           npm publish --workspace=packages/klint-plugins --access public --provenance
         env:
-          NPM_TOKEN: ''  # Empty string forces OIDC
+          NPM_TOKEN: "" # Empty string forces OIDC
 
       - name: Create GitHub Release
         uses: actions/create-release@v1
