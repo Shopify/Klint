@@ -9,8 +9,8 @@
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "klint-create-editor": "./bin/create-editor",
-    "klint-create-sandbox": "./bin/create-sandbox"
+    "klint-create-editor": "bin/create-editor",
+    "klint-create-sandbox": "bin/create-sandbox"
   },
   "exports": {
     ".": {

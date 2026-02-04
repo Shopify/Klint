@@ -4,45 +4,54 @@ on:
   push:
     tags:
       - "v*" # triggers on version tags
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g. v0.1.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  id-token: write
 
 jobs:
   release-and-publish:
     runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
     steps:
       - name: Checkout repo
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Important for generating release notes
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
-          cache: "yarn"
-          cache-dependency-path: "lib/yarn.lock"
+          cache: "npm"
+          cache-dependency-path: "package-lock.json"
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
-        working-directory: lib
+        run: npm ci
 
       - name: Run tests
-        run: yarn test || echo "Tests failed but continuing with release"
-        working-directory: lib
+        run: npm run test --workspace=packages/klint
 
-      - name: Build package
-        run: yarn build
-        working-directory: lib
+      - name: Build packages
+        run: npm run build:klint && npm run build:plugins
 
       - name: Generate Release Notes
         id: release_notes
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        uses: actions/github-script@v8
         with:
           script: |
             const { execSync } = require('child_process');
 
-            // Get the tag name
-            const tagName = context.ref.replace('refs/tags/', '');
+            const tagName = process.env.RELEASE_TAG;
 
             // Get the previous tag
             let previousTag;
@@ -60,19 +69,18 @@ jobs:
             core.setOutput('notes', notes);
             return notes;
 
-      - name: Publish to npm
-        run: yarn publish --access public
-        working-directory: lib
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish to npm (OIDC / Trusted Publishing)
+        run: |
+          npm publish --workspace=packages/klint --access public --provenance
+          npm publish --workspace=packages/klint-plugins --access public --provenance
 
       - name: Create GitHub Release
-        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1.1.4
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          release_name: Release ${{ env.RELEASE_TAG }}
           body: ${{ steps.release_notes.outputs.notes }}
           draft: false
           prerelease: false
