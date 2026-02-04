@@ -17,20 +17,20 @@ describe("Noise", () => {
     it("should set the random seed", () => {
       noise.seed(12345);
       const value1 = noise.perlin(0.5, 0.5);
-      
+
       noise.seed(12345);
       const value2 = noise.perlin(0.5, 0.5);
-      
+
       expect(value1).toBe(value2);
     });
 
     it("should produce different values with different seeds", () => {
       noise.seed(12345);
       const value1 = noise.perlin(0.5, 0.5);
-      
+
       noise.seed(54321);
       const value2 = noise.perlin(0.5, 0.5);
-      
+
       expect(value1).not.toBe(value2);
     });
   });
@@ -47,10 +47,10 @@ describe("Noise", () => {
     it("should produce consistent values with same seed", () => {
       noise.seed(42);
       const values1 = [noise.random(), noise.random(), noise.random()];
-      
+
       noise.seed(42);
       const values2 = [noise.random(), noise.random(), noise.random()];
-      
+
       expect(values1).toEqual(values2);
     });
   });
@@ -146,8 +146,8 @@ describe("Noise", () => {
     });
 
     it("should respect frequency parameter", () => {
-      const val1 = noise.fbm(0.1, 0.1, { frequency: 1 });
-      const val2 = noise.fbm(0.1, 0.1, { frequency: 10 });
+      const val1 = noise.fbm(0.37, 0.53, { frequency: 1 });
+      const val2 = noise.fbm(0.37, 0.53, { frequency: 10 });
       // Higher frequency should produce different values
       expect(val1).not.toBe(val2);
     });
@@ -182,7 +182,7 @@ describe("Noise", () => {
         amplitude: 1,
         frequency: 2,
         lacunarity: 2,
-        gain: 0.5
+        gain: 0.5,
       });
       expect(typeof val).toBe("number");
     });
