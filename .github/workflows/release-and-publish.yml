@@ -22,7 +22,7 @@ jobs:
       RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # Important for generating release notes
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
