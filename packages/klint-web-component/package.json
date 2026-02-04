@@ -1,6 +1,6 @@
 {
   "name": "@shopify/klint-web-component",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Klint Web Component - Standalone creative coding in the browser",
   "main": "index.js",
   "type": "module",
