@@ -8,3 +8,7 @@ sandbox/
 
 mcp-server
 klint-web-component
+
+# Local files
+oicd.txt
+.cursor/
