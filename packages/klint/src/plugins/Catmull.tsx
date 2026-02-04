@@ -1,4 +1,4 @@
-import { KlintContext } from "@shopify/klint";
+import { KlintContext } from "../Klint";
 
 /**
  * Static CatmullRom Plugin
