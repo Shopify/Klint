@@ -104,22 +104,7 @@ npm run build
 ```
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for development guidelines.
 
-## 🏆 Origins
-
-Created during Shopify's Winter 2024 Hackdays by:
-- 🔑 Arthur Cloche — @ac  
-- 👩‍💻 Carolyn McNeillie — @Carolyn McNeillie
-- 👨‍💻 John Bogan — @bogan
-- 👨‍💻 Dane Sun - @Dane  
-- 👨‍💻 Eric Johnson - @Eric Johnson
-
-With support from:
-- 💡 Ateş Göral — @atesgoral
-- 💡 Josh Sanger — @josh.sanger  
-- 💡 Mikko Haapoja — @mikko
-
 ## 📄 License
-
 MIT
 
 ---
