@@ -1,7 +1,7 @@
 {
   "id": "getting-started/quick-start",
   "title": "Quick Start",
-  "description": "Create your first Klint sketch in 2 minutes.",
+  "description": "Create your first Klint sketch in 2 minutes. Klint will take the size of its direct parent DOM element.",
   "source": "@site/docs/1-getting-started/quick-start.md",
   "sourceDirName": "1-getting-started",
   "slug": "/getting-started/quick-start",

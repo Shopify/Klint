@@ -1,7 +1,7 @@
 {
   "id": "elements/Time",
-  "title": "Time",
-  "description": "The Time element provides advanced timeline management and animation sequencing capabilities for complex animations.",
+  "title": "Timeline",
+  "description": "The Timeline provides advanced animation sequencing capabilities with keyframe-based animations. Unlike other elements, Timeline is accessed through the useKlint hook for optimal performance.",
   "source": "@site/docs/4-elements/Time.md",
   "sourceDirName": "4-elements",
   "slug": "/elements/Time",

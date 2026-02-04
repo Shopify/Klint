@@ -1,7 +1,7 @@
 {
   "id": "functions/transforms/translate",
   "title": "translate",
-  "description": "Translates (moves) the coordinate system origin by the specified amounts.",
+  "description": "Translates (moves) the coordinate system origin by the specified amounts. This is also used to change the origin of transformation for scale, rotation and applyTransform.",
   "source": "@site/docs/3-functions/transforms/translate.md",
   "sourceDirName": "3-functions/transforms",
   "slug": "/functions/transforms/translate",

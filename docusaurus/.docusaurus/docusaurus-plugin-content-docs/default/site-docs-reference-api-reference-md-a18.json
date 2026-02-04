@@ -16,8 +16,8 @@
   },
   "sidebar": "docs",
   "previous": {
-    "title": "Klint MCP Server",
-    "permalink": "/docs/advanced/mcp-server"
+    "title": "🎮 Interactive Editor",
+    "permalink": "/docs/advanced/klint-editor"
   },
   "next": {
     "title": "Migrating from p5.js",

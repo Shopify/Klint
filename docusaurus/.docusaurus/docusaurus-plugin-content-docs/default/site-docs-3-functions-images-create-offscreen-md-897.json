@@ -1,7 +1,7 @@
 {
   "id": "functions/images/createOffscreen",
   "title": "createOffscreen",
-  "description": "Creates an offscreen canvas for drawing operations outside the main canvas.",
+  "description": "Creates an offscreen canvas for drawing operations outside the main canvas. The best way to think about it is a transparent layer.",
   "source": "@site/docs/3-functions/images/createOffscreen.md",
   "sourceDirName": "3-functions/images",
   "slug": "/functions/images/createOffscreen",

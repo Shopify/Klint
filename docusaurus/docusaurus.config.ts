@@ -7,7 +7,7 @@ import type * as Preset from "@docusaurus/preset-classic";
 const config: Config = {
   title: "Klint Handbook",
   tagline: "The manual to a modern 2D Canvas made for React",
-  url: "https://klint.docs.shopify.io",
+  url: "https://shopify.github.io",
   baseUrl: "/",
   onBrokenLinks: "warn",
   onBrokenMarkdownLinks: "warn",
@@ -58,21 +58,12 @@ const config: Config = {
     image: "img/docusaurus-social-card.jpg",
     navbar: {
       title: "Klint",
-      logo: {
-        alt: "My Site Logo",
-        src: "img/logo.svg",
-      },
       items: [
         {
           type: "docSidebar",
-          sidebarId: "docs", // Changed from "sidebar" to "docs"
+          sidebarId: "docs",
           position: "left",
           label: "Docs",
-        },
-        {
-          href: "https://github.com/Shopify/Klint",
-          label: "Editor",
-          position: "left",
         },
         {
           href: "https://github.com/Shopify/Klint",
@@ -88,12 +79,8 @@ const config: Config = {
           title: "Community",
           items: [
             {
-              label: "Slack",
-              href: "https://shopify.enterprise.slack.com/archives/C04UJANU3LP",
-            },
-            {
-              label: "Vault",
-              href: "https://shopify.com",
+              label: "GitHub Discussions",
+              href: "https://github.com/Shopify/Klint/discussions",
             },
           ],
         },
@@ -102,12 +89,12 @@ const config: Config = {
           items: [
             {
               label: "GitHub",
-              href: "https://github.com/shopify/Klint",
+              href: "https://github.com/Shopify/Klint",
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Shopify Inc. Made w/ 💚 for Shopifolks, hit me @ac on Slack.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Shopify Inc.`,
     },
     prism: {
       theme: prismThemes.github,

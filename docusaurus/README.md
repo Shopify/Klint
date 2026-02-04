@@ -1,10 +1,6 @@
-# Website
+# Klint Documentation
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator. It can be visited at [klint.docs.shopify.io/](https://klint.docs.shopify.io/)
-
-[![Build status](https://badge.buildkite.com/97c3dd6dfb8619261e74d10604279d0eb3082fc5c8dff4942a.svg)](https://buildkite.com/shopify/klint-docs)
-
-https://buildkite.com/shopify/klint-docs
+This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
 
 ## Installation
 

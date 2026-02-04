@@ -104,15 +104,15 @@ export default [
   },
   {
     path: '/docs',
-    component: ComponentCreator('/docs', 'a1c'),
+    component: ComponentCreator('/docs', 'b8c'),
     routes: [
       {
         path: '/docs',
-        component: ComponentCreator('/docs', 'e9f'),
+        component: ComponentCreator('/docs', 'f96'),
         routes: [
           {
             path: '/docs',
-            component: ComponentCreator('/docs', '30e'),
+            component: ComponentCreator('/docs', '3c7'),
             routes: [
               {
                 path: '/docs/',
@@ -123,12 +123,6 @@ export default [
               {
                 path: '/docs/advanced/klint-editor',
                 component: ComponentCreator('/docs/advanced/klint-editor', 'b77'),
-                exact: true,
-                sidebar: "docs"
-              },
-              {
-                path: '/docs/advanced/mcp-server',
-                component: ComponentCreator('/docs/advanced/mcp-server', 'af5'),
                 exact: true,
                 sidebar: "docs"
               },
@@ -265,6 +259,11 @@ export default [
                 sidebar: "docs"
               },
               {
+                path: '/docs/functions/drawing/strip',
+                component: ComponentCreator('/docs/functions/drawing/strip', 'f62'),
+                exact: true
+              },
+              {
                 path: '/docs/functions/gradients/addColorStop',
                 component: ComponentCreator('/docs/functions/gradients/addColorStop', '73d'),
                 exact: true,
@@ -325,6 +324,11 @@ export default [
                 sidebar: "docs"
               },
               {
+                path: '/docs/functions/paths/clipTo',
+                component: ComponentCreator('/docs/functions/paths/clipTo', '9ed'),
+                exact: true
+              },
+              {
                 path: '/docs/functions/paths/endContour',
                 component: ComponentCreator('/docs/functions/paths/endContour', 'fbf'),
                 exact: true,
@@ -359,6 +363,11 @@ export default [
                 component: ComponentCreator('/docs/functions/styling/fillColor', 'a8a'),
                 exact: true,
                 sidebar: "docs"
+              },
+              {
+                path: '/docs/functions/styling/filters',
+                component: ComponentCreator('/docs/functions/styling/filters', 'ebd'),
+                exact: true
               },
               {
                 path: '/docs/functions/styling/noFill',
@@ -409,6 +418,16 @@ export default [
                 sidebar: "docs"
               },
               {
+                path: '/docs/functions/text/paragraph',
+                component: ComponentCreator('/docs/functions/text/paragraph', '67b'),
+                exact: true
+              },
+              {
+                path: '/docs/functions/transforms/applyTransform',
+                component: ComponentCreator('/docs/functions/transforms/applyTransform', 'fa3'),
+                exact: true
+              },
+              {
                 path: '/docs/functions/transforms/pop',
                 component: ComponentCreator('/docs/functions/transforms/pop', 'f66'),
                 exact: true,
@@ -419,6 +438,11 @@ export default [
                 component: ComponentCreator('/docs/functions/transforms/push', 'ceb'),
                 exact: true,
                 sidebar: "docs"
+              },
+              {
+                path: '/docs/functions/transforms/resetTransform',
+                component: ComponentCreator('/docs/functions/transforms/resetTransform', '39b'),
+                exact: true
               },
               {
                 path: '/docs/functions/transforms/rotate',
@@ -470,7 +494,7 @@ export default [
               },
               {
                 path: '/docs/klinfunctions-pixels',
-                component: ComponentCreator('/docs/klinfunctions-pixels', 'cc7'),
+                component: ComponentCreator('/docs/klinfunctions-pixels', '8b8'),
                 exact: true,
                 sidebar: "docs"
               },

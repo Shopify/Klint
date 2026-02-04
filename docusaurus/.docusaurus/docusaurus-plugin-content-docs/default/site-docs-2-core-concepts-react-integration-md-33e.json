@@ -1,7 +1,7 @@
 {
   "id": "core-concepts/react-integration",
   "title": "Using Klint with React",
-  "description": "Klint is designed specifically for React, integrating with its component model while carefully avoiding unnecessary re-renders. Understanding this architecture is key to building performant canvas applications.",
+  "description": "Klint is designed specifically for React, integrating with its component model while carefully avoiding unnecessary re-renders. Understanding this architecture is key to building performant Klint applications.",
   "source": "@site/docs/2-core-concepts/react-integration.md",
   "sourceDirName": "2-core-concepts",
   "slug": "/core-concepts/react-integration",

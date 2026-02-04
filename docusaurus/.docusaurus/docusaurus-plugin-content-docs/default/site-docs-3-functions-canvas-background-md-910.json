@@ -1,7 +1,7 @@
 {
   "id": "functions/canvas/background",
   "title": "background",
-  "description": "Sets the canvas background color or clears the canvas.",
+  "description": "Clears the canvas and sets its background color.",
   "source": "@site/docs/3-functions/canvas/background.md",
   "sourceDirName": "3-functions/canvas",
   "slug": "/functions/canvas/background",

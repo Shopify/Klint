@@ -1,7 +1,7 @@
 {
   "id": "functions/transforms/scale",
   "title": "scale",
-  "description": "Scales the coordinate system by the specified factors.",
+  "description": "Scales the coordinate system by the specified factors. The scale takes place around the (0,0), use translate() before scale() to rotate around a different point.",
   "source": "@site/docs/3-functions/transforms/scale.md",
   "sourceDirName": "3-functions/transforms",
   "slug": "/functions/transforms/scale",

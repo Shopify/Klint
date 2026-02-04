@@ -1,7 +1,7 @@
 {
   "id": "functions/transforms/rotate",
   "title": "rotate",
-  "description": "Rotates the coordinate system by the specified angle (in radians).",
+  "description": "Rotates the coordinate system by the specified angle (in radians). The rotation takes place around the (0,0), use translate() before rotate() to rotate around a different point.",
   "source": "@site/docs/3-functions/transforms/rotate.md",
   "sourceDirName": "3-functions/transforms",
   "slug": "/functions/transforms/rotate",

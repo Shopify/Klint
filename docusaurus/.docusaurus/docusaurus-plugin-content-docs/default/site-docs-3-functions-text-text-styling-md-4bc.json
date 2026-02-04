@@ -1,7 +1,7 @@
 {
   "id": "functions/text/klintfunctions-text-styling",
   "title": "Styling Text",
-  "description": "Klint provides various functions for styling and rendering text.",
+  "description": "Klint provides various functions for styling and rendering text. The 2D canvas API takes the font from the CSS imports, make sure the names are matching.",
   "source": "@site/docs/3-functions/text/text-styling.md",
   "sourceDirName": "3-functions/text",
   "slug": "/klinfunctions-text-styling",

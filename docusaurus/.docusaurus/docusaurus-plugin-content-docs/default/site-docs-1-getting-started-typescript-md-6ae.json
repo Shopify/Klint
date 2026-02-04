@@ -1,7 +1,7 @@
 {
   "id": "getting-started/typescript",
   "title": "TypeScript Setup",
-  "description": "Klint is built with TypeScript and provides comprehensive type definitions for a great developer experience.",
+  "description": "Klint is built with TypeScript and provides comprehensive type definitions.",
   "source": "@site/docs/1-getting-started/typescript.md",
   "sourceDirName": "1-getting-started",
   "slug": "/getting-started/typescript",

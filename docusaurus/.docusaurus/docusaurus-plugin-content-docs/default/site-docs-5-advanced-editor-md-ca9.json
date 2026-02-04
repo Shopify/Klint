@@ -22,7 +22,7 @@
     "permalink": "/docs/advanced/web-components"
   },
   "next": {
-    "title": "Klint MCP Server",
-    "permalink": "/docs/advanced/mcp-server"
+    "title": "API Reference",
+    "permalink": "/docs/reference/api-reference"
   }
 }

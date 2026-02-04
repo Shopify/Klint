@@ -1,7 +1,7 @@
 {
   "id": "core-concepts/klint-context",
   "title": "The Klint Context (K)",
-  "description": "The Klint Context, typically named K, is the enhanced canvas context that provides all drawing and utility functions.",
+  "description": "The Klint Context, typically named K in the documentation, is the enhanced canvas context that provides all drawing and utility functions. All the functions, patterns and plugins in Klint always reference this context, so you can always use any functions in any situations as long as you can reference it.",
   "source": "@site/docs/2-core-concepts/klint-context.md",
   "sourceDirName": "2-core-concepts",
   "slug": "/core-concepts/klint-context",

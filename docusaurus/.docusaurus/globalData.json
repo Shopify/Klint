@@ -16,11 +16,6 @@
               "sidebar": "docs"
             },
             {
-              "id": "advanced/mcp-server",
-              "path": "/docs/advanced/mcp-server",
-              "sidebar": "docs"
-            },
-            {
               "id": "advanced/plugins",
               "path": "/docs/plugins",
               "sidebar": "docs"
@@ -141,6 +136,10 @@
               "sidebar": "docs"
             },
             {
+              "id": "functions/drawing/strip",
+              "path": "/docs/functions/drawing/strip"
+            },
+            {
               "id": "functions/gradients/addColorStop",
               "path": "/docs/functions/gradients/addColorStop",
               "sidebar": "docs"
@@ -196,6 +195,10 @@
               "sidebar": "docs"
             },
             {
+              "id": "functions/paths/clipTo",
+              "path": "/docs/functions/paths/clipTo"
+            },
+            {
               "id": "functions/paths/endContour",
               "path": "/docs/functions/paths/endContour",
               "sidebar": "docs"
@@ -224,6 +227,10 @@
               "id": "functions/styling/fillColor",
               "path": "/docs/functions/styling/fillColor",
               "sidebar": "docs"
+            },
+            {
+              "id": "functions/styling/filters",
+              "path": "/docs/functions/styling/filters"
             },
             {
               "id": "functions/styling/noFill",
@@ -266,9 +273,17 @@
               "sidebar": "docs"
             },
             {
+              "id": "functions/text/paragraph",
+              "path": "/docs/functions/text/paragraph"
+            },
+            {
               "id": "functions/text/text",
               "path": "/docs/functions/text/",
               "sidebar": "docs"
+            },
+            {
+              "id": "functions/transforms/applyTransform",
+              "path": "/docs/functions/transforms/applyTransform"
             },
             {
               "id": "functions/transforms/pop",
@@ -279,6 +294,10 @@
               "id": "functions/transforms/push",
               "path": "/docs/functions/transforms/push",
               "sidebar": "docs"
+            },
+            {
+              "id": "functions/transforms/resetTransform",
+              "path": "/docs/functions/transforms/resetTransform"
             },
             {
               "id": "functions/transforms/rotate",

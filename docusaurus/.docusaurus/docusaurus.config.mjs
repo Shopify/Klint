@@ -6,7 +6,7 @@
 export default {
   "title": "Klint Handbook",
   "tagline": "The manual to a modern 2D Canvas made for React",
-  "url": "https://klint.docs.shopify.io",
+  "url": "https://shopify.github.io",
   "baseUrl": "/",
   "onBrokenLinks": "warn",
   "onBrokenMarkdownLinks": "warn",
@@ -88,21 +88,12 @@ export default {
     "image": "img/docusaurus-social-card.jpg",
     "navbar": {
       "title": "Klint",
-      "logo": {
-        "alt": "My Site Logo",
-        "src": "img/logo.svg"
-      },
       "items": [
         {
           "type": "docSidebar",
           "sidebarId": "docs",
           "position": "left",
           "label": "Docs"
-        },
-        {
-          "href": "https://github.com/Shopify/Klint",
-          "label": "Editor",
-          "position": "left"
         },
         {
           "href": "https://github.com/Shopify/Klint",
@@ -119,12 +110,8 @@ export default {
           "title": "Community",
           "items": [
             {
-              "label": "Slack",
-              "href": "https://shopify.enterprise.slack.com/archives/C04UJANU3LP"
-            },
-            {
-              "label": "Vault",
-              "href": "https://shopify.com"
+              "label": "GitHub Discussions",
+              "href": "https://github.com/Shopify/Klint/discussions"
             }
           ]
         },
@@ -133,12 +120,12 @@ export default {
           "items": [
             {
               "label": "GitHub",
-              "href": "https://github.com/shopify/Klint"
+              "href": "https://github.com/Shopify/Klint"
             }
           ]
         }
       ],
-      "copyright": "Copyright © 2025 Shopify Inc. Made w/ 💚 for Shopifolks, hit me @ac on Slack."
+      "copyright": "Copyright © 2026 Shopify Inc."
     },
     "prism": {
       "theme": {

@@ -1,7 +1,7 @@
 {
   "id": "functions/drawing/circle",
   "title": "circle",
-  "description": "Draws a circle on the canvas.",
+  "description": "Draws a circle or an ellipse on the canvas.",
   "source": "@site/docs/3-functions/drawing/circle.md",
   "sourceDirName": "3-functions/drawing",
   "slug": "/functions/drawing/circle",

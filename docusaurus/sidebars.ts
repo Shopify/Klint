@@ -147,7 +147,6 @@ const sidebars: SidebarsConfig = {
         'advanced/plugins',
         'advanced/web-components',
         'advanced/klint-editor',
-        'advanced/mcp-server',
       ],
     },
     {
