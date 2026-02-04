@@ -35,30 +35,6 @@
 - [x] Make vectors 3D + add cross, slerp and 3d transforms
 - [x] Essential plugins to be included in the library
 - [x] Update docs 
-<<<<<<< Current (Your changes)
-- [ ] loading / error state
-- [ ] Add KlintVideo - consider streaming data
-- [ ] Add fillrule : non-zero | even-odd
-- [ ] Add 'default' to K.blend() to reset to default
-
-#### Docs 
-- [ ] Review images-image.md
-- [ ] Review images-pixel-manipulation.md
-- [ ] Review styling-opacity : remove the Klint.State mention, replace with useStorage
-- [ ] Review text - text : not sure if accurate
-- [ ] Review text - text-styling : not sure if accurate
-- [ ] Review transforms - push : old
-- [ ] Review transforms - pop : old
-- [ ] Review transforms - resetTranform : missing
-- [ ] Review transforms - applyTransform : missing
-- [ ] Add missing functions and update according to lasts updates :
-    [ ] paragraph(),
-    [ ] clip()
-    [ ] strip()
-    [ ] filters
-    [ ] 3D vector operations
-    [ ] grids
-=======
 - [ ] loading state
 - [ ] Add KlintVideo - consider streaming data
 - [x] Add fillrule : non-zero | even-odd
@@ -81,7 +57,6 @@
     [x] filters
     [ ] 3D vector operations (check Vector.md)
     [ ] grids (check Grid element docs)
->>>>>>> Incoming (Background Agent changes)
 
 
 ### Elements 

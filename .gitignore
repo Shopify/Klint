@@ -9,6 +9,18 @@ sandbox/
 mcp-server
 klint-web-component
 
-# Local files
-oicd.txt
 .cursor/
+
+# IDE
+.vscode/
+
+# Shopify-specific infrastructure
+.shopify-build/
+.spin/
+shopify_docusaurus_installer.sh
+
+# Docusaurus cache
+.docusaurus/
+
+# Vite cache
+.vite/
