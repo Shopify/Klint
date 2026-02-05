@@ -20,7 +20,7 @@ klint-web-component
 shopify_docusaurus_installer.sh
 
 # Docusaurus cache
-.docusaurus/
+**/.docusaurus/
 
 # Vite cache
 .vite/

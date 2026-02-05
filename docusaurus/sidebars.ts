@@ -160,6 +160,11 @@ const sidebars: SidebarsConfig = {
         'reference/klint-hooks',
       ],
     },
+    {
+      type: 'link',
+      label: 'Download AI Skill',
+      href: '/SKILL.md',
+    },
   ],
 };
 

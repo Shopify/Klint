@@ -47,6 +47,9 @@ jobs:
       - name: Build packages
         run: npm run build
 
+      - name: Sync README to package
+        run: cp README.md packages/klint/README.md
+
       - name: Generate Release Notes
         id: release_notes
         uses: actions/github-script@v8

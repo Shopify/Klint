@@ -5,7 +5,7 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
-    "build": "npm run build:api && docusaurus build",
+    "build": "cp ../SKILL.md static/SKILL.md && npm run build:api && docusaurus build",
     "build:api": "node scripts/build-api-docs.js",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",

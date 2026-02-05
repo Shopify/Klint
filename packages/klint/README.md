@@ -1,89 +1,113 @@
-# Klint
+# 🎨 Klint
 
-A modern creative coding library for React applications that provides an intuitive interface to HTML Canvas 2D rendering. Klint simplifies the process of creating interactive graphics, animations, and visualizations.
+Klint is a modern 2D canvas library for React, inspired by p5.js and Processing. It makes creative coding in React intuitive and powerful, perfect for generative art, data visualization, interactive graphics, and creative web experiences.
 
-## Features
+## ✨ Features
 
-- React integration with hooks and components
-- Intuitive drawing API inspired by Processing and P5.js
-- Responsive canvas that automatically resizes
-- Support for animations, static renderings, and interactive content
-- Built-in utilities for managing state, input, and resources
+- 🎯 **React-first**: Built specifically for React with hooks and component patterns
+- 🎨 **Creative coding**: p5.js-like API with modern JavaScript/TypeScript
+- 🚀 **Performance**: Direct canvas access with minimal overhead
+- 🛠️ **Developer friendly**: Full TypeScript support and great tooling
+- 🔧 **Extensible**: Plugin system and easy customization
 
-## Example
+## 🚀 Quick Start
+
+### Install Klint
+
+```bash
+npm install @shopify/klint
+```
+
+### Basic Usage
 
 ```jsx
-import { Klint, useKlint, type KlintContext } from "klint";
+import { useKlint, Klint } from '@shopify/klint';
 
-function AnimatedCircle() {
+function MySketch() {
   const { context } = useKlint();
-
-  const draw = (K: KlintContext) => {
-    K.background("#222");
-    K.fillColor("red");
-    
-    // Draw a pulsing circle at the center of the canvas
-    const size = 50 + Math.sin(K.frame * 0.05) * 25;
-    K.circle(K.width/2, K.height/2, size);
+  
+  const draw = (K) => {
+    K.background('#000');
+    K.fillColor('#ff6b6b');
+    K.circle(K.width/2, K.height/2, 50);
   };
   
   return <Klint context={context} draw={draw} />;
 }
 ```
 
-## Release Process
+## 🎮 Try the Editor
 
-This package uses GitHub Actions for automated releases. Here's how to create a new release:
+Want to experiment with Klint interactively? Create a live editor environment:
 
-## Development and tests
+```bash
+npx @shopify/klint klint-create-editor my-klint-project
+cd my-klint-project
+npm install
+npm run dev
+```
 
-> **Important:** The Klint library isn't public yet, so you'll need to link it manually if you want to edit it.
+This creates a Monaco-based editor with live preview - perfect for learning and prototyping!
 
-1. Clone the repository
-   ```bash
-   git clone https://github.com/Shopify/klint.git
-   cd klint
-   ```
+## 📚 Documentation
 
-2. Go to the lib folder and link it locally
-   ```bash
-   cd lib
-   npm link
-   ```
+- **[Getting Started Guide](https://shopify.github.io/Klint/)** - Learn the basics
+- **[API Reference](https://shopify.github.io/Klint/docs/Functions/introduction)** - Complete function reference  
+- **[Examples](https://shopify.github.io/Klint/experiments)** - See Klint in action
+- **[Lifecycle](https://shopify.github.io/Klint/docs/klint-introduction)** - Understand how Klint works with React
 
-3. In your working directory, link to the local Klint
-   ```bash
-   cd your-project
-   npm link klint
-   ```
+## 🌟 Examples
 
-4. Run the dev server:
-   ```bash
-   npm run dev
-   ```
+### Animated Circle
+```jsx
+function AnimatedCircle() {
+  const { context } = useKlint();
+  
+  const draw = (K) => {
+    K.background('rgba(0, 0, 0, 0.1)');
+    K.fillColor('#4ecdc4');
+    const x = K.width/2 + Math.cos(K.frame * 0.02) * 100;
+    const y = K.height/2 + Math.sin(K.frame * 0.02) * 100;
+    K.circle(x, y, 20);
+  };
+  
+  return <Klint context={context} draw={draw} />;
+}
+```
 
-5. When finished, unlink both in your project and the local repo
-   ```bash
-   # In your project
-   npm unlink klint
-   
-   # In the Klint lib folder
-   npm unlink
-   ```
+### Interactive Drawing
+```jsx
+function InteractiveDrawing() {
+  const { context, KlintMouse } = useKlint();
+  const { mouse } = KlintMouse();
+  
+  const draw = (K) => {
+    if (mouse.pressed) {
+      K.fillColor('red');
+      K.circle(mouse.x, mouse.y, 10);
+    }
+  };
+  
+  return <Klint context={context} draw={draw} />;
+}
+```
 
-6. If you change anything in the library, you will need to rebuild
-   ```bash
-   # In the Klint lib folder
-   npm build
-   npm link
-   ```
+## 🛠️ Development
 
-7. I use Vitest for testing
-   ```bash
-   npm test
-   ```
+**For contributors** who want to work on Klint itself:
 
-8. Push your commit
+```bash
+git clone https://github.com/Shopify/klint.git
+cd klint
+npm install
+npm run build
+```
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for development guidelines.
 
+## 📄 License
+MIT
 
-Made with love at Shopify, 2025
+---
+
+**Ready to create?** Start with `npx @shopify/klint klint-create-editor my-project` 🎨
+
