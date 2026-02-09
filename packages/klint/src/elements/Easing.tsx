@@ -7,6 +7,23 @@ interface KlintEasing {
   overshootIn: (val: number) => number;
   overshootOut: (val: number) => number;
   overshootInOut: (val: number) => number;
+  bounceIn: (val: number) => number;
+  bounceOut: (val: number) => number;
+  bounceInOut: (val: number) => number;
+  elasticIn: (val: number) => number;
+  elasticOut: (val: number) => number;
+  elasticInOut: (val: number) => number;
+  smoothstep: (val: number, x0?: number, x1?: number) => number;
+  spring: (val: number, tension?: number, friction?: number) => number;
+  steps: (val: number, n?: number) => number;
+  damp: (
+    current: number,
+    target: number,
+    smoothing: number,
+    deltaTime: number,
+  ) => number;
+  impulse: (val: number, k?: number) => number;
+  parabola: (val: number, k?: number) => number;
 }
 
 class Easing implements KlintEasing {
@@ -117,6 +134,76 @@ class Easing implements KlintEasing {
     let p = (val - x0) / (x1 - x0);
     p = p < 0 ? 0 : p > 1 ? 1 : p;
     return p * p * (3 - 2 * p);
+  };
+
+  /**
+   * Damped spring easing. Physically expressive oscillation.
+   * @param val - Progress value (0 to 1)
+   * @param tension - Spring tension (0 to 1, default 0.5). Higher = faster oscillation.
+   * @param friction - Spring friction (0 to 1, default 0.5). Higher = less damping (more bouncy).
+   */
+  spring = (val: number, tension: number = 0.5, friction: number = 0.5) => {
+    const omega = tension * 40;
+    const zeta = 1 - friction;
+
+    if (zeta < 1) {
+      const omegaD = omega * Math.sqrt(1 - zeta * zeta);
+      return (
+        1 -
+        Math.exp(-zeta * omega * val) *
+          (Math.cos(omegaD * val) +
+            ((zeta * omega) / omegaD) * Math.sin(omegaD * val))
+      );
+    }
+    return 1 - (1 + omega * val) * Math.exp(-omega * val);
+  };
+
+  /**
+   * Staircase easing. Quantizes to N discrete steps.
+   * @param val - Progress value (0 to 1)
+   * @param n - Number of steps (default 4)
+   */
+  steps = (val: number, n: number = 4) => {
+    if (n <= 0) return val;
+    return Math.floor(val * n) / n;
+  };
+
+  /**
+   * Frame-rate independent exponential smoothing.
+   * Use instead of naive `lerp(a, b, 0.1)` which breaks at different FPS.
+   * @param current - Current value
+   * @param target - Target value
+   * @param smoothing - Smoothing factor (higher = faster convergence)
+   * @param deltaTime - Time since last frame in seconds
+   */
+  damp = (
+    current: number,
+    target: number,
+    smoothing: number,
+    deltaTime: number,
+  ) => {
+    return (
+      current + (target - current) * (1 - Math.exp(-smoothing * deltaTime))
+    );
+  };
+
+  /**
+   * Quick rise then decay. Great for hit effects, flashes.
+   * @param val - Progress value (0 to 1)
+   * @param k - Sharpness (default 6). Higher = sharper peak.
+   */
+  impulse = (val: number, k: number = 6) => {
+    const h = k * val;
+    return h * Math.exp(1 - h);
+  };
+
+  /**
+   * Symmetric arc. Useful for jumps, throw curves.
+   * @param val - Progress value (0 to 1)
+   * @param k - Steepness (default 1)
+   */
+  parabola = (val: number, k: number = 1) => {
+    return Math.pow(4 * val * (1 - val), k);
   };
 
   log = () => {

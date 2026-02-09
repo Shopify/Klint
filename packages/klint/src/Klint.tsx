@@ -30,9 +30,7 @@ export type CurveVertex =
     };
 
 export interface KlintOffscreenContext
-  extends CanvasRenderingContext2D,
-    KlintFunctions,
-    KlintElements {
+  extends CanvasRenderingContext2D, KlintFunctions, KlintElements {
   width: number;
   height: number;
   __dpr: number;
@@ -62,19 +60,8 @@ export interface KlintOffscreenContext
   [key: string]: any;
 }
 
-export interface KlintPerformanceMetrics {
-  fps: number;
-  frameTime: number; // Time taken to render last frame in ms
-  averageFrameTime: number; // Rolling average frame time
-  minFrameTime: number;
-  maxFrameTime: number;
-  droppedFrames: number; // Frames that took longer than target frame time
-  memoryUsage?: number; // If available (in MB)
-}
-
 export interface KlintContext
-  extends KlintOffscreenContext,
-    KlintCoreFunctions {
+  extends KlintOffscreenContext, KlintCoreFunctions {
   frame: number;
   time: number;
   deltaTime: number;
@@ -83,7 +70,6 @@ export interface KlintContext
   __lastRealTime: number;
   __isPlaying: boolean;
   __offscreens: Map<string, KlintOffscreenContext | HTMLImageElement>;
-  __performance?: KlintPerformanceMetrics;
 }
 
 export interface KlintCanvasOptions {
@@ -122,7 +108,7 @@ export interface KlintContextWrapper {
   context: KlintContext | null;
   initCoreContext: (
     canvas: HTMLCanvasElement,
-    options: KlintCanvasOptions
+    options: KlintCanvasOptions,
   ) => KlintContext;
 }
 
@@ -162,29 +148,20 @@ export interface KlintProps {
   options?: KlintCanvasOptions;
   onResize?: (ctx: KlintContext) => void;
   onVisible?: (ctx: KlintContext) => void;
-  enablePerformanceTracking?: boolean;
 }
 
 function useAnimate(
   contextRef: React.RefObject<KlintContext | null>,
   draw: (context: KlintContext) => void,
   isVisible: boolean,
-  enablePerformanceTracking = false
 ) {
   const animationFrameId = useRef<number>(0);
-  const frameTimeHistoryRef = useRef<number[]>([]);
-  const frameStartTimeRef = useRef<number>(0);
-  const frameCountRef = useRef<number>(0);
-  const lastFpsUpdateRef = useRef<number>(0);
-  const droppedFramesRef = useRef<number>(0);
 
   const animate = useCallback(
     (timestamp = 0) => {
       if (!contextRef.current || !isVisible) return;
       if (!contextRef.current.__isReadyToDraw) return;
-      if (!contextRef.current.__isPlaying) {
-        return;
-      }
+      if (!contextRef.current.__isPlaying) return;
 
       const context = contextRef.current;
       const now = timestamp;
@@ -193,79 +170,25 @@ function useAnimate(
       if (!context.__lastTargetTime) {
         context.__lastTargetTime = now;
         context.__lastRealTime = now;
-        frameStartTimeRef.current = now;
-        lastFpsUpdateRef.current = now;
       }
 
       const sinceLast = now - context.__lastTargetTime;
       const epsilon = 5;
 
       if (sinceLast >= target - epsilon) {
-        const frameStart =
-          enablePerformanceTracking && context.__performance
-            ? performance.now()
-            : 0;
-
         context.deltaTime = now - context.__lastRealTime;
         draw(context);
         if (context.time > 1e7) context.time = 0;
         if (context.frame > 1e7) context.frame = 0;
-        context.time += context.deltaTime / 1000; // Convert ms to seconds
-
+        context.time += context.deltaTime / 1000;
         context.frame++;
         context.__lastTargetTime = now;
         context.__lastRealTime = now;
-
-        // Performance tracking
-        if (enablePerformanceTracking && context.__performance) {
-          const frameTime = performance.now() - frameStart;
-          const targetFrameTime = 1000 / context.fps;
-
-          frameTimeHistoryRef.current.push(frameTime);
-          if (frameTimeHistoryRef.current.length > 60) {
-            frameTimeHistoryRef.current.shift(); // Keep last 60 frames
-          }
-
-          // Update metrics
-          const avgFrameTime =
-            frameTimeHistoryRef.current.reduce((a, b) => a + b, 0) /
-            frameTimeHistoryRef.current.length;
-          context.__performance.frameTime = frameTime;
-          context.__performance.averageFrameTime = avgFrameTime;
-          context.__performance.minFrameTime = Math.min(
-            ...frameTimeHistoryRef.current
-          );
-          context.__performance.maxFrameTime = Math.max(
-            ...frameTimeHistoryRef.current
-          );
-
-          if (frameTime > targetFrameTime * 1.1) {
-            droppedFramesRef.current++;
-          }
-          context.__performance.droppedFrames = droppedFramesRef.current;
-
-          // Update FPS every second
-          frameCountRef.current++;
-          if (now - lastFpsUpdateRef.current >= 1000) {
-            context.__performance.fps = frameCountRef.current;
-            frameCountRef.current = 0;
-            lastFpsUpdateRef.current = now;
-
-            // Memory usage if available
-            if (
-              typeof performance !== "undefined" &&
-              (performance as any).memory
-            ) {
-              context.__performance.memoryUsage =
-                (performance as any).memory.usedJSHeapSize / 1048576; // MB
-            }
-          }
-        }
       }
 
       animationFrameId.current = requestAnimationFrame(animate);
     },
-    [draw, isVisible, contextRef, enablePerformanceTracking]
+    [draw, isVisible, contextRef],
   );
 
   return {
@@ -282,38 +205,42 @@ export default function Klint({
   options = {},
   preload,
   onVisible,
-  enablePerformanceTracking = false,
 }: KlintProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const contextRef = useRef<KlintContext | null>(null); // KlintCoreContext | undefined
   const intersectionObserverRef = useRef<IntersectionObserver | null>(null);
   const resizeCallbackRef = useRef<((this: Window, ev: UIEvent) => any) | null>(
-    null
+    null,
   );
   const [isVisible, setIsVisible] = useState(true);
 
   // HMR cleanup for development
   useEffect(() => {
+    const resetContext = () => {
+      if (contextRef.current) {
+        const ctx = contextRef.current;
+        ctx.__isPlaying = false;
+        ctx.frame = 0;
+        ctx.time = 0;
+        ctx.__offscreens?.clear();
+        ctx.__startedShape = false;
+        ctx.__currentShape = null;
+        ctx.__startedContour = false;
+        ctx.__currentContours = null;
+        ctx.__currentContour = null;
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      }
+    };
+
     // Vite HMR
     if (typeof import.meta !== "undefined" && (import.meta as any).hot) {
-      (import.meta as any).hot.dispose(() => {
-        console.log("[Klint] Component unmounting due to HMR");
-        // Force cleanup of any pending animations
-        if (contextRef.current) {
-          contextRef.current.__isPlaying = false;
-        }
-      });
+      (import.meta as any).hot.dispose(resetContext);
     }
 
     // Webpack HMR fallback
     if (typeof module !== "undefined" && (module as any).hot) {
-      (module as any).hot.dispose(() => {
-        console.log("[Klint] Component unmounting due to Webpack HMR");
-        if (contextRef.current) {
-          contextRef.current.__isPlaying = false;
-        }
-      });
+      (module as any).hot.dispose(resetContext);
     }
   }, []);
   const __options = {
@@ -323,12 +250,7 @@ export default function Klint({
   const [toStaticImage, setStaticImage] = useState<string | null>(null);
 
   const initContext = context?.initCoreContext;
-  const { animate, animationFrameId } = useAnimate(
-    contextRef,
-    draw,
-    isVisible,
-    enablePerformanceTracking
-  );
+  const { animate, animationFrameId } = useAnimate(contextRef, draw, isVisible);
 
   const updateCanvasSize = (shouldRedraw = false) => {
     if (!containerRef.current || !contextRef.current || !canvasRef.current)
@@ -369,18 +291,6 @@ export default function Klint({
 
     context.__dpr = dpr;
 
-    // Initialize performance tracking if enabled
-    if (enablePerformanceTracking) {
-      context.__performance = {
-        fps: 0,
-        frameTime: 0,
-        averageFrameTime: 0,
-        minFrameTime: Infinity,
-        maxFrameTime: 0,
-        droppedFrames: 0,
-      };
-    }
-
     if (__options.fps && __options.fps !== context.fps) {
       context.fps = __options.fps;
     }
@@ -403,7 +313,7 @@ export default function Klint({
           onVisible?.(context);
         });
       },
-      { threshold: 0.1, root: null, rootMargin: "50px" }
+      { threshold: 0.1, root: null, rootMargin: "50px" },
     );
     intersectionObserverRef.current.observe(container);
 

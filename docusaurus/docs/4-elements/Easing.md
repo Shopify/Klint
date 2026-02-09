@@ -335,13 +335,114 @@ const draw = (K: KlintContext) => {
 }
 ```
 
+## Spring
+
+### spring(val, tension?, friction?)
+
+```ts
+spring(val: number, tension?: number, friction?: number) => number
+```
+
+Damped spring easing. More physically expressive than elastic — feels "alive."
+
+- `tension` (0-1, default 0.5): Higher = faster oscillation.
+- `friction` (0-1, default 0.5): Higher = more bouncy (less damping).
+
+```tsx
+const t = (K.time % 2) / 2;
+
+// Bouncy spring
+const bouncy = K.Easing.spring(t, 0.5, 0.8);
+
+// Critically damped (no overshoot)
+const smooth = K.Easing.spring(t, 0.5, 0);
+```
+
+## Steps
+
+### steps(val, n?)
+
+```ts
+steps(val: number, n?: number) => number
+```
+
+Staircase easing — quantizes to N discrete steps. Great for pixel art aesthetics or snapping animations.
+
+```tsx
+const t = (K.time % 3) / 3;
+const stepped = K.Easing.steps(t, 8); // 8 distinct levels
+
+K.fillColor('#fff');
+K.rectangle(50, 50 + stepped * 300, 40, 40);
+```
+
+## Damp
+
+### damp(current, target, smoothing, deltaTime)
+
+```ts
+damp(current: number, target: number, smoothing: number, deltaTime: number) => number
+```
+
+Frame-rate independent exponential smoothing. Use instead of `lerp(a, b, 0.1)` which breaks at different FPS.
+
+```tsx
+// Smooth camera follow (in your draw loop)
+cameraX = K.Easing.damp(cameraX, player.x, 5, K.deltaTime / 1000);
+cameraY = K.Easing.damp(cameraY, player.y, 5, K.deltaTime / 1000);
+
+// Smooth mouse trailing
+trailX = K.Easing.damp(trailX, mouse.x, 8, K.deltaTime / 1000);
+trailY = K.Easing.damp(trailY, mouse.y, 8, K.deltaTime / 1000);
+```
+
+## Impulse
+
+### impulse(val, k?)
+
+```ts
+impulse(val: number, k?: number) => number
+```
+
+Quick rise then decay. Perfect for hit effects, flashes, particles. Peak is at `val = 1/k`.
+
+```tsx
+const t = (K.time % 1);
+const flash = K.Easing.impulse(t, 6);
+
+K.fillColor(`rgba(255, 255, 255, ${flash})`);
+K.circle(K.width / 2, K.height / 2, 50 + flash * 30);
+```
+
+## Parabola
+
+### parabola(val, k?)
+
+```ts
+parabola(val: number, k?: number) => number
+```
+
+Symmetric arc — 0 at edges, 1 at center. Useful for jump arcs, throw curves.
+
+```tsx
+const t = (K.time % 2) / 2;
+const arc = K.Easing.parabola(t);
+
+// Jump arc
+const jumpHeight = 200;
+const playerY = groundY - arc * jumpHeight;
+K.circle(playerX, playerY, 15);
+```
+
 ## Notes
 
 - All easing functions expect input values between 0 and 1
-- Output typically ranges from 0 to 1, but some functions (like overshoot) may go beyond this range
+- Output typically ranges from 0 to 1, but some functions (like overshoot, spring) may go beyond this range
+- `damp` is the exception — it takes current/target values and returns the smoothed result
 - Combine multiple easing functions for complex animations
 - Use `normalize()` and `expand()` to convert between different ranges
 - For UI animations, overshoot easing feels responsive and modern
 - Bounce and elastic easings work well for playful, attention-grabbing effects
 - Smoothstep is excellent for crossfades and smooth transitions
-- Chain easing functions: `K.Easing.inout(K.Easing.bounceOut(t))` 
+- Chain easing functions: `K.Easing.inout(K.Easing.bounceOut(t))`
+- `damp` is frame-rate independent — prefer it over naive `lerp(a, b, 0.1)` 

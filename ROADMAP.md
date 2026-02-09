@@ -94,6 +94,7 @@
 - [ ] Advanced bezier : see bezier.js
 - [ ] Springs
 - [ ] Particles 
+- [ ] State Machine : finite state machines with enter/update/exit hooks, conditional auto-transitions, timed transitions with easing. Needs more design thought around API surface and integration patterns.
 - [ ] Worker
 - [ ] Bitmap font rendering => render to image, get atlas of chars on texture, text composer
 - [ ] True SSR => return base64

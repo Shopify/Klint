@@ -21,6 +21,7 @@ const sidebars: SidebarsConfig = {
         'core-concepts/klint-context',
         'core-concepts/react-integration',
         'core-concepts/coordinates',
+        'core-concepts/timeline',
       ],
     },
     {
@@ -36,7 +37,6 @@ const sidebars: SidebarsConfig = {
             'functions/drawing/line',
             'functions/drawing/point',
             'functions/drawing/polygon',
-            'functions/drawing/arc',
             'functions/drawing/disk',
             'functions/drawing/ellipse',
             'functions/drawing/roundedRectangle',
@@ -133,9 +133,8 @@ const sidebars: SidebarsConfig = {
       items: [
         'elements/Color',
         'elements/Vector',
-        'elements/Time',
         'elements/State',
-        'elements/Thing',
+
         'elements/Text',
         'elements/Easing',
       ],

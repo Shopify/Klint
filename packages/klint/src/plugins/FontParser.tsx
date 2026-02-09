@@ -41,15 +41,6 @@ class BinaryReader {
     return num / 16384;
   }
 
-  readInt(buff: Uint8Array, p: number): number {
-    const a = this.t.uint8;
-    a[0] = buff[p + 3];
-    a[1] = buff[p + 2];
-    a[2] = buff[p + 1];
-    a[3] = buff[p];
-    return this.t.int32[0];
-  }
-
   readInt8(buff: Uint8Array, p: number): number {
     const a = this.t.uint8;
     a[0] = buff[p];
@@ -83,22 +74,10 @@ class BinaryReader {
     return this.t.uint32[0];
   }
 
-  readUint64(buff: Uint8Array, p: number): number {
-    return (
-      this.readUint(buff, p) * (0xffffffff + 1) + this.readUint(buff, p + 4)
-    );
-  }
-
   readASCII(buff: Uint8Array, p: number, l: number): string {
     let s = "";
     for (let i = 0; i < l; i++) s += String.fromCharCode(buff[p + i]);
     return s;
-  }
-
-  readBytes(buff: Uint8Array, p: number, l: number): number[] {
-    const arr: number[] = [];
-    for (let i = 0; i < l; i++) arr.push(buff[p + i]);
-    return arr;
   }
 }
 
@@ -172,18 +151,18 @@ export interface FontData {
   toPaths(
     text: string,
     size?: number,
-    options?: FontTextOptions
+    options?: FontTextOptions,
   ): FontPathsResult;
   toPoints(
     text: string,
     size?: number,
-    options?: FontTextOptions
+    options?: FontTextOptions,
   ): FontPointsResult;
   layoutText(
     font: any,
     text: string,
     size: number,
-    options?: FontTextOptions
+    options?: FontTextOptions,
   ): any;
 
   // Font metadata
@@ -205,14 +184,13 @@ export interface FontData {
 function findTable(
   data: Uint8Array,
   tab: string,
-  foff: number = 0
+  foff: number = 0,
 ): [number, number] | null {
   const numTables = bin.readUshort(data, foff + 4);
   let offset = foff + 12;
 
   for (let i = 0; i < numTables; i++) {
     const tag = bin.readASCII(data, offset, 4);
-    const checkSum = bin.readUint(data, offset + 4);
     const toffset = bin.readUint(data, offset + 8);
     const length = bin.readUint(data, offset + 12);
     if (tag === tab) return [toffset, length];
@@ -225,119 +203,54 @@ function findTable(
 const Tables: any = {
   head: {
     parseTab(data: Uint8Array, offset: number, length: number): any {
-      const obj: any = {};
-      const tableVersion = bin.readFixed(data, offset);
-      offset += 4;
-
-      obj.fontRevision = bin.readFixed(data, offset);
-      offset += 4;
-      const checkSumAdjustment = bin.readUint(data, offset);
-      offset += 4;
-      const magicNumber = bin.readUint(data, offset);
-      offset += 4;
-      obj.flags = bin.readUshort(data, offset);
-      offset += 2;
-      obj.unitsPerEm = bin.readUshort(data, offset);
-      offset += 2;
-      obj.created = bin.readUint64(data, offset);
-      offset += 8;
-      obj.modified = bin.readUint64(data, offset);
-      offset += 8;
-      obj.xMin = bin.readShort(data, offset);
-      offset += 2;
-      obj.yMin = bin.readShort(data, offset);
-      offset += 2;
-      obj.xMax = bin.readShort(data, offset);
-      offset += 2;
-      obj.yMax = bin.readShort(data, offset);
-      offset += 2;
-      obj.macStyle = bin.readUshort(data, offset);
-      offset += 2;
-      obj.lowestRecPPEM = bin.readUshort(data, offset);
-      offset += 2;
-      obj.fontDirectionHint = bin.readShort(data, offset);
-      offset += 2;
-      obj.indexToLocFormat = bin.readShort(data, offset);
-      offset += 2;
-      obj.glyphDataFormat = bin.readShort(data, offset);
-      offset += 2;
-      return obj;
+      return {
+        flags: bin.readUshort(data, offset + 16),
+        unitsPerEm: bin.readUshort(data, offset + 18),
+        xMin: bin.readShort(data, offset + 36),
+        yMin: bin.readShort(data, offset + 38),
+        xMax: bin.readShort(data, offset + 40),
+        yMax: bin.readShort(data, offset + 42),
+        indexToLocFormat: bin.readShort(data, offset + 50),
+      };
     },
   },
 
   maxp: {
     parseTab(data: Uint8Array, offset: number, length: number): any {
-      const obj: any = {};
-      const ver = bin.readUint(data, offset);
-      offset += 4;
-      obj.numGlyphs = bin.readUshort(data, offset);
-      offset += 2;
-      return obj;
+      return { numGlyphs: bin.readUshort(data, offset + 4) };
     },
   },
 
   hhea: {
     parseTab(data: Uint8Array, offset: number, length: number): any {
-      const obj: any = {};
-      const tableVersion = bin.readFixed(data, offset);
-      offset += 4;
-
-      const keys = [
-        "ascender",
-        "descender",
-        "lineGap",
-        "advanceWidthMax",
-        "minLeftSideBearing",
-        "minRightSideBearing",
-        "xMaxExtent",
-        "caretSlopeRise",
-        "caretSlopeRun",
-        "caretOffset",
-        "res0",
-        "res1",
-        "res2",
-        "res3",
-        "metricDataFormat",
-        "numberOfHMetrics",
-      ];
-
-      for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        const func =
-          key === "advanceWidthMax" || key === "numberOfHMetrics"
-            ? bin.readUshort
-            : bin.readShort;
-        obj[key] = func.call(bin, data, offset + i * 2);
-      }
-      return obj;
+      return {
+        ascender: bin.readShort(data, offset + 4),
+        descender: bin.readShort(data, offset + 6),
+        lineGap: bin.readShort(data, offset + 8),
+        numberOfHMetrics: bin.readUshort(data, offset + 34),
+      };
     },
   },
 
   hmtx: {
     parseTab(data: Uint8Array, offset: number, length: number, font: any): any {
       const aWidth: number[] = [];
-      const lsBearing: number[] = [];
-
       const nG = font.maxp.numGlyphs;
       const nH = font.hhea.numberOfHMetrics;
       let aw = 0,
-        lsb = 0,
         i = 0;
 
       while (i < nH) {
         aw = bin.readUshort(data, offset + (i << 2));
-        lsb = bin.readShort(data, offset + (i << 2) + 2);
         aWidth.push(aw);
-        lsBearing.push(lsb);
         i++;
       }
       while (i < nG) {
         aWidth.push(aw);
-        lsBearing.push(lsb);
         i++;
       }
 
-      return { aWidth, lsBearing };
+      return { aWidth };
     },
   },
 
@@ -346,7 +259,7 @@ const Tables: any = {
       data: Uint8Array,
       offset: number,
       length: number,
-      font: any
+      font: any,
     ): number[] {
       const obj: number[] = [];
       const ver = font.head.indexToLocFormat;
@@ -410,9 +323,6 @@ const Tables: any = {
     readFormat0(data: Uint8Array, offset: number, map: any): number {
       let pleft = -1;
       const nPairs = bin.readUshort(data, offset);
-      const searchRange = bin.readUshort(data, offset + 2);
-      const entrySelector = bin.readUshort(data, offset + 4);
-      const rangeShift = bin.readUshort(data, offset + 6);
       offset += 8;
 
       for (let j = 0; j < nPairs; j++) {
@@ -481,14 +391,7 @@ const cmap = {
   },
 
   parse0(data: Uint8Array, offset: number, obj: any): any {
-    const startOffset = offset;
-    const format = bin.readUshort(data, offset);
-    offset += 2;
-    const length = bin.readUshort(data, offset);
-    offset += 2;
-    const language = bin.readUshort(data, offset);
-    offset += 2;
-
+    offset += 6; // skip format, length, language
     obj.map = [] as number[];
     for (let i = 0; i < 256; i++) obj.map.push(data[offset + i]);
 
@@ -497,12 +400,9 @@ const cmap = {
 
   parse4(data: Uint8Array, offset: number, obj: any): any {
     const startOffset = offset;
-    const format = bin.readUshort(data, offset);
-    offset += 2;
+    offset += 2; // skip format
     const length = bin.readUshort(data, offset);
-    offset += 2;
-    const language = bin.readUshort(data, offset);
-    offset += 2;
+    offset += 4; // skip length + language
     const segCountX2 = bin.readUshort(data, offset);
     offset += 2;
     const segCount = segCountX2 >>> 1;
@@ -528,20 +428,14 @@ const cmap = {
     obj.glyphIdArray = bin.readUshorts(
       data,
       offset,
-      (startOffset + length - offset) >> 1
+      (startOffset + length - offset) >> 1,
     );
 
     return obj;
   },
 
   parse6(data: Uint8Array, offset: number, obj: any): any {
-    const startOffset = offset;
-    const format = bin.readUshort(data, offset);
-    offset += 2;
-    const length = bin.readUshort(data, offset);
-    offset += 2;
-    const language = bin.readUshort(data, offset);
-    offset += 2;
+    offset += 6; // skip format, length, language
     obj.firstCode = bin.readUshort(data, offset);
     offset += 2;
     obj.entryCount = bin.readUshort(data, offset);
@@ -553,12 +447,7 @@ const cmap = {
   },
 
   parse12(data: Uint8Array, offset: number, obj: any): any {
-    const startOffset = offset;
-    offset += 4;
-    const length = bin.readUint(data, offset);
-    offset += 4;
-    const language = bin.readUint(data, offset);
-    offset += 4;
+    offset += 12; // skip format, length, language
     const nGroups = bin.readUint(data, offset) * 3;
     offset += 4;
 
@@ -614,8 +503,7 @@ const glyf = {
 
       const instructionLength = bin.readUshort(data, off);
       off += 2;
-      if (data.length - off < instructionLength) return null;
-      gl.instructions = bin.readBytes(data, off, instructionLength);
+      if (off + instructionLength > data.length) return null;
       off += instructionLength;
 
       const crdnum = gl.endPts[gl.noc - 1] + 1;
@@ -850,7 +738,7 @@ const VariableTables: any = {
         off: any,
         vcnt: any,
         acnt: any,
-        eoff: any
+        eoff: any,
       ): any[] {
         const out: any[] = [];
         for (let j = 0; j < vcnt; j++) {
@@ -972,7 +860,7 @@ const VariableTables: any = {
           off,
           vcnt,
           acnt,
-          offset + goff + offs[i + 1]
+          offset + goff + offs[i + 1],
         );
 
         const tab: any[] = [];
@@ -1435,7 +1323,7 @@ function simpleGlyph(gl: any, font: any, gid: any, p: any, axs: any): void {
             PathBuilder.MoveTo(
               p,
               Math.floor((xs[pr] + x) * 0.5),
-              Math.floor((ys[pr] + y) * 0.5)
+              Math.floor((ys[pr] + y) * 0.5),
             );
         }
       }
@@ -1450,7 +1338,7 @@ function simpleGlyph(gl: any, font: any, gid: any, p: any, axs: any): void {
             x,
             y,
             Math.floor((x + xs[nx]) * 0.5),
-            Math.floor((y + ys[nx]) * 0.5)
+            Math.floor((y + ys[nx]) * 0.5),
           );
       }
     }
@@ -1537,7 +1425,7 @@ function interpolateDeltas(
   ind: any,
   xs: any,
   ys: any,
-  endPts: any
+  endPts: any,
 ): any {
   const N = xs.length;
   const ndfs = new Array(N * 2 + 8);
@@ -1655,7 +1543,7 @@ class FontUtils {
         for (const p in font) (obj as any)[p] = font[p];
         (obj as any)._index = i;
         const name = ((obj as any).name = JSON.parse(
-          JSON.stringify((obj as any).name || {})
+          JSON.stringify((obj as any).name || {}),
         ));
         name.fontSubfamily = fv[0];
         if (fv[3] == null) {
@@ -1736,13 +1624,13 @@ export default class FontParser {
     }
     if (ext === "woff") {
       console.warn(
-        "WOFF not supported. Convert: http://convertio.co/woff-ttf/"
+        "WOFF not supported. Convert: http://convertio.co/woff-ttf/",
       );
       throw new Error("WOFF not supported");
     }
     if (ext === "woff2") {
       console.warn(
-        "WOFF2 not supported. Convert: http://convertio.co/woff2-ttf/"
+        "WOFF2 not supported. Convert: http://convertio.co/woff2-ttf/",
       );
       throw new Error("WOFF2 not supported");
     }
@@ -1780,7 +1668,7 @@ export default class FontParser {
             font,
             letter.glyph.g,
             false,
-            axisValues
+            axisValues,
           );
 
           // Transform glyph coordinates from font units to pixels
@@ -1790,13 +1678,13 @@ export default class FontParser {
             if (cmd === "M") {
               path2D.moveTo(
                 glyphPath.crds[cmdIndex] * scale,
-                -glyphPath.crds[cmdIndex + 1] * scale
+                -glyphPath.crds[cmdIndex + 1] * scale,
               );
               cmdIndex += 2;
             } else if (cmd === "L") {
               path2D.lineTo(
                 glyphPath.crds[cmdIndex] * scale,
-                -glyphPath.crds[cmdIndex + 1] * scale
+                -glyphPath.crds[cmdIndex + 1] * scale,
               );
               cmdIndex += 2;
             } else if (cmd === "Q") {
@@ -1804,7 +1692,7 @@ export default class FontParser {
                 glyphPath.crds[cmdIndex] * scale,
                 -glyphPath.crds[cmdIndex + 1] * scale,
                 glyphPath.crds[cmdIndex + 2] * scale,
-                -glyphPath.crds[cmdIndex + 3] * scale
+                -glyphPath.crds[cmdIndex + 3] * scale,
               );
               cmdIndex += 4;
             } else if (cmd === "Z") {
@@ -1842,7 +1730,7 @@ export default class FontParser {
             font,
             letter.glyph.g,
             false,
-            axisValues
+            axisValues,
           );
           const rawPoints = this.samplePathPoints(glyphPath, sampling);
 
@@ -2010,63 +1898,35 @@ export default class FontParser {
       },
 
       samplePathPoints(glyphPath: any, sampling: any): any {
-        // Parse contours separately - each contour should be sampled independently
         const rawContours = this.parseContours(glyphPath);
-        const contoursWithLength = rawContours.map(
-          (contour: any, index: any) => ({
-            contour,
-            originalIndex: index,
-            length: this.calculateContourLength(contour),
-          })
+
+        // Build segments and get lengths in one pass
+        const prepared = rawContours.map((contour: any) =>
+          this.buildSegments(contour),
         );
 
-        contoursWithLength.sort((a: any, b: any) => b.length - a.length);
+        // Sort by length descending (largest contour = index 0)
+        prepared.sort((a: any, b: any) => b.totalLength - a.totalLength);
 
-        const allPoints = [];
+        const allPoints: FontPoint[] = [];
 
-        for (let i = 0; i < contoursWithLength.length; i++) {
-          const { contour } = contoursWithLength[i];
-          const contourPoints = this.sampleContour(contour, sampling, i);
-          allPoints.push(...contourPoints);
-        }
+        for (let i = 0; i < prepared.length; i++) {
+          const { segments, totalLength } = prepared[i];
+          const targetPoints = Math.max(
+            5,
+            Math.floor(totalLength * sampling * 0.1),
+          );
 
-        return allPoints;
-      },
-
-      // Calculate total length of a contour
-      calculateContourLength(contour: any): number {
-        let totalLength = 0;
-        let currentX = contour.startX;
-        let currentY = contour.startY;
-
-        for (const seg of contour.segments) {
-          if (seg.cmd === "L") {
-            const endX = seg.coords[0];
-            const endY = seg.coords[1];
-            totalLength += Math.sqrt(
-              (endX - currentX) ** 2 + (endY - currentY) ** 2
-            );
-            currentX = endX;
-            currentY = endY;
-          } else if (seg.cmd === "Q") {
-            const controlX = seg.coords[0];
-            const controlY = seg.coords[1];
-            const endX = seg.coords[2];
-            const endY = seg.coords[3];
-            totalLength += this.approximateQuadraticLength(
-              currentX,
-              currentY,
-              controlX,
-              controlY,
-              endX,
-              endY
-            );
-            currentX = endX;
-            currentY = endY;
+          for (let j = 0; j <= targetPoints; j++) {
+            const targetLength = (j / targetPoints) * totalLength;
+            const pt = this.getPointAtLengthInContour(segments, targetLength);
+            if (pt) {
+              allPoints.push({ x: pt.x, y: pt.y, contour: i });
+            }
           }
         }
 
-        return totalLength;
+        return allPoints;
       },
 
       // Parse glyph path into separate contours
@@ -2095,7 +1955,7 @@ export default class FontParser {
                 cmd,
                 coords: glyphPath.crds.slice(
                   cmdIndex,
-                  cmdIndex + (cmd === "L" ? 2 : 4)
+                  cmdIndex + (cmd === "L" ? 2 : 4),
                 ),
               });
             }
@@ -2117,22 +1977,18 @@ export default class FontParser {
         return contours;
       },
 
-      // Sample a single contour uniformly
-      sampleContour(contour: any, sampling: any, contourIndex: any): any {
-        const segments = [];
+      // Build segments from a contour with lengths pre-calculated
+      buildSegments(contour: any): any {
+        const segments: any[] = [];
         let currentX = contour.startX;
         let currentY = contour.startY;
         let totalLength = 0;
 
-        // Build segments for this contour
         for (const seg of contour.segments) {
           if (seg.cmd === "L") {
             const endX = seg.coords[0];
             const endY = seg.coords[1];
-            const length = Math.sqrt(
-              (endX - currentX) ** 2 + (endY - currentY) ** 2
-            );
-
+            const length = Math.hypot(endX - currentX, endY - currentY);
             segments.push({
               type: "L",
               startX: currentX,
@@ -2142,7 +1998,6 @@ export default class FontParser {
               length,
               startLength: totalLength,
             });
-
             totalLength += length;
             currentX = endX;
             currentY = endY;
@@ -2151,16 +2006,11 @@ export default class FontParser {
             const controlY = seg.coords[1];
             const endX = seg.coords[2];
             const endY = seg.coords[3];
-
-            const length = this.approximateQuadraticLength(
-              currentX,
-              currentY,
-              controlX,
-              controlY,
-              endX,
-              endY
-            );
-
+            const chord = Math.hypot(endX - currentX, endY - currentY);
+            const ctrl =
+              Math.hypot(controlX - currentX, controlY - currentY) +
+              Math.hypot(endX - controlX, endY - controlY);
+            const length = (chord + ctrl) / 2;
             segments.push({
               type: "Q",
               startX: currentX,
@@ -2172,36 +2022,13 @@ export default class FontParser {
               length,
               startLength: totalLength,
             });
-
             totalLength += length;
             currentX = endX;
             currentY = endY;
           }
         }
 
-        // Sample this contour uniformly
-        const points = [];
-        const targetPoints = Math.max(
-          5,
-          Math.floor(totalLength * sampling * 0.1)
-        );
-
-        for (let i = 0; i <= targetPoints; i++) {
-          const targetLength = (i / targetPoints) * totalLength;
-          const pointData = this.getPointAtLengthInContour(
-            segments,
-            targetLength
-          );
-          if (pointData) {
-            points.push({
-              x: pointData.x,
-              y: pointData.y,
-              contour: contourIndex,
-            });
-          }
-        }
-
-        return points;
+        return { segments, totalLength };
       },
 
       // Get point at length within a single contour
@@ -2235,23 +2062,6 @@ export default class FontParser {
           }
         }
         return null;
-      },
-
-      // Helper function to approximate quadratic curve length
-      approximateQuadraticLength(
-        x0: any,
-        y0: any,
-        x1: any,
-        y1: any,
-        x2: any,
-        y2: any
-      ): number {
-        // Use simple approximation: chord + control polygon
-        const chordLength = Math.sqrt((x2 - x0) ** 2 + (y2 - y0) ** 2);
-        const controlLength =
-          Math.sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2) +
-          Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
-        return (chordLength + controlLength) / 2;
       },
     };
   }

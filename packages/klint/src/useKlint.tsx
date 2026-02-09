@@ -6,13 +6,13 @@ import {
   Vector,
   Easing,
   Text,
-  Thing,
   Grid,
   Strip,
   Noise,
   Hotspot,
-  Performance,
-  SSR,
+  Quadtree,
+  Pixels,
+  Timeline,
 } from "./elements";
 
 // Export Vector type as KlintVector
@@ -122,29 +122,9 @@ export default function useKlint() {
   const keyboardRef = useRef<KlintKeyboard | null>(null);
 
   const useDev = () => {
-    useEffect(() => {
-      if (process.env.NODE_ENV === "development") {
-        if (typeof import.meta !== "undefined" && (import.meta as any).hot) {
-          console.log("[Klint] hot updated - clearing non-context state");
-          if (contextRef.current) {
-            const ctx = contextRef.current;
-            ctx.frame = 0;
-            ctx.time = 0;
-            ctx.__offscreens?.clear();
-            ctx.__startedShape = false;
-            ctx.__currentShape = null;
-            ctx.__startedContour = false;
-            ctx.__currentContours = null;
-            ctx.__currentContour = null;
-            ctx.__isReadyToDraw = true;
-            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-          }
-        }
-      }
-    }, []);
+    // Re-enable drawing on every render (covers HMR re-renders)
     useEffect(() => {
       if (process.env.NODE_ENV === "development" && contextRef.current) {
-        console.log("[Klint] hot updated - clearing context state");
         contextRef.current.__isReadyToDraw = true;
       }
     });
@@ -157,7 +137,7 @@ export default function useKlint() {
       async (
         key: string,
         url: string,
-        options?: { crossOrigin?: string }
+        options?: { crossOrigin?: string },
       ): Promise<HTMLImageElement> => {
         return new Promise((resolve, reject) => {
           const img = new Image();
@@ -173,24 +153,24 @@ export default function useKlint() {
           img.src = url;
         });
       },
-      []
+      [],
     );
 
     const loadImages = useCallback(
       async (
         imageMap: Record<string, string>,
-        options?: { crossOrigin?: string }
+        options?: { crossOrigin?: string },
       ): Promise<Map<string, HTMLImageElement>> => {
         const promises = Object.entries(imageMap).map(([key, url]) =>
           loadImage(key, url, options).then(
-            (img: HTMLImageElement) => [key, img] as [string, HTMLImageElement]
-          )
+            (img: HTMLImageElement) => [key, img] as [string, HTMLImageElement],
+          ),
         );
 
         const results = await Promise.all(promises);
         return new Map(results);
       },
-      [loadImage]
+      [loadImage],
     );
 
     // Proxy to allow both images['key'] and images.get('key') access patterns
@@ -274,7 +254,7 @@ export default function useKlint() {
           mouseRef.current.vy = y - mouseRef.current.py;
           mouseRef.current.angle = Math.atan2(
             mouseRef.current.vy,
-            mouseRef.current.vx
+            mouseRef.current.vx,
           );
         }
       };
@@ -311,7 +291,7 @@ export default function useKlint() {
       canvas.addEventListener("click", handleClick, { signal });
 
       return () => controller.abort();
-    });
+    }, []);
 
     return {
       mouse: mouseRef.current,
@@ -361,7 +341,7 @@ export default function useKlint() {
 
       canvas.addEventListener("wheel", handleScroll, { signal });
       return () => controller.abort();
-    });
+    }, []);
 
     return {
       scroll: scrollRef.current,
@@ -369,8 +349,8 @@ export default function useKlint() {
         callback: (
           ctx: KlintContext,
           scroll: KlintScroll,
-          e: WheelEvent
-        ) => void
+          e: WheelEvent,
+        ) => void,
       ) => (scrollCallbackRef.current = callback),
     };
   };
@@ -388,7 +368,7 @@ export default function useKlint() {
           ctx: KlintContext,
           e: TouchEvent,
           gesture: KlintGesture,
-          direction: "left" | "right" | "up" | "down"
+          direction: "left" | "right" | "up" | "down",
         ) => void)
       | null
     >(null);
@@ -472,7 +452,7 @@ export default function useKlint() {
         if (e.touches.length >= 2) {
           gestureRef.current.startDistance = getDistance(
             e.touches[0],
-            e.touches[1]
+            e.touches[1],
           );
           gestureRef.current.currentDistance = gestureRef.current.startDistance;
           gestureRef.current.scale = 1;
@@ -629,51 +609,51 @@ export default function useKlint() {
         callback: (
           ctx: KlintContext,
           e: TouchEvent,
-          gesture: KlintGesture
-        ) => void
+          gesture: KlintGesture,
+        ) => void,
       ) => (tapCallbackRef.current = callback),
       onSwipe: (
         callback: (
           ctx: KlintContext,
           e: TouchEvent,
           gesture: KlintGesture,
-          direction: "left" | "right" | "up" | "down"
-        ) => void
+          direction: "left" | "right" | "up" | "down",
+        ) => void,
       ) => (swipeCallbackRef.current = callback),
       onPinch: (
         callback: (
           ctx: KlintContext,
           e: TouchEvent,
-          gesture: KlintGesture
-        ) => void
+          gesture: KlintGesture,
+        ) => void,
       ) => (pinchCallbackRef.current = callback),
       onRotate: (
         callback: (
           ctx: KlintContext,
           e: TouchEvent,
-          gesture: KlintGesture
-        ) => void
+          gesture: KlintGesture,
+        ) => void,
       ) => (rotateCallbackRef.current = callback),
       onTouchStart: (
         callback: (
           ctx: KlintContext,
           e: TouchEvent,
-          gesture: KlintGesture
-        ) => void
+          gesture: KlintGesture,
+        ) => void,
       ) => (touchStartCallbackRef.current = callback),
       onTouchMove: (
         callback: (
           ctx: KlintContext,
           e: TouchEvent,
-          gesture: KlintGesture
-        ) => void
+          gesture: KlintGesture,
+        ) => void,
       ) => (touchMoveCallbackRef.current = callback),
       onTouchEnd: (
         callback: (
           ctx: KlintContext,
           e: TouchEvent,
-          gesture: KlintGesture
-        ) => void
+          gesture: KlintGesture,
+        ) => void,
       ) => (touchEndCallbackRef.current = callback),
     };
   };
@@ -693,6 +673,19 @@ export default function useKlint() {
       Map<string, (ctx: KlintContext, e: KeyboardEvent) => void>
     >(new Map());
 
+    const normalizeKey = (key: string): string => {
+      const keyMap: Record<string, string> = {
+        " ": "Space",
+        Control: "Ctrl",
+        Escape: "Esc",
+      };
+      return keyMap[key] || key;
+    };
+
+    const createComboKey = (keys: string[]): string => {
+      return keys.map(normalizeKey).sort().join("+");
+    };
+
     useEffect(() => {
       if (!contextRef.current) return;
       const ctx = contextRef.current;
@@ -705,16 +698,6 @@ export default function useKlint() {
         keyboardRef.current.modifiers.shift = e.shiftKey;
         keyboardRef.current.modifiers.ctrl = e.ctrlKey;
         keyboardRef.current.modifiers.meta = e.metaKey;
-      };
-
-      const normalizeKey = (key: string): string => {
-        // Normalize common key variations
-        const keyMap: Record<string, string> = {
-          " ": "Space",
-          Control: "Ctrl",
-          Escape: "Esc",
-        };
-        return keyMap[key] || key;
       };
 
       const handleKeyDown = (e: KeyboardEvent) => {
@@ -736,7 +719,7 @@ export default function useKlint() {
 
         // Check for combination callbacks
         const pressedKeysArray = Array.from(
-          keyboardRef.current.pressedKeys
+          keyboardRef.current.pressedKeys,
         ).sort();
         const comboKey = pressedKeysArray.join("+");
         const comboCallback = keyComboCallbackRef.current.get(comboKey);
@@ -768,27 +751,13 @@ export default function useKlint() {
       return () => controller.abort();
     }, []);
 
-    // Helper to create combo key string
-    const createComboKey = (keys: string[]): string => {
-      return keys.map(normalizeKey).sort().join("+");
-    };
-
-    const normalizeKey = (key: string): string => {
-      const keyMap: Record<string, string> = {
-        " ": "Space",
-        Control: "Ctrl",
-        Escape: "Esc",
-      };
-      return keyMap[key] || key;
-    };
-
     return {
       keyboard: keyboardRef.current,
 
       // Register callback for single key press
       keyPressed: (
         key: string,
-        callback: (ctx: KlintContext, e: KeyboardEvent) => void
+        callback: (ctx: KlintContext, e: KeyboardEvent) => void,
       ) => {
         keyPressedCallbackRef.current.set(normalizeKey(key), callback);
       },
@@ -796,7 +765,7 @@ export default function useKlint() {
       // Register callback for single key release
       keyReleased: (
         key: string,
-        callback: (ctx: KlintContext, e: KeyboardEvent) => void
+        callback: (ctx: KlintContext, e: KeyboardEvent) => void,
       ) => {
         keyReleasedCallbackRef.current.set(normalizeKey(key), callback);
       },
@@ -804,7 +773,7 @@ export default function useKlint() {
       // Register callback for key combination (e.g., ['Alt', 'Shift'])
       keyCombo: (
         keys: string[],
-        callback: (ctx: KlintContext, e: KeyboardEvent) => void
+        callback: (ctx: KlintContext, e: KeyboardEvent) => void,
       ) => {
         const comboKey = createComboKey(keys);
         keyComboCallbackRef.current.set(comboKey, callback);
@@ -818,7 +787,7 @@ export default function useKlint() {
       arePressed: (keys: string[]): boolean => {
         if (!keyboardRef.current) return false;
         return keys.every((key) =>
-          keyboardRef.current!.pressedKeys.has(normalizeKey(key))
+          keyboardRef.current!.pressedKeys.has(normalizeKey(key)),
         );
       },
 
@@ -831,299 +800,9 @@ export default function useKlint() {
     };
   };
 
-  const KlintTimeline = () => {
-    const timelinesRef = useRef<Map<string, any>>(new Map());
-    const callbacksRef = useRef<{
-      start: Array<() => void>;
-      end: Array<() => void>;
-      loop: Array<() => void>;
-    }>({ start: [], end: [], loop: [] });
-
-    const Timeline = {
-      create: <T extends Record<string, any>>(
-        setup: (timeline: any) => T,
-        options: {
-          defaultEasing?: (t: number) => number;
-          defaultLoop?: number;
-        } = {}
-      ): T & { update: (progress: number) => void } => {
-        const tracks = new Map<any, any>();
-        const parents = new Set<any>();
-        let currentProgress = 0;
-        let hasStarted = false;
-        let hasEnded = false;
-
-        const defaultEasing = options.defaultEasing || ((t: number) => t);
-        const defaultLoop = options.defaultLoop || 0;
-
-        // Helper for safe callback execution
-        const executeCallback = (
-          callback: () => void,
-          errorMsg = "Callback error"
-        ) => {
-          try {
-            callback();
-          } catch (e) {
-            console.warn(`${errorMsg}:`, e);
-          }
-        };
-
-        // Keyframe builder
-        function createKeyframes() {
-          const segments: any[] = [];
-          let currentPos = 0;
-          let loopCount = defaultLoop;
-          let parentTrack: any = undefined;
-
-          const parseEasingCallback = (
-            easing?: ((t: number) => number) | (() => void),
-            callback?: () => void
-          ) => {
-            if (
-              typeof easing === "function" &&
-              typeof callback === "undefined"
-            ) {
-              if (easing.length === 0) {
-                return {
-                  easing: defaultEasing,
-                  callback: easing as () => void,
-                };
-              }
-              return {
-                easing: easing as (t: number) => number,
-                callback: undefined,
-              };
-            }
-            return {
-              easing: (easing as (t: number) => number) || defaultEasing,
-              callback,
-            };
-          };
-
-          const builder = {
-            start(value: number, delay = 0, callback?: () => void) {
-              segments.push({ pos: delay, value, callback, type: "start" });
-              currentPos = delay;
-              return builder;
-            },
-
-            at(
-              progress: number,
-              value: number,
-              easing?: (t: number) => number,
-              callback?: () => void
-            ) {
-              const { easing: finalEasing, callback: finalCallback } =
-                parseEasingCallback(easing, callback);
-              segments.push({
-                pos: progress,
-                value,
-                easing: finalEasing,
-                callback: finalCallback,
-                type: "tween",
-              });
-              currentPos = progress;
-              return builder;
-            },
-
-            then(
-              value: number,
-              duration: number,
-              easing?: (t: number) => number,
-              callback?: () => void
-            ) {
-              const { easing: finalEasing, callback: finalCallback } =
-                parseEasingCallback(easing, callback);
-              const nextPos = currentPos + duration;
-              segments.push({
-                pos: nextPos,
-                value,
-                easing: finalEasing,
-                callback: finalCallback,
-                type: "tween",
-              });
-              currentPos = nextPos;
-              return builder;
-            },
-
-            loop(count = Infinity) {
-              loopCount = count;
-              return builder;
-            },
-
-            _compile: () => {
-              segments.sort((a, b) => a.pos - b.pos);
-              return { segments, loopCount, parentTrack };
-            },
-          };
-
-          return builder;
-        }
-
-        function interpolateTrack(compiled: any, progress: number): number {
-          const { segments } = compiled;
-          if (!segments.length) return 0;
-
-          progress = Math.max(0, Math.min(1, progress));
-
-          const valueSegments = segments.filter(
-            (seg: any) => seg.type !== "callback"
-          );
-          if (!valueSegments.length) return 0;
-
-          let prevSeg = valueSegments[0];
-
-          for (let i = 1; i < valueSegments.length; i++) {
-            const seg = valueSegments[i];
-
-            if (progress <= seg.pos) {
-              if (
-                seg.type === "tween" &&
-                prevSeg.value !== undefined &&
-                seg.value !== undefined
-              ) {
-                const t = (progress - prevSeg.pos) / (seg.pos - prevSeg.pos);
-                const easedT = seg.easing ? seg.easing(t) : t;
-                return prevSeg.value + (seg.value - prevSeg.value) * easedT;
-              }
-              return seg.value || 0;
-            }
-
-            if (seg.value !== undefined) {
-              prevSeg = seg;
-            }
-          }
-
-          return prevSeg.value || 0;
-        }
-
-        const timeline = {
-          track: (keyframesOrFn: any): any => {
-            const compiled =
-              typeof keyframesOrFn === "function"
-                ? timeline.keyframes(keyframesOrFn)
-                : keyframesOrFn;
-
-            const track = {
-              ...compiled,
-              currentValue: 0,
-              getValue: (progress: number) =>
-                interpolateTrack(compiled, progress),
-              get current(): number {
-                return this.currentValue;
-              },
-              value: function () {
-                return this.currentValue;
-              },
-            };
-
-            tracks.set(track, compiled);
-            return track;
-          },
-
-          keyframes: (fn: (kf: any) => void) => {
-            const kf = createKeyframes();
-            fn(kf);
-            return kf._compile();
-          },
-
-          stagger: (count: number, offset: number, keyframesFn: any): any[] => {
-            const compiled = timeline.keyframes(keyframesFn);
-            return Array.from({ length: count }, (_, i) => {
-              const track = {
-                ...compiled,
-                currentValue: 0,
-                staggerDelay: i * offset,
-                getValue: (progress: number) => {
-                  const staggeredProgress = Math.max(0, progress - i * offset);
-                  const normalizedProgress = Math.min(
-                    1,
-                    staggeredProgress / (1 - i * offset)
-                  );
-                  return normalizedProgress > 0
-                    ? interpolateTrack(compiled, normalizedProgress)
-                    : 0;
-                },
-                get current(): number {
-                  return this.currentValue;
-                },
-                value: function () {
-                  return this.currentValue;
-                },
-              };
-              tracks.set(track, compiled);
-              return track;
-            });
-          },
-
-          update: (progress: number) => {
-            const prevProgress = currentProgress;
-            currentProgress = progress;
-
-            // Fire timeline start callbacks
-            if (!hasStarted && progress > 0) {
-              hasStarted = true;
-              callbacksRef.current.start.forEach((cb) =>
-                executeCallback(cb, "Start callback error")
-              );
-            }
-
-            // Fire timeline end callbacks
-            if (!hasEnded && progress >= 1) {
-              hasEnded = true;
-              callbacksRef.current.end.forEach((cb) =>
-                executeCallback(cb, "End callback error")
-              );
-            }
-
-            // Reset flags if rewinding
-            if (progress < prevProgress) {
-              if (progress === 0) {
-                hasStarted = false;
-                hasEnded = false;
-              } else if (progress < 1) {
-                hasEnded = false;
-              }
-            }
-
-            for (const [track, compiled] of tracks) {
-              track.currentValue = track.getValue(progress);
-
-              // Handle callbacks
-              if (compiled.segments) {
-                compiled.segments.forEach((seg: any) => {
-                  if (
-                    seg.callback &&
-                    seg.pos <= progress &&
-                    seg.pos > prevProgress
-                  ) {
-                    executeCallback(seg.callback);
-                  }
-                });
-              }
-            }
-          },
-
-          progress: () => currentProgress,
-        };
-
-        // Execute setup
-        const result = setup(timeline);
-        return { ...result, update: timeline.update };
-      },
-    };
-
-    return {
-      Timeline,
-      onStart: (fn: () => void) => callbacksRef.current.start.push(fn),
-      onEnd: (fn: () => void) => callbacksRef.current.end.push(fn),
-      onLoop: (fn: () => void) => callbacksRef.current.loop.push(fn),
-    };
-  };
-
   const KlintWindow = () => {
     const resizeCallbackRef = useRef<((ctx: KlintContext) => void) | null>(
-      null
+      null,
     );
     const blurCallbackRef = useRef<((ctx: KlintContext) => void) | null>(null);
     const focusCallbackRef = useRef<((ctx: KlintContext) => void) | null>(null);
@@ -1174,14 +853,14 @@ export default function useKlint() {
       onFocus: (callback: (ctx: KlintContext) => void) =>
         (focusCallbackRef.current = callback),
       onVisibilityChange: (
-        callback: (ctx: KlintContext, isVisible: boolean) => void
+        callback: (ctx: KlintContext, isVisible: boolean) => void,
       ) => (visibilityChangeCallbackRef.current = callback),
     };
   };
 
   const buildKlintContext = (
     ctx: CanvasRenderingContext2D,
-    options: KlintCanvasOptions
+    options: KlintCanvasOptions,
   ): KlintContext => {
     const context = ctx as unknown as KlintContext;
     // Initialize core properties
@@ -1217,13 +896,13 @@ export default function useKlint() {
     context.Vector = new Vector();
     context.Easing = new Easing();
     context.Text = new Text(context);
-    context.Thing = new Thing(context);
     context.Grid = new Grid(context);
     context.Strip = new Strip(context);
     context.Noise = new Noise(context);
     context.Hotspot = new Hotspot(context);
-    context.Performance = new Performance(context);
-    context.SSR = new SSR(context);
+    context.Quadtree = Quadtree;
+    context.Pixels = new Pixels(context);
+    context.Timeline = new Timeline();
 
     // Add Klint core functions
     Object.entries(KlintCoreFunctions).forEach(([name, fn]) => {
@@ -1249,7 +928,7 @@ export default function useKlint() {
       }
       return contextRef.current;
     },
-    []
+    [],
   );
 
   const togglePlay = useCallback((playing?: boolean) => {
@@ -1262,45 +941,6 @@ export default function useKlint() {
     }
   }, []);
 
-  const KlintPerformance = () => {
-    const metricsRef = useRef<{
-      fps: number;
-      frameTime: number;
-      averageFrameTime: number;
-      minFrameTime: number;
-      maxFrameTime: number;
-      droppedFrames: number;
-      memoryUsage?: number;
-    } | null>(null);
-
-    useEffect(() => {
-      if (!contextRef.current?.__performance) return;
-
-      // Update metrics ref when performance data changes
-      const updateMetrics = () => {
-        if (contextRef.current?.__performance) {
-          metricsRef.current = { ...contextRef.current.__performance };
-        }
-      };
-
-      // Poll for updates (performance data is updated in animation loop)
-      const interval = setInterval(updateMetrics, 100);
-      return () => clearInterval(interval);
-    }, []);
-
-    return {
-      metrics: metricsRef.current,
-      getMetrics: () => contextRef.current?.__performance || null,
-      reset: () => {
-        if (contextRef.current?.__performance) {
-          contextRef.current.__performance.droppedFrames = 0;
-          contextRef.current.__performance.minFrameTime = Infinity;
-          contextRef.current.__performance.maxFrameTime = 0;
-        }
-      },
-    };
-  };
-
   return {
     context: {
       context: contextRef.current,
@@ -1312,15 +952,13 @@ export default function useKlint() {
     KlintKeyboard,
     KlintWindow,
     KlintImage,
-    KlintTimeline,
-    KlintPerformance,
     togglePlay,
     useDev,
   };
 }
 
 export const useProps = <T extends object = Record<string, unknown>>(
-  props: T
+  props: T,
 ) => {
   const propsRef = useRef<T>(props);
 
@@ -1345,7 +983,7 @@ export const useProps = <T extends object = Record<string, unknown>>(
 };
 
 export const useStorage = <T extends object = Record<string, unknown>>(
-  initialProps: T = {} as T
+  initialProps: T = {} as T,
 ) => {
   const storeRef = useRef<T>(initialProps);
 

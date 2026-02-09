@@ -36,7 +36,6 @@ const draw = (K: KlintContext) => {
 ```
 
 ## Notes
-- If you want to draw a curve or an arc, prefer the `arc` function
 - When `closed` is true, adds lines to center to create a pie/pizza slice shape
 - When `closed` is false, creates only the arc without connecting to center
 - Uses current fill and stroke styles

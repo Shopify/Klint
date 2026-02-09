@@ -16,5 +16,8 @@ export type {
 
 export { Delaunay } from "./Delaunay";
 export { CatmullRom } from "./Catmull";
-export { Things } from "./Things";
+
 export { Sprites } from "./Sprites";
+export { MatterPhysics } from "./MatterPhysics";
+export { default as Projector } from "./Projector";
+export type { Point3D, ProjectedPoint, Transform3D } from "./Projector";

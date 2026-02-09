@@ -38,43 +38,6 @@ export const KlintCoreFunctions = {
   },
   // to do
   redraw: () => () => {},
-  extend:
-    (ctx: KlintContext) =>
-    (name: string, data: unknown, enforceReplace = false) => {
-      if (name in ctx && !enforceReplace) return;
-      (ctx as KlintContext)[name] = data;
-    },
-
-  passImage: () => (element: HTMLImageElement) => {
-    if (!element.complete) {
-      console.warn("Image passed to passImage() is not fully loaded");
-      return null;
-    }
-    return element;
-  },
-  passImages: () => (elements: HTMLImageElement[]) => {
-    return elements.map((element) => {
-      if (!element.complete) {
-        console.warn("Image passed to passImages() is not fully loaded");
-        return null;
-      }
-      return element;
-    });
-  },
-
-  saveConfig: (ctx: KlintContexts) => (from?: KlintContexts) => {
-    return Object.fromEntries(
-      CONFIG_PROPS.map((key) => [
-        key,
-        from?.[key as keyof KlintContexts] ?? ctx[key as keyof KlintContexts],
-      ])
-    ) as KlintConfig;
-  },
-  restoreConfig:
-    (ctx: KlintContext) =>
-    (config: KlintConfig): void => {
-      Object.assign(ctx, config);
-    },
   describe: (ctx: KlintContext) => (description: string) => {
     ctx.__description = description;
   },
@@ -86,7 +49,7 @@ export const KlintCoreFunctions = {
       width: number,
       height: number,
       options?: KlintCanvasOptions,
-      callback?: (ctx: KlintOffscreenContext) => void
+      callback?: (ctx: KlintOffscreenContext) => void,
     ) => {
       const offscreen = document.createElement("canvas");
       offscreen.width = width * ctx.__dpr;
@@ -216,6 +179,7 @@ export const KlintFunctions = {
   strokeWidth: (ctx: KlintContexts) => (width: number) => {
     if (width <= 0) {
       ctx.lineWidth = EPSILON;
+      return;
     }
     ctx.lineWidth = width;
   },
@@ -272,7 +236,7 @@ export const KlintFunctions = {
       radius: number,
       startAngle = 0,
       endAngle = Math.PI * 2,
-      closed = true
+      closed = true,
     ) => {
       ctx.beginPath();
       if (closed) {
@@ -303,7 +267,7 @@ export const KlintFunctions = {
       y: number,
       width: number,
       radius: number | number[],
-      height?: number
+      height?: number,
     ) => {
       const originType = ctx.__rectangleOrigin || ctx.origin;
       const h = height ?? width;
@@ -321,7 +285,7 @@ export const KlintFunctions = {
       radius: number,
       sides: number,
       radius2?: number,
-      rotation: number = 0
+      rotation: number = 0,
     ) => {
       ctx.beginPath();
       for (let i = 0; i < sides; i++) {
@@ -361,7 +325,7 @@ export const KlintFunctions = {
       cp2x: number,
       cp2y: number,
       x: number,
-      y: number
+      y: number,
     ) => {
       if (!ctx.__startedShape) return;
       const points = ctx.__startedContour
@@ -417,18 +381,18 @@ export const KlintFunctions = {
           firstPoint.type === "line"
             ? firstPoint.x
             : firstPoint.type === "bezier"
-            ? firstPoint.x
-            : firstPoint.type === "quadratic"
-            ? firstPoint.x
-            : firstPoint.x2; // arc
+              ? firstPoint.x
+              : firstPoint.type === "quadratic"
+                ? firstPoint.x
+                : firstPoint.x2; // arc
         const startY =
           firstPoint.type === "line"
             ? firstPoint.y
             : firstPoint.type === "bezier"
-            ? firstPoint.y
-            : firstPoint.type === "quadratic"
-            ? firstPoint.y
-            : firstPoint.y2; // arc
+              ? firstPoint.y
+              : firstPoint.type === "quadratic"
+                ? firstPoint.y
+                : firstPoint.y2; // arc
         ctx.moveTo(startX, startY);
 
         for (let i = 0; i < points.length; i++) {
@@ -445,7 +409,7 @@ export const KlintFunctions = {
                 point.cp2x,
                 point.cp2y,
                 point.x,
-                point.y
+                point.y,
               );
               break;
             case "quadratic":
@@ -465,7 +429,7 @@ export const KlintFunctions = {
       ctx.beginPath();
       drawPath(points, close);
       ctx.__currentContours?.forEach((contour: any[]) =>
-        drawPath(contour, true)
+        drawPath(contour, true),
       );
       ctx.drawIfVisible();
       // and we are out of the shape
@@ -475,7 +439,7 @@ export const KlintFunctions = {
     },
   gradient:
     (ctx: KlintContexts) =>
-    (x1 = 0, y1 = 0, x2 = ctx.width, y2 = ctx.width) => {
+    (x1 = 0, y1 = 0, x2 = ctx.width, y2 = ctx.height) => {
       return ctx.createLinearGradient(x1, y1, x2, y2);
     },
   radialGradient:
@@ -486,7 +450,7 @@ export const KlintFunctions = {
       r1 = 0,
       x2 = ctx.width / 2,
       y2 = ctx.height / 2,
-      r2 = Math.min(ctx.width, ctx.height)
+      r2 = Math.min(ctx.width, ctx.height),
     ) => {
       return ctx.createRadialGradient(x1, y1, r1, x2, y2, r2);
     },
@@ -518,7 +482,7 @@ export const KlintFunctions = {
     (
       n: number,
       mod: number,
-      mode: "precise" | "fast" | "faster" = "precise"
+      mode: "precise" | "fast" | "faster" = "precise",
     ) => {
       if (mode === "faster") {
         // only works reliably for positive numbers < 2^31
@@ -538,7 +502,7 @@ export const KlintFunctions = {
       y1: number,
       x2: number,
       y2: number,
-      mode: "precise" | "fast" | "faster" = "precise"
+      mode: "precise" | "fast" | "faster" = "precise",
     ) => {
       if (mode === "faster") {
         const dx = Math.abs(x2 - x1);
@@ -638,7 +602,7 @@ export const KlintFunctions = {
       text: string | number | undefined,
       x: number,
       y: number,
-      maxWidth: number | undefined = undefined
+      maxWidth: number | undefined = undefined,
     ) => {
       if (text === undefined) return;
       ctx.computeFont();
@@ -706,7 +670,7 @@ export const KlintFunctions = {
         justification?: "left" | "center" | "right" | "justified";
         overflow?: number;
         break?: "words" | "letters";
-      }
+      },
     ) => {
       if (text === undefined) return;
       ctx.computeFont();
@@ -841,7 +805,7 @@ export const KlintFunctions = {
       arg5?: number,
       arg6?: number,
       arg7?: number,
-      arg8?: number
+      arg8?: number,
     ) => {
       const sourceImage = "canvas" in image ? image.canvas : image;
 
@@ -869,7 +833,7 @@ export const KlintFunctions = {
           adjustedX,
           adjustedY,
           dWidth,
-          dHeight
+          dHeight,
         );
         return;
       }
@@ -899,25 +863,6 @@ export const KlintFunctions = {
 
       ctx.drawImage(sourceImage, adjustedX, adjustedY);
     },
-  // unsure about keeping those next two, maybe a shader plugin would be better
-  loadPixels: (ctx: KlintContexts) => () => {
-    return ctx.getImageData(0, 0, ctx.width, ctx.height);
-  },
-  updatePixels:
-    (ctx: KlintContexts) => (pixels: Uint8ClampedArray | number[]) => {
-      const pixelArray =
-        pixels instanceof Uint8ClampedArray
-          ? new Uint8ClampedArray(pixels)
-          : new Uint8ClampedArray(pixels);
-      const imageData = new ImageData(pixelArray, ctx.width, ctx.height);
-      ctx.putImageData(imageData, 0, 0);
-    },
-  readPixels:
-    (ctx: KlintContexts) =>
-    (x: number, y: number, w = 1, h = 1) => {
-      const imageData = ctx.getImageData(x, y, w, h);
-      return Array.from(imageData.data); // Returns [r,g,b,a]
-    },
   scaleTo:
     () =>
     (
@@ -925,7 +870,7 @@ export const KlintFunctions = {
       originHeight: number,
       destinationWidth: number,
       destinationHeight: number,
-      cover = false
+      cover = false,
     ) => {
       const widthRatio = destinationWidth / originWidth;
       const heightRatio = destinationHeight / originHeight;
@@ -941,6 +886,12 @@ export const KlintFunctions = {
       ctx.globalCompositeOperation =
         blend === "default" ? "source-over" : blend;
     },
+  smooth: (ctx: KlintContexts) => () => {
+    ctx.imageSmoothingEnabled = true;
+  },
+  noSmooth: (ctx: KlintContexts) => () => {
+    ctx.imageSmoothingEnabled = false;
+  },
   setCanvasOrigin: (ctx: KlintContexts) => (type: "center" | "corner") => {
     ctx.__canvasOrigin = type;
   },
@@ -966,7 +917,7 @@ export const KlintFunctions = {
       CONFIG_PROPS.map((key) => [
         key,
         from?.[key as keyof KlintContexts] ?? ctx[key as keyof KlintContexts],
-      ])
+      ]),
     ) as KlintConfig;
   },
   restoreConfig:
@@ -990,7 +941,7 @@ export const KlintFunctions = {
     (ctx: KlintContexts) =>
     (
       callback: (K: KlintContexts | KlintContext) => void,
-      fillRule?: CanvasFillRule
+      fillRule?: CanvasFillRule,
     ) => {
       // Build a clip path without painting; let caller manage push/pop
       const originalFill = ctx.fill;
@@ -1026,6 +977,57 @@ export const KlintFunctions = {
       ctx.drawIfVisible = originalDrawIfVisible;
       ctx.fill = originalFill;
       ctx.stroke = originalStroke;
+    },
+
+  screenToWorld:
+    (ctx: KlintContexts) =>
+    (screenX: number, screenY: number): { x: number; y: number } => {
+      const isCenter = ctx.__canvasOrigin === "center";
+      const deviceX = isCenter ? screenX + ctx.width * 0.5 : screenX;
+      const deviceY = isCenter ? screenY + ctx.height * 0.5 : screenY;
+      const inverse = ctx.getTransform().inverse();
+      const pt = inverse.transformPoint(new DOMPoint(deviceX, deviceY));
+      return { x: pt.x, y: pt.y };
+    },
+
+  worldToScreen:
+    (ctx: KlintContexts) =>
+    (worldX: number, worldY: number): { x: number; y: number } => {
+      const isCenter = ctx.__canvasOrigin === "center";
+      const matrix = ctx.getTransform();
+      const pt = matrix.transformPoint(new DOMPoint(worldX, worldY));
+      const screenX = isCenter ? pt.x - ctx.width * 0.5 : pt.x;
+      const screenY = isCenter ? pt.y - ctx.height * 0.5 : pt.y;
+      return { x: screenX, y: screenY };
+    },
+
+  getVisibleBounds:
+    (ctx: KlintContexts) =>
+    (): {
+      left: number;
+      top: number;
+      right: number;
+      bottom: number;
+      width: number;
+      height: number;
+    } => {
+      const inverse = ctx.getTransform().inverse();
+      const c0 = inverse.transformPoint(new DOMPoint(0, 0));
+      const c1 = inverse.transformPoint(new DOMPoint(ctx.width, 0));
+      const c2 = inverse.transformPoint(new DOMPoint(ctx.width, ctx.height));
+      const c3 = inverse.transformPoint(new DOMPoint(0, ctx.height));
+      const left = Math.min(c0.x, c1.x, c2.x, c3.x);
+      const right = Math.max(c0.x, c1.x, c2.x, c3.x);
+      const top = Math.min(c0.y, c1.y, c2.y, c3.y);
+      const bottom = Math.max(c0.y, c1.y, c2.y, c3.y);
+      return {
+        left,
+        top,
+        right,
+        bottom,
+        width: right - left,
+        height: bottom - top,
+      };
     },
 
   canIuseFilter: (ctx: KlintContexts) => () => {

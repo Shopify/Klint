@@ -65,6 +65,30 @@ background("transparent") // Clear canvas
 background() // Clear canvas
 ```
 
+## smooth
+
+```ts
+smooth() => void
+```
+
+Enables image smoothing (anti-aliasing) for image and canvas rendering. This is the default behavior.
+
+```tsx
+smooth() // Enable anti-aliasing (default)
+```
+
+## noSmooth
+
+```ts
+noSmooth() => void
+```
+
+Disables image smoothing (anti-aliasing). Useful for pixel art, retro aesthetics, or when scaling offscreen canvases where you want crisp pixel edges.
+
+```tsx
+noSmooth() // Disable anti-aliasing for crisp pixels
+```
+
 ## reset
 
 ```ts
@@ -157,4 +181,5 @@ const draw = (K: KlintContext) => {
 - The `background()` function automatically respects canvas origin settings
 - `reset()` and `clear()` are useful when redrawing the entire canvas
 - `resizeCanvas()` only works with offscreen canvases, not the main canvas
-- Origin settings affect all subsequent drawing operations 
+- Origin settings affect all subsequent drawing operations
+- `noSmooth()` is especially useful when drawing scaled offscreen canvases or pixel art

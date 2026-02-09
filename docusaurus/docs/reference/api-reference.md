@@ -18,8 +18,7 @@ Complete reference for all Klint functions, organized by category.
 | `K.line(x1, y1, x2, y2)` | Draw a line | x1, y1: start point<br/>x2, y2: end point |
 | `K.point(x, y)` | Draw a point | x, y: position |
 | `K.polygon(x, y, sides, radius)` | Draw a regular polygon | x, y: center position<br/>sides: number of sides<br/>radius: radius |
-| `K.arc(x, y, radius, startAngle, endAngle, counterclockwise?)` | Draw an arc | x, y: center<br/>radius: radius<br/>angles in radians |
-| `K.disk(x, y, radius)` | Draw a filled circle | x, y: center<br/>radius: radius |
+| `K.disk(x, y, radius, startAngle?, endAngle?, closed?)` | Draw a circle or arc with optional sector closing | x, y: center<br/>radius: radius<br/>startAngle, endAngle: radians<br/>closed: connect to center |
 
 ### Paths and Vertices
 
@@ -68,6 +67,9 @@ Complete reference for all Klint functions, organized by category.
 | `K.scale(x, y?)` | Scale canvas | x scale, optional y scale |
 | `K.push()` | Save transform state | None |
 | `K.pop()` | Restore transform state | None |
+| `K.screenToWorld(x, y)` | Convert screen coords to world coords | Screen x, y (e.g. mouseX/Y). Call **after** transforms |
+| `K.worldToScreen(x, y)` | Convert world coords to screen coords | World x, y. Call **after** transforms |
+| `K.getVisibleBounds()` | Get visible area in world coords | None. Call **after** transforms |
 
 ## Text Functions
 
