@@ -43,7 +43,7 @@ export default class Pixels {
         ? pixels
         : new Uint8ClampedArray(pixels);
     const imageData = new ImageData(
-      pixelArray,
+      new Uint8ClampedArray(pixelArray.buffer as ArrayBuffer),
       this.ctx.width,
       this.ctx.height,
     );
