@@ -31,7 +31,10 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install dependencies
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Install docusaurus dependencies
         working-directory: docusaurus
         run: npm install
 
