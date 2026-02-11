@@ -8,7 +8,7 @@ const config: Config = {
   title: "Klint Handbook",
   tagline: "The manual to a modern 2D Canvas made for React",
   url: "https://shopify.github.io",
-  baseUrl: "/klint/",
+  baseUrl: "/Klint/",
   onBrokenLinks: "warn",
   onBrokenMarkdownLinks: "warn",
   favicon: "img/favicon.ico",
