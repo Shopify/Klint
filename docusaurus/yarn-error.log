@@ -1,0 +1,82 @@
+Arguments: 
+  /Users/carolynmcneillie/.nvm/versions/node/v20.11.1/bin/node /Users/carolynmcneillie/.dev/yarn/1.22.15/bin/yarn.js check --integrity
+
+PATH: 
+  /Users/carolynmcneillie/.dev/yarn/1.22.15/bin:/Users/carolynmcneillie/.nvm/versions/node/v20.11.1/bin:/Users/carolynmcneillie/.dev/userprofile/bin:/Users/carolynmcneillie/.dev/binaries:/Users/carolynmcneillie/.cargo/bin:/opt/dev/bin/user:/opt/homebrew/bin:/opt/homebrew/sbin:/Users/carolynmcneillie/.nix-profile/bin:/nix/var/nix/profiles/default/bin:/Library/Frameworks/Python.framework/Versions/3.13/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/Applications/iTerm.app/Contents/Resources/utilities
+
+Yarn version: 
+  1.22.15
+
+Node version: 
+  20.11.1
+
+Platform: 
+  darwin arm64
+
+Trace: 
+  TypeError: Cannot read properties of undefined (reading '@docusaurus/core@3.8.0')
+      at /Users/carolynmcneillie/.dev/yarn/1.22.15/lib/cli.js:47488:25
+      at Array.filter (<anonymous>)
+      at InstallationIntegrityChecker.<anonymous> (/Users/carolynmcneillie/.dev/yarn/1.22.15/lib/cli.js:47487:38)
+      at Generator.next (<anonymous>)
+      at step (/Users/carolynmcneillie/.dev/yarn/1.22.15/lib/cli.js:310:30)
+      at /Users/carolynmcneillie/.dev/yarn/1.22.15/lib/cli.js:328:14
+      at new Promise (<anonymous>)
+      at new F (/Users/carolynmcneillie/.dev/yarn/1.22.15/lib/cli.js:5301:28)
+      at InstallationIntegrityChecker.<anonymous> (/Users/carolynmcneillie/.dev/yarn/1.22.15/lib/cli.js:307:12)
+      at InstallationIntegrityChecker.check (/Users/carolynmcneillie/.dev/yarn/1.22.15/lib/cli.js:47536:21)
+
+npm manifest: 
+  {
+    "name": "docusaurus",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+      "docusaurus": "docusaurus",
+      "start": "docusaurus start",
+      "build": "docusaurus build",
+      "swizzle": "docusaurus swizzle",
+      "deploy": "docusaurus deploy",
+      "clear": "docusaurus clear",
+      "serve": "docusaurus serve",
+      "write-translations": "docusaurus write-translations",
+      "write-heading-ids": "docusaurus write-heading-ids",
+      "typecheck": "tsc"
+    },
+    "dependencies": {
+      "@docusaurus/core": "3.8.0",
+      "@docusaurus/preset-classic": "3.8.0",
+      "@mdx-js/react": "^3.0.0",
+      "clsx": "^2.0.0",
+      "prism-react-renderer": "^2.3.0",
+      "react": "^19.0.0",
+      "react-dom": "^19.0.0"
+    },
+    "devDependencies": {
+      "@docusaurus/module-type-aliases": "3.8.0",
+      "@docusaurus/tsconfig": "3.8.0",
+      "@docusaurus/types": "3.8.0",
+      "typescript": "~5.6.2"
+    },
+    "browserslist": {
+      "production": [
+        ">0.5%",
+        "not dead",
+        "not op_mini all"
+      ],
+      "development": [
+        "last 3 chrome version",
+        "last 3 firefox version",
+        "last 5 safari version"
+      ]
+    },
+    "engines": {
+      "node": ">=18.0"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
