@@ -1,0 +1,106 @@
+.playground {
+  contain: content;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-code-border-radius, 6px);
+  overflow: hidden;
+  margin-bottom: var(--ifm-leading);
+}
+
+.title {
+  padding: 8px 16px;
+  font-weight: 600;
+  font-size: 14px;
+  border-bottom: 1px solid var(--ifm-color-emphasis-300);
+  background: var(--ifm-color-emphasis-100);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.editorPanel {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--ifm-color-emphasis-300);
+  min-width: 0;
+}
+
+.editorScroll {
+  flex: 1;
+  overflow: auto;
+}
+
+.canvasPanel {
+  position: relative;
+  height: 100%;
+}
+
+.errorDisplay {
+  padding: 16px;
+  color: #ff4444;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 13px;
+  white-space: pre-wrap;
+  overflow: auto;
+  height: 100%;
+  background: var(--ifm-color-emphasis-100);
+}
+
+.toolbar {
+  padding: 8px 16px;
+  border-top: 1px solid var(--ifm-color-emphasis-300);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: var(--ifm-color-emphasis-100);
+}
+
+.runButton {
+  padding: 4px 16px;
+  border-radius: 4px;
+  border: none;
+  background: var(--ifm-color-primary);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.resetButton {
+  padding: 4px 16px;
+  border-radius: 4px;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  background: transparent;
+  color: var(--ifm-font-color-base);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+/* CodeEditor overrides — these target elements rendered by react-simple-code-editor
+   inside our .codeEditor wrapper. Using :global() because the child elements
+   don't have CSS-module class names. */
+.codeEditor {
+  overflow: auto;
+  height: 100%;
+}
+
+.codeEditor :global(pre) {
+  overflow: hidden !important;
+}
+
+.codeEditor :global(textarea) {
+  caret-color: #f8f8f2 !important;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .editorPanel {
+    border-right: none;
+    border-bottom: 1px solid var(--ifm-color-emphasis-300);
+  }
+}

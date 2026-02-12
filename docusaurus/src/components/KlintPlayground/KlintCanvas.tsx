@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from "react";
+import React, { memo, useMemo, useRef } from "react";
 import { Klint, useKlint, type KlintContext, type KlintCanvasOptions } from "@shopify/klint";
 import { evaluateCode } from "./evaluateCode";
 
@@ -11,12 +11,14 @@ interface KlintCanvasProps {
 export default memo(function KlintCanvas({ source, options, onError }: KlintCanvasProps) {
   const { context, KlintMouse } = useKlint();
   const { mouse } = KlintMouse();
+  const errorRef = useRef(false);
 
   // Evaluate with mouse in scope so user code can reference `mouse` directly,
   // matching the real KlintMouse hook API (mouse.x, mouse.isPressed, etc.).
   // mouse is a stable mutable ref — safe to omit from deps.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const userCode = useMemo(() => {
+    errorRef.current = false;
     const result = evaluateCode(source, { mouse });
     if (result.error) {
       onError(result.error);
@@ -29,9 +31,11 @@ export default memo(function KlintCanvas({ source, options, onError }: KlintCanv
 
   const wrappedDraw = userCode.draw
     ? (K: KlintContext) => {
+        if (errorRef.current) return;
         try {
           userCode.draw!(K);
         } catch (err) {
+          errorRef.current = true;
           onError(err instanceof Error ? err.message : String(err));
         }
       }
@@ -39,9 +43,11 @@ export default memo(function KlintCanvas({ source, options, onError }: KlintCanv
 
   const wrappedSetup = userCode.setup
     ? (K: KlintContext) => {
+        if (errorRef.current) return;
         try {
           userCode.setup!(K);
         } catch (err) {
+          errorRef.current = true;
           onError(err instanceof Error ? err.message : String(err));
         }
       }
@@ -49,9 +55,11 @@ export default memo(function KlintCanvas({ source, options, onError }: KlintCanv
 
   const wrappedPreload = userCode.preload
     ? async (K: KlintContext) => {
+        if (errorRef.current) return;
         try {
           await userCode.preload!(K);
         } catch (err) {
+          errorRef.current = true;
           onError(err instanceof Error ? err.message : String(err));
         }
       }

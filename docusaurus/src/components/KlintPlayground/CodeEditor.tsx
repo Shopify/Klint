@@ -1,14 +1,9 @@
 import React from "react";
 import Editor from "react-simple-code-editor";
 import { Highlight, themes } from "prism-react-renderer";
+import styles from "./KlintPlayground.module.css";
 
-const EDITOR_CSS = `
-  /* Infima sets overflow:auto on all <pre> elements globally, which can
-     cause scrollbar/sizing mismatch with the overlaid textarea. */
-  .klint-code-editor pre { overflow: hidden !important; }
-  /* Caret inherits the page text color — make it visible on dark bg. */
-  .klint-code-editor textarea { caret-color: #f8f8f2 !important; }
-`;
+const theme = themes.dracula;
 
 interface CodeEditorProps {
   code: string;
@@ -16,9 +11,11 @@ interface CodeEditorProps {
   disabled?: boolean;
 }
 
-export default function CodeEditor({ code, onChange, disabled }: CodeEditorProps) {
-  const theme = themes.dracula;
-
+export default function CodeEditor({
+  code,
+  onChange,
+  disabled,
+}: CodeEditorProps) {
   const highlight = (value: string) => (
     <Highlight theme={theme} code={value} language="javascript">
       {({ tokens, getLineProps, getTokenProps }) => (
@@ -37,14 +34,8 @@ export default function CodeEditor({ code, onChange, disabled }: CodeEditorProps
 
   return (
     <div
-      className="klint-code-editor"
-      style={{
-        background: theme.plain.backgroundColor,
-        fontSize: "var(--ifm-code-font-size, 13px)",
-        fontFamily: "var(--ifm-font-family-monospace)",
-        overflow: "auto",
-        height: "100%",
-      }}
+      className={styles.codeEditor}
+      style={{ background: theme.plain.backgroundColor }}
     >
       <Editor
         value={code}
@@ -59,7 +50,6 @@ export default function CodeEditor({ code, onChange, disabled }: CodeEditorProps
           minHeight: "100%",
         }}
       />
-      <style dangerouslySetInnerHTML={{ __html: EDITOR_CSS }} />
     </div>
   );
 }

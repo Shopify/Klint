@@ -4,6 +4,7 @@ import type { KlintCanvasOptions } from "@shopify/klint";
 import CodeEditor from "./CodeEditor";
 import KlintCanvas from "./KlintCanvas";
 import { evaluateCode } from "./evaluateCode";
+import styles from "./KlintPlayground.module.css";
 
 interface KlintPlaygroundProps {
   code: string;
@@ -68,71 +69,21 @@ function PlaygroundInner({
   const isModified = code !== initialCode;
 
   return (
-    <div
-      style={{
-        border: "1px solid var(--ifm-color-emphasis-300)",
-        borderRadius: "var(--ifm-code-border-radius, 6px)",
-        overflow: "hidden",
-        marginBottom: "var(--ifm-leading)",
-      }}
-    >
-      {title && (
-        <div
-          style={{
-            padding: "8px 16px",
-            fontWeight: 600,
-            fontSize: 14,
-            borderBottom: "1px solid var(--ifm-color-emphasis-300)",
-            background: "var(--ifm-color-emphasis-100)",
-          }}
-        >
-          {title}
-        </div>
-      )}
+    <div className={styles.playground}>
+      {title && <div className={styles.title}>{title}</div>}
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          minHeight: canvasHeight,
-        }}
-        className="klint-playground-grid"
-      >
+      <div className={styles.grid} style={{ minHeight: canvasHeight }}>
         {/* Editor panel */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            borderRight: "1px solid var(--ifm-color-emphasis-300)",
-            minWidth: 0,
-          }}
-        >
-          <div style={{ flex: 1, overflow: "auto" }}>
-            <CodeEditor
-              code={code}
-              onChange={setCode}
-              disabled={!editable}
-            />
+        <div className={styles.editorPanel}>
+          <div className={styles.editorScroll}>
+            <CodeEditor code={code} onChange={setCode} disabled={!editable} />
           </div>
         </div>
 
         {/* Canvas panel */}
-        <div style={{ position: "relative", minHeight: canvasHeight, height: "100%" }}>
+        <div className={styles.canvasPanel} style={{ minHeight: canvasHeight }}>
           {error ? (
-            <div
-              style={{
-                padding: 16,
-                color: "#ff4444",
-                fontFamily: "var(--ifm-font-family-monospace)",
-                fontSize: 13,
-                whiteSpace: "pre-wrap",
-                overflow: "auto",
-                height: "100%",
-                background: "var(--ifm-color-emphasis-100)",
-              }}
-            >
-              {error}
-            </div>
+            <div className={styles.errorDisplay}>{error}</div>
           ) : runCode ? (
             <KlintCanvas
               key={canvasKey}
@@ -144,73 +95,38 @@ function PlaygroundInner({
         </div>
       </div>
 
-      {/* Toolbar — full width */}
+      {/* Toolbar */}
       {editable && (
-        <div
-          style={{
-            padding: "8px 16px",
-            borderTop: "1px solid var(--ifm-color-emphasis-300)",
-            display: "flex",
-            gap: 8,
-            alignItems: "center",
-            background: "var(--ifm-color-emphasis-100)",
-          }}
-        >
+        <div className={styles.toolbar}>
           <button
             type="button"
+            className={styles.runButton}
             onClick={handleRun}
-            style={{
-              padding: "4px 16px",
-              borderRadius: 4,
-              border: "none",
-              background: "var(--ifm-color-primary)",
-              color: "#fff",
-              cursor: "pointer",
-              fontWeight: 600,
-              fontSize: 13,
-            }}
           >
             Run
           </button>
           {isModified && (
             <button
               type="button"
+              className={styles.resetButton}
               onClick={handleReset}
-              style={{
-                padding: "4px 16px",
-                borderRadius: 4,
-                border: "1px solid var(--ifm-color-emphasis-300)",
-                background: "transparent",
-                color: "var(--ifm-font-color-base)",
-                cursor: "pointer",
-                fontWeight: 600,
-                fontSize: 13,
-              }}
             >
               Reset
             </button>
           )}
         </div>
       )}
-
-      <style>{`
-        @media (max-width: 768px) {
-          .klint-playground-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .klint-playground-grid > div:first-child {
-            border-right: none !important;
-            border-bottom: 1px solid var(--ifm-color-emphasis-300);
-          }
-        }
-      `}</style>
     </div>
   );
 }
 
 export default function KlintPlayground(props: KlintPlaygroundProps) {
   return (
-    <BrowserOnly fallback={<div style={{ padding: 16, opacity: 0.5 }}>Loading playground...</div>}>
+    <BrowserOnly
+      fallback={
+        <div style={{ padding: 16, opacity: 0.5 }}>Loading playground...</div>
+      }
+    >
       {() => <PlaygroundInner {...props} />}
     </BrowserOnly>
   );
