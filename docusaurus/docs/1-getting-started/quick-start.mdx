@@ -1,0 +1,142 @@
+---
+sidebar_position: 2
+---
+
+import KlintPlayground from '@site/src/components/KlintPlayground/KlintPlayground';
+
+# Quick Start
+
+Create your first Klint sketch in 2 minutes. Klint will take the size of its direct parent DOM element.
+
+## The Minimal Sketch
+
+Here's the simplest possible Klint sketch:
+
+```tsx
+import { useKlint, Klint } from '@shopify/klint';
+
+function MySketch() {
+  const { context } = useKlint();
+
+  const draw = (K) => {
+    K.background('#000');
+    K.fillColor('#fff');
+    K.circle(K.width/2, K.height/2, 50);
+  };
+
+  return <Klint context={context} draw={draw} />;
+}
+```
+
+Try it out — edit the code and click **Run**:
+
+<KlintPlayground
+  code={`function draw(K) {
+    K.background('#000');
+    K.fillColor('#fff');
+    K.circle(K.width / 2, K.height / 2, 50);
+}`}
+  canvasHeight={300}
+/>
+
+## Add Animation
+
+Make it move by using the `K.frame` property — it represents the number of frames elapsed since the sketch started.
+
+<KlintPlayground
+  code={`function draw(K) {
+    K.background('#000');
+
+    // Animate position with sine wave
+    const x = K.width / 2 + Math.sin(K.frame * 0.001) * 100;
+    const y = K.height / 2 + Math.cos(K.frame * 0.001) * 100;
+
+    K.fillColor('#ff6b6b');
+    K.circle(x, y, 30);
+}`}
+  canvasHeight={300}
+/>
+
+## Add Interactivity
+
+Track mouse position with the `mouse` object — in your app you get it from the `KlintMouse` hook, and in the playground it's available automatically:
+
+<KlintPlayground
+  code={`function draw(K) {
+    K.background('#000');
+
+    // Draw at mouse position
+    K.fillColor(mouse.isPressed ? '#ff6b6b' : '#fff');
+    K.circle(mouse.x, mouse.y, mouse.isPressed ? 40 : 30);
+}`}
+  canvasHeight={300}
+/>
+
+## Use Setup Function
+
+Initialize your sketch with the `setup` function — it runs once when the component mounts:
+
+<KlintPlayground
+  code={`function setup(K) {
+    // Runs once when component mounts
+    console.log('Canvas size:', K.width, 'x', K.height);
+}
+
+function draw(K) {
+    K.background('#000');
+
+    // Draw a grid of circles
+    for (let x = 50; x < K.width; x += 100) {
+        for (let y = 50; y < K.height; y += 100) {
+            K.fillColor('#ff6b6b');
+            K.circle(x, y, 20);
+        }
+    }
+}`}
+  canvasHeight={300}
+/>
+
+## Complete Example
+
+Here's everything together — `setup` for initialization, `draw` for animation, text rendering, and color:
+
+<KlintPlayground
+  code={`function setup(K) {
+    // Set up text styling
+    K.alignText('center', 'middle');
+    K.textSize(16);
+}
+
+function draw(K) {
+    // Fade background
+    K.fillColor('rgba(0, 0, 0, 0.1)');
+    K.rectangle(0, 0, K.width, K.height);
+
+    // Draw animated circles
+    for (let i = 0; i < 5; i++) {
+        const angle = (K.time * 0.001) + (i * Math.PI * 2 / 5);
+        const radius = 100;
+
+        const x = K.width / 2 + Math.cos(angle) * radius;
+        const y = K.height / 2 + Math.sin(angle) * radius;
+
+        // Distance from mouse affects size
+        const dist = K.distance(mouse.x, mouse.y, x, y);
+        const size = K.remap(dist, 0, 200, 40, 10);
+
+        K.fillColor(\`hsl(\${i * 72}, 70%, 60%)\`);
+        K.circle(x, y, size);
+    }
+
+    // Show instructions
+    K.fillColor('#fff');
+    K.text('Move your mouse around!', K.width / 2, 30);
+}`}
+  canvasHeight={300}
+/>
+
+## What's Next?
+
+- [useKlint Pattern](./useKlint-pattern) - Deep dive into the core pattern
+- [Core Concepts](../2-core-concepts/lifecycle) - Understand lifecycle functions
+- [Function Reference](../3-functions/drawing/circle) - Explore all available functions
