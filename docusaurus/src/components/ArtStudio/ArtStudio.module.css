@@ -1,0 +1,19 @@
+.studio {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+  background: #0a0a0f;
+}
+
+.canvasWrap {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.canvasWrap canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}

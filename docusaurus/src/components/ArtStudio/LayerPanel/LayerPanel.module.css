@@ -1,0 +1,255 @@
+.panel {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  bottom: 70px;
+  width: 240px;
+  background: rgba(10, 10, 20, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 20;
+  transition: width 0.25s ease, opacity 0.25s ease;
+}
+
+.collapsed {
+  width: 36px;
+  background: rgba(10, 10, 20, 0.5);
+}
+
+.collapseBtn {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 22px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  padding: 0;
+}
+
+.collapseBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 38px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  letter-spacing: 0.3px;
+}
+
+.addBtn {
+  width: 26px;
+  height: 26px;
+  background: rgba(65, 179, 163, 0.25);
+  border: 1px solid rgba(65, 179, 163, 0.4);
+  border-radius: 6px;
+  color: #41b3a3;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.15s;
+}
+
+.addBtn:hover {
+  background: rgba(65, 179, 163, 0.4);
+}
+
+/* Add menu */
+.addMenu {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 10px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.category {
+  margin-bottom: 6px;
+}
+
+.categoryName {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 2px 4px;
+}
+
+.algoBtn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 12px;
+  padding: 5px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.1s;
+}
+
+.algoBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+}
+
+/* Layer list */
+.layerList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.empty {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.3);
+  text-align: center;
+  padding: 30px 10px;
+}
+
+/* Layer item */
+.layerItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.layerItem:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.layerItem.selected {
+  background: rgba(65, 179, 163, 0.15);
+  border: 1px solid rgba(65, 179, 163, 0.3);
+}
+
+.layerItem.hidden {
+  opacity: 0.4;
+}
+
+.layerInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.visibilityBtn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.visibilityBtn:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.layerName {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.layerActions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.layerItem:hover .layerActions {
+  opacity: 1;
+}
+
+.actionBtn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  font-size: 10px;
+  padding: 2px 3px;
+  border-radius: 3px;
+}
+
+.actionBtn:hover {
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.actionBtn:disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
+.deleteBtn:hover {
+  color: #e27d60;
+  background: rgba(226, 125, 96, 0.1);
+}
+
+@media (max-width: 768px) {
+  .panel {
+    top: auto;
+    bottom: 60px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-height: 40vh;
+  }
+
+  .collapsed {
+    width: auto;
+    max-height: 36px;
+  }
+}
