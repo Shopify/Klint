@@ -1,0 +1,4 @@
+/* Override Docusaurus-specific height to fill full viewport */
+[class*="studio"] {
+  height: 100vh !important;
+}
