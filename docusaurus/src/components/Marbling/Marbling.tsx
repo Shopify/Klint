@@ -1,28 +1,73 @@
-import { useCallback, useEffect, useRef } from "react";
-import { Klint, useKlint, type KlintContext } from "@shopify/klint";
+import { useCallback, useEffect } from "react";
+import { Klint, useKlint, useStorage, type KlintContext } from "@shopify/klint";
 import FontParser from "@shopify/klint/plugins/FontParser";
 import useBaseUrl from "@docusaurus/useBaseUrl";
-import { type Drop, createDrop, displaceForDrop, applyTineLine } from "./tine";
+import {
+  type Drop,
+  createDrop,
+  createFlower,
+  createBlob,
+  createStar,
+  createCrescent,
+  createSupershape,
+  displaceForDrop,
+  applyTineLine,
+} from "./tine";
 
-// Indices into K.Color.colors for lighter background-suitable colors
-// peach(8), rose(9), drab(12), mustard(2), sky(5), sage(11)
-const BG_INDICES = [8, 9, 12, 2, 5, 11];
+// Curated color sets: [background, ...foreground]
+// Foreground colors are shuffled per load; background is fixed per set.
+const COLOR_SETS = [
+  {
+    bg: "orange",
+    fg: ["sky", "golden", "mustard", "peach", "charcoal", "rose"],
+  },
+  { bg: "peach", fg: ["sky", "mustard", "coral", "plum", "rose", "golden"] },
+  { bg: "navy", fg: ["peach", "rose", "orange", "mustard", "midnight"] },
+  { bg: "sage", fg: ["olive", "midnight", "golden", "plum", "peach", "navy"] },
+];
 
 const TEXT_COLOR = "#ffffff";
 const STRENGTH = 1.5;
 const TINE_U = 0.4;
 const TINE_SCALE = 150;
-const CIRCLE_COUNT = 5;
-const FRAMES_PER_DROP = 20;
+const GOLDEN_ANGLE = 2.39996322; // 137.508° — the angle that never repeats
+const DROP_COUNT = 18;
+const FRAMES_PER_DROP = 10;
 const LERP_EASE_FAST = 0.22; // near center
 const LERP_EASE_SLOW = 0.04; // at edges
 const LERP_SNAP = 0.25; // snap to target when within this distance²
+
+type ShapeType =
+  | "circle"
+  | "flower"
+  | "blob"
+  | "star"
+  | "crescent"
+  | "supershape";
 
 interface DropSpec {
   cx: number;
   cy: number;
   r: number;
   color: string;
+  shape: ShapeType;
+  // flower
+  petals?: number;
+  amplitude?: number;
+  // blob
+  harmonics?: { amp: number; freq: number; phase: number }[];
+  // star
+  points?: number;
+  innerRatio?: number;
+  sharpness?: number;
+  // crescent
+  offset?: number;
+  rotation?: number;
+  // supershape
+  m?: number;
+  n1?: number;
+  n2?: number;
+  n3?: number;
 }
 
 interface TextResult {
@@ -37,15 +82,6 @@ function mulberry32(seed: number) {
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-}
-
-function pickPalette(rand: () => number, allColors: string[], bg: string): string[] {
-  const available = allColors.filter((c) => c !== bg);
-  for (let i = available.length - 1; i > 0; i--) {
-    const j = Math.floor(rand() * (i + 1));
-    [available[i], available[j]] = [available[j], available[i]];
-  }
-  return available.slice(0, 7);
 }
 
 function textToDrops(
@@ -90,95 +126,247 @@ export default function Marbling() {
   const { mouse } = KlintMouse();
   const fontUrl = useBaseUrl("/fonts/Jost-Regular.ttf");
 
-  const fontDataRef = useRef<any>(null);
-  const specsRef = useRef<DropSpec[] | null>(null);
-  const textResultRef = useRef<TextResult | null>(null);
-  const dropsRef = useRef<Drop[]>([]);
-  const targetsRef = useRef<{ x: number; y: number }[][]>([]);
-  const placedRef = useRef(0);
-  const textPlacedRef = useRef(false);
-  const frameRef = useRef(0);
-  const initSizeRef = useRef<{ w: number; h: number } | null>(null);
-  const bgRef = useRef("#ECA088");
-  const seedRef = useRef(Date.now());
+  const storage = useStorage<{
+    fontData: any;
+    specs: DropSpec[] | null;
+    textResult: TextResult | null;
+    drops: Drop[];
+    targets: { x: number; y: number }[][];
+    placed: number;
+    textPlaced: boolean;
+    frame: number;
+    initSize: { w: number; h: number } | null;
+    bg: string;
+    seed: number;
+  }>({
+    fontData: null,
+    specs: null,
+    textResult: null,
+    drops: [],
+    targets: [],
+    placed: 0,
+    textPlaced: false,
+    frame: 0,
+    initSize: null,
+    bg: "#ECA088",
+    seed: Date.now(),
+  });
 
   useEffect(() => {
     const parser = new FontParser();
     parser.load(fontUrl).then((data: any) => {
-      fontDataRef.current = data;
+      storage.set("fontData", data);
     });
-  }, [fontUrl]);
+  }, [fontUrl, storage]);
 
   const draw = useCallback(
     (K: KlintContext) => {
+      const initSize = storage.get("initSize");
       const sizeChanged =
-        !initSizeRef.current ||
-        initSizeRef.current.w !== K.width ||
-        initSizeRef.current.h !== K.height;
+        !initSize || initSize.w !== K.width || initSize.h !== K.height;
 
       let dirty = false;
 
-      if ((!specsRef.current || sizeChanged) && fontDataRef.current) {
+      if ((!storage.get("specs") || sizeChanged) && storage.get("fontData")) {
         dirty = true;
-        initSizeRef.current = { w: K.width, h: K.height };
-        const rand = mulberry32(seedRef.current);
+        storage.set("initSize", { w: K.width, h: K.height });
+        const rand = mulberry32(storage.get("seed"));
         const hw = K.width * 0.5;
         const hh = K.height * 0.5;
 
-        const allColors = [...K.Color.colors];
-        const bgOptions = BG_INDICES.map((i) => allColors[i]);
-        bgRef.current = bgOptions[Math.floor(rand() * bgOptions.length)];
-        const palette = pickPalette(rand, allColors, bgRef.current);
+        const set = COLOR_SETS[Math.floor(rand() * COLOR_SETS.length)];
+        storage.set("bg", K.Color[set.bg as keyof typeof K.Color] as string);
+        const fg = set.fg.map(
+          (name) => K.Color[name as keyof typeof K.Color] as string,
+        );
+        // Shuffle foreground colors
+        for (let i = fg.length - 1; i > 0; i--) {
+          const j = Math.floor(rand() * (i + 1));
+          [fg[i], fg[j]] = [fg[j], fg[i]];
+        }
+        const palette = fg;
 
-        const baseR = Math.max(hw, hh) * 1.05;
-        const jitter = () => (rand() - 0.5) * 400; // ±200px
-        const circleSpecs: DropSpec[] = [
-          { cx: jitter(), cy: jitter(), r: baseR, color: palette[0] },
-          { cx: jitter(), cy: jitter(), r: baseR * 0.75, color: palette[1] },
-          { cx: jitter(), cy: jitter(), r: baseR * 0.55, color: palette[2] },
-          { cx: jitter(), cy: jitter(), r: baseR * 0.38, color: palette[3] },
-          { cx: jitter(), cy: jitter(), r: baseR * 0.22, color: palette[4] },
-        ];
+        // Phyllotaxis spiral — golden angle ensures no two drops align
+        const baseR = Math.max(hw, hh) * 0.35;
+        const spiralSpacing = Math.min(hw, hh) * 0.15;
+        const circleSpecs: DropSpec[] = [];
+        for (let i = 0; i < DROP_COUNT; i++) {
+          const angle = i * GOLDEN_ANGLE;
+          const dist = Math.sqrt(i) * spiralSpacing;
+          const t = i / (DROP_COUNT - 1);
+          const r = baseR * Math.pow(1 - t * 0.85, 1.5);
+          const jx = (rand() - 0.5) * 30; // ±15px subtle jitter
+          const jy = (rand() - 0.5) * 30;
 
-        const fontSize = Math.min(hw, hh) * 0.55;
-        textResultRef.current = textToDrops(
-          fontDataRef.current,
-          "Klint",
-          fontSize,
-          TEXT_COLOR,
+          // Pick a shape from 6 types
+          const cx = Math.cos(angle) * dist + jx;
+          const cy = Math.sin(angle) * dist + jy;
+          const color = palette[i % palette.length];
+          const roll = rand();
+          let spec: DropSpec;
+
+          if (roll < 0.2) {
+            // Flower — rose curve, 3–6 petals
+            spec = {
+              cx,
+              cy,
+              r,
+              color,
+              shape: "flower",
+              petals: 3 + Math.floor(rand() * 4),
+              amplitude: 0.2 + rand() * 0.25,
+            };
+          } else if (roll < 0.35) {
+            // Star — sharp points that become tendrils when displaced
+            spec = {
+              cx,
+              cy,
+              r,
+              color,
+              shape: "star",
+              points: 3 + Math.floor(rand() * 5), // 3–7 points
+              innerRatio: 0.3 + rand() * 0.3, // 0.3–0.6
+              sharpness: 0.4 + rand() * 0.6,
+            };
+          } else if (roll < 0.5) {
+            // Crescent — asymmetric limaçon, rotated randomly
+            spec = {
+              cx,
+              cy,
+              r,
+              color,
+              shape: "crescent",
+              offset: 0.3 + rand() * 0.4, // 0.3–0.7
+              rotation: rand() * Math.PI * 2,
+            };
+          } else if (roll < 0.7) {
+            // Supershape — Gielis formula, wild organic forms
+            const presets = [
+              { m: 3, n1: 0.5, n2: 1, n3: 1 }, // rounded triangle
+              { m: 5, n1: 0.3, n2: 1, n3: 1 }, // 5-lobe bloom
+              { m: 4, n1: 2, n2: 2, n3: 2 }, // squircle
+              { m: 6, n1: 0.2, n2: 1.7, n3: 1.7 }, // hexagonal bloom
+              { m: 3, n1: 5, n2: 2, n3: 7 }, // organic 3-lobe
+              { m: 7, n1: 0.3, n2: 1, n3: 1 }, // 7-petal soft
+              { m: 8, n1: 0.5, n2: 0.5, n3: 8 }, // spiky asymmetric
+            ];
+            const p = presets[Math.floor(rand() * presets.length)];
+            spec = { cx, cy, r, color, shape: "supershape", ...p };
+          } else if (roll < 0.85) {
+            // Blob — layered harmonics, every one unique
+            spec = {
+              cx,
+              cy,
+              r,
+              color,
+              shape: "blob",
+              harmonics: [
+                {
+                  amp: 0.05 + rand() * 0.12,
+                  freq: 2,
+                  phase: rand() * Math.PI * 2,
+                },
+                {
+                  amp: 0.03 + rand() * 0.1,
+                  freq: 3,
+                  phase: rand() * Math.PI * 2,
+                },
+                {
+                  amp: 0.02 + rand() * 0.08,
+                  freq: 5,
+                  phase: rand() * Math.PI * 2,
+                },
+              ],
+            };
+          } else {
+            // Circle — clean contrast
+            spec = { cx, cy, r, color, shape: "circle" };
+          }
+          circleSpecs.push(spec);
+        }
+
+        // Measure text at reference size, then scale to fit canvas with margin
+        const refSize = 100;
+        const refResult = storage.get("fontData").toPoints("Klint", refSize, {
+          anchor: "center",
+          align: "center",
+          baseline: "center",
+          sampling: 0.5,
+        });
+        let minX = Infinity,
+          maxX = -Infinity,
+          minY = Infinity,
+          maxY = -Infinity;
+        for (const letter of refResult.letters) {
+          for (const point of letter.shape) {
+            const px = letter.center.x + point.x;
+            const py = letter.center.y + point.y;
+            minX = Math.min(minX, px);
+            maxX = Math.max(maxX, px);
+            minY = Math.min(minY, py);
+            maxY = Math.max(maxY, py);
+          }
+        }
+        const margin = 0.32;
+        const scaleX = (K.width * (1 - margin * 2)) / (maxX - minX);
+        const scaleY = (K.height * (1 - margin * 2)) / (maxY - minY);
+        const fontSize = refSize * Math.min(scaleX, scaleY);
+
+        storage.set(
+          "textResult",
+          textToDrops(storage.get("fontData"), "Klint", fontSize, TEXT_COLOR),
         );
 
-        specsRef.current = circleSpecs;
-        dropsRef.current = [];
-        targetsRef.current = [];
-        placedRef.current = 0;
-        textPlacedRef.current = false;
-        frameRef.current = 0;
+        // Ensure the largest drops (first in array, last after reverse)
+        // have enough contrast with white text — pick darkest foreground colors
+        const withLum = fg.map((c) => {
+          const r = parseInt(c.slice(1, 3), 16) / 255;
+          const g = parseInt(c.slice(3, 5), 16) / 255;
+          const b = parseInt(c.slice(5, 7), 16) / 255;
+          return { color: c, lum: 0.299 * r + 0.587 * g + 0.114 * b };
+        });
+        withLum.sort((a, b) => a.lum - b.lum); // darkest first
+        circleSpecs[0].color = withLum[0].color;
+        if (circleSpecs.length > 1) {
+          circleSpecs[1].color = withLum[Math.min(1, withLum.length - 1)].color;
+        }
+
+        circleSpecs.reverse(); // small outer drops first → large center drops last
+        storage.set("specs", circleSpecs);
+        storage.set("drops", []);
+        storage.set("targets", []);
+        storage.set("placed", 0);
+        storage.set("textPlaced", false);
+        storage.set("frame", 0);
       }
 
-      if (specsRef.current && placedRef.current < CIRCLE_COUNT) {
-        if (frameRef.current % FRAMES_PER_DROP === 0) {
-          const spec = specsRef.current[placedRef.current];
+      const specs = storage.get("specs");
+      const drops = storage.get("drops");
+      const targets = storage.get("targets");
+
+      if (specs && storage.get("placed") < DROP_COUNT) {
+        if (storage.get("frame") % FRAMES_PER_DROP === 0) {
+          const spec = specs[storage.get("placed")];
 
           // Save current vertex positions (may be mid-lerp)
-          const saved = dropsRef.current.map((drop) =>
+          const saved = drops.map((drop) =>
             drop.vertices.map((v) => ({ x: v.x, y: v.y })),
           );
 
           // Displace existing drops (mutates vertices to displaced positions)
-          displaceForDrop(dropsRef.current, spec.cx, spec.cy, spec.r);
+          displaceForDrop(drops, spec.cx, spec.cy, spec.r);
 
           // Capture displaced positions as new lerp targets
-          for (let i = 0; i < dropsRef.current.length; i++) {
-            targetsRef.current[i] = dropsRef.current[i].vertices.map((v) => ({
+          for (let i = 0; i < drops.length; i++) {
+            targets[i] = drops[i].vertices.map((v) => ({
               x: v.x,
               y: v.y,
             }));
           }
 
           // Restore old positions — vertices will lerp toward targets
-          for (let i = 0; i < dropsRef.current.length; i++) {
-            const verts = dropsRef.current[i].vertices;
+          for (let i = 0; i < drops.length; i++) {
+            const verts = drops[i].vertices;
             for (let j = 0; j < verts.length; j++) {
               verts[j].x = saved[i][j].x;
               verts[j].y = saved[i][j].y;
@@ -186,43 +374,95 @@ export default function Marbling() {
           }
 
           // New drop appears instantly — targets match vertices
-          const newDrop = createDrop(spec.cx, spec.cy, spec.r, spec.color);
-          dropsRef.current.push(newDrop);
-          targetsRef.current.push(
-            newDrop.vertices.map((v) => ({ x: v.x, y: v.y })),
-          );
+          let newDrop: Drop;
+          switch (spec.shape) {
+            case "flower":
+              newDrop = createFlower(
+                spec.cx,
+                spec.cy,
+                spec.r,
+                spec.color,
+                spec.petals!,
+                spec.amplitude!,
+              );
+              break;
+            case "star":
+              newDrop = createStar(
+                spec.cx,
+                spec.cy,
+                spec.r,
+                spec.color,
+                spec.points!,
+                spec.innerRatio!,
+                spec.sharpness,
+              );
+              break;
+            case "crescent":
+              newDrop = createCrescent(
+                spec.cx,
+                spec.cy,
+                spec.r,
+                spec.color,
+                spec.offset!,
+                spec.rotation!,
+              );
+              break;
+            case "supershape":
+              newDrop = createSupershape(
+                spec.cx,
+                spec.cy,
+                spec.r,
+                spec.color,
+                spec.m!,
+                spec.n1!,
+                spec.n2!,
+                spec.n3!,
+              );
+              break;
+            case "blob":
+              newDrop = createBlob(
+                spec.cx,
+                spec.cy,
+                spec.r,
+                spec.color,
+                spec.harmonics!,
+              );
+              break;
+            default:
+              newDrop = createDrop(spec.cx, spec.cy, spec.r, spec.color);
+          }
+          drops.push(newDrop);
+          targets.push(newDrop.vertices.map((v) => ({ x: v.x, y: v.y })));
 
-          placedRef.current++;
+          storage.set("placed", storage.get("placed") + 1);
           dirty = true;
         }
-        frameRef.current++;
+        storage.set("frame", storage.get("frame") + 1);
       }
 
       if (
-        specsRef.current &&
-        placedRef.current >= CIRCLE_COUNT &&
-        !textPlacedRef.current &&
-        textResultRef.current
+        specs &&
+        storage.get("placed") >= DROP_COUNT &&
+        !storage.get("textPlaced") &&
+        storage.get("textResult")
       ) {
-        if (frameRef.current % FRAMES_PER_DROP === 0) {
-          const { drops: textDrops } = textResultRef.current;
+        if (storage.get("frame") % FRAMES_PER_DROP === 0) {
+          const { drops: textDrops } = storage.get("textResult")!;
 
           for (const drop of textDrops) {
-            dropsRef.current.push(drop);
-            targetsRef.current.push(
-              drop.vertices.map((v) => ({ x: v.x, y: v.y })),
-            );
+            drops.push(drop);
+            targets.push(drop.vertices.map((v) => ({ x: v.x, y: v.y })));
           }
 
-          textPlacedRef.current = true;
+          storage.set("textPlaced", true);
           dirty = true;
         }
-        frameRef.current++;
+        storage.set("frame", storage.get("frame") + 1);
       }
 
       // Tick position lerps — center vertices animate faster, edges slower
-      const allDrops = dropsRef.current;
-      const allTargets = targetsRef.current;
+      const allDrops = drops;
+      const allTargets = targets;
       const maxDist = Math.sqrt(K.width * K.width + K.height * K.height) * 0.5;
       for (let i = 0; i < allDrops.length; i++) {
         const verts = allDrops[i].vertices;
@@ -232,7 +472,9 @@ export default function Marbling() {
           const dx = tgt[j].x - verts[j].x;
           const dy = tgt[j].y - verts[j].y;
           if (dx * dx + dy * dy > LERP_SNAP) {
-            const dist = Math.sqrt(verts[j].x * verts[j].x + verts[j].y * verts[j].y);
+            const dist = Math.sqrt(
+              verts[j].x * verts[j].x + verts[j].y * verts[j].y,
+            );
             const t = Math.min(1, dist / maxDist);
             const ease = LERP_EASE_FAST + (LERP_EASE_SLOW - LERP_EASE_FAST) * t;
             verts[j].x += dx * ease;
@@ -245,14 +487,14 @@ export default function Marbling() {
         }
       }
 
-      if (textPlacedRef.current && mouse.isPressed) {
+      if (storage.get("textPlaced") && mouse.isPressed) {
         const dx = mouse.x - mouse.px;
         const dy = mouse.y - mouse.py;
         const dragDist = Math.sqrt(dx * dx + dy * dy);
 
         if (dragDist > 1) {
           applyTineLine(
-            dropsRef.current,
+            drops,
             mouse.px,
             mouse.py,
             dx,
@@ -262,8 +504,8 @@ export default function Marbling() {
             TINE_SCALE,
           );
           // Sync targets after tine (subdivision may change vertex count)
-          for (let i = 0; i < dropsRef.current.length; i++) {
-            targetsRef.current[i] = dropsRef.current[i].vertices.map((v) => ({
+          for (let i = 0; i < drops.length; i++) {
+            targets[i] = drops[i].vertices.map((v) => ({
               x: v.x,
               y: v.y,
             }));
@@ -274,10 +516,10 @@ export default function Marbling() {
 
       if (!dirty) return;
 
-      K.background(bgRef.current);
+      K.background(storage.get("bg"));
       K.noStroke();
 
-      for (const drop of dropsRef.current) {
+      for (const drop of drops) {
         K.fillColor(drop.color);
         K.beginShape();
         for (const v of drop.vertices) {
@@ -286,7 +528,7 @@ export default function Marbling() {
         K.endShape(true);
       }
     },
-    [mouse],
+    [mouse, storage],
   );
 
   return (

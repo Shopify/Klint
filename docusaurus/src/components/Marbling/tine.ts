@@ -36,6 +36,141 @@ export function createDrop(
 }
 
 /**
+ * Create a flower-shaped drop using a rose curve.
+ * r(θ) = radius × (1 + amplitude × cos(petals × θ))
+ */
+export function createFlower(
+  cx: number,
+  cy: number,
+  radius: number,
+  color: string,
+  petals: number,
+  amplitude: number,
+  numVertices = 120,
+): Drop {
+  const vertices: { x: number; y: number }[] = [];
+  for (let i = 0; i < numVertices; i++) {
+    const angle = (i / numVertices) * Math.PI * 2;
+    const r = radius * (1 + amplitude * Math.cos(petals * angle));
+    vertices.push({
+      x: cx + Math.cos(angle) * r,
+      y: cy + Math.sin(angle) * r,
+    });
+  }
+  return { color, vertices };
+}
+
+/**
+ * Create an organic blob using layered sine harmonics.
+ * Each harmonic adds a wobble at a different frequency.
+ */
+export function createBlob(
+  cx: number,
+  cy: number,
+  radius: number,
+  color: string,
+  harmonics: { amp: number; freq: number; phase: number }[],
+  numVertices = 120,
+): Drop {
+  const vertices: { x: number; y: number }[] = [];
+  for (let i = 0; i < numVertices; i++) {
+    const angle = (i / numVertices) * Math.PI * 2;
+    let r = radius;
+    for (const h of harmonics) {
+      r += radius * h.amp * Math.sin(h.freq * angle + h.phase);
+    }
+    vertices.push({
+      x: cx + Math.cos(angle) * r,
+      y: cy + Math.sin(angle) * r,
+    });
+  }
+  return { color, vertices };
+}
+
+/**
+ * Create a star with sharp points.
+ * Alternates between outer radius and inner radius with smooth transitions.
+ */
+export function createStar(
+  cx: number,
+  cy: number,
+  radius: number,
+  color: string,
+  points: number,
+  innerRatio: number,
+  sharpness = 0.6,
+  numVertices = 120,
+): Drop {
+  const vertices: { x: number; y: number }[] = [];
+  for (let i = 0; i < numVertices; i++) {
+    const angle = (i / numVertices) * Math.PI * 2;
+    const t = Math.pow((1 + Math.cos(points * angle)) / 2, sharpness);
+    const r = radius * (innerRatio + (1 - innerRatio) * t);
+    vertices.push({
+      x: cx + Math.cos(angle) * r,
+      y: cy + Math.sin(angle) * r,
+    });
+  }
+  return { color, vertices };
+}
+
+/**
+ * Create a crescent / limaçon shape.
+ * offset=0 is a circle, 0.5 is a cardioid, 0.8 is a deep crescent.
+ * rotation rotates the bulge direction.
+ */
+export function createCrescent(
+  cx: number,
+  cy: number,
+  radius: number,
+  color: string,
+  offset: number,
+  rotation: number,
+  numVertices = 120,
+): Drop {
+  const vertices: { x: number; y: number }[] = [];
+  for (let i = 0; i < numVertices; i++) {
+    const angle = (i / numVertices) * Math.PI * 2;
+    const r = radius * (1 + offset * Math.cos(angle - rotation));
+    vertices.push({
+      x: cx + Math.cos(angle) * r,
+      y: cy + Math.sin(angle) * r,
+    });
+  }
+  return { color, vertices };
+}
+
+/**
+ * Create a supershape using the Gielis formula.
+ * One formula that can produce stars, flowers, organic lobes, and everything in between.
+ * r(θ) = (|cos(mθ/4)/a|^n2 + |sin(mθ/4)/b|^n3)^(-1/n1)
+ */
+export function createSupershape(
+  cx: number,
+  cy: number,
+  radius: number,
+  color: string,
+  m: number,
+  n1: number,
+  n2: number,
+  n3: number,
+  numVertices = 120,
+): Drop {
+  const vertices: { x: number; y: number }[] = [];
+  for (let i = 0; i < numVertices; i++) {
+    const angle = (i / numVertices) * Math.PI * 2;
+    const t1 = Math.abs(Math.cos((m * angle) / 4));
+    const t2 = Math.abs(Math.sin((m * angle) / 4));
+    const r = radius * Math.pow(Math.pow(t1, n2) + Math.pow(t2, n3), -1 / n1);
+    vertices.push({
+      x: cx + Math.cos(angle) * r,
+      y: cy + Math.sin(angle) * r,
+    });
+  }
+  return { color, vertices };
+}
+
+/**
  * Displace all existing drops when a new ink drop lands.
  *
  * Formula: P' = C + (P - C) * sqrt(1 + r² / ||P - C||²)
