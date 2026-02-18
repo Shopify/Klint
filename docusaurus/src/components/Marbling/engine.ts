@@ -9,165 +9,68 @@
  * so the GPU handles rasterization with perfectly crisp edges.
  */
 
-export interface Drop {
-  color: string;
-  vertices: { x: number; y: number }[];
-}
+import type { Drop } from "./config";
 
 /**
- * Create a circular ink drop with evenly spaced vertices.
+ * Sample a polar radius function at evenly spaced angles to produce a polygon.
  */
-export function createDrop(
+function createPolarDrop(
   cx: number,
   cy: number,
-  radius: number,
   color: string,
+  radiusFn: (angle: number) => number,
   numVertices = 120,
 ): Drop {
   const vertices: { x: number; y: number }[] = [];
   for (let i = 0; i < numVertices; i++) {
     const angle = (i / numVertices) * Math.PI * 2;
-    vertices.push({
-      x: cx + Math.cos(angle) * radius,
-      y: cy + Math.sin(angle) * radius,
-    });
+    const r = radiusFn(angle);
+    vertices.push({ x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r });
   }
   return { color, vertices };
 }
 
-/**
- * Create a flower-shaped drop using a rose curve.
- * r(θ) = radius × (1 + amplitude × cos(petals × θ))
- */
-export function createFlower(
-  cx: number,
-  cy: number,
-  radius: number,
-  color: string,
-  petals: number,
-  amplitude: number,
-  numVertices = 120,
-): Drop {
-  const vertices: { x: number; y: number }[] = [];
-  for (let i = 0; i < numVertices; i++) {
-    const angle = (i / numVertices) * Math.PI * 2;
-    const r = radius * (1 + amplitude * Math.cos(petals * angle));
-    vertices.push({
-      x: cx + Math.cos(angle) * r,
-      y: cy + Math.sin(angle) * r,
-    });
-  }
-  return { color, vertices };
+export function createDrop(cx: number, cy: number, radius: number, color: string, numVertices = 120): Drop {
+  return createPolarDrop(cx, cy, color, () => radius, numVertices);
 }
 
-/**
- * Create an organic blob using layered sine harmonics.
- * Each harmonic adds a wobble at a different frequency.
- */
-export function createBlob(
-  cx: number,
-  cy: number,
-  radius: number,
-  color: string,
-  harmonics: { amp: number; freq: number; phase: number }[],
-  numVertices = 120,
-): Drop {
-  const vertices: { x: number; y: number }[] = [];
-  for (let i = 0; i < numVertices; i++) {
-    const angle = (i / numVertices) * Math.PI * 2;
+/** r(θ) = radius × (1 + amplitude × cos(petals × θ)) */
+export function createFlower(cx: number, cy: number, radius: number, color: string, petals: number, amplitude: number, numVertices = 120): Drop {
+  return createPolarDrop(cx, cy, color, (a) => radius * (1 + amplitude * Math.cos(petals * a)), numVertices);
+}
+
+/** Layered sine harmonics — each harmonic adds a wobble at a different frequency. */
+export function createBlob(cx: number, cy: number, radius: number, color: string, harmonics: { amp: number; freq: number; phase: number }[], numVertices = 120): Drop {
+  return createPolarDrop(cx, cy, color, (a) => {
     let r = radius;
-    for (const h of harmonics) {
-      r += radius * h.amp * Math.sin(h.freq * angle + h.phase);
-    }
-    vertices.push({
-      x: cx + Math.cos(angle) * r,
-      y: cy + Math.sin(angle) * r,
-    });
-  }
-  return { color, vertices };
+    for (const h of harmonics) r += radius * h.amp * Math.sin(h.freq * a + h.phase);
+    return r;
+  }, numVertices);
+}
+
+/** Smooth star: r oscillates between radius × innerRatio and radius. */
+export function createStar(cx: number, cy: number, radius: number, color: string, points: number, innerRatio: number, sharpness = 0.6, numVertices = 120): Drop {
+  return createPolarDrop(cx, cy, color, (a) => {
+    const t = Math.pow((1 + Math.cos(points * a)) / 2, sharpness);
+    return radius * (innerRatio + (1 - innerRatio) * t);
+  }, numVertices);
 }
 
 /**
- * Create a star with sharp points.
- * Alternates between outer radius and inner radius with smooth transitions.
- */
-export function createStar(
-  cx: number,
-  cy: number,
-  radius: number,
-  color: string,
-  points: number,
-  innerRatio: number,
-  sharpness = 0.6,
-  numVertices = 120,
-): Drop {
-  const vertices: { x: number; y: number }[] = [];
-  for (let i = 0; i < numVertices; i++) {
-    const angle = (i / numVertices) * Math.PI * 2;
-    const t = Math.pow((1 + Math.cos(points * angle)) / 2, sharpness);
-    const r = radius * (innerRatio + (1 - innerRatio) * t);
-    vertices.push({
-      x: cx + Math.cos(angle) * r,
-      y: cy + Math.sin(angle) * r,
-    });
-  }
-  return { color, vertices };
-}
-
-/**
- * Create a crescent / limaçon shape.
- * offset=0 is a circle, 0.5 is a cardioid, 0.8 is a deep crescent.
+ * Limaçon: offset=0 is a circle, 0.5 is a cardioid, 0.8 is a deep crescent.
  * rotation rotates the bulge direction.
  */
-export function createCrescent(
-  cx: number,
-  cy: number,
-  radius: number,
-  color: string,
-  offset: number,
-  rotation: number,
-  numVertices = 120,
-): Drop {
-  const vertices: { x: number; y: number }[] = [];
-  for (let i = 0; i < numVertices; i++) {
-    const angle = (i / numVertices) * Math.PI * 2;
-    const r = radius * (1 + offset * Math.cos(angle - rotation));
-    vertices.push({
-      x: cx + Math.cos(angle) * r,
-      y: cy + Math.sin(angle) * r,
-    });
-  }
-  return { color, vertices };
+export function createCrescent(cx: number, cy: number, radius: number, color: string, offset: number, rotation: number, numVertices = 120): Drop {
+  return createPolarDrop(cx, cy, color, (a) => radius * (1 + offset * Math.cos(a - rotation)), numVertices);
 }
 
-/**
- * Create a supershape using the Gielis formula.
- * One formula that can produce stars, flowers, organic lobes, and everything in between.
- * r(θ) = (|cos(mθ/4)/a|^n2 + |sin(mθ/4)/b|^n3)^(-1/n1)
- */
-export function createSupershape(
-  cx: number,
-  cy: number,
-  radius: number,
-  color: string,
-  m: number,
-  n1: number,
-  n2: number,
-  n3: number,
-  numVertices = 120,
-): Drop {
-  const vertices: { x: number; y: number }[] = [];
-  for (let i = 0; i < numVertices; i++) {
-    const angle = (i / numVertices) * Math.PI * 2;
-    const t1 = Math.abs(Math.cos((m * angle) / 4));
-    const t2 = Math.abs(Math.sin((m * angle) / 4));
-    const r = radius * Math.pow(Math.pow(t1, n2) + Math.pow(t2, n3), -1 / n1);
-    vertices.push({
-      x: cx + Math.cos(angle) * r,
-      y: cy + Math.sin(angle) * r,
-    });
-  }
-  return { color, vertices };
+/** Gielis superformula: r(θ) = (|cos(mθ/4)|^n2 + |sin(mθ/4)|^n3)^(-1/n1) */
+export function createSupershape(cx: number, cy: number, radius: number, color: string, m: number, n1: number, n2: number, n3: number, numVertices = 120): Drop {
+  return createPolarDrop(cx, cy, color, (a) => {
+    const t1 = Math.abs(Math.cos((m * a) / 4));
+    const t2 = Math.abs(Math.sin((m * a) / 4));
+    return radius * Math.pow(Math.pow(t1, n2) + Math.pow(t2, n3), -1 / n1);
+  }, numVertices);
 }
 
 /**
@@ -222,7 +125,6 @@ export function applyTineLine(
   const len = Math.sqrt(dirX * dirX + dirY * dirY);
   if (len < 0.5) return;
 
-  // M = direction unit vector
   const mx = dirX / len;
   const my = dirY / len;
 
@@ -230,17 +132,14 @@ export function applyTineLine(
     for (const v of drop.vertices) {
       const relX = v.x - lineX;
       const relY = v.y - lineY;
-      const d = Math.sqrt(relX * relX + relY * relY); // distance to point
+      const d = Math.sqrt(relX * relX + relY * relY);
       const displacement = z * Math.pow(u, d / scale);
       v.x += mx * displacement;
       v.y += my * displacement;
     }
   }
 
-  // Subdivide edges that stretched too far — prevents self-intersection
   subdivideStretched(drops, 8);
-
-  // Pull back vertices that drifted too far from their neighbors
   constrainNeighborDistance(drops, 12);
 }
 
@@ -262,7 +161,6 @@ function subdivideStretched(drops: Drop[], maxLen: number) {
     const len = verts.length;
     let needsSubdiv = false;
 
-    // Quick scan: does any edge exceed the threshold?
     for (let i = 0; i < len; i++) {
       const a = verts[i];
       const b = verts[(i + 1) % len];
@@ -328,7 +226,6 @@ function constrainNeighborDistance(drops: Drop[], maxDist: number) {
         if (dist2 > maxDist2) {
           const dist = Math.sqrt(dist2);
           const excess = (dist - maxDist) / dist;
-          // Split the correction 50/50 between both vertices
           const cx = dx * excess * 0.5;
           const cy = dy * excess * 0.5;
           curr.x += cx;
