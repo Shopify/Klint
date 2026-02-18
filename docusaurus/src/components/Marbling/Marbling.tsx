@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from "react";
 import { Klint, useKlint, useStorage, type KlintContext } from "@shopify/klint";
-import { FontParser } from "@shopify/klint/plugins";
+import FontParser from "@shopify/klint/plugins/FontParser";
 import useBaseUrl from "@docusaurus/useBaseUrl";
 import {
   type Drop,
@@ -307,7 +307,7 @@ export default function Marbling() {
             maxY = Math.max(maxY, py);
           }
         }
-        const margin = 0.24; // 24% margin on each side
+        const margin = 0.32;
         const scaleX = (K.width * (1 - margin * 2)) / (maxX - minX);
         const scaleY = (K.height * (1 - margin * 2)) / (maxY - minY);
         const fontSize = refSize * Math.min(scaleX, scaleY);
