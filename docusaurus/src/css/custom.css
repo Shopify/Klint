@@ -7,8 +7,25 @@
  * work well for content-centric websites.
  */
 
+@font-face {
+  font-family: "Jost";
+  src: url("../../static/fonts/Jost-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Jost";
+  src: url("../../static/fonts/Jost-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* You can override the default Infima variables here. */
 :root {
+  --ifm-heading-font-family: "Jost", sans-serif;
   --ifm-color-primary: #2e8555;
   --ifm-color-primary-dark: #29784c;
   --ifm-color-primary-darker: #277148;
@@ -30,4 +47,9 @@
   --ifm-color-primary-lighter: #32d8b4;
   --ifm-color-primary-lightest: #4fddbf;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+.navbar__title {
+  font-family: "Jost", sans-serif;
+  font-weight: 400;
 }
