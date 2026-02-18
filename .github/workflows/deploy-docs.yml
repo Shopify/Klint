@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "docusaurus/**"
+      - "packages/klint/src/**"
       - "SKILL.md"
       - ".github/workflows/deploy-docs.yml"
   workflow_dispatch:
@@ -33,6 +34,10 @@ jobs:
 
       - name: Install dependencies
         run: rm -f package-lock.json && npm install
+
+      - name: Build Klint package
+        working-directory: packages/klint
+        run: npm run build
 
       - name: Build Docusaurus
         working-directory: docusaurus
