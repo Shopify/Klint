@@ -292,17 +292,36 @@ const {
 ### KlintMouse
 
 ```tsx
-const { mouse, onClick, onMove, onDrag } = KlintMouse();
+const { mouse, onClick, onMouseDown, onMouseUp, onMove, onDrag, onMouseIn, onMouseOut } = KlintMouse();
 
 // mouse object:
-mouse.x;        // Current X position
-mouse.y;        // Current Y position
-mouse.px;       // Previous X
-mouse.py;       // Previous Y
-mouse.pressed;  // Is button down
-mouse.button;   // Which button (0/1/2)
+mouse.x;         // Current X position
+mouse.y;         // Current Y position
+mouse.px;        // Previous X
+mouse.py;        // Previous Y
+mouse.vx;        // Velocity X (x - px)
+mouse.vy;        // Velocity Y (y - py)
+mouse.angle;     // Angle of movement (Math.atan2)
+mouse.isPressed; // Is button down (NOTE: published 0.0.98 uses isPressed, not pressed)
+mouse.isHover;   // Is pointer over the canvas
+mouse.button;    // Which button (0/1/2)
 
 onClick((K, e) => { /* handle click */ });
+onMouseDown((K, e) => { /* handle mouse down */ });
+onMouseUp((K, e) => { /* handle mouse up */ });
+onMouseIn((K, e) => { /* handle mouse enter canvas */ });
+onMouseOut((K, e) => { /* handle mouse leave canvas */ });
+```
+
+### KlintWindow
+
+```tsx
+const { onResize, onFocus, onBlur, onVisibilityChange } = KlintWindow();
+
+onResize((K) => { /* window resized */ });
+onFocus((K) => { /* window gained focus */ });
+onBlur((K) => { /* window lost focus */ });
+onVisibilityChange((K, isVisible) => { /* tab visibility changed */ });
 ```
 
 ### KlintImage

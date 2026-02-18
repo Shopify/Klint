@@ -30,6 +30,7 @@ const TEXT_COLOR = "#ffffff";
 const STRENGTH = 1.5;
 const TINE_U = 0.4;
 const TINE_SCALE = 150;
+const STROKE_DECAY = 4800; // drag distance (px) at which strength halves
 const GOLDEN_ANGLE = 2.39996322; // 137.508° — the angle that never repeats
 const DROP_COUNT = 18;
 const FRAMES_PER_DROP = 10;
@@ -140,6 +141,9 @@ export default function Marbling() {
     seed: number;
     lastTineX: number;
     lastTineY: number;
+    wasPressed: boolean;
+    strokeDist: number;
+    settledFrames: number;
   }>({
     fontData: null,
     specs: null,
@@ -154,6 +158,9 @@ export default function Marbling() {
     seed: Date.now(),
     lastTineX: 0,
     lastTineY: 0,
+    wasPressed: false,
+    strokeDist: 0,
+    settledFrames: 0,
   });
 
   useEffect(() => {
@@ -164,6 +171,21 @@ export default function Marbling() {
   }, [fontUrl, storage]);
 
   const draw = (K: KlintContext) => {
+    // Keep mouse tracking current even when idle, so stale positions
+    // don't cause phantom tine displacements on the next click.
+    if (!mouse.isPressed) {
+      storage.set("wasPressed", false);
+      storage.set("lastTineX", mouse.x);
+      storage.set("lastTineY", mouse.y);
+    }
+
+    // Skip all work if canvas has been idle and no interaction is happening
+    const settled = storage.get("settledFrames");
+    if (settled > 3 && !mouse.isPressed && storage.get("textPlaced")) {
+      const initSize = storage.get("initSize");
+      if (initSize && initSize.w === K.width && initSize.h === K.height) return;
+    }
+
     const initSize = storage.get("initSize");
     const sizeChanged =
       !initSize || initSize.w !== K.width || initSize.h !== K.height;
@@ -489,7 +511,15 @@ export default function Marbling() {
       }
     }
 
-    if (storage.get("textPlaced") && mouse.isPressed) {
+    if (storage.get("textPlaced") && mouse.isPressed && mouse.isHover) {
+      // On initial press, reset tine origin and stroke distance
+      if (!storage.get("wasPressed")) {
+        storage.set("wasPressed", true);
+        storage.set("strokeDist", 0);
+        storage.set("lastTineX", mouse.x);
+        storage.set("lastTineY", mouse.y);
+      }
+
       const lx = storage.get("lastTineX");
       const ly = storage.get("lastTineY");
       const dx = mouse.x - lx;
@@ -497,16 +527,23 @@ export default function Marbling() {
       const dragDist = K.distance(mouse.x, mouse.y, lx, ly);
 
       if (dragDist > 3) {
+        // Full power for 75% of max distance, then fade to zero
+        const sd = storage.get("strokeDist");
+        const fadeStart = STROKE_DECAY * 0.75;
+        const decay = sd < fadeStart ? 1 : Math.max(0, 1 - (sd - fadeStart) / (STROKE_DECAY - fadeStart));
+        const strength = STRENGTH * decay;
+
         applyTineLine(
           drops,
           lx,
           ly,
           dx,
           dy,
-          dragDist * STRENGTH,
+          dragDist * strength,
           TINE_U,
           TINE_SCALE,
         );
+        storage.set("strokeDist", sd + dragDist);
         storage.set("lastTineX", mouse.x);
         storage.set("lastTineY", mouse.y);
         // Sync targets after tine (subdivision may change vertex count)
@@ -518,12 +555,14 @@ export default function Marbling() {
         }
         dirty = true;
       }
-    } else if (!mouse.isPressed) {
-      storage.set("lastTineX", mouse.x);
-      storage.set("lastTineY", mouse.y);
     }
 
-    if (!dirty) return;
+    if (!dirty) {
+      storage.set("settledFrames", storage.get("settledFrames") + 1);
+      return;
+    }
+
+    storage.set("settledFrames", 0);
 
     K.background(storage.get("bg"));
     K.noStroke();
@@ -543,7 +582,11 @@ export default function Marbling() {
       <Klint
         context={context}
         draw={draw}
-        options={{ origin: "center", fps: 60, dpr: 2 }}
+        options={{
+          origin: "center",
+          fps: 60,
+          dpr: Math.min(2, 4096 / Math.max(window.innerWidth, window.innerHeight)),
+        }}
       />
     </div>
   );
