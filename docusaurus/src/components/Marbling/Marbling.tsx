@@ -310,6 +310,23 @@ export default function Marbling() {
         circleSpecs.push(spec);
       }
 
+      // Force the first drop to be a blob (it's the largest)
+      const first = circleSpecs[0];
+      if (first.shape !== "blob") {
+        circleSpecs[0] = {
+          cx: first.cx,
+          cy: first.cy,
+          r: first.r,
+          color: first.color,
+          shape: "blob",
+          harmonics: [
+            { amp: 0.05 + rand() * 0.12, freq: 2, phase: rand() * Math.PI * 2 },
+            { amp: 0.03 + rand() * 0.1, freq: 3, phase: rand() * Math.PI * 2 },
+            { amp: 0.02 + rand() * 0.08, freq: 5, phase: rand() * Math.PI * 2 },
+          ],
+        };
+      }
+
       // Measure text at reference size, then scale to fit canvas with margin
       const refSize = 100;
       const refResult = storage.get("fontData").toPoints("Klint", refSize, {

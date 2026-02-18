@@ -239,6 +239,9 @@ export function applyTineLine(
 
   // Subdivide edges that stretched too far — prevents self-intersection
   subdivideStretched(drops, 8);
+
+  // Pull back vertices that drifted too far from their neighbors
+  constrainNeighborDistance(drops, 12);
 }
 
 /**
@@ -299,3 +302,44 @@ function subdivideStretched(drops: Drop[], maxLen: number) {
     drop.vertices = newVerts;
   }
 }
+
+/**
+ * Constrain each vertex so it stays within maxDist of both its neighbors.
+ * If an edge is too long, pull the vertex toward the midpoint of the edge.
+ * Multiple passes handle chains of stretched edges.
+ */
+function constrainNeighborDistance(drops: Drop[], maxDist: number) {
+  const maxDist2 = maxDist * maxDist;
+
+  for (const drop of drops) {
+    const verts = drop.vertices;
+    const len = verts.length;
+    if (len < 3) continue;
+
+    for (let pass = 0; pass < 3; pass++) {
+      let anyFixed = false;
+      for (let i = 0; i < len; i++) {
+        const curr = verts[i];
+        const next = verts[(i + 1) % len];
+        const dx = next.x - curr.x;
+        const dy = next.y - curr.y;
+        const dist2 = dx * dx + dy * dy;
+
+        if (dist2 > maxDist2) {
+          const dist = Math.sqrt(dist2);
+          const excess = (dist - maxDist) / dist;
+          // Split the correction 50/50 between both vertices
+          const cx = dx * excess * 0.5;
+          const cy = dy * excess * 0.5;
+          curr.x += cx;
+          curr.y += cy;
+          next.x -= cx;
+          next.y -= cy;
+          anyFixed = true;
+        }
+      }
+      if (!anyFixed) break;
+    }
+  }
+}
+
