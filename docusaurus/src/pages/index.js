@@ -9,7 +9,7 @@ export default function Home() {
       description="A modern 2D Canvas made for React"
       noFooter
     >
-      <div style={{ position: "relative", width: "100vw", height: "calc(100vh - 60px)" }}>
+      <div style={{ position: "relative", width: "100%", height: "calc(100vh - 60px)", overflow: "hidden" }}>
         <Marbling />
         <a
           href={useBaseUrl("/docs")}
