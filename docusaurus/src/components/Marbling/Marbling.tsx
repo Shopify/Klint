@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { Klint, useKlint, useStorage, type KlintContext } from "@shopify/klint";
 import FontParser from "@shopify/klint/plugins/FontParser";
 import useBaseUrl from "@docusaurus/useBaseUrl";
@@ -138,6 +138,8 @@ export default function Marbling() {
     initSize: { w: number; h: number } | null;
     bg: string;
     seed: number;
+    lastTineX: number;
+    lastTineY: number;
   }>({
     fontData: null,
     specs: null,
@@ -150,6 +152,8 @@ export default function Marbling() {
     initSize: null,
     bg: "#ECA088",
     seed: Date.now(),
+    lastTineX: 0,
+    lastTineY: 0,
   });
 
   useEffect(() => {
@@ -159,381 +163,388 @@ export default function Marbling() {
     });
   }, [fontUrl, storage]);
 
-  const draw = useCallback(
-    (K: KlintContext) => {
-      const initSize = storage.get("initSize");
-      const sizeChanged =
-        !initSize || initSize.w !== K.width || initSize.h !== K.height;
+  const draw = (K: KlintContext) => {
+    const initSize = storage.get("initSize");
+    const sizeChanged =
+      !initSize || initSize.w !== K.width || initSize.h !== K.height;
 
-      let dirty = false;
+    let dirty = false;
 
-      if ((!storage.get("specs") || sizeChanged) && storage.get("fontData")) {
-        dirty = true;
-        storage.set("initSize", { w: K.width, h: K.height });
-        const rand = mulberry32(storage.get("seed"));
-        const hw = K.width * 0.5;
-        const hh = K.height * 0.5;
+    if ((!storage.get("specs") || sizeChanged) && storage.get("fontData")) {
+      dirty = true;
+      storage.set("initSize", { w: K.width, h: K.height });
+      const rand = mulberry32(storage.get("seed"));
+      const hw = K.width * 0.5;
+      const hh = K.height * 0.5;
 
-        const set = COLOR_SETS[Math.floor(rand() * COLOR_SETS.length)];
-        storage.set("bg", K.Color[set.bg as keyof typeof K.Color] as string);
-        const fg = set.fg.map(
-          (name) => K.Color[name as keyof typeof K.Color] as string,
+      const set = COLOR_SETS[Math.floor(rand() * COLOR_SETS.length)];
+      storage.set("bg", K.Color[set.bg as keyof typeof K.Color] as string);
+      const fg = set.fg.map(
+        (name) => K.Color[name as keyof typeof K.Color] as string,
+      );
+      // Shuffle foreground colors
+      for (let i = fg.length - 1; i > 0; i--) {
+        const j = Math.floor(rand() * (i + 1));
+        [fg[i], fg[j]] = [fg[j], fg[i]];
+      }
+      const palette = fg;
+
+      // Phyllotaxis spiral — golden angle ensures no two drops align
+      const baseR = Math.max(hw, hh) * 0.35;
+      const spiralSpacing = Math.min(hw, hh) * 0.15;
+      const circleSpecs: DropSpec[] = [];
+      for (let i = 0; i < DROP_COUNT; i++) {
+        const angle = i * GOLDEN_ANGLE;
+        const dist = Math.sqrt(i) * spiralSpacing;
+        const t = i / (DROP_COUNT - 1);
+        const r = baseR * Math.pow(1 - t * 0.85, 1.5);
+        const jx = (rand() - 0.5) * 30; // ±15px subtle jitter
+        const jy = (rand() - 0.5) * 30;
+
+        // Pick a shape from 6 types
+        const cx = Math.cos(angle) * dist + jx;
+        const cy = Math.sin(angle) * dist + jy;
+        const color = palette[i % palette.length];
+        const roll = rand();
+        let spec: DropSpec;
+
+        if (roll < 0.2) {
+          // Flower — rose curve, 3–6 petals
+          spec = {
+            cx,
+            cy,
+            r,
+            color,
+            shape: "flower",
+            petals: 3 + Math.floor(rand() * 4),
+            amplitude: 0.2 + rand() * 0.25,
+          };
+        } else if (roll < 0.35) {
+          // Star — sharp points that become tendrils when displaced
+          spec = {
+            cx,
+            cy,
+            r,
+            color,
+            shape: "star",
+            points: 3 + Math.floor(rand() * 5), // 3–7 points
+            innerRatio: 0.3 + rand() * 0.3, // 0.3–0.6
+            sharpness: 0.4 + rand() * 0.6,
+          };
+        } else if (roll < 0.5) {
+          // Crescent — asymmetric limaçon, rotated randomly
+          spec = {
+            cx,
+            cy,
+            r,
+            color,
+            shape: "crescent",
+            offset: 0.3 + rand() * 0.4, // 0.3–0.7
+            rotation: rand() * Math.PI * 2,
+          };
+        } else if (roll < 0.7) {
+          // Supershape — Gielis formula, wild organic forms
+          const presets = [
+            { m: 3, n1: 0.5, n2: 1, n3: 1 }, // rounded triangle
+            { m: 5, n1: 0.3, n2: 1, n3: 1 }, // 5-lobe bloom
+            { m: 4, n1: 2, n2: 2, n3: 2 }, // squircle
+            { m: 6, n1: 0.2, n2: 1.7, n3: 1.7 }, // hexagonal bloom
+            { m: 3, n1: 5, n2: 2, n3: 7 }, // organic 3-lobe
+            { m: 7, n1: 0.3, n2: 1, n3: 1 }, // 7-petal soft
+            { m: 8, n1: 0.5, n2: 0.5, n3: 8 }, // spiky asymmetric
+          ];
+          const p = presets[Math.floor(rand() * presets.length)];
+          spec = { cx, cy, r, color, shape: "supershape", ...p };
+        } else if (roll < 0.85) {
+          // Blob — layered harmonics, every one unique
+          spec = {
+            cx,
+            cy,
+            r,
+            color,
+            shape: "blob",
+            harmonics: [
+              {
+                amp: 0.05 + rand() * 0.12,
+                freq: 2,
+                phase: rand() * Math.PI * 2,
+              },
+              {
+                amp: 0.03 + rand() * 0.1,
+                freq: 3,
+                phase: rand() * Math.PI * 2,
+              },
+              {
+                amp: 0.02 + rand() * 0.08,
+                freq: 5,
+                phase: rand() * Math.PI * 2,
+              },
+            ],
+          };
+        } else {
+          // Circle — clean contrast
+          spec = { cx, cy, r, color, shape: "circle" };
+        }
+        circleSpecs.push(spec);
+      }
+
+      // Measure text at reference size, then scale to fit canvas with margin
+      const refSize = 100;
+      const refResult = storage.get("fontData").toPoints("Klint", refSize, {
+        anchor: "center",
+        align: "center",
+        baseline: "center",
+        sampling: 0.5,
+      });
+      let minX = Infinity,
+        maxX = -Infinity,
+        minY = Infinity,
+        maxY = -Infinity;
+      for (const letter of refResult.letters) {
+        for (const point of letter.shape) {
+          const px = letter.center.x + point.x;
+          const py = letter.center.y + point.y;
+          minX = Math.min(minX, px);
+          maxX = Math.max(maxX, px);
+          minY = Math.min(minY, py);
+          maxY = Math.max(maxY, py);
+        }
+      }
+      const margin = 0.32;
+      const scaleX = (K.width * (1 - margin * 2)) / (maxX - minX);
+      const scaleY = (K.height * (1 - margin * 2)) / (maxY - minY);
+      const fontSize = refSize * Math.min(scaleX, scaleY);
+
+      storage.set(
+        "textResult",
+        textToDrops(storage.get("fontData"), "Klint", fontSize, TEXT_COLOR),
+      );
+
+      // Ensure the largest drops (first in array, last after reverse)
+      // have enough contrast with white text — pick darkest foreground colors
+      const withLum = fg.map((c) => {
+        const r = parseInt(c.slice(1, 3), 16) / 255;
+        const g = parseInt(c.slice(3, 5), 16) / 255;
+        const b = parseInt(c.slice(5, 7), 16) / 255;
+        return { color: c, lum: 0.299 * r + 0.587 * g + 0.114 * b };
+      });
+      withLum.sort((a, b) => a.lum - b.lum); // darkest first
+      circleSpecs[0].color = withLum[0].color;
+      if (circleSpecs.length > 1) {
+        circleSpecs[1].color = withLum[Math.min(1, withLum.length - 1)].color;
+      }
+
+      circleSpecs.reverse(); // small outer drops first → large center drops last
+      storage.set("specs", circleSpecs);
+      storage.set("drops", []);
+      storage.set("targets", []);
+      storage.set("placed", 0);
+      storage.set("textPlaced", false);
+      storage.set("frame", 0);
+    }
+
+    const specs = storage.get("specs");
+    const drops = storage.get("drops");
+    const targets = storage.get("targets");
+
+    if (specs && storage.get("placed") < DROP_COUNT) {
+      if (storage.get("frame") % FRAMES_PER_DROP === 0) {
+        const spec = specs[storage.get("placed")];
+
+        // Save current vertex positions (may be mid-lerp)
+        const saved = drops.map((drop) =>
+          drop.vertices.map((v) => ({ x: v.x, y: v.y })),
         );
-        // Shuffle foreground colors
-        for (let i = fg.length - 1; i > 0; i--) {
-          const j = Math.floor(rand() * (i + 1));
-          [fg[i], fg[j]] = [fg[j], fg[i]];
-        }
-        const palette = fg;
 
-        // Phyllotaxis spiral — golden angle ensures no two drops align
-        const baseR = Math.max(hw, hh) * 0.35;
-        const spiralSpacing = Math.min(hw, hh) * 0.15;
-        const circleSpecs: DropSpec[] = [];
-        for (let i = 0; i < DROP_COUNT; i++) {
-          const angle = i * GOLDEN_ANGLE;
-          const dist = Math.sqrt(i) * spiralSpacing;
-          const t = i / (DROP_COUNT - 1);
-          const r = baseR * Math.pow(1 - t * 0.85, 1.5);
-          const jx = (rand() - 0.5) * 30; // ±15px subtle jitter
-          const jy = (rand() - 0.5) * 30;
+        // Displace existing drops (mutates vertices to displaced positions)
+        displaceForDrop(drops, spec.cx, spec.cy, spec.r);
 
-          // Pick a shape from 6 types
-          const cx = Math.cos(angle) * dist + jx;
-          const cy = Math.sin(angle) * dist + jy;
-          const color = palette[i % palette.length];
-          const roll = rand();
-          let spec: DropSpec;
-
-          if (roll < 0.2) {
-            // Flower — rose curve, 3–6 petals
-            spec = {
-              cx,
-              cy,
-              r,
-              color,
-              shape: "flower",
-              petals: 3 + Math.floor(rand() * 4),
-              amplitude: 0.2 + rand() * 0.25,
-            };
-          } else if (roll < 0.35) {
-            // Star — sharp points that become tendrils when displaced
-            spec = {
-              cx,
-              cy,
-              r,
-              color,
-              shape: "star",
-              points: 3 + Math.floor(rand() * 5), // 3–7 points
-              innerRatio: 0.3 + rand() * 0.3, // 0.3–0.6
-              sharpness: 0.4 + rand() * 0.6,
-            };
-          } else if (roll < 0.5) {
-            // Crescent — asymmetric limaçon, rotated randomly
-            spec = {
-              cx,
-              cy,
-              r,
-              color,
-              shape: "crescent",
-              offset: 0.3 + rand() * 0.4, // 0.3–0.7
-              rotation: rand() * Math.PI * 2,
-            };
-          } else if (roll < 0.7) {
-            // Supershape — Gielis formula, wild organic forms
-            const presets = [
-              { m: 3, n1: 0.5, n2: 1, n3: 1 }, // rounded triangle
-              { m: 5, n1: 0.3, n2: 1, n3: 1 }, // 5-lobe bloom
-              { m: 4, n1: 2, n2: 2, n3: 2 }, // squircle
-              { m: 6, n1: 0.2, n2: 1.7, n3: 1.7 }, // hexagonal bloom
-              { m: 3, n1: 5, n2: 2, n3: 7 }, // organic 3-lobe
-              { m: 7, n1: 0.3, n2: 1, n3: 1 }, // 7-petal soft
-              { m: 8, n1: 0.5, n2: 0.5, n3: 8 }, // spiky asymmetric
-            ];
-            const p = presets[Math.floor(rand() * presets.length)];
-            spec = { cx, cy, r, color, shape: "supershape", ...p };
-          } else if (roll < 0.85) {
-            // Blob — layered harmonics, every one unique
-            spec = {
-              cx,
-              cy,
-              r,
-              color,
-              shape: "blob",
-              harmonics: [
-                {
-                  amp: 0.05 + rand() * 0.12,
-                  freq: 2,
-                  phase: rand() * Math.PI * 2,
-                },
-                {
-                  amp: 0.03 + rand() * 0.1,
-                  freq: 3,
-                  phase: rand() * Math.PI * 2,
-                },
-                {
-                  amp: 0.02 + rand() * 0.08,
-                  freq: 5,
-                  phase: rand() * Math.PI * 2,
-                },
-              ],
-            };
-          } else {
-            // Circle — clean contrast
-            spec = { cx, cy, r, color, shape: "circle" };
-          }
-          circleSpecs.push(spec);
+        // Capture displaced positions as new lerp targets
+        for (let i = 0; i < drops.length; i++) {
+          targets[i] = drops[i].vertices.map((v) => ({
+            x: v.x,
+            y: v.y,
+          }));
         }
 
-        // Measure text at reference size, then scale to fit canvas with margin
-        const refSize = 100;
-        const refResult = storage.get("fontData").toPoints("Klint", refSize, {
-          anchor: "center",
-          align: "center",
-          baseline: "center",
-          sampling: 0.5,
-        });
-        let minX = Infinity,
-          maxX = -Infinity,
-          minY = Infinity,
-          maxY = -Infinity;
-        for (const letter of refResult.letters) {
-          for (const point of letter.shape) {
-            const px = letter.center.x + point.x;
-            const py = letter.center.y + point.y;
-            minX = Math.min(minX, px);
-            maxX = Math.max(maxX, px);
-            minY = Math.min(minY, py);
-            maxY = Math.max(maxY, py);
+        // Restore old positions — vertices will lerp toward targets
+        for (let i = 0; i < drops.length; i++) {
+          const verts = drops[i].vertices;
+          for (let j = 0; j < verts.length; j++) {
+            verts[j].x = saved[i][j].x;
+            verts[j].y = saved[i][j].y;
           }
         }
-        const margin = 0.32;
-        const scaleX = (K.width * (1 - margin * 2)) / (maxX - minX);
-        const scaleY = (K.height * (1 - margin * 2)) / (maxY - minY);
-        const fontSize = refSize * Math.min(scaleX, scaleY);
 
-        storage.set(
-          "textResult",
-          textToDrops(storage.get("fontData"), "Klint", fontSize, TEXT_COLOR),
-        );
-
-        // Ensure the largest drops (first in array, last after reverse)
-        // have enough contrast with white text — pick darkest foreground colors
-        const withLum = fg.map((c) => {
-          const r = parseInt(c.slice(1, 3), 16) / 255;
-          const g = parseInt(c.slice(3, 5), 16) / 255;
-          const b = parseInt(c.slice(5, 7), 16) / 255;
-          return { color: c, lum: 0.299 * r + 0.587 * g + 0.114 * b };
-        });
-        withLum.sort((a, b) => a.lum - b.lum); // darkest first
-        circleSpecs[0].color = withLum[0].color;
-        if (circleSpecs.length > 1) {
-          circleSpecs[1].color = withLum[Math.min(1, withLum.length - 1)].color;
-        }
-
-        circleSpecs.reverse(); // small outer drops first → large center drops last
-        storage.set("specs", circleSpecs);
-        storage.set("drops", []);
-        storage.set("targets", []);
-        storage.set("placed", 0);
-        storage.set("textPlaced", false);
-        storage.set("frame", 0);
-      }
-
-      const specs = storage.get("specs");
-      const drops = storage.get("drops");
-      const targets = storage.get("targets");
-
-      if (specs && storage.get("placed") < DROP_COUNT) {
-        if (storage.get("frame") % FRAMES_PER_DROP === 0) {
-          const spec = specs[storage.get("placed")];
-
-          // Save current vertex positions (may be mid-lerp)
-          const saved = drops.map((drop) =>
-            drop.vertices.map((v) => ({ x: v.x, y: v.y })),
-          );
-
-          // Displace existing drops (mutates vertices to displaced positions)
-          displaceForDrop(drops, spec.cx, spec.cy, spec.r);
-
-          // Capture displaced positions as new lerp targets
-          for (let i = 0; i < drops.length; i++) {
-            targets[i] = drops[i].vertices.map((v) => ({
-              x: v.x,
-              y: v.y,
-            }));
-          }
-
-          // Restore old positions — vertices will lerp toward targets
-          for (let i = 0; i < drops.length; i++) {
-            const verts = drops[i].vertices;
-            for (let j = 0; j < verts.length; j++) {
-              verts[j].x = saved[i][j].x;
-              verts[j].y = saved[i][j].y;
-            }
-          }
-
-          // New drop appears instantly — targets match vertices
-          let newDrop: Drop;
-          switch (spec.shape) {
-            case "flower":
-              newDrop = createFlower(
-                spec.cx,
-                spec.cy,
-                spec.r,
-                spec.color,
-                spec.petals!,
-                spec.amplitude!,
-              );
-              break;
-            case "star":
-              newDrop = createStar(
-                spec.cx,
-                spec.cy,
-                spec.r,
-                spec.color,
-                spec.points!,
-                spec.innerRatio!,
-                spec.sharpness,
-              );
-              break;
-            case "crescent":
-              newDrop = createCrescent(
-                spec.cx,
-                spec.cy,
-                spec.r,
-                spec.color,
-                spec.offset!,
-                spec.rotation!,
-              );
-              break;
-            case "supershape":
-              newDrop = createSupershape(
-                spec.cx,
-                spec.cy,
-                spec.r,
-                spec.color,
-                spec.m!,
-                spec.n1!,
-                spec.n2!,
-                spec.n3!,
-              );
-              break;
-            case "blob":
-              newDrop = createBlob(
-                spec.cx,
-                spec.cy,
-                spec.r,
-                spec.color,
-                spec.harmonics!,
-              );
-              break;
-            default:
-              newDrop = createDrop(spec.cx, spec.cy, spec.r, spec.color);
-          }
-          drops.push(newDrop);
-          targets.push(newDrop.vertices.map((v) => ({ x: v.x, y: v.y })));
-
-          storage.set("placed", storage.get("placed") + 1);
-          dirty = true;
-        }
-        storage.set("frame", storage.get("frame") + 1);
-      }
-
-      if (
-        specs &&
-        storage.get("placed") >= DROP_COUNT &&
-        !storage.get("textPlaced") &&
-        storage.get("textResult")
-      ) {
-        if (storage.get("frame") % FRAMES_PER_DROP === 0) {
-          const { drops: textDrops } = storage.get("textResult")!;
-
-          for (const drop of textDrops) {
-            drops.push(drop);
-            targets.push(drop.vertices.map((v) => ({ x: v.x, y: v.y })));
-          }
-
-          storage.set("textPlaced", true);
-          dirty = true;
-        }
-        storage.set("frame", storage.get("frame") + 1);
-      }
-
-      // Tick position lerps — center vertices animate faster, edges slower
-      const allDrops = drops;
-      const allTargets = targets;
-      const maxDist = Math.sqrt(K.width * K.width + K.height * K.height) * 0.5;
-      for (let i = 0; i < allDrops.length; i++) {
-        const verts = allDrops[i].vertices;
-        const tgt = allTargets[i];
-        if (!tgt) continue;
-        for (let j = 0; j < verts.length; j++) {
-          const dx = tgt[j].x - verts[j].x;
-          const dy = tgt[j].y - verts[j].y;
-          if (dx * dx + dy * dy > LERP_SNAP) {
-            const dist = Math.sqrt(
-              verts[j].x * verts[j].x + verts[j].y * verts[j].y,
+        // New drop appears instantly — targets match vertices
+        let newDrop: Drop;
+        switch (spec.shape) {
+          case "flower":
+            newDrop = createFlower(
+              spec.cx,
+              spec.cy,
+              spec.r,
+              spec.color,
+              spec.petals!,
+              spec.amplitude!,
             );
-            const t = Math.min(1, dist / maxDist);
-            const ease = LERP_EASE_FAST + (LERP_EASE_SLOW - LERP_EASE_FAST) * t;
-            verts[j].x += dx * ease;
-            verts[j].y += dy * ease;
-            dirty = true;
-          } else if (dx !== 0 || dy !== 0) {
-            verts[j].x = tgt[j].x;
-            verts[j].y = tgt[j].y;
-          }
+            break;
+          case "star":
+            newDrop = createStar(
+              spec.cx,
+              spec.cy,
+              spec.r,
+              spec.color,
+              spec.points!,
+              spec.innerRatio!,
+              spec.sharpness,
+            );
+            break;
+          case "crescent":
+            newDrop = createCrescent(
+              spec.cx,
+              spec.cy,
+              spec.r,
+              spec.color,
+              spec.offset!,
+              spec.rotation!,
+            );
+            break;
+          case "supershape":
+            newDrop = createSupershape(
+              spec.cx,
+              spec.cy,
+              spec.r,
+              spec.color,
+              spec.m!,
+              spec.n1!,
+              spec.n2!,
+              spec.n3!,
+            );
+            break;
+          case "blob":
+            newDrop = createBlob(
+              spec.cx,
+              spec.cy,
+              spec.r,
+              spec.color,
+              spec.harmonics!,
+            );
+            break;
+          default:
+            newDrop = createDrop(spec.cx, spec.cy, spec.r, spec.color);
         }
+        drops.push(newDrop);
+        targets.push(newDrop.vertices.map((v) => ({ x: v.x, y: v.y })));
+
+        storage.set("placed", storage.get("placed") + 1);
+        dirty = true;
       }
+      storage.set("frame", storage.get("frame") + 1);
+    }
 
-      if (storage.get("textPlaced") && mouse.isPressed) {
-        const dx = mouse.x - mouse.px;
-        const dy = mouse.y - mouse.py;
-        const dragDist = Math.sqrt(dx * dx + dy * dy);
+    if (
+      specs &&
+      storage.get("placed") >= DROP_COUNT &&
+      !storage.get("textPlaced") &&
+      storage.get("textResult")
+    ) {
+      if (storage.get("frame") % FRAMES_PER_DROP === 0) {
+        const { drops: textDrops } = storage.get("textResult")!;
 
-        if (dragDist > 1) {
-          applyTineLine(
-            drops,
-            mouse.px,
-            mouse.py,
-            dx,
-            dy,
-            dragDist * STRENGTH,
-            TINE_U,
-            TINE_SCALE,
-          );
-          // Sync targets after tine (subdivision may change vertex count)
-          for (let i = 0; i < drops.length; i++) {
-            targets[i] = drops[i].vertices.map((v) => ({
-              x: v.x,
-              y: v.y,
-            }));
-          }
+        for (const drop of textDrops) {
+          drops.push(drop);
+          targets.push(drop.vertices.map((v) => ({ x: v.x, y: v.y })));
+        }
+
+        storage.set("textPlaced", true);
+        dirty = true;
+      }
+      storage.set("frame", storage.get("frame") + 1);
+    }
+
+    // Tick position lerps — center vertices animate faster, edges slower
+    const allDrops = drops;
+    const allTargets = targets;
+    const maxDist = K.distance(0, 0, K.width, K.height) * 0.5;
+    for (let i = 0; i < allDrops.length; i++) {
+      const verts = allDrops[i].vertices;
+      const tgt = allTargets[i];
+      if (!tgt) continue;
+      for (let j = 0; j < verts.length; j++) {
+        if (
+          K.squareDistance(verts[j].x, verts[j].y, tgt[j].x, tgt[j].y) >
+          LERP_SNAP
+        ) {
+          const dist = K.distance(0, 0, verts[j].x, verts[j].y);
+          const t = K.constrain(dist / maxDist, 0, 1);
+          const ease = K.lerp(LERP_EASE_FAST, LERP_EASE_SLOW, t);
+          verts[j].x = K.lerp(verts[j].x, tgt[j].x, ease);
+          verts[j].y = K.lerp(verts[j].y, tgt[j].y, ease);
           dirty = true;
+        } else if (verts[j].x !== tgt[j].x || verts[j].y !== tgt[j].y) {
+          verts[j].x = tgt[j].x;
+          verts[j].y = tgt[j].y;
         }
       }
+    }
 
-      if (!dirty) return;
+    if (storage.get("textPlaced") && mouse.isPressed) {
+      const lx = storage.get("lastTineX");
+      const ly = storage.get("lastTineY");
+      const dx = mouse.x - lx;
+      const dy = mouse.y - ly;
+      const dragDist = K.distance(mouse.x, mouse.y, lx, ly);
 
-      K.background(storage.get("bg"));
-      K.noStroke();
-
-      for (const drop of drops) {
-        K.fillColor(drop.color);
-        K.beginShape();
-        for (const v of drop.vertices) {
-          K.vertex(v.x, v.y);
+      if (dragDist > 3) {
+        applyTineLine(
+          drops,
+          lx,
+          ly,
+          dx,
+          dy,
+          dragDist * STRENGTH,
+          TINE_U,
+          TINE_SCALE,
+        );
+        storage.set("lastTineX", mouse.x);
+        storage.set("lastTineY", mouse.y);
+        // Sync targets after tine (subdivision may change vertex count)
+        for (let i = 0; i < drops.length; i++) {
+          targets[i] = drops[i].vertices.map((v) => ({
+            x: v.x,
+            y: v.y,
+          }));
         }
-        K.endShape(true);
+        dirty = true;
       }
-    },
-    [mouse, storage],
-  );
+    } else if (!mouse.isPressed) {
+      storage.set("lastTineX", mouse.x);
+      storage.set("lastTineY", mouse.y);
+    }
+
+    if (!dirty) return;
+
+    K.background(storage.get("bg"));
+    K.noStroke();
+
+    for (const drop of drops) {
+      K.fillColor(drop.color);
+      K.beginShape();
+      for (const v of drop.vertices) {
+        K.vertex(v.x, v.y);
+      }
+      K.endShape(true);
+    }
+  };
 
   return (
     <div style={{ width: "100vw", height: "100vh", cursor: "crosshair" }}>
-      <Klint context={context} draw={draw} options={{ origin: "center" }} />
+      <Klint
+        context={context}
+        draw={draw}
+        options={{ origin: "center", fps: 60, dpr: 2 }}
+      />
     </div>
   );
 }
