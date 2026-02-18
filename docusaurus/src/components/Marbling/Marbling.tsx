@@ -320,6 +320,8 @@ export default function Marbling() {
           maxWidth: 1920,
           margin: "0 auto",
           cursor: "crosshair",
+          userSelect: "none",
+          WebkitUserSelect: "none",
         }}
       >
         <Klint
