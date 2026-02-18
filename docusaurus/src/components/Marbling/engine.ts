@@ -107,7 +107,7 @@ export function displaceForDrop(
  * Formula: P' = P + z · u^(d/scale) · M
  *
  * - M: unit vector of drag direction
- * - d: perpendicular distance from point to the tine line
+ * - d: radial distance from point to the tine origin
  * - z: max displacement (drag magnitude)
  * - u: base falloff rate (0 < u < 1, smaller = sharper cusps)
  * - scale: normalizes distance so falloff is independent of canvas size
