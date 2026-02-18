@@ -20,10 +20,13 @@ import {
 } from "./config";
 
 export default function Marbling() {
-  const { context, KlintMouse } = useKlint();
+  const { context, KlintMouse, KlintGesture } = useKlint();
   const { mouse } = KlintMouse();
+  const gesture = KlintGesture();
   const fontUrl = useBaseUrl("/fonts/Jost-Regular.ttf");
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const touchActiveRef = useRef(false);
+  const touchPosRef = useRef({ x: 0, y: 0 });
 
   const storage = useStorage<{
     fontData: any;
@@ -61,6 +64,37 @@ export default function Marbling() {
     settledFrames: 0,
   });
 
+  gesture.onTouchStart((K, e, g) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    if (!touch) return;
+    const canvas = K.canvas;
+    const rect = canvas.getBoundingClientRect();
+    const x = (touch.clientX - rect.left) * 2 - canvas.width / 2;
+    const y = (touch.clientY - rect.top) * 2 - canvas.height / 2;
+    touchActiveRef.current = true;
+    touchPosRef.current = { x, y };
+    storage.set("wasPressed", true);
+    storage.set("strokeDist", 0);
+    storage.set("lastTineX", x);
+    storage.set("lastTineY", y);
+  });
+
+  gesture.onTouchMove((K, e, g) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    if (!touch) return;
+    const canvas = K.canvas;
+    const rect = canvas.getBoundingClientRect();
+    const x = (touch.clientX - rect.left) * 2 - canvas.width / 2;
+    const y = (touch.clientY - rect.top) * 2 - canvas.height / 2;
+    touchPosRef.current = { x, y };
+  });
+
+  gesture.onTouchEnd((K, e, g) => {
+    touchActiveRef.current = false;
+  });
+
   useEffect(() => {
     const parser = new FontParser();
     parser.load(fontUrl).then((data: any) => {
@@ -71,14 +105,14 @@ export default function Marbling() {
   const draw = (K: KlintContext) => {
     // Keep mouse tracking current even when idle, so stale positions
     // don't cause phantom tine displacements on the next click.
-    if (!mouse.isPressed) {
+    if (!mouse.isPressed && !touchActiveRef.current) {
       storage.set("wasPressed", false);
       storage.set("lastTineX", mouse.x);
       storage.set("lastTineY", mouse.y);
     }
 
     const settled = storage.get("settledFrames");
-    if (settled > 3 && !mouse.isPressed && storage.get("textPlaced")) {
+    if (settled > 3 && !mouse.isPressed && !touchActiveRef.current && storage.get("textPlaced")) {
       const initSize = storage.get("initSize");
       if (initSize && initSize.w === K.width && initSize.h === K.height) return;
     }
@@ -191,31 +225,55 @@ export default function Marbling() {
       }
     }
 
-    if (storage.get("textPlaced") && mouse.isPressed && mouse.isHover) {
+    const isTineActive =
+      (mouse.isPressed && mouse.isHover) || touchActiveRef.current;
+    const tineX = touchActiveRef.current ? touchPosRef.current.x : mouse.x;
+    const tineY = touchActiveRef.current ? touchPosRef.current.y : mouse.y;
+
+    if (storage.get("textPlaced") && isTineActive) {
       if (!storage.get("wasPressed")) {
         storage.set("wasPressed", true);
         storage.set("strokeDist", 0);
-        storage.set("lastTineX", mouse.x);
-        storage.set("lastTineY", mouse.y);
+        storage.set("lastTineX", tineX);
+        storage.set("lastTineY", tineY);
       }
 
       const lx = storage.get("lastTineX");
       const ly = storage.get("lastTineY");
-      const dx = mouse.x - lx;
-      const dy = mouse.y - ly;
-      const dragDist = K.distance(mouse.x, mouse.y, lx, ly);
+      const dx = tineX - lx;
+      const dy = tineY - ly;
+      const dragDist = K.distance(tineX, tineY, lx, ly);
 
       if (dragDist > 3) {
+        // Scale tine and stroke decay relative to canvas size so they
+        // feel the same proportion on mobile and desktop.
+        const refWidth = 1920 * 2; // reference desktop canvas width at 2× DPR
+        const sizeRatio = K.width / refWidth;
+        const strokeDecay = STROKE_DECAY * sizeRatio;
+        const tineScale = TINE_SCALE * sizeRatio;
+
         // Full power for 75% of max distance, then fade to zero
         const sd = storage.get("strokeDist");
-        const fadeStart = STROKE_DECAY * 0.75;
-        const decay = sd < fadeStart ? 1 : Math.max(0, 1 - (sd - fadeStart) / (STROKE_DECAY - fadeStart));
+        const fadeStart = strokeDecay * 0.75;
+        const decay =
+          sd < fadeStart
+            ? 1
+            : Math.max(0, 1 - (sd - fadeStart) / (strokeDecay - fadeStart));
         const strength = STRENGTH * decay;
 
-        applyTineLine(drops, lx, ly, dx, dy, dragDist * strength, TINE_U, TINE_SCALE);
+        applyTineLine(
+          drops,
+          lx,
+          ly,
+          dx,
+          dy,
+          dragDist * strength,
+          TINE_U,
+          tineScale,
+        );
         storage.set("strokeDist", sd + dragDist);
-        storage.set("lastTineX", mouse.x);
-        storage.set("lastTineY", mouse.y);
+        storage.set("lastTineX", tineX);
+        storage.set("lastTineY", tineY);
 
         // Sync targets after tine (subdivision may change vertex count)
         for (let i = 0; i < drops.length; i++) {
@@ -243,21 +301,34 @@ export default function Marbling() {
       }
       K.endShape(true);
     }
-
   };
 
   return (
-    <div ref={wrapperRef} style={{ width: "100%", height: "100%", overflow: "hidden", backgroundColor: storage.get("bg") }}>
-      <div style={{ width: "100%", height: "100%", maxWidth: 1920, margin: "0 auto", cursor: "crosshair" }}>
+    <div
+      ref={wrapperRef}
+      style={{
+        width: "100%",
+        height: "100%",
+        overflow: "hidden",
+        backgroundColor: storage.get("bg"),
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          maxWidth: 1920,
+          margin: "0 auto",
+          cursor: "crosshair",
+        }}
+      >
         <Klint
           context={context}
           draw={draw}
           options={{
             origin: "center",
             fps: 30,
-            dpr: typeof window !== "undefined"
-              ? Math.min(2, 4096 / Math.max(window.innerWidth, window.innerHeight))
-              : 2,
+            dpr: 2,
           }}
         />
       </div>
