@@ -5,7 +5,7 @@ Klint is designed specifically for React, integrating with its component model w
 ## Architecture Overview
 
 ```jsx
-import { Klint, useKlint, useStorage } from 'klint';
+import { Klint, useKlint, useStorage } from '@shopify/klint';
 
 function MySketch() {
   const { context } = useKlint();
@@ -16,7 +16,11 @@ function MySketch() {
     K.circle(K.width/2, K.height/2, 100);
   };
 
-  return <Klint context={context} draw={draw} />;
+  return (
+    <div style={{ width: "100vw", height: "100vh" }}>
+      <Klint context={context} draw={draw} />
+    </div>
+  );
 }
 ```
 
@@ -41,51 +45,52 @@ The `useStorage` hook provides persistent state storage that doesn't trigger re-
 
 ```jsx
 function MySketch() {
-  // Create persistent storage for your sketch
-  const P = useStorage({
+  const { context } = useKlint();
+
+  const storage = useStorage({
     particles: [],
     activeColor: "red",
     count: 0
   });
 
   const setup = (K) => {
-    // Initialize with 100 particles
-    P.particles = Array(100).fill().map(() => ({
+    storage.set("particles", Array(100).fill(null).map(() => ({
       x: Math.random() * K.width,
       y: Math.random() * K.height,
       vx: Math.random() * 2 - 1,
       vy: Math.random() * 2 - 1
-    }));
+    })));
   };
 
   const draw = (K) => {
     K.background("#333");
-    
-    // Update particles
-    for (const p of P.particles) {
+
+    for (const p of storage.get("particles")) {
       p.x += p.vx;
       p.y += p.vy;
-      // Bounce off edges
       if (p.x < 0 || p.x > K.width) p.vx *= -1;
       if (p.y < 0 || p.y > K.height) p.vy *= -1;
-      
-      K.fillColor(P.activeColor);
+
+      K.fillColor(storage.get("activeColor"));
       K.circle(p.x, p.y, 5);
     }
-    
-    // Update counter
-    P.count++;
+
+    storage.set("count", storage.get("count") + 1);
   };
 
-  return <Klint setup={setup} draw={draw} />;
+  return (
+    <div style={{ width: "100vw", height: "100vh" }}>
+      <Klint context={context} setup={setup} draw={draw} />
+    </div>
+  );
 }
 ```
 
 The `useStorage` hook:
-- Creates a persistent store for your sketch data
+- Creates a persistent store for your sketch data using `get(key)` and `set(key, value)` methods
 - Changes to this data don't trigger React re-renders
 - Values persist between frames and throughout the component lifecycle
-- Provides a cleaner alternative to attaching properties directly to the context
+- Also exposes `has(key)` and `remove(key)` for checking and deleting entries
 
 ### Handling React Props
 
@@ -93,52 +98,38 @@ When you need to pass data from parent React components to Klint:
 
 ```jsx
 function ControlledSketch({ color, particleCount }) {
-  const P = useStorage({
-    particles: []
-  });
+  const { context } = useKlint();
+  const storage = useStorage({ particles: [] });
+  const props = useProps({ color, particleCount });
 
   const setup = (K) => {
-    // Initialize particles based on prop
-    regenerateParticles(K, particleCount);
-  };
-  
-  const regenerateParticles = (K, count) => {
-    P.particles = Array(count).fill().map(() => ({
+    storage.set("particles", Array(props.particleCount).fill(null).map(() => ({
       x: Math.random() * K.width,
       y: Math.random() * K.height,
       vx: Math.random() * 2 - 1,
       vy: Math.random() * 2 - 1
-    }));
+    })));
   };
 
   const draw = (K) => {
     K.background("#333");
-    
-    // Use the color prop from the parent component
-    K.fillColor(color);
-    
-    for (const p of P.particles) {
+    K.fillColor(props.color);
+
+    for (const p of storage.get("particles")) {
       p.x += p.vx;
       p.y += p.vy;
       if (p.x < 0 || p.x > K.width) p.vx *= -1;
       if (p.y < 0 || p.y > K.height) p.vy *= -1;
-      
+
       K.circle(p.x, p.y, 5);
     }
   };
 
-  // When particleCount changes, regenerate particles
-  useEffect(() => {
-    if (P.particles.length !== particleCount) {
-      // We access the Klint context through a custom hook
-      const { current: K } = useContext(KlintContext);
-      if (K) {
-        regenerateParticles(K, particleCount);
-      }
-    }
-  }, [particleCount]);
-
-  return <Klint setup={setup} draw={draw} />;
+  return (
+    <div style={{ width: "100%", height: "400px" }}>
+      <Klint context={context} setup={setup} draw={draw} />
+    </div>
+  );
 }
 ```
 
@@ -226,24 +217,25 @@ Klint provides built-in hooks for handling window resize events, if you are on t
 
 ```jsx
 function MySketch() {
-  const { context, useWindow } = useKlint();
-  const { onResize } = useWindow();
-  
-  const P = useStorage({
-    scale: 1
-  });
-  
+  const { context, KlintWindow } = useKlint();
+  const { onResize } = KlintWindow();
+
+  const storage = useStorage({ scale: 1 });
+
   onResize(() => {
-    // Update sketch parameters on window resize
-    P.scale = Math.min(window.innerWidth, window.innerHeight) / 1000;
+    storage.set("scale", Math.min(window.innerWidth, window.innerHeight) / 1000);
   });
-  
+
   const draw = (K) => {
     K.background("#333");
-    K.circle(K.width/2, K.height/2, 100 * P.scale);
+    K.circle(K.width/2, K.height/2, 100 * storage.get("scale"));
   };
-  
-  return <Klint context={context} draw={draw} />;
+
+  return (
+    <div style={{ width: "100vw", height: "100vh" }}>
+      <Klint context={context} draw={draw} />
+    </div>
+  );
 }
 ```
 
@@ -255,25 +247,23 @@ Since Klint functions run outside React's normal update cycle, you need to be ca
 ```jsx
 // Problematic - uses closed-over props that won't update
 function MySketch({ color }) {
+  const { context } = useKlint();
   const draw = (K) => {
     K.fillColor(color); // This captures the initial value of color
     K.circle(K.width/2, K.height/2, 100);
   };
-  
-  return <Klint draw={draw} />;
+  return <Klint context={context} draw={draw} />;
 }
 
-// Better - passes props to Klint so they're accessible in current state
+// Better - passes props via useProps so they're always current
 function MySketch({ color }) {
-  const props = useProps({
-    color : color
-  })
+  const { context } = useKlint();
+  const props = useProps({ color });
   const draw = (K) => {
     K.fillColor(props.color); // Access current value
     K.circle(K.width/2, K.height/2, 100);
   };
-  
-  return <Klint draw={draw} />;
+  return <Klint context={context} draw={draw} />;
 }
 ```
 
@@ -284,36 +274,38 @@ function MySketch({ color }) {
 For complex visualizations, split functionality across components:
 
 ```jsx
-function ParticleSystem({ count }) {
-  const particles = useStorage({
-    items: []
-  });
-  
+function useParticleSystem(count) {
+  const storage = useStorage({ items: [] });
+
   const setup = (K) => {
-    particles.items = createParticles(count, K.width, K.height);
+    storage.set("items", createParticles(count, K.width, K.height));
   };
-  
+
   const draw = (K) => {
-    // Update and draw particles
-    updateParticles(particles.items, K);
+    updateParticles(storage.get("items"), K);
   };
-  
-  return { setup, draw, particles };
+
+  return { setup, draw, storage };
 }
 
 function MySketch() {
-  const particleSystem = ParticleSystem({ count: 100 });
-  
+  const { context } = useKlint();
+  const particleSystem = useParticleSystem(100);
+
   const setup = (K) => {
     particleSystem.setup(K);
   };
-  
+
   const draw = (K) => {
     K.background("#333");
     particleSystem.draw(K);
   };
-  
-  return <Klint setup={setup} draw={draw} />;
+
+  return (
+    <div style={{ width: "100vw", height: "100vh" }}>
+      <Klint context={context} setup={setup} draw={draw} />
+    </div>
+  );
 }
 ```
 
@@ -322,51 +314,47 @@ function MySketch() {
 Create custom hooks for reusable canvas behaviors:
 
 ```jsx
-function useMouseTrail(options = {}) {
+function useMouseTrail(mouse, options = {}) {
   const { maxPoints = 20, fadeRate = 0.95 } = options;
-  
-  const trail = useStorage({
-    points: []
-  });
-  
-  const update = (K) => {
-    if (K.mouse.x && K.mouse.y) {
-      trail.points.push({ x: K.mouse.x, y: K.mouse.y, alpha: 1 });
-      if (trail.points.length > maxPoints) {
-        trail.points.shift();
-      }
+  const trail = useStorage({ points: [] });
+
+  const update = () => {
+    const points = trail.get("points");
+    if (mouse.x && mouse.y) {
+      points.push({ x: mouse.x, y: mouse.y, alpha: 1 });
+      if (points.length > maxPoints) points.shift();
     }
-    
-    // Fade points
-    trail.points.forEach(p => {
-      p.alpha *= fadeRate;
-    });
-    
-    // Remove completely faded points
-    trail.points = trail.points.filter(p => p.alpha > 0.01);
+    points.forEach(p => { p.alpha *= fadeRate; });
+    trail.set("points", points.filter(p => p.alpha > 0.01));
   };
-  
+
   const draw = (K) => {
-    trail.points.forEach(p => {
+    for (const p of trail.get("points")) {
       K.fillColor(`rgba(255, 255, 255, ${p.alpha})`);
       K.circle(p.x, p.y, 5);
-    });
+    }
   };
-  
+
   return { update, draw };
 }
 
 // Usage
 function MySketch() {
-  const mouseTrail = useMouseTrail({ maxPoints: 50 });
-  
+  const { context, KlintMouse } = useKlint();
+  const { mouse } = KlintMouse();
+  const mouseTrail = useMouseTrail(mouse, { maxPoints: 50 });
+
   const draw = (K) => {
     K.background("#333");
-    mouseTrail.update(K);
+    mouseTrail.update();
     mouseTrail.draw(K);
   };
-  
-  return <Klint draw={draw} />;
+
+  return (
+    <div style={{ width: "100vw", height: "100vh" }}>
+      <Klint context={context} draw={draw} />
+    </div>
+  );
 }
 ```
 
@@ -376,34 +364,29 @@ To monitor your Klint component's performance:
 
 ```jsx
 function MySketch() {
-  const P = useStorage({
-    fps: 0,
-    frameCount: 0,
-    lastTime: 0
-  });
-  
+  const { context } = useKlint();
+  const perf = useStorage({ fps: 0, frameCount: 0, lastTime: 0 });
+
   const draw = (K) => {
-    // Calculate FPS
     const now = performance.now();
-    if (now - P.lastTime >= 1000) {
-      P.fps = P.frameCount;
-      P.frameCount = 0;
-      P.lastTime = now;
+    perf.set("frameCount", perf.get("frameCount") + 1);
+    if (now - perf.get("lastTime") >= 1000) {
+      perf.set("fps", perf.get("frameCount"));
+      perf.set("frameCount", 0);
+      perf.set("lastTime", now);
     }
-    P.frameCount++;
-    
-    // Clear and draw
+
     K.background("#333");
-    
-    // Display FPS
     K.fillColor("white");
     K.textSize(16);
-    K.text(`FPS: ${P.fps}`, 10, 20);
-    
-    // Your drawing code here
+    K.text(`FPS: ${perf.get("fps")}`, 10, 20);
   };
-  
-  return <Klint draw={draw} />;
+
+  return (
+    <div style={{ width: "100vw", height: "100vh" }}>
+      <Klint context={context} draw={draw} />
+    </div>
+  );
 }
 ```
 

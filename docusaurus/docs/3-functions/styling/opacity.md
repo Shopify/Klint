@@ -57,7 +57,7 @@ const draw = (K: KlintContext) => {
   // Foreground text (full opacity)
   K.opacity(1)
   K.fillColor("white")
-  K.textAlign("center", "middle")
+  K.alignText("center", "middle")
   K.textSize(24)
   K.text("Transparency Demo", K.width/2, K.height/2)
 }
@@ -234,7 +234,7 @@ function HoverSketch() {
       // Button text (always full opacity)
       K.opacity(1);
       K.fillColor("white");
-      K.textAlign("center", "middle");
+      K.alignText("center", "middle");
       K.text(btn.text, btn.x + btn.w/2, btn.y + btn.h/2);
     });
   };

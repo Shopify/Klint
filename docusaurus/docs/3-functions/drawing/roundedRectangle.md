@@ -71,7 +71,7 @@ const draw = (K: KlintContext) => {
   K.fillColor("#007bff")
   K.roundedRectangle(150, 400, 100, 8, 40)
   K.fillColor("white")
-  K.textAlign("center", "middle")
+  K.alignText("center", "middle")
   K.text("Button", 200, 420)
 }
 ```

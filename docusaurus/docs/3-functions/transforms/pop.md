@@ -152,7 +152,7 @@ function ParticleSketch() {
     
     K.translate(particle.x, particle.y);
     K.rotate(particle.rotation);
-    K.scale(particle.scale);
+    K.scale(particle.scale, particle.scale);
     K.opacity(particle.alpha);
     
     K.fillColor(particle.color);

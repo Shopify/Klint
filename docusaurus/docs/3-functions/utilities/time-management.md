@@ -80,10 +80,10 @@ As a general rule, **use K.frame for most animation needs** unless you specifica
 K.time: number
 ```
 
-The total elapsed time in milliseconds since the animation started.
+The total elapsed time in **seconds** since the animation started.
 
 **Characteristics:**
-- Floating-point value in milliseconds
+- Floating-point value in seconds
 - Accumulates based on frame rate and performance
 - More consistent for longer running animations
 - Ideal for real-time simulations
@@ -93,18 +93,18 @@ The total elapsed time in milliseconds since the animation started.
 ```jsx
 const draw = (K) => {
   K.background("#333");
-  
+
   // Time-based animation (period of 2 seconds)
-  const cycle = (K.time % 2000) / 2000;
+  const cycle = (K.time % 2) / 2;
   const size = 20 + Math.sin(cycle * Math.PI * 2) * 15;
-  
+
   K.fillColor("blue");
   K.circle(K.width/2, K.height/2, size);
-  
+
   // Display the elapsed time
   K.fillColor("white");
   K.textSize(16);
-  K.text(`Time: ${K.time.toFixed(0)}ms`, 10, 30);
+  K.text(`Time: ${K.time.toFixed(1)}s`, 10, 30);
 };
 ```
 
@@ -114,7 +114,7 @@ const draw = (K) => {
 K.deltaTime: number
 ```
 
-The time in milliseconds taken to compute the previous frame.
+The time in **milliseconds** taken to compute the previous frame.
 
 **Characteristics:**
 - Floating-point value in milliseconds
@@ -160,8 +160,8 @@ Each time property is designed for specific use cases:
 | Property | Best For | Not Great For |
 |----------|----------|---------------|
 | `K.frame` | **Default choice**: simple animations, creative coding, keyframes | Physics simulations that must be frame-rate independent |
-| `K.time` | Long-running animations, consistent timing across devices | When exact frame counts matter |
-| `K.deltaTime` | Physics simulations, frame-rate independent behavior | Animation sequencing |
+| `K.time` (seconds) | Long-running animations, consistent timing across devices | When exact frame counts matter |
+| `K.deltaTime` (ms) | Physics simulations, frame-rate independent behavior | Animation sequencing |
 
 ## Time Management Patterns
 
@@ -189,11 +189,11 @@ For animations that need to run at the same speed regardless of frame rate:
 ```jsx
 const draw = (K) => {
   K.background("#333");
-  
-  // A 5-second animation loop
-  const animationProgress = (K.time % 5000) / 5000;
+
+  // A 5-second animation loop (K.time is in seconds)
+  const animationProgress = (K.time % 5) / 5;
   const x = K.width * animationProgress;
-  
+
   K.fillColor("purple");
   K.circle(x, K.height/2, 30);
 };
@@ -250,27 +250,19 @@ const draw = (K) => {
 - Monitor performance with a simple FPS counter:
 
 ```jsx
-const P = useStorage({
-  fps: 0,
-  frameCount: 0,
-  lastSecond: 0
-});
+const perf = useStorage({ fps: 0, frameCount: 0, lastSecond: 0 });
 
 const draw = (K) => {
-  // Update FPS counter
-  P.frameCount++;
-  if (K.time - P.lastSecond >= 1000) {
-    P.fps = P.frameCount;
-    P.frameCount = 0;
-    P.lastSecond = K.time;
+  perf.set("frameCount", perf.get("frameCount") + 1);
+  if (K.time - perf.get("lastSecond") >= 1) {
+    perf.set("fps", perf.get("frameCount"));
+    perf.set("frameCount", 0);
+    perf.set("lastSecond", K.time);
   }
-  
-  // Display FPS
+
   K.fillColor("white");
   K.textSize(16);
-  K.text(`FPS: ${P.fps}`, 10, 20);
-  
-  // Your drawing code here
+  K.text(`FPS: ${perf.get("fps")}`, 10, 20);
 };
 ```
 

@@ -203,7 +203,7 @@ canvas.setSketch({
     K.background('#000');
   },
   draw(K) {
-    K.fillColor(`hsl(${K.time * 0.1}, 70%, 50%)`);
+    K.fillColor(`hsl(${K.time * 50}, 70%, 50%)`);
     K.circle(K.width/2, K.height/2, 100);
   }
 });
