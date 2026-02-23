@@ -112,7 +112,12 @@ export default function Marbling() {
     }
 
     const settled = storage.get("settledFrames");
-    if (settled > 3 && !mouse.isPressed && !touchActiveRef.current && storage.get("textPlaced")) {
+    if (
+      settled > 3 &&
+      !mouse.isPressed &&
+      !touchActiveRef.current &&
+      storage.get("textPlaced")
+    ) {
       const initSize = storage.get("initSize");
       if (initSize && initSize.w === K.width && initSize.h === K.height) return;
     }
