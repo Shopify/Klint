@@ -1,22 +1,20 @@
-// Core plugin classes for static import
-export { default as FontParser } from "./FontParser";
-
-// FontParser types - clean interfaces for creative coding
+export { FontParser } from "./FontParser";
 export type {
   FontData,
   FontPoint,
   FontLetter,
   FontLetterWithPath,
+  FontLetterWithSVG,
   FontLetterWithPoints,
   FontTextBlock,
   FontPathsResult,
+  FontSVGResult,
   FontPointsResult,
   FontTextOptions,
 } from "./FontParser";
 
 export { Delaunay } from "./Delaunay";
 export { CatmullRom } from "./Catmull";
-
 export { Sprites } from "./Sprites";
 export { MatterPhysics } from "./MatterPhysics";
 export { default as Projector } from "./Projector";

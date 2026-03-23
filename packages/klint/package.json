@@ -54,9 +54,9 @@
     "url": "https://github.com/Shopify/Klint/issues"
   },
   "scripts": {
-    "build": "tsup src/index.tsx src/plugins/index.tsx --format esm,cjs --dts --external=react --external=react-dom",
-    "build:minified": "tsup src/index.tsx src/plugins/index.tsx --format esm,cjs --dts --minify --external=react --external=react-dom",
-    "dev": "tsup src/index.tsx src/plugins/index.tsx --format esm,cjs --dts --watch --external=react --external=react-dom",
+    "build": "tsup",
+    "build:minified": "tsup --minify",
+    "dev": "tsup --watch",
     "test": "vitest run --environment jsdom",
     "test:watch": "vitest --environment jsdom",
     "lint": "eslint src --ext .ts,.tsx",
