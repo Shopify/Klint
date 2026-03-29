@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>KlintGPU Benchmark</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111; overflow: hidden; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+    #hud {
+      position: fixed; top: 12px; left: 12px;
+      font: 13px/1.6 monospace; color: #0f0; pointer-events: none;
+    }
+    #result {
+      position: fixed; bottom: 12px; left: 12px;
+      font: 13px monospace; color: #ff0; pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">loading…</div>
+<div id="result"></div>
+<script type="module">
+// ─── Inline WebGPU renderer (standalone, no build step) ───────────────────────
+
+// WGSL SDF shape shader — same as WebGPURenderer.ts
+const WGSL = `
+struct Screen { size:vec2f, dpr:f32, _pad:f32 }
+struct Shape {
+  pos:vec2f, size:vec2f,
+  fill:vec4f, stroke:vec4f,
+  stroke_w:f32, corner_r:f32, shape_type:u32, opacity:f32,
+}
+@group(0) @binding(0) var<uniform>       screen:Screen;
+@group(0) @binding(1) var<storage,read>  shapes:array<Shape>;
+struct V { @builtin(position) cp:vec4f, @location(0) lp:vec2f, @location(1) @interpolate(flat) idx:u32 }
+const Q=array<vec2f,6>(vec2f(-1,-1),vec2f(1,-1),vec2f(1,1),vec2f(-1,-1),vec2f(1,1),vec2f(-1,1));
+@vertex fn vs(@builtin(vertex_index) vi:u32,@builtin(instance_index) ii:u32)->V {
+  let s=shapes[ii]; let qv=Q[vi];
+  var hs:vec2f;
+  if s.shape_type==2u { let hl=length(s.size)*0.5+s.stroke_w*0.5+2.0; hs=vec2f(hl+abs(s.size.x)*0.5,hl+abs(s.size.y)*0.5); }
+  else { hs=s.size+vec2f(s.stroke_w*0.5+2.0); }
+  let wp=s.pos+qv*hs;
+  let ndc=vec2f(wp.x/screen.size.x*2.0-1.0,-(wp.y/screen.size.y*2.0-1.0));
+  var o:V; o.cp=vec4f(ndc,0,1); o.lp=qv*hs; o.idx=ii; return o;
+}
+fn sc(p:vec2f,r:f32)->f32{return length(p)-r;}
+fn se(p:vec2f,ab:vec2f)->f32{let k1=length(p/ab);let k2=length(p/(ab*ab));return k1*(k1-1.0)/k2;}
+fn sr(p:vec2f,hw:vec2f,r:f32)->f32{let q=abs(p)-hw+vec2f(r);return length(max(q,vec2f(0)))+min(max(q.x,q.y),0.0)-r;}
+fn ss(p:vec2f,a:vec2f,b:vec2f)->f32{let pa=p-a;let ba=b-a;let h=clamp(dot(pa,ba)/dot(ba,ba),0.0,1.0);return length(pa-ba*h);}
+@fragment fn fs(in:V)->@location(0) vec4f {
+  let s=shapes[in.idx]; let p=in.lp;
+  var d:f32;
+  switch s.shape_type {
+    case 0u:{if s.size.x==s.size.y{d=sc(p,s.size.x);}else{d=se(p,s.size);}}
+    case 1u:{d=sr(p,s.size,s.corner_r);}
+    case 2u:{d=ss(p,-s.size,s.size)-s.stroke_w*0.5;}
+    case 3u:{d=sc(p,s.stroke_w*0.5);}
+    default:{d=1.0;}
+  }
+  let aa=max(fwidth(d),0.0001);
+  let fa=1.0-smoothstep(-aa,aa,d);
+  var color=vec4f(s.fill.rgb*s.fill.a,s.fill.a)*fa;
+  if s.stroke_w>0.0{
+    let sd=abs(d)-s.stroke_w*0.5;
+    let sa=(1.0-smoothstep(-aa,aa,sd))*s.stroke.a;
+    color=color*(1.0-sa)+vec4f(s.stroke.rgb*sa,sa);
+  }
+  color=color*s.opacity;
+  if color.a<0.001{discard;} return color;
+}`;
+
+const SHAPE_STRIDE = 80;
+const N = parseInt(new URLSearchParams(location.search).get('n') || '500');
+const WARMUP = 30;
+const MEASURE = 60;
+
+async function run() {
+  const hud = document.getElementById('hud');
+  const resultEl = document.getElementById('result');
+  const canvas = document.getElementById('c');
+
+  if (!navigator.gpu) {
+    hud.textContent = 'ERROR: WebGPU not supported';
+    resultEl.textContent = 'fps:0 error:no-webgpu';
+    return;
+  }
+
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = window.innerWidth * dpr;
+  canvas.height = window.innerHeight * dpr;
+
+  const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
+  if (!adapter) { hud.textContent = 'ERROR: no adapter'; resultEl.textContent = 'fps:0 error:no-adapter'; return; }
+  const device = await adapter.requestDevice();
+  const fmt = navigator.gpu.getPreferredCanvasFormat();
+  const gpuCtx = canvas.getContext('webgpu');
+  gpuCtx.configure({ device, format: fmt, alphaMode: 'premultiplied' });
+
+  // Uniform buffer (Screen)
+  const uniformBuf = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+  const screenData = new Float32Array([canvas.width, canvas.height, dpr, 0]);
+  device.queue.writeBuffer(uniformBuf, 0, screenData);
+
+  // Storage buffer — allocate for N shapes
+  const storageBuf = device.createBuffer({
+    size: N * SHAPE_STRIDE,
+    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+  });
+
+  const bgl = device.createBindGroupLayout({ entries: [
+    { binding: 0, visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT, buffer: { type: 'uniform' } },
+    { binding: 1, visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT, buffer: { type: 'read-only-storage' } },
+  ]});
+  const bg = device.createBindGroup({ layout: bgl, entries: [
+    { binding: 0, resource: { buffer: uniformBuf } },
+    { binding: 1, resource: { buffer: storageBuf } },
+  ]});
+  const sm = device.createShaderModule({ code: WGSL });
+  const pipeline = device.createRenderPipeline({
+    layout: device.createPipelineLayout({ bindGroupLayouts: [bgl] }),
+    vertex: { module: sm, entryPoint: 'vs' },
+    fragment: { module: sm, entryPoint: 'fs', targets: [{ format: fmt,
+      blend: {
+        color: { operation:'add', srcFactor:'one', dstFactor:'one-minus-src-alpha' },
+        alpha: { operation:'add', srcFactor:'one', dstFactor:'one-minus-src-alpha' },
+      }
+    }]},
+    primitive: { topology: 'triangle-list' },
+  });
+
+  // ── Build benchmark scene: N animated circles + rects ───────────────────
+  const W = canvas.width, H = canvas.height;
+  const shapes = Array.from({ length: N }, (_, i) => ({
+    x: Math.random() * W, y: Math.random() * H,
+    vx: (Math.random() - 0.5) * 3, vy: (Math.random() - 0.5) * 3,
+    r: 8 + Math.random() * 30,
+    type: i % 5 === 0 ? 1 : 0, // every 5th = rect
+    r_fill: Math.random(), g_fill: Math.random(), b_fill: Math.random(),
+    phase: Math.random() * Math.PI * 2,
+  }));
+
+  const data = new ArrayBuffer(N * SHAPE_STRIDE);
+  const view = new DataView(data);
+
+  // ── Timing ────────────────────────────────────────────────────────────────
+  let frameCount = 0;
+  let frameTimes = [];
+  let lastTime = performance.now();
+  let done = false;
+
+  function writeShapes(t) {
+    let off = 0;
+    for (let i = 0; i < N; i++) {
+      const s = shapes[i];
+      s.x += s.vx; s.y += s.vy;
+      if (s.x < 0 || s.x > W) s.vx *= -1;
+      if (s.y < 0 || s.y > H) s.vy *= -1;
+      const pulse = 0.85 + 0.15 * Math.sin(t * 0.002 + s.phase);
+      const r = s.r * pulse;
+      // pos
+      view.setFloat32(off+0, s.x, true); view.setFloat32(off+4, s.y, true);
+      // size (half)
+      view.setFloat32(off+8, r, true); view.setFloat32(off+12, r, true);
+      // fill rgba
+      view.setFloat32(off+16, s.r_fill, true); view.setFloat32(off+20, s.g_fill, true);
+      view.setFloat32(off+24, s.b_fill, true); view.setFloat32(off+28, 0.85, true);
+      // stroke (none)
+      view.setFloat32(off+32, 0, true); view.setFloat32(off+36, 0, true);
+      view.setFloat32(off+40, 0, true); view.setFloat32(off+44, 0, true);
+      // stroke_w, corner_r, shape_type, opacity
+      view.setFloat32(off+48, 0, true); view.setFloat32(off+52, 0, true);
+      view.setUint32(off+56, s.type, true); view.setFloat32(off+60, 1.0, true);
+      off += SHAPE_STRIDE;
+    }
+  }
+
+  function frame(ts) {
+    if (done) return;
+    const dt = ts - lastTime;
+    lastTime = ts;
+
+    writeShapes(ts);
+    device.queue.writeBuffer(storageBuf, 0, data);
+
+    const tex = gpuCtx.getCurrentTexture().createView();
+    const enc = device.createCommandEncoder();
+    const pass = enc.beginRenderPass({
+      colorAttachments: [{ view: tex, clearValue:{r:0.05,g:0.05,b:0.07,a:1}, loadOp:'clear', storeOp:'store' }],
+    });
+    pass.setPipeline(pipeline);
+    pass.setBindGroup(0, bg);
+    pass.draw(6, N, 0, 0);
+    pass.end();
+    device.queue.submit([enc.finish()]);
+
+    frameCount++;
+    if (frameCount > WARMUP) frameTimes.push(dt);
+
+    hud.textContent = `n=${N}  frame=${frameCount}  dt=${dt.toFixed(1)}ms`;
+
+    if (frameCount >= WARMUP + MEASURE) {
+      done = true;
+      const medianDt = frameTimes.slice().sort((a,b)=>a-b)[Math.floor(frameTimes.length/2)];
+      const fps = Math.round(1000 / medianDt);
+      const avgFps = Math.round(frameTimes.length * 1000 / frameTimes.reduce((a,b)=>a+b,0));
+      hud.textContent = `DONE  n=${N}  median_fps=${fps}  avg_fps=${avgFps}`;
+      resultEl.textContent = `fps:${fps} n:${N} avg_fps:${avgFps}`;
+      console.log(`RESULT fps=${fps} n=${N} avg_fps=${avgFps}`);
+      return;
+    }
+    requestAnimationFrame(frame);
+  }
+
+  requestAnimationFrame(frame);
+}
+
+run().catch(err => {
+  document.getElementById('hud').textContent = 'ERROR: ' + err.message;
+  document.getElementById('result').textContent = 'fps:0 error:' + err.message;
+  console.error(err);
+});
+</script>
+</body>
+</html>

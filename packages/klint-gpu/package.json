@@ -1,0 +1,34 @@
+{
+  "name": "@shopify/klint-gpu",
+  "version": "0.1.0",
+  "description": "WebGPU-powered rendering backend for Klint",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "bench:build": "node --input-type=module -e \"import {build} from 'esbuild'; build({entryPoints:['benchmark/renderer_bundle.ts'],bundle:true,outfile:'benchmark/renderer.js',format:'esm',platform:'browser'})\"",
+    "bench": "node benchmark/run.mjs"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "esbuild": "^0.25.12",
+    "playwright": "^1.58.2",
+    "tsup": "^8.4.0",
+    "typescript": "^5.0.0"
+  }
+}
