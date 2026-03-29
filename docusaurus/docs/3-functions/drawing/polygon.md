@@ -32,7 +32,7 @@ polygon(250, 250, 100, 5, 50, 0)
 const draw = (K: KlintContext) => {
   K.fillColor("purple")
   K.strokeColor("white")
-  K.polygon(K.width/2, K.height/2, 100, 8, null, K.time * 0.01)
+  K.polygon(K.width/2, K.height/2, 100, 8, null, K.time)
 }
 ```
 

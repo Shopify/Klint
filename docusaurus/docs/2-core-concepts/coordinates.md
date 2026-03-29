@@ -76,7 +76,7 @@ const draw = (K) => {
       K.fillColor('#333');
       K.circle(x, y, 20);
       
-      K.textAlign('center', 'middle');
+      K.alignText('center', 'middle');
       K.text(`${col},${row}`, x, y);
     }
   }
@@ -136,7 +136,7 @@ const draw = (K) => {
   K.text('Default', x, y);
   
   // Center, middle
-  K.textAlign('center', 'middle');
+  K.alignText('center', 'middle');
   K.text('Centered', x, y + 50);
   
   // Mark anchor points
@@ -234,7 +234,7 @@ const draw = (K) => {
   K.circle(K.width/2, K.height/2, 50);
   
   // Center text
-  K.textAlign('center', 'middle');
+  K.alignText('center', 'middle');
   K.text('Centered Text', K.width/2, K.height/2);
 };
 ```

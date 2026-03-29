@@ -40,7 +40,11 @@ function MySketch() {
     K.circle(200, 200, 50);
   };
   
-  return <Klint context={context} setup={setup} draw={draw} width={400} height={400} />;
+  return (
+    <div style={{ width: 400, height: 400 }}>
+      <Klint context={context} setup={setup} draw={draw} />
+    </div>
+  );
 }
 ```
 
@@ -48,14 +52,14 @@ function MySketch() {
 
 | p5.js | Klint | Notes |
 |-------|-------|-------|
-| `fill(r, g, b)` | `K.fillColor(r, g, b)` | Also accepts CSS colors |
-| `stroke(r, g, b)` | `K.strokeColor(r, g, b)` | Also accepts CSS colors |
+| `fill(r, g, b)` | `K.fillColor('rgb(r, g, b)')` | Accepts CSS color strings |
+| `stroke(r, g, b)` | `K.strokeColor('rgb(r, g, b)')` | Accepts CSS color strings |
 | `strokeWeight(w)` | `K.strokeWidth(w)` | Same behavior |
 | `noFill()` | `K.noFill()` | Same behavior |
 | `noStroke()` | `K.noStroke()` | Same behavior |
 | `ellipse(x, y, w, h)` | `K.circle(x, y, r)` | Uses radius, not diameter |
 | `rect(x, y, w, h)` | `K.rectangle(x, y, w, h)` | Same behavior |
-| `createVector(x, y)` | `Vector.create(x, y)` | Using Vector element |
+| `createVector(x, y)` | `K.createVector(x, y)` | Shorthand for `new K.Vector(x, y)` |
 
 ### 3. Color Handling
 
@@ -67,13 +71,13 @@ fill('#ff0000');        // Hex
 fill('red');            // Named
 ```
 
-**Klint**:
+**Klint** (accepts CSS color strings or CanvasGradient):
 ```javascript
-K.fillColor(255, 0, 0);        // RGB
-K.fillColor(255, 0, 0, 0.5);   // RGBA (0-1 for alpha)
-K.fillColor('#ff0000');        // Hex
-K.fillColor('red');            // Named
-K.fillColor('rgb(255, 0, 0)'); // CSS syntax
+K.fillColor('#ff0000');           // Hex
+K.fillColor('red');               // Named
+K.fillColor('rgb(255, 0, 0)');    // CSS RGB syntax
+K.fillColor('rgba(255, 0, 0, 0.5)'); // CSS RGBA
+K.fillColor(K.Color.rgb(255, 0, 0)); // Via Color element
 ```
 
 ### 4. Canvas Creation
@@ -85,9 +89,11 @@ function setup() {
 }
 ```
 
-**Klint**:
+**Klint** (canvas fills its container):
 ```tsx
-<Klint context={context} draw={draw} width={800} height={600} />
+<div style={{ width: 800, height: 600 }}>
+  <Klint context={context} draw={draw} />
+</div>
 ```
 
 ### 5. Mouse Interaction
@@ -109,7 +115,7 @@ const { mouse } = KlintMouse();
 
 const draw = (K) => {
   K.circle(mouse.x, mouse.y, 50);
-  if (mouse.pressed) {
+  if (mouse.isPressed) {
     K.fillColor('black');
   }
 };
@@ -127,10 +133,10 @@ function draw() {
 }
 ```
 
-**Klint**:
+**Klint** (K.time is in seconds):
 ```javascript
 const draw = (K) => {
-  const x = K.width/2 + Math.sin(K.time * 0.001) * 100;
+  const x = K.width/2 + Math.sin(K.time) * 100;
   K.circle(x, K.height/2, 50);
 };
 ```
@@ -153,7 +159,7 @@ function draw() {
 const draw = (K) => {
   K.background('#000');
   for (let i = 0; i < 10; i++) {
-    K.fillColor(i * 25, i * 25, i * 25);
+    K.fillColor(K.Color.gray(i * 25));
     K.circle(i * 80, K.height/2, 50);
   }
 };
@@ -239,22 +245,20 @@ import { useKlint, Klint } from '@shopify/klint';
 
 function App() {
   const { context } = useKlint();
-  
+
   const setup = (K) => {
     // Setup code
   };
-  
+
   const draw = (K) => {
     K.background('#dcdcdc');
   };
-  
-  return <Klint 
-    context={context} 
-    setup={setup} 
-    draw={draw}
-    width={400}
-    height={400}
-  />;
+
+  return (
+    <div style={{ width: 400, height: 400 }}>
+      <Klint context={context} setup={setup} draw={draw} />
+    </div>
+  );
 }
 ```
 
@@ -272,18 +276,18 @@ function draw() {
 
 **Klint**:
 ```tsx
-const { context, useStorage } = useKlint();
+const { context } = useKlint();
 const state = useStorage({ x: 0 });
 
 const draw = (K) => {
-  state.x += 1;
-  K.circle(state.x, K.height/2, 50);
+  state.set('x', state.get('x') + 1);
+  K.circle(state.get('x'), K.height/2, 50);
 };
 ```
 
 ## Migration Checklist
 
-1. ✅ Replace `createCanvas()` with `<Klint>` component props
+1. ✅ Replace `createCanvas()` with a sized container div + `<Klint>` component
 2. ✅ Add `K.` prefix to all drawing functions
 3. ✅ Change `fill()` to `K.fillColor()`
 4. ✅ Change `stroke()` to `K.strokeColor()`

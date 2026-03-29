@@ -2,19 +2,9 @@ import React from "react";
 import { Klint, useKlint, type KlintContext } from "@shopify/klint";
 
 export default function Swans17() {
-  const { context, useDev } = useKlint();
-
-  const setup = (K: KlintContext) => {
-    K.textFont("Inter");
-    K.textSize(36);
-    K.noStroke();
-    K.alignText("center", "middle");
-    K.setImageOrigin("center");
-  };
+  const { context } = useKlint();
 
   const draw = (K: KlintContext) => {
-    useDev();
-
     K.background(K.Color.coral);
     K.fillColor("white");
     K.circle(0, 0, K.width / 3);
@@ -37,9 +27,8 @@ export default function Swans17() {
   return (
     <Klint
       context={context}
-      setup={setup}
       draw={draw}
-      options={{ origin: "center" }}
+      options={{ origin: "center", static: "true" }}
     />
   );
 }

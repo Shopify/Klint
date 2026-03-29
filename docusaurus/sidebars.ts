@@ -133,17 +133,34 @@ const sidebars: SidebarsConfig = {
       items: [
         'elements/Color',
         'elements/Vector',
-        'elements/State',
-
-        'elements/Text',
         'elements/Easing',
+        'elements/Noise',
+        'elements/Text',
+        'elements/Grid',
+        'elements/Hotspot',
+        'elements/Strip',
+        'elements/Pixels',
+        'elements/Quadtree',
       ],
     },
     {
       type: 'category',
       label: 'Advanced Topics',
       items: [
-        'advanced/plugins',
+        {
+          type: 'category',
+          label: 'Plugins',
+          items: [
+            'advanced/plugins/plugins-overview',
+            'advanced/plugins/font-parser',
+            'advanced/plugins/sprites',
+            'advanced/plugins/catmull-rom',
+            'advanced/plugins/delaunay',
+            'advanced/plugins/matter-physics',
+            'advanced/plugins/projector',
+            'advanced/plugins/custom-plugins',
+          ],
+        },
         'advanced/web-components',
         'advanced/klint-editor',
       ],

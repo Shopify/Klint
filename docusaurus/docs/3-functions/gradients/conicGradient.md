@@ -43,7 +43,7 @@ circle(350, 200, 150)
 
 // In JSX component
 const draw = (K: KlintContext) => {
-  const grad = K.conicGradient(K.time * 0.001, K.width/2, K.height/2)
+  const grad = K.conicGradient(K.time, K.width/2, K.height/2)
   K.addColorStop(grad, 0, "red")
   K.addColorStop(grad, 0.25, "yellow")
   K.addColorStop(grad, 0.5, "green")

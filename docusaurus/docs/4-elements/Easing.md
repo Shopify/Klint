@@ -261,10 +261,8 @@ const draw = (K: KlintContext) => {
 const draw = (K: KlintContext) => {
   const { mouse } = KlintMouse();
   
-  // Initialize UI state
-  if (!K.State.has('buttonHover')) {
-    K.State.set('buttonHover', 0);
-  }
+  // hoverAmount should be stored via useStorage outside the draw function
+  // e.g. const store = useStorage({ buttonHover: 0 });
   
   const buttonX = 200;
   const buttonY = 300;
@@ -276,10 +274,10 @@ const draw = (K: KlintContext) => {
                   mouse.y > buttonY && mouse.y < buttonY + buttonH;
   
   // Animate hover state
-  let hoverAmount = K.State.get('buttonHover');
+  let hoverAmount = store.get('buttonHover');
   const speed = 0.1;
   hoverAmount += (isHover ? 1 : 0 - hoverAmount) * speed;
-  K.State.set('buttonHover', hoverAmount);
+  store.set('buttonHover', hoverAmount);
   
   // Apply easing to hover animation
   const easedHover = K.Easing.overshootOut(hoverAmount);
@@ -299,7 +297,7 @@ const draw = (K: KlintContext) => {
   
   // Button text
   K.fillColor("white");
-  K.textAlign("center", "middle");
+  K.alignText("center", "middle");
   K.textSize(16);
   K.text("Click Me", buttonX + buttonW/2, buttonY + buttonH/2);
 }

@@ -55,7 +55,8 @@ const draw = (K: KlintContext) => {
   
   // Apply global transformation
   K.translate(K.width/2, K.height/2)
-  K.scale(1 + Math.sin(K.time) * 0.2)
+  const s = 1 + Math.sin(K.time) * 0.2
+  K.scale(s, s)
   
   // Draw multiple objects with individual transformations
   for (let i = 0; i < 8; i++) {
@@ -146,7 +147,7 @@ const drawButton = (K, x, y, width, height, text) => {
   
   // Button text
   K.fillColor("white")
-  K.textAlign("center", "middle")
+  K.alignText("center", "middle")
   K.text(text, width/2, height/2)
   
   K.pop()
