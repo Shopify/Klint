@@ -13,7 +13,7 @@ const draw = (K: KlintContext) => {
   const position3D = K.createVector(100, 200, 50);
   
   // Create from class (if needed)
-  const velocity = new K.Vector(5, -3, 0);
+  const velocity = K.createVector(5, -3, 0);
 }
 ```
 
@@ -288,25 +288,28 @@ const point = K.Vector.fromAngle(center, Math.PI / 4, 100);
 ### 3D Physics Simulation
 
 ```tsx
-const draw = (K: KlintContext) => {
-  // Initialize if first frame
-  if (!K.State.has('particles')) {
-    const particles = [];
-    for (let i = 0; i < 10; i++) {
-      particles.push({
-        position: K.createVector(K.width/2, K.height/2, 0),
-        velocity: K.createVector(
-          (Math.random() - 0.5) * 4,
-          (Math.random() - 0.5) * 4,
-          (Math.random() - 0.5) * 2
-        ),
-        acceleration: K.createVector(0, 0.1, 0) // gravity
-      });
-    }
-    K.State.set('particles', particles);
+// Outside draw: const store = useStorage({ particles: [] });
+
+// In setup:
+const setup = (K: KlintContext) => {
+  const particles = [];
+  for (let i = 0; i < 10; i++) {
+    particles.push({
+      position: K.createVector(K.width/2, K.height/2, 0),
+      velocity: K.createVector(
+        (Math.random() - 0.5) * 4,
+        (Math.random() - 0.5) * 4,
+        (Math.random() - 0.5) * 2
+      ),
+      acceleration: K.createVector(0, 0.1, 0)
+    });
   }
-  
-  const particles = K.State.get('particles');
+  store.set('particles', particles);
+};
+
+// In draw:
+const draw = (K: KlintContext) => {
+  const particles = store.get('particles');
   
   K.background("#222");
   
@@ -340,19 +343,19 @@ const draw = (K: KlintContext) => {
 ### 3D Steering and Following
 
 ```tsx
+// Outside draw: const store = useStorage({ agent: null });
+
+const setup = (K: KlintContext) => {
+  store.set('agent', {
+    position: K.createVector(K.width/2, K.height/2, 0),
+    velocity: K.createVector(0, 0, 0),
+    maxSpeed: 3
+  });
+};
+
 const draw = (K: KlintContext) => {
   const { mouse } = KlintMouse();
-  
-  // Initialize agent
-  if (!K.State.has('agent')) {
-    K.State.set('agent', {
-      position: K.createVector(K.width/2, K.height/2, 0),
-      velocity: K.createVector(0, 0, 0),
-      maxSpeed: 3
-    });
-  }
-  
-  const agent = K.State.get('agent');
+  const agent = store.get('agent');
   const target = K.createVector(mouse.x, mouse.y, 0);
   
   // Calculate desired velocity toward target
@@ -389,17 +392,19 @@ const draw = (K: KlintContext) => {
 ### Spherical Interpolation Animation
 
 ```tsx
+// Outside draw: const store = useStorage({ vectors: null });
+
+const setup = (K: KlintContext) => {
+  store.set('vectors', {
+    start: K.createVector(1, 0, 0),
+    end: K.createVector(0, 1, 0),
+    current: K.createVector(1, 0, 0),
+    t: 0
+  });
+};
+
 const draw = (K: KlintContext) => {
-  if (!K.State.has('vectors')) {
-    K.State.set('vectors', {
-      start: K.createVector(1, 0, 0),
-      end: K.createVector(0, 1, 0),
-      current: K.createVector(1, 0, 0),
-      t: 0
-    });
-  }
-  
-  const vectors = K.State.get('vectors');
+  const vectors = store.get('vectors');
   const center = K.createVector(K.width/2, K.height/2, 0);
   
   // Animate interpolation

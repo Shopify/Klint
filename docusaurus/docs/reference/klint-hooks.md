@@ -10,13 +10,17 @@ Klint provides React hooks for managing state, handling input, and loading resou
 
 ```tsx
 const { 
-  context,        // KlintContext instance 
-  KlintMouse,     // Mouse tracking hook factory
-  KlintImage,     // Image loading hook factory
-  KlintWindow,    // Window/resize events hook factory
-  KlintScroll,    // Scroll handling hook factory
-  KlintGesture,   // Touch gesture handling hook factory
-  useDev          // Development utilities
+  context,          // KlintContext instance 
+  KlintMouse,       // Mouse tracking hook factory
+  KlintKeyboard,    // Keyboard tracking hook factory
+  KlintImage,       // Image loading hook factory
+  KlintWindow,      // Window/resize events hook factory
+  KlintScroll,      // Scroll handling hook factory
+  KlintGesture,     // Touch gesture handling hook factory
+  KlintTimeline,    // Animation timeline hook factory
+  KlintPerformance, // Performance monitoring hook factory
+  useDev,           // Development utilities
+  togglePlay,       // Play/pause control
 } = useKlint()
 ```
 
@@ -34,7 +38,7 @@ Provides persistent storage across renders that survives component re-renders.
 - `get(key)`: Get a stored value
 - `set(key, value)`: Store a value
 - `has(key)`: Check if key exists
-- `delete(key)`: Remove a stored value
+- `remove(key)`: Remove a stored value
 
 ## useProps
 
@@ -191,11 +195,13 @@ export function KlintCanvas() {
   };
 
   return (
-    <Klint
-      context={context}
-      preload={preload}
-      draw={draw}
-    />
+    <div style={{ width: "100vw", height: "100vh" }}>
+      <Klint
+        context={context}
+        preload={preload}
+        draw={draw}
+      />
+    </div>
   );
 }
 ```
@@ -204,7 +210,7 @@ export function KlintCanvas() {
 - All hooks must be used within a React component
 - `useKlint()` should be called only once per component
 - Pass the context from `useKlint()` to the `<Klint>` component
-- Storage persists between renders and is reactive
+- Storage persists between renders without triggering re-renders
 - Event handlers are automatically cleaned up on component unmount
 - The `loadImages` function returns a promise that resolves when all images are loaded
 - Mouse coordinates are relative to the canvas origin setting

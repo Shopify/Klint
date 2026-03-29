@@ -377,7 +377,7 @@ const draw = (K: KlintContext) => {
   K.circle(250, 300, 50)
   
   // Animated blending
-  const t = Math.sin(K.time * 0.002) * 0.5 + 0.5
+  const t = Math.sin(K.time * 2) * 0.5 + 0.5
   const blended = K.Color.blendColors(K.Color.coral, K.Color.sky, t, "oklch")
   K.fillColor(blended)
   K.circle(400, 300, 60)

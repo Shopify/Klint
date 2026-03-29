@@ -4,164 +4,168 @@ sidebar_position: 3
 
 # API Reference
 
-Complete reference for all Klint functions, organized by category.
+Quick reference for all Klint functions. Click any function name for detailed docs with examples.
 
-## Drawing Functions
+## Canvas Properties
 
-### Basic Shapes
+| Property | Type | Description |
+|----------|------|-------------|
+| `K.width` | number | Canvas width in device pixels |
+| `K.height` | number | Canvas height in device pixels |
+| `K.time` | number | Elapsed time in seconds |
+| `K.deltaTime` | number | Time since last frame in milliseconds |
+| `K.frame` | number | Frame count since start |
+| `K.dpr` | number | Device pixel ratio |
 
-| Function | Description | Parameters |
-|----------|-------------|------------|
-| `K.circle(x, y, radius, radius2?)` | Draw a circle or ellipse | x, y: center position<br/>radius: circle radius<br/>radius2: optional y-radius for ellipse |
-| `K.rectangle(x, y, width, height)` | Draw a rectangle | x, y: top-left position<br/>width, height: dimensions |
-| `K.roundedRectangle(x, y, width, height, radius)` | Draw a rounded rectangle | x, y: top-left position<br/>width, height: dimensions<br/>radius: corner radius |
-| `K.line(x1, y1, x2, y2)` | Draw a line | x1, y1: start point<br/>x2, y2: end point |
-| `K.point(x, y)` | Draw a point | x, y: position |
-| `K.polygon(x, y, sides, radius)` | Draw a regular polygon | x, y: center position<br/>sides: number of sides<br/>radius: radius |
-| `K.disk(x, y, radius, startAngle?, endAngle?, closed?)` | Draw a circle or arc with optional sector closing | x, y: center<br/>radius: radius<br/>startAngle, endAngle: radians<br/>closed: connect to center |
+## [Drawing Functions](../3-functions/drawing/circle)
 
-### Paths and Vertices
+| Function | Signature |
+|----------|-----------|
+| [`circle`](../3-functions/drawing/circle) | `(x, y, radius, radius2?) => void` |
+| [`rectangle`](../3-functions/drawing/rectangle) | `(x, y, width, height?) => void` |
+| [`roundedRectangle`](../3-functions/drawing/roundedRectangle) | `(x, y, width, radius, height?) => void` |
+| [`line`](../3-functions/drawing/line) | `(x1, y1, x2, y2) => void` |
+| [`point`](../3-functions/drawing/point) | `(x, y) => void` |
+| [`polygon`](../3-functions/drawing/polygon) | `(x, y, radius, sides, radius2?, rotation?) => void` |
+| [`disk`](../3-functions/drawing/disk) | `(x, y, radius, startAngle?, endAngle?, closed?) => void` |
+| [`ellipse`](../3-functions/drawing/ellipse) | `(x, y, radiusX, radiusY) => void` |
 
-| Function | Description | Parameters |
-|----------|-------------|------------|
-| `K.beginShape()` | Start a new shape | None |
-| `K.endShape(close?)` | End the current shape | close: close the path |
-| `K.vertex(x, y)` | Add a vertex | x, y: position |
-| `K.bezierVertex(cp1x, cp1y, cp2x, cp2y, x, y)` | Add a bezier curve | Control points and end point |
-| `K.quadraticVertex(cpx, cpy, x, y)` | Add a quadratic curve | Control point and end point |
-| `K.arcVertex(x, y, radius, startAngle, endAngle, ccw?)` | Add an arc to path | Center, radius, and angles |
-| `K.beginContour()` | Start a hole in shape | None |
-| `K.endContour()` | End the hole | None |
+## [Styling Functions](../3-functions/styling/fillColor)
 
-## Styling Functions
+| Function | Signature |
+|----------|-----------|
+| [`fillColor`](../3-functions/styling/fillColor) | `(color: string \| CanvasGradient) => void` |
+| [`strokeColor`](../3-functions/styling/strokeColor) | `(color: string \| CanvasGradient) => void` |
+| [`strokeWidth`](../3-functions/styling/strokeWidth) | `(width: number) => void` |
+| [`strokeCap`](../3-functions/styling/strokeCap) | `(cap: CanvasLineCap) => void` |
+| [`strokeJoin`](../3-functions/styling/strokeJoin) | `(join: CanvasLineJoin) => void` |
+| [`noFill`](../3-functions/styling/noFill) | `() => void` |
+| [`noStroke`](../3-functions/styling/noStroke) | `() => void` |
+| [`opacity`](../3-functions/styling/opacity) | `(value: number) => void` |
+| [`blend`](../3-functions/styling/blend) | `(mode: GlobalCompositeOperation \| "default") => void` |
 
-### Colors and Stroke
+## [Transform Functions](../3-functions/transforms/push)
 
-| Function | Description | Parameters |
-|----------|-------------|------------|
-| `K.fillColor(color)` | Set fill color | CSS color string or RGB values |
-| `K.strokeColor(color)` | Set stroke color | CSS color string or RGB values |
-| `K.strokeWidth(width)` | Set stroke width | Width in pixels |
-| `K.strokeCap(cap)` | Set line cap style | 'butt', 'round', 'square' |
-| `K.strokeJoin(join)` | Set line join style | 'miter', 'round', 'bevel' |
-| `K.noFill()` | Disable fill | None |
-| `K.noStroke()` | Disable stroke | None |
-| `K.opacity(alpha)` | Set global opacity | 0-1 |
-| `K.blend(mode)` | Set blend mode | Blend mode string |
+| Function | Signature |
+|----------|-----------|
+| [`push`](../3-functions/transforms/push) | `() => void` |
+| [`pop`](../3-functions/transforms/pop) | `() => void` |
+| [`translate`](../3-functions/transforms/translate) | `(x, y) => void` |
+| [`rotate`](../3-functions/transforms/rotate) | `(angle) => void` |
+| [`scale`](../3-functions/transforms/scale) | `(x, y) => void` — **requires 2 args** |
+| [`resetTransform`](../3-functions/transforms/resetTransform) | `() => void` |
+| [`screenToWorld`](../3-functions/transforms/coordinates) | `(x, y) => { x, y }` — call **after** transforms |
+| [`worldToScreen`](../3-functions/transforms/coordinates) | `(x, y) => { x, y }` — call **after** transforms |
+| [`getVisibleBounds`](../3-functions/transforms/coordinates) | `() => { left, top, right, bottom, width, height }` |
 
-### Gradients
+## [Path Functions](../3-functions/paths/beginShape)
 
-| Function | Description | Parameters |
-|----------|-------------|------------|
-| `K.gradient(x1, y1, x2, y2)` | Create linear gradient | Start and end points |
-| `K.radialGradient(x1, y1, r1, x2, y2, r2)` | Create radial gradient | Two circles |
-| `K.conicGradient(angle, x, y)` | Create conic gradient | Start angle and center |
-| `K.addColorStop(offset, color)` | Add gradient color stop | 0-1 offset and color |
+| Function | Signature |
+|----------|-----------|
+| [`beginShape`](../3-functions/paths/beginShape) | `() => void` |
+| [`endShape`](../3-functions/paths/endShape) | `(close?) => void` |
+| [`vertex`](../3-functions/paths/vertex) | `(x, y) => void` |
+| [`bezierVertex`](../3-functions/paths/bezierVertex) | `(cp1x, cp1y, cp2x, cp2y, x, y) => void` |
+| [`quadraticVertex`](../3-functions/paths/quadraticVertex) | `(cpx, cpy, x, y) => void` |
+| [`arcVertex`](../3-functions/paths/arcVertex) | `(x1, y1, x2, y2, radius) => void` |
+| [`beginContour`](../3-functions/paths/beginContour) | `() => void` |
+| [`endContour`](../3-functions/paths/endContour) | `(forceRevert?) => void` |
+| [`clipTo`](../3-functions/paths/clipTo) | `(callback, fillRule?) => void` |
 
-## Transform Functions
+## [Text Functions](../3-functions/text/text)
 
-| Function | Description | Parameters |
-|----------|-------------|------------|
-| `K.translate(x, y)` | Move origin | x, y: translation |
-| `K.rotate(angle)` | Rotate canvas | Angle in radians |
-| `K.scale(x, y?)` | Scale canvas | x scale, optional y scale |
-| `K.push()` | Save transform state | None |
-| `K.pop()` | Restore transform state | None |
-| `K.screenToWorld(x, y)` | Convert screen coords to world coords | Screen x, y (e.g. mouseX/Y). Call **after** transforms |
-| `K.worldToScreen(x, y)` | Convert world coords to screen coords | World x, y. Call **after** transforms |
-| `K.getVisibleBounds()` | Get visible area in world coords | None. Call **after** transforms |
+| Function | Signature |
+|----------|-----------|
+| [`text`](../3-functions/text/text) | `(text, x, y, maxWidth?) => void` |
+| [`paragraph`](../3-functions/text/paragraph) | `(text, x, y, width, options?) => void` |
+| `textFont` | `(font: string) => void` |
+| `textSize` | `(size: number) => void` |
+| `textStyle` | `(style: string) => void` |
+| `textWeight` | `(weight: string) => void` |
+| `alignText` | `(horizontal: CanvasTextAlign, vertical?: CanvasTextBaseline) => void` |
+| `textLeading` | `(spacing: number) => number` |
+| `textWidth` | `(text: string) => number` |
 
-## Text Functions
+**Important**: Text alignment is `alignText` (NOT `textAlign`).
 
-| Function | Description | Parameters |
-|----------|-------------|------------|
-| `K.text(text, x, y, maxWidth?)` | Draw text | Text string and position |
-| `K.textSize(size)` | Set font size | Size in pixels |
-| `K.textFont(font)` | Set font family | Font string |
-| `K.textAlign(horizontal, vertical?)` | Set text alignment | 'left', 'center', 'right'<br/>'top', 'middle', 'bottom' |
-| `K.textBaseline(baseline)` | Set text baseline | 'alphabetic', 'top', 'middle', etc. |
-| `K.measureText(text)` | Measure text dimensions | Text string |
+## [Gradient Functions](../3-functions/gradients/gradient)
 
-## Image Functions
+| Function | Signature |
+|----------|-----------|
+| [`gradient`](../3-functions/gradients/gradient) | `(x1?, y1?, x2?, y2?) => CanvasGradient` |
+| [`radialGradient`](../3-functions/gradients/radialGradient) | `(x1?, y1?, r1?, x2?, y2?, r2?) => CanvasGradient` |
+| [`conicGradient`](../3-functions/gradients/conicGradient) | `(angle?, x1?, y1?) => CanvasGradient` |
+| [`addColorStop`](../3-functions/gradients/addColorStop) | `(gradient, offset, color) => void` |
 
-| Function | Description | Parameters |
-|----------|-------------|------------|
-| `K.image(img, x, y, width?, height?)` | Draw an image | Image and position |
-| `K.createOffscreen(width, height)` | Create offscreen canvas | Dimensions |
-| `K.loadImage(url)` | Load an image | URL string |
-| `K.getImageData(x, y, width, height)` | Get pixel data | Rectangle bounds |
-| `K.putImageData(data, x, y)` | Put pixel data | ImageData and position |
+## [Image Functions](../3-functions/images/image)
 
-## Canvas Control
+| Function | Signature |
+|----------|-----------|
+| [`image`](../3-functions/images/image) | `(img, x, y, ...args) => void` |
+| [`createOffscreen`](../3-functions/images/createOffscreen) | `(width, height) => KlintOffscreenContext` |
+| `loadPixels` | `() => ImageData` |
+| `updatePixels` | `(pixels) => void` |
+| `readPixels` | `(x, y, w?, h?) => number[]` |
+| `scaleTo` | `(origW, origH, destW, destH, cover?) => number` |
 
-| Function | Description | Parameters |
-|----------|-------------|------------|
-| `K.background(color)` | Clear canvas with color | CSS color string |
-| `K.clear()` | Clear canvas | None |
-| `K.reset()` | Reset all transforms | None |
-| `K.save()` | Save canvas state | None |
-| `K.restore()` | Restore canvas state | None |
+## [Canvas Control](../3-functions/canvas/canvas-settings)
 
-## Utility Functions
+| Function | Signature |
+|----------|-----------|
+| [`background`](../3-functions/canvas/background) | `(color?: string) => void` |
+| `clear` | `() => void` |
+| `reset` | `() => void` |
+| `setCanvasOrigin` | `("center" \| "corner") => void` |
+| `setImageOrigin` | `("center" \| "corner") => void` |
+| `setRectOrigin` | `("center" \| "corner") => void` |
+| `smooth` / `noSmooth` | `() => void` |
+| `toBase64` | `(type?: string, quality?: number) => string` |
 
-### Math Utilities
+## [Math Utilities](../3-functions/utilities/math-utils)
 
-| Function | Description | Parameters |
-|----------|-------------|------------|
-| `K.distance(x1, y1, x2, y2)` | Distance between points | Two points |
-| `K.angle(x1, y1, x2, y2)` | Angle between points | Two points |
-| `K.lerp(start, end, amount)` | Linear interpolation | Start, end, amount (0-1) |
-| `K.map(value, start1, end1, start2, end2)` | Map value between ranges | Value and two ranges |
-| `K.constrain(value, min, max)` | Constrain value to range | Value and min/max |
-| `K.random(min?, max?)` | Random number | Optional range |
-| `K.noise(x, y?, z?)` | Perlin noise | 1D, 2D, or 3D position |
+| Function | Signature |
+|----------|-----------|
+| `lerp` | `(A, B, mix, bounded?) => number` |
+| `remap` | `(n, A, B, C, D, bounded?) => number` |
+| `constrain` | `(val, floor, ceil) => number` |
+| `distance` | `(x1, y1, x2, y2, mode?) => number` |
+| `squareDistance` | `(x1, y1, x2, y2) => number` |
+| `dot` | `(x1, y1, x2, y2) => number` |
+| `fract` | `(n, mod, mode?) => number` |
 
-### Time and Animation
+## Elements
 
-| Property | Description | Type |
-|----------|-------------|------|
-| `K.time` | Time since start (ms) | number |
-| `K.frame` | Frame count | number |
-| `K.deltaTime` | Time since last frame (ms) | number |
-| `K.fps` | Current frame rate | number |
+Elements are accessed as `K.ElementName` inside draw functions.
 
-### Canvas Properties
+| Element | Description | Docs |
+|---------|-------------|------|
+| `K.Color` | Color creation and manipulation across color spaces | [Color](../4-elements/Color) |
+| `K.Easing` | Animation easing functions (in, out, bounce, spring, etc.) | [Easing](../4-elements/Easing) |
+| `K.Vector` | 3D vector math (`K.createVector(x, y)` or `new K.Vector(x, y)`) | [Vector](../4-elements/Vector) |
+| `K.Noise` | Seedable noise: Perlin, Simplex, Hash (1-4D), Gaussian random | [Noise](../4-elements/Noise) |
+| `K.Text` | Advanced text layout (splitTo, circularText, findTextSize) | [Text](../4-elements/Text) |
+| `K.Quadtree` | Spatial partitioning for efficient queries | [Quadtree](../4-elements/Quadtree) |
+| `K.Hotspot` | Hit testing (circle, rect, ellipse, polygon, path) | [Hotspot](../4-elements/Hotspot) |
+| `K.Grid` | Grid generators (rect, radial, hex, triangle) | [Grid](../4-elements/Grid) |
+| `K.Strip` | Triangle/quad strip, hull, and ribbon rendering | [Strip](../4-elements/Strip) |
+| `K.Pixels` | Pixel-level read/write (load, update, read) | [Pixels](../4-elements/Pixels) |
+| `K.Timeline` | Keyframe-based animation with tracks and stagger | [Timeline](../2-core-concepts/timeline) |
 
-| Property | Description | Type |
-|----------|-------------|------|
-| `K.width` | Canvas width | number |
-| `K.height` | Canvas height | number |
-| `K.pixelDensity` | Device pixel ratio | number |
+## Common Pitfalls
 
-## Klint Elements
-
-### Color Element
-- `Color.rgb(r, g, b, a?)` - Create from RGB
-- `Color.hsl(h, s, l, a?)` - Create from HSL
-- `Color.hex(hex)` - Create from hex string
-
-### Vector Element
-- `Vector.create(x, y)` - Create 2D vector
-- `Vector.add(v1, v2)` - Add vectors
-- `Vector.sub(v1, v2)` - Subtract vectors
-- `Vector.mult(v, scalar)` - Multiply by scalar
-- `Vector.normalize(v)` - Normalize vector
-- `Vector.magnitude(v)` - Get magnitude
-
-### Time Element
-- `Time.now()` - Current timestamp
-- `Time.delta()` - Delta time
-- `Time.fps()` - Current FPS
-
-### Easing Functions
-- `Easing.linear(t)` - Linear (no easing)
-- `Easing.easeInQuad(t)` - Quadratic ease in
-- `Easing.easeOutQuad(t)` - Quadratic ease out
-- `Easing.easeInOutQuad(t)` - Quadratic ease in/out
-- And many more...
+- **Option names**: `dpr` not `pixelRatio`, `origin` not `canvasOrigin`
+- **Text alignment**: `K.alignText()` not `K.textAlign()`
+- **Scale needs 2 args**: `K.scale(2, 2)` not `K.scale(2)` (native canvas API)
+- **Canvas fills container**: Set container size, not canvas size — there are no `width`/`height` props
+- **Device pixels**: `K.width`/`K.height` are device pixels = CSS pixels × DPR
+- **Boolean options are strings**: `alpha: "true"` not `alpha: true`
+- **K.time is in seconds**: Not milliseconds — `Math.sin(K.time)` oscillates with a ~6.28s period
+- **K.deltaTime is in milliseconds**: Convert with `K.deltaTime / 1000` for seconds
+- **Color functions live on K.Color**: Use `K.Color.hsl()`, not `K.hsl()`
+- **Noise lives on K.Noise**: Use `K.Noise.perlin()`, not `K.noise()`
 
 ## Next Steps
 
-- [Function Examples](../3-functions/drawing/circle) - Detailed function docs
-- [Quick Start](../1-getting-started/quick-start) - Get started quickly
-- [TypeScript](../1-getting-started/typescript) - Type definitions
+- [Quick Start](../1-getting-started/quick-start) — Get started
+- [Klint Component](./klint-component) — Component props reference
+- [Klint Hooks](./klint-hooks) — Hook reference

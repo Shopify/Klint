@@ -4,7 +4,7 @@ Understanding Klint's lifecycle is essential for creating efficient canvas anima
 
 ## Basic Usage: Just Draw
 
-At its simplest, Klint only requires a `draw` function. Klint is thought to go through each frame, which is essential for making creative coding tools and apps. If you are making generative art or long-running sketches, prefer the use of the actual time and delatTime to make frame-indepedent animations :
+At its simplest, Klint only requires a `draw` function. Klint is thought to go through each frame, which is essential for making creative coding tools and apps. If you are making generative art or long-running sketches, prefer the use of the actual `K.time` (seconds) and `K.deltaTime` (milliseconds) to make frame-independent animations:
 
 ```jsx
 function SimpleSketch() {
@@ -42,51 +42,43 @@ For more complex applications, Klint supports a three-phase lifecycle:
 ```jsx
 function ComplexSketch() {
 
-  const props = useStorage({
-        particles : [],
-    }) 
+  const storage = useStorage({
+    particles: [],
+  });
 
   const preload = async (K) => {
-    // Load resources asynchronously
-    
-    await K.loadImages({
+    await loadImages({
       background: "path/to/background.jpg",
       sprite: "path/to/sprite.png"
     });
-    
-    // Initialize plugins
+
     K.extend("myPlugin", new MyPlugin(K));
   };
-  
+
   const setup = (K) => {
-    // One-time initialization
     K.textFont("Arial");
     K.textSize(16);
     K.alignText("center");
-    
-    // Initialize persistent objects
-    props.particles = Array(100).fill().map(() => ({
+
+    storage.set("particles", Array(100).fill(null).map(() => ({
       x: Math.random() * K.width,
       y: Math.random() * K.height,
       vx: Math.random() * 2 - 1,
       vy: Math.random() * 2 - 1
-    }));
+    })));
   };
-  
+
   const draw = (K) => {
-    // Animation loop (runs every frame)
     K.background("#333");
-    
-    // Use resources loaded in preload
-    K.image(K.images.background, 0, 0, K.width, K.height);
-    
-    // Update and draw objects initialized in setup
-    for (const p of props.particles) {
+
+    K.image(images.background, 0, 0, K.width, K.height);
+
+    for (const p of storage.get("particles")) {
       p.x += p.vx;
       p.y += p.vy;
       if (p.x < 0 || p.x > K.width) p.vx *= -1;
       if (p.y < 0 || p.y > K.height) p.vy *= -1;
-      
+
       K.fillColor("white");
       K.circle(p.x, p.y, 5);
     }
@@ -160,7 +152,7 @@ Key characteristics:
 - **Runs repeatedly** - Aiming at consistent 60fps, the frame rate can be adjusted in the options.
 - **Performance-critical** - Avoid as much as you can to compute anything in the draw loop, sometimes you won't be able to avoid it, i.e. when you draw something on the mouse or do update objects positions. A good practice is to draw anything that doesn't need to be updated, especially text, on an `offscreenContext` and render in layers. Images are cheap to render, when text is memory consuming. 
 - **Has access** to all properties set in preload and setup
-- **Synchronous** - doest not `await`, but you can use Klint.deltaTime to block the frames if needed.
+- **Synchronous** - does not `await`, but you can use `K.deltaTime` to manage frame timing if needed.
 
 Use draw for:
 - Clearing/updating the canvas

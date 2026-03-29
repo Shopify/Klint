@@ -95,7 +95,7 @@ Splits text into individual components with positioning data for advanced layout
 // Split into letters for animation
 const letters = K.Text.splitTo("ANIMATE", "letters")
 letters.forEach((letter, i) => {
-  const offset = Math.sin(K.time * 0.005 + i * 0.5) * 20
+  const offset = Math.sin(K.time * 5 + i * 0.5) * 20
   K.fillColor(`hsl(${i * 40}, 70%, 60%)`)
   K.text(letter.char, letter.x, letter.y + offset)
 })
@@ -154,7 +154,7 @@ K.Text.circularText("BETTER SPACING", 150, "kerned", Math.PI/4)
 K.Text.circularText("WORD BASED LAYOUT", 200, "words", 0, Math.PI)
 
 // Partial circle with offset
-K.Text.circularText("PARTIAL ARC", 120, "fill", K.time * 0.01, Math.PI * 1.5)
+K.Text.circularText("PARTIAL ARC", 120, "fill", K.time, Math.PI * 1.5)
 ```
 
 ## Animation Examples
@@ -169,12 +169,12 @@ const draw = (K: KlintContext) => {
   const letters = K.Text.splitTo(text, "letters")
   
   K.textSize(48)
-  K.textAlign("center", "middle")
+  K.alignText("center", "middle")
   
   letters.forEach((letter, i) => {
     // Staggered fade-in
     const delay = i * 0.1
-    const progress = Math.max(0, (K.time * 0.003 - delay) % 2)
+    const progress = Math.max(0, (K.time * 3 - delay) % 2)
     const alpha = K.Easing.out(Math.min(1, progress))
     
     if (letter.char !== " ") {
@@ -198,13 +198,13 @@ const draw = (K: KlintContext) => {
   const letters = K.Text.splitTo(sentence, "all", { wordSpacing: 40 })
   
   K.textSize(32)
-  K.textAlign("center", "middle")
+  K.alignText("center", "middle")
   
   letters.forEach((letter) => {
     if (letter.char !== " ") {
       const wordOffset = (letter.wordIndex || 0) * 0.8
       const letterOffset = (letter.letterIndex || 0) * 0.2
-      const wave = Math.sin(K.time * 0.004 + wordOffset + letterOffset) * 30
+      const wave = Math.sin(K.time * 4 + wordOffset + letterOffset) * 30
       
       const hue = ((letter.wordIndex || 0) * 60) % 360
       K.fillColor(`hsl(${hue}, 80%, 70%)`)
@@ -227,7 +227,7 @@ const draw = (K: KlintContext) => {
   
   const optimalSize = K.Text.findTextSize(dynamicText, availableWidth, 72, "x")
   K.textSize(optimalSize)
-  K.textAlign("center", "middle")
+  K.alignText("center", "middle")
   K.fillColor("yellow")
   K.text(dynamicText, K.width/2, K.height/2)
   
@@ -258,8 +258,8 @@ const draw = (K: KlintContext) => {
   K.fillColor("cyan")
   
   // Rotating text with changing radius
-  const radius = 100 + Math.sin(K.time * 0.002) * 30
-  const offset = K.time * 0.005
+  const radius = 100 + Math.sin(K.time * 2) * 30
+  const offset = K.time * 5
   
   K.Text.circularText("SPINNING AROUND", radius, "kerned", offset)
   
@@ -289,7 +289,7 @@ with a durable visual form`
   })
   
   K.textSize(28)
-  K.textAlign("center", "top")
+  K.alignText("center", "top")
   
   lines.forEach((letter, i) => {
     // Color-code each line
@@ -297,7 +297,7 @@ with a durable visual form`
                      letter.lineIndex === 1 ? "lightgreen" : "lightcoral"
     
     // Add typewriter effect
-    const lineProgress = (K.time * 0.002 - (letter.lineIndex || 0) * 1.5) % 4
+    const lineProgress = (K.time * 2 - (letter.lineIndex || 0) * 1.5) % 4
     const charIndex = letter.letterIndex || 0
     const shouldShow = charIndex < lineProgress * 20
     
@@ -335,7 +335,7 @@ The `splitTo` function accepts these options:
 
 ## Notes
 
-- All positioning respects current `textAlign` and `textBaseline` settings
+- All positioning respects current `alignText` settings
 - Text metrics include actual character dimensions, not just CSS font metrics
 - `findTextSize()` uses binary search for efficient size calculation (max 16 iterations)
 - Circular text automatically handles rotation and positioning

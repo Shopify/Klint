@@ -109,33 +109,15 @@ for (let i = 0; i < 1000; i++) {
 
 **Solution**: Ensure canvas size matches display size:
 ```tsx
-// ✅ Explicit size
-<Klint 
-  context={context} 
-  draw={draw} 
-  width={800} 
-  height={600} 
-/>
+// Klint fills its container — set size on the wrapper
+<div style={{ width: 800, height: 600 }}>
+  <Klint context={context} draw={draw} />
+</div>
 
 // Or responsive
-const canvasRef = useRef();
-const [size, setSize] = useState({ width: 800, height: 600 });
-
-useEffect(() => {
-  const handleResize = () => {
-    if (canvasRef.current) {
-      setSize({
-        width: canvasRef.current.offsetWidth,
-        height: canvasRef.current.offsetHeight
-      });
-    }
-  };
-  
-  window.addEventListener('resize', handleResize);
-  handleResize();
-  
-  return () => window.removeEventListener('resize', handleResize);
-}, []);
+<div style={{ width: '100vw', height: '100vh' }}>
+  <Klint context={context} draw={draw} />
+</div>
 ```
 
 ## Performance Issues
@@ -193,7 +175,7 @@ const draw = (K) => {
 // ✅ Reuse storage
 const particles = useStorage({ list: [] });
 const setup = (K) => {
-  particles.list = Array(1000).fill().map(() => ({...}));
+  particles.set('list', Array(1000).fill(null).map(() => ({...})));
 };
 ```
 
@@ -222,20 +204,19 @@ useEffect(() => {
 ```tsx
 function MySketch({ color, size }) {
   const { context } = useKlint();
-  
+  const props = useProps({ color, size });
+
   const draw = (K) => {
     K.background('#000');
-    // Access current props through K.props
-    K.fillColor(K.props.color);
-    K.circle(K.width/2, K.height/2, K.props.size);
+    K.fillColor(props.color);
+    K.circle(K.width/2, K.height/2, props.size);
   };
-  
-  return <Klint 
-    context={context} 
-    draw={draw}
-    color={color}  // Pass as props
-    size={size}    // Pass as props
-  />;
+
+  return (
+    <div style={{ width: '100%', height: '400px' }}>
+      <Klint context={context} draw={draw} />
+    </div>
+  );
 }
 ```
 
@@ -256,11 +237,11 @@ function MySketch() {
 
 // ✅ No re-renders
 function MySketch() {
-  const { context, useStorage } = useKlint();
+  const { context } = useKlint();
   const position = useStorage({ x: 0, y: 0 });
-  
+
   const draw = (K) => {
-    position.x += 1; // Direct mutation, no re-render
+    position.set('x', position.get('x') + 1); // No re-render
   };
 }
 ```
@@ -302,12 +283,12 @@ K.circle(100, 100, 50);      // ✅ Correct
 
 **Valid formats**:
 ```tsx
-K.fillColor('red');              // ✅ Named color
-K.fillColor('#ff0000');          // ✅ Hex
-K.fillColor('rgb(255, 0, 0)');   // ✅ RGB string
-K.fillColor('hsl(0, 100%, 50%)'); // ✅ HSL string
-K.fillColor(255, 0, 0);          // ✅ RGB values
-K.fillColor(255, 0, 0, 0.5);     // ✅ RGBA values
+K.fillColor('red');                    // ✅ Named color
+K.fillColor('#ff0000');                // ✅ Hex
+K.fillColor('rgb(255, 0, 0)');         // ✅ RGB string
+K.fillColor('hsl(0, 100%, 50%)');      // ✅ HSL string
+K.fillColor('rgba(255, 0, 0, 0.5)');   // ✅ RGBA string
+K.fillColor(K.Color.rgb(255, 0, 0));   // ✅ Using Color element
 ```
 
 ## Getting Help
@@ -334,7 +315,7 @@ const draw = (K) => {
   K.strokeWidth(2);
   K.textSize(12);
   K.text(`FPS: ${Math.round(1000 / K.deltaTime)}`, 10, 20);
-  K.text(`Time: ${(K.time / 1000).toFixed(2)}s`, 10, 35);
+  K.text(`Time: ${K.time.toFixed(2)}s`, 10, 35);
   K.text(`Frame: ${K.frame}`, 10, 50);
   K.text(`Size: ${K.width}x${K.height}`, 10, 65);
   K.text(`Mouse: ${mouse.x}, ${mouse.y}`, 10, 80);

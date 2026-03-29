@@ -17,8 +17,8 @@ The `context` prop comes from `useKlint()` hook.
     origin: "center",         // "center" or "corner" (default)
     fps: 60,                  // Target frame rate (default: 60)
     static: "true",           // Static render, no animation loop (default: undefined)
-    alpha: true,              // Canvas with alpha channel (default: true)
-    willReadFrequently: false // Optimize for pixel manipulation (default: false)
+    alpha: "true",            // Canvas with alpha channel (default: "true")
+    willreadfrequently: "false" // Optimize for pixel manipulation (default: "false")
   }}
 />
 ```
@@ -48,8 +48,8 @@ Called every frame (or once in static mode). Contains your drawing logic.
 import { Klint, useKlint, useStorage, type KlintContext } from "@shopify/klint";
 
 export function KlintCanvas() {
-  const { context, useMouse, useImage } = useKlint();
-  const { images, loadImages } = useImage();
+  const { context, KlintMouse, KlintImage } = useKlint();
+  const { images, loadImages } = KlintImage();
   const P = useStorage({
     hello: "world",
   });
@@ -84,15 +84,17 @@ export function KlintCanvas() {
   };
 
   return (
-    <Klint
-      context={context}
-      preload={preload}
-      setup={setup}
-      draw={draw}
-      options={{
-        origin: "center",
-      }}
-    />
+    <div style={{ width: "100vw", height: "100vh" }}>
+      <Klint
+        context={context}
+        preload={preload}
+        setup={setup}
+        draw={draw}
+        options={{
+          origin: "center",
+        }}
+      />
+    </div>
   );
 }
 ```

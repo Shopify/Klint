@@ -31,8 +31,8 @@ function MyCanvas() {
   });
 
   const draw = (K: KlintContext) => {
-    const progress = (K.time * 0.001) % 1; // 0-1 over 1 second
-    
+    const progress = K.time % 1; // 0-1 over 1 second
+
     // Update timeline
     scaleIn.update(progress);
     
@@ -87,7 +87,7 @@ Updates the timeline with progress (0-1). Call this once per frame.
 
 ```tsx
 const draw = (K: KlintContext) => {
-  const progress = (K.time * 0.001) % 1;
+  const progress = K.time % 1;
   fadeIn.update(progress);
   
   K.globalAlpha(fadeIn.current);
@@ -113,7 +113,7 @@ const { staggeredItems } = Timeline.create((timeline) => {
 });
 
 const draw = (K: KlintContext) => {
-  const progress = (K.time * 0.001) % 1;
+  const progress = K.time % 1;
   staggeredItems.update(progress);
 
   staggeredItems.forEach((track, i) => {
@@ -180,7 +180,7 @@ function SequenceCanvas() {
   const draw = (K: KlintContext) => {
     K.background("#222");
     
-    const progress = (K.time * 0.001 / 8) % 1; // 8-second cycle
+    const progress = (K.time / 8) % 1; // 8-second cycle
     fadeIn.update(progress);
 
     K.push();
@@ -188,11 +188,11 @@ function SequenceCanvas() {
     
     // Apply all animations
     K.globalAlpha(fadeIn.current * fadeOut.current);
-    K.scale(scaleUp.current);
+    K.scale(scaleUp.current, scaleUp.current);
     K.rotate(rotateAnim.current);
     
     K.fillColor("white");
-    K.textAlign("center", "middle");
+    K.alignText("center", "middle");
     K.textSize(48);
     K.text("Animated", 0, 0);
     
@@ -223,7 +223,7 @@ function CallbackCanvas() {
   });
 
   const draw = (K: KlintContext) => {
-    const progress = (K.time * 0.001) % 1;
+    const progress = K.time % 1;
     bounce.update(progress);
     
     K.circle(K.width / 2, K.height / 2 + bounce.current, 20);

@@ -153,7 +153,7 @@ function setup(K) {
 }
 
 function draw(K) {
-  if (K.mouse && K.mouse.pressed) {
+  if (K.mouse && K.mouse.isPressed) {
     K.line(K.mouse.prevX || K.mouse.x, K.mouse.prevY || K.mouse.y, K.mouse.x, K.mouse.y);
   }
 }
