@@ -18,11 +18,8 @@
     [ ] 3D vector operations (check Vector.md)
     [ ] grids (check Grid element docs)
 
-
 ### Elements 
 - [ ] Text element : add animation callback
-
-
 
 ###  Plugins
 - [ ] Auto Responsive grid/Layout : CSS-like responsivenes - to think about
