@@ -71,9 +71,27 @@ async function main() {
     );
 
     const text = await result.jsonValue();
-    // Parse "fps:123 n:500 avg_fps:120"
-    const match = text.match(/fps:(\d+)/);
-    if (match) fps = parseInt(match[1]);
+    // Parse all metrics from result line
+    const mFps     = text.match(/fps:([\d.]+)/);
+    const mFrameMs = text.match(/frame_ms:([\d.]+)/);
+    const mSpeedup = text.match(/speedup:([\d.]+)/);
+    const mJsMs    = text.match(/js_ms:([\d.]+)/);
+    const mGpuMs   = text.match(/gpu_wait_ms:([\d.]+)/);
+    if (mFps)     fps = parseInt(mFps[1]);
+    if (mFrameMs) process.stdout.write(`frame_ms=${mFrameMs[1]}\n`);
+    if (mSpeedup) process.stdout.write(`speedup=${mSpeedup[1]}\n`);
+    if (mJsMs)    process.stdout.write(`js_ms=${mJsMs[1]}\n`);
+    if (mGpuMs)   process.stdout.write(`gpu_wait_ms=${mGpuMs[1]}\n`);
+    const mGpuCFps = text.match(/gpu_compute_fps:([\d.]+)/);
+    const mGpuCMs  = text.match(/gpu_compute_ms:([\d.]+)/);
+    if (mGpuCFps) process.stdout.write(`gpu_compute_fps=${mGpuCFps[1]}\n`);
+    if (mGpuCMs)  process.stdout.write(`gpu_compute_ms=${mGpuCMs[1]}\n`);
+    const mOpaqueFps = text.match(/opaque_fps:([\d.]+)/);
+    const mOpaqueMs  = text.match(/opaque_ms:([\d.]+)/);
+    if (mOpaqueFps) process.stdout.write(`opaque_fps=${mOpaqueFps[1]}\n`);
+    if (mOpaqueMs)  process.stdout.write(`opaque_ms=${mOpaqueMs[1]}\n`);
+    if (mFrameMs) process.stdout.write(`METRIC frame_ms=${mFrameMs[1]}\n`);
+    if (mSpeedup) process.stdout.write(`METRIC speedup=${mSpeedup[1]}\n`);
 
     // Also grab console logs for debugging
     const consoleLogs = await page.evaluate(() =>
