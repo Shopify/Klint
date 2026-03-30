@@ -284,6 +284,33 @@ async function run() {
     draw4way(rp);rp.end();device.queue.submit([enc.finish()]);
     const t0=performance.now();await device.queue.onSubmittedWorkDone();return performance.now()-t0;
   }
+  // GPU Compute + Opaque blend (ultimate ceiling: no upload, no blend reads)
+  const mkPLgo=wgsl=>{const m=device.createShaderModule({code:wgsl});return device.createRenderPipeline({layout,vertex:{module:m,entryPoint:'vs'},fragment:{module:m,entryPoint:'fs',targets:[{format:fmt,...blendOpaque}]},primitive:{topology:'triangle-list'}});};
+  const pCNSgo=mkPLgo(WGSL_NS_HEADER+FS_CNS), pCSgo=mkPLgo(WGSL_HEADER+FS_CS),
+        pRNSgo=mkPLgo(WGSL_NS_HEADER+FS_RNS), pRSgo=mkPLgo(WGSL_HEADER+FS_RS);
+  function draw4wayOpaque2(pass){
+    if(N0>0){pass.setPipeline(pCNSgo);pass.setBindGroup(0,bgFill);pass.draw(6,N0,0,0);}
+    if(N1>0){pass.setPipeline(pCSgo); pass.setBindGroup(0,bg);    pass.draw(6,N1,N0,0);}
+    if(N2>0){pass.setPipeline(pRNSgo);pass.setBindGroup(0,bgFill);pass.draw(6,N2,N0+N1,0);}
+    const N3=N-N0-N1-N2;
+    if(N3>0){pass.setPipeline(pRSgo); pass.setBindGroup(0,bg);    pass.draw(6,N3,N0+N1+N2,0);}
+  }
+  let gcStep=0;
+  async function gpuComputeOpaqueTimedFrame(){
+    device.queue.writeBuffer(simBuf,0,new Float32Array([W,H,gcStep++,0]));
+    const enc=device.createCommandEncoder();
+    const cp=enc.beginComputePass();cp.setPipeline(computePL);cp.setBindGroup(0,cBg);cp.dispatchWorkgroups(Math.ceil(N/64));cp.end();
+    const rp=enc.beginRenderPass({colorAttachments:[{view:offView,clearValue:{r:0.04,g:0.04,b:0.06,a:1},loadOp:'clear',storeOp:'store'}]});
+    draw4wayOpaque2(rp);rp.end();device.queue.submit([enc.finish()]);
+    const t0=performance.now();await device.queue.onSubmittedWorkDone();return performance.now()-t0;
+  }
+  hud.textContent=`GPU compute+opaque warmup…`;
+  for(let i=0;i<WARMUP;i++) await gpuComputeOpaqueTimedFrame();
+  const gcOpaqueTimes=[];
+  for(let i=0;i<MEASURE;i++){gcOpaqueTimes.push(await gpuComputeOpaqueTimedFrame());}
+  gcOpaqueTimes.sort((a,b)=>a-b);
+  const gcOpaqueMedian=gcOpaqueTimes[Math.floor(gcOpaqueTimes.length/2)];
+  const gcOpaqueFps=Math.round(1000/gcOpaqueMedian);
   hud.textContent=`GPU compute warmup…`;
   for(let i=0;i<WARMUP;i++) await gpuTimedFrame();
   const gpuTimes=[];
@@ -319,12 +346,13 @@ async function run() {
     `N=${N}  4-way split (circ-ns/s, rect-ns/s)  WARMUP=${WARMUP} MEASURE=${MEASURE}`,
     `CPU-anim (alpha)   median=${median.toFixed(2)}ms  fps=${fps}  JS=${avgJs}ms  GPU=${avgGpu}ms`,
     `CPU-anim (opaque)  median=${opaqueMedian.toFixed(2)}ms  fps=${opaqueFps}  (+${((opaqueFps/fps-1)*100)|0}% from no-blend)`,
-    `GPU-compute  fps=${gpuFps}  ${gpuMedian.toFixed(2)}ms`,
+    `GPU-compute (alpha)   fps=${gpuFps}  ${gpuMedian.toFixed(2)}ms`,
+    `GPU-compute (opaque)  fps=${gcOpaqueFps}  ${gcOpaqueMedian.toFixed(2)}ms  ← ceiling`,
     `Canvas2D N=${c2N}: ${c2med.toFixed(2)}ms scaled=${c2scaled.toFixed(1)}ms fps=${c2fps}`,
     `Speedup (CPU-anim vs 2D scaled): ${speedup}×`,
   ].join('\n');
   writeDynamic();submitFrame(gpuCtx.getCurrentTexture().createView());
-  resultEl.textContent=`fps:${fps} frame_ms:${median.toFixed(2)} n:${N} c2d_fps:${c2fps} speedup:${speedup} js_ms:${avgJs} gpu_wait_ms:${avgGpu} gpu_compute_fps:${gpuFps} gpu_compute_ms:${gpuMedian.toFixed(2)} opaque_fps:${opaqueFps} opaque_ms:${opaqueMedian.toFixed(2)}`;
+  resultEl.textContent=`fps:${fps} frame_ms:${median.toFixed(2)} n:${N} c2d_fps:${c2fps} speedup:${speedup} js_ms:${avgJs} gpu_wait_ms:${avgGpu} gpu_compute_fps:${gpuFps} gpu_compute_ms:${gpuMedian.toFixed(2)} opaque_fps:${opaqueFps} opaque_ms:${opaqueMedian.toFixed(2)} gc_opaque_fps:${gcOpaqueFps} gc_opaque_ms:${gcOpaqueMedian.toFixed(2)}`;
   console.log(`RESULT fps=${fps} frame_ms=${median.toFixed(2)} n=${N} gpu_compute_fps=${gpuFps}`);
 }
 run().catch(err=>{hud.textContent='ERROR: '+err.message;resultEl.textContent='fps:0 frame_ms:999 n:'+N;console.error(err);});

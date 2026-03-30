@@ -90,6 +90,10 @@ async function main() {
     const mOpaqueMs  = text.match(/opaque_ms:([\d.]+)/);
     if (mOpaqueFps) process.stdout.write(`opaque_fps=${mOpaqueFps[1]}\n`);
     if (mOpaqueMs)  process.stdout.write(`opaque_ms=${mOpaqueMs[1]}\n`);
+    const mGcOFps = text.match(/gc_opaque_fps:([\d.]+)/);
+    const mGcOMs  = text.match(/gc_opaque_ms:([\d.]+)/);
+    if (mGcOFps) process.stdout.write(`gc_opaque_fps=${mGcOFps[1]}\n`);
+    if (mGcOMs)  process.stdout.write(`gc_opaque_ms=${mGcOMs[1]}\n`);
     if (mFrameMs) process.stdout.write(`METRIC frame_ms=${mFrameMs[1]}\n`);
     if (mSpeedup) process.stdout.write(`METRIC speedup=${mSpeedup[1]}\n`);
 
