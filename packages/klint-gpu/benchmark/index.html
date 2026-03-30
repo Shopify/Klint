@@ -212,13 +212,31 @@ async function run() {
     accumJs+=t1-t0;accumGpuWait+=t3-t2;accumTotal+=t3-t0;accumCount++;
     return t3-t0;
   }
-  hud.textContent=`warming up… (${WARMUP} frames, N=${N})`;
+  // Run opaque mode FIRST to warm up GPU, then measure alpha
+  // (GPU at higher sustained frequency for main alpha measurement)
+  hud.textContent=`opaque pre-warmup… (${WARMUP} frames to heat GPU)`;
+  const mkPLpw=wgsl=>{const m=device.createShaderModule({code:wgsl});return device.createRenderPipeline({layout,vertex:{module:m,entryPoint:'vs'},fragment:{module:m,entryPoint:'fs',targets:[{format:fmt,...blendOpaque}]},primitive:{topology:'triangle-list'}});};
+  const pCNSpw=mkPLpw(WGSL_NS_HEADER+FS_CNS), pCSpw=mkPLpw(WGSL_HEADER+FS_CS),
+        pRNSpw=mkPLpw(WGSL_NS_HEADER+FS_RNS), pRSpw=mkPLpw(WGSL_HEADER+FS_RS);
+  for(let i=0;i<WARMUP*2;i++){
+    writeDynamic();device.queue.writeBuffer(dynBuf,0,df32);
+    const enc=device.createCommandEncoder();
+    const p=enc.beginRenderPass({colorAttachments:[{view:offView,clearValue:{r:0.04,g:0.04,b:0.06,a:1},loadOp:'clear',storeOp:'store'}]});
+    p.setBindGroup(0,bgFill);
+    if(N0>0){p.setPipeline(pCNSpw);p.draw(6,N0,0,0);}
+    if(N1>0){p.setPipeline(pCSpw);p.draw(6,N1,N0,0);}
+    if(N2>0){p.setPipeline(pRNSpw);p.draw(6,N2,N0+N1,0);}
+    const N3pw=N-N0-N1-N2;if(N3pw>0){p.setPipeline(pRSpw);p.draw(6,N3pw,N0+N1+N2,0);}
+    p.end();device.queue.submit([enc.finish()]);
+    await device.queue.onSubmittedWorkDone();
+  }
+  hud.textContent=`warming up alpha… (${WARMUP} frames, N=${N})`;
   for(let i=0;i<WARMUP;i++) await timedFrame();
   accumJs=0;accumGpuWait=0;accumTotal=0;accumCount=0;
   const times=[];
   for(let i=0;i<MEASURE;i++){
     times.push(await timedFrame());
-    hud.textContent=`measuring… ${i+1}/${MEASURE}  last=${times[times.length-1].toFixed(2)}ms`;
+    hud.textContent=`measuring alpha… ${i+1}/${MEASURE}  last=${times[times.length-1].toFixed(2)}ms`;
   }
   // ── Opaque mode measurement (no dst read, for reference) ──────────────────
   const mkPLO=wgsl=>{const m=device.createShaderModule({code:wgsl});return device.createRenderPipeline({layout,vertex:{module:m,entryPoint:'vs'},fragment:{module:m,entryPoint:'fs',targets:[{format:fmt,...blendOpaque}]},primitive:{topology:'triangle-list'}});};
