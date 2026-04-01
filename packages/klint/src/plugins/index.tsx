@@ -15,6 +15,9 @@ export type {
 
 export { Delaunay } from "./Delaunay";
 export { CatmullRom } from "./Catmull";
+export { Bezier } from "./Bezier";
+export type { Point as BezierPoint, BBox, CurvatureResult, Arc } from "./Bezier";
+
 export { Sprites } from "./Sprites";
 export { MatterPhysics } from "./MatterPhysics";
 export { default as Projector } from "./Projector";
