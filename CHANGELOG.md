@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.4.0 (Unreleased)
+
+### Added
+
+### Changed
+- **FontParser plugin**: Refactored to lazy-loaded `.mjs` bundle (~13 KB / ~5 KB gzipped), no longer inlined in the main plugins bundle
+- **Build**: Added `tsup.config.ts`, simplified build scripts in `package.json`
+- **FontParser tests**: Expanded test coverage with real font fixtures (Inter Variable, Jost Regular)
+
+### Fixed
+
+---
+
 ## v0.3.0
 
 ### Added
