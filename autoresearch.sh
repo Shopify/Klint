@@ -1,22 +1,25 @@
 #!/bin/bash
 set -euo pipefail
 
-# KlintGPU benchmark — measures FPS of 500-shape animated WebGPU scene
-# Outputs: METRIC fps=<value>
+# KlintGPU autoresearch — API coverage session
+# Primary metric: fps (must stay ≥ 370 — no regression)
+# Secondary: TypeScript must compile clean
 
-BENCH_DIR="packages/klint-gpu/benchmark"
-BENCH_N="${BENCH_N:-500}"
+BENCH_N="${BENCH_N:-50000}"
+# fps floor updated: user says 200fps is acceptable (new baseline after renderer rebuild)
 
-# ── Quick syntax check on changed TS files ─────────────────────────────────
+# ── TypeScript check (fast, <5s) ─────────────────────────────────────────────
 cd packages/klint-gpu
-node_modules_path="../../node_modules"
-if [ -d "$node_modules_path/.bin" ]; then
-  # Fast type-check (no emit) — skip if no changes
-  if command -v tsc >/dev/null 2>&1; then
-    tsc --noEmit --skipLibCheck 2>&1 | head -20 || true
-  fi
+echo "--- TypeScript check ---"
+TS_ERRORS=$(npx tsc --noEmit --skipLibCheck 2>&1 | grep -c "error TS" || true)
+echo "TS errors: $TS_ERRORS"
+if [ "$TS_ERRORS" -gt "0" ]; then
+  npx tsc --noEmit --skipLibCheck 2>&1 | head -20
+  echo "METRIC fps=0"
+  exit 1
 fi
+echo "TypeScript: CLEAN"
 cd ../..
 
-# ── Run benchmark via Playwright ──────────────────────────────────────────
-BENCH_N="$BENCH_N" BENCH_TIMEOUT=50000 node packages/klint-gpu/benchmark/run.mjs 2>&1
+# ── Benchmark (fps must not regress) ─────────────────────────────────────────
+BENCH_N="$BENCH_N" BENCH_TIMEOUT=120000 node packages/klint-gpu/benchmark/run.mjs 2>&1

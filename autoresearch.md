@@ -1,87 +1,67 @@
-# Autoresearch: KlintGPU — WebGPU rendering backend for Klint
+# Autoresearch: KlintGPU — API Coverage & Feature Parity
 
 ## Objective
-Build and optimize `@shopify/klint-gpu` — a WebGPU-powered rendering backend for the Klint creative coding library.
-Klint currently uses Canvas 2D. This new package provides the same API surface (`background`, `fillColor`, `circle`,
-`rectangle`, `line`, `push`/`pop`, `translate`/`rotate`/`scale`) but renders via WebGPU using a GPU compute-friendly
-SDF batch renderer — inspired by Vello's architecture.
+Implement missing KlintFunctions in `@shopify/klint-gpu` to achieve parity with the Canvas2D
+Klint library. Each session targets a tier of functions, verified by TypeScript clean compile
+AND no fps regression in the benchmark.
 
-Key innovations over Canvas 2D:
-- **Multi-canvas native**: one `GPUDevice` → many `GPUCanvasContext` surfaces simultaneously
-- **Batch rendering**: all draw calls collected per frame, uploaded as a single storage buffer, dispatched in one draw call
-- **SDF shapes**: circle, rect (rounded), line, point — all rendered GPU-side via signed distance functions with AA
-- **Zero CPU rasterization**: geometry is procedural (6 verts/instance, no VBO), shapes are pure SDF in fragment shader
+## Current Session
+**Session 1 — COMPLETE ✅** All 28 Tier 2 functions implemented, zero fps regression.
+**Now: Session 4 — createOffscreen / getOffscreen (GPU render-to-texture)**
 
 ## Metrics
-- **Primary**: `fps` (frames/second, higher is better) — median FPS of 500-shape animated scene, 60 frames measured after 30 warmup
-- **Secondary**: none yet (can add shape_count, frame_time_ms)
+- **Primary**: `fps` (must stay ≥ 370fps — no regression from API additions)
+- **Secondary**: `ts_errors` (TypeScript compile errors — must be 0)
 
 ## How to Run
 ```bash
 ./autoresearch.sh
 ```
-Outputs `METRIC fps=<value>`. Uses Playwright (headless:false for real Metal GPU on Apple Silicon).
 
 ## Files in Scope
-- `packages/klint-gpu/src/renderer/WebGPURenderer.ts` — core renderer: SDF pipeline, buffer management, multi-canvas
-- `packages/klint-gpu/src/context/KlintGPUContext.ts` — GPU context type mirroring KlintContext API
-- `packages/klint-gpu/src/KlintGPU.tsx` — React component (mirrors Klint.tsx)
-- `packages/klint-gpu/src/useKlintGPU.tsx` — React hook (mirrors useKlint.tsx)
-- `packages/klint-gpu/src/index.ts` — exports
-- `packages/klint-gpu/benchmark/index.html` — **benchmark page** (self-contained, no build step)
-- `packages/klint-gpu/benchmark/run.mjs` — Playwright runner
+- `packages/klint-gpu/src/context/KlintGPUContext.ts` — main target: add all missing function types + implementations
+- `packages/klint-gpu/src/renderer/WebGPURenderer.ts` — renderer: only if shape/gradient work needed
+- `packages/klint-gpu/src/useKlintGPU.tsx` — hook additions if needed
+- `packages/klint-gpu/benchmark/index.html` — DO NOT change (benchmark stability)
 
 ## Off Limits
 - `packages/klint/` — original Klint package, do not modify
-- `docusaurus/` — docs, do not modify
-- `package.json` (root) — do not modify workspaces list without careful thought
+- Benchmark HTML/shader code — preserve for accurate fps measurement
 
-## Constraints
-- Must maintain the Klint API contract: `draw(K)` receives a context with `K.circle()`, `K.rectangle()`, etc.
-- All rendering must go through WebGPU (no Canvas 2D fallback in the hot path)
-- Benchmark must use real GPU (Playwright headed mode → Metal on Apple Silicon)
-- TypeScript strict mode — no `any` abuse
+## Session 1 Batch Plan
 
-## Architecture Notes
-### Renderer pipeline
-```
-Frame start → beginFrame() clears command list + resets transform stack
-User draw() → pushes DrawCommands (pos, size, fill, stroke, type)
-Frame end → render():
-  1. writeBuffer() — upload all shapes as packed Float32Array to storage buffer
-  2. render pass: draw(6, N) — 6 verts × N instances (procedural quad)
-  3. Fragment shader: SDF dispatch by shape_type, AA via fwidth()
-```
+### ✅ ALL TIER 2 COMPLETE (run #92)
+- ✅ Batch A: dot, squareDistance, bezierLerp/Tangent, remap, scaleTo, smooth/noSmooth, describe, extend
+- ✅ Batch B: clear, reset, strokeCap/Join, fillRule, setImageOrigin/RectOrigin, saveCanvas
+- ✅ Batch C: disk (proper arc tessellation), arcVertex, beginContour/endContour
+- ✅ Batch D: gradient()+addColorStop() → KlintGPUGradient builder pattern (2-stop now, LUT pending)
 
-### Multi-canvas
-```
-renderer = WebGPURenderer.init()          // one GPUDevice
-surfaceA  = renderer.addCanvas(canvasA)   // separate GPUCanvasContext
-surfaceB  = renderer.addCanvas(canvasB)   // same device, different surface
-// render() iterates all surfaces, or render(surfaceA) for targeted
-```
+## Session 4 — createOffscreen / getOffscreen Plan
 
-### Transform stack
-CPU-side 2×3 affine matrix. `push()/pop()`, `translate()`, `rotate()`, `scale()`.
-Points are transformed on CPU before being written to the draw command list.
-This avoids per-instance matrix uploads (saves 64 bytes/shape).
+The renderer ALREADY supports multiple surfaces (`addCanvas()`). `createOffscreen` is:
+1. `createOffscreen(id, w, h, options, callback?)` → create a GPUTexture surface, run callback with its own KlintGPUContext
+2. `getOffscreen(id)` → retrieve as a drawable source for `image()`
+
+### Implementation approach
+- `createOffscreen(id, w, h, cb?)` → create a `GPUTexture` (RENDER_ATTACHMENT + TEXTURE_BINDING + COPY_SRC)
+  - Create a GPUCanvasContext-like surface (but targeting the texture, not a canvas)
+  - Create a new KlintGPUContext pointing at that texture surface
+  - Run `cb(offscreenCtx)` if provided
+  - Store the texture + bind group in a Map keyed by id
+- `getOffscreen(id)` → retrieve stored texture key, usable by `image(key, x, y, w, h)`
+  - The image pipeline already handles GPUTexture via bind groups
+
+Key detail: the image pipeline in the renderer uses `imgBgl` (sampler + texture_2d). We just need:
+  1. A way to create a GPUTexture of arbitrary size (not from a canvas)
+  2. Render passes targeting that texture  
+  3. Store the texture's bind group by id, accessible from `image()` calls
+
+This is ~50 lines of renderer changes + ~20 lines of context changes.
 
 ## What's Been Tried
 *(updated each run)*
 
-### Baseline
-- Initial implementation: SDF batch renderer, 500 animated circles/rects, Playwright headed mode
-- Shapes: circles (type 0) and rects (type 1), no stroke, opacity 1.0
-- WGSL inlined in HTML benchmark (no build step needed for benchmark)
-
-## Ideas Backlog
-- Try `premultiplied` vs `opaque` alpha mode — opaque is faster but no transparency
-- Sort commands by shape_type to reduce shader divergence
-- Use `writeBuffer` with a mapped ring buffer instead of new ArrayBuffer each frame
-- Try f16 for color data (halves color payload: 4×f32 → 4×f16)
-- `GPUBuffer.mapAsync` + staging buffer for larger batches
-- MSAA anti-aliasing (4x) via multisampling instead of fwidth() SDF AA
-- Add `image()` via sampled texture + instanced UV
-- Add gradient fills: radial/linear gradient as texture LUT
-- Offscreen rendering: render scene to intermediate texture, apply post-processing
-- Worker thread rendering via OffscreenCanvas (once wgpu WASM supports it)
+## Performance Baseline (from previous sessions)
+- alpha: 385-417fps at N=50k
+- GPU compute: 435fps
+- opaque: 1111fps

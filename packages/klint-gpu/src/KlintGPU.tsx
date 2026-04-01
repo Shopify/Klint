@@ -17,6 +17,8 @@ export interface KlintGPUProps {
   preload?: (ctx: KlintGPUContext) => Promise<void>;
   options?: KlintGPUOptions;
   onResize?: (ctx: KlintGPUContext) => void;
+  /** Called when the canvas enters/exits the viewport */
+  onVisible?: (ctx: KlintGPUContext) => void;
 }
 
 function useAnimate(
@@ -35,19 +37,26 @@ function useAnimate(
       }
 
       const target = 1000 / ctx.fps;
-      if (!ctx.__lastTargetTime) {
-        (ctx as any).__lastTargetTime = timestamp;
-        (ctx as any).__lastRealTime = timestamp;
+      const ctxEx = ctx as KlintGPUContext & {__lastTargetTime?:number;__lastRealTime?:number};
+      if (!ctxEx.__lastTargetTime) {
+        ctxEx.__lastTargetTime = timestamp;
+        ctxEx.__lastRealTime   = timestamp;
       }
 
-      const sinceLast = timestamp - (ctx as any).__lastTargetTime;
+      const sinceLast = timestamp - ctxEx.__lastTargetTime!;
       if (sinceLast >= target - 5) {
-        ctx.deltaTime = timestamp - (ctx as any).__lastRealTime;
+        ctx.deltaTime = timestamp - ctxEx.__lastRealTime!;
 
         // ── GPU frame ───────────────────────────────────────────
         ctx.__renderer.beginFrame();
 
-        // Apply center origin once at frame start
+        // Match Klint Canvas2D: coordinate system in CSS pixels (not device pixels).
+        // Apply DPR scale so user coords are CSS px, just like in Klint's ctx.scale(dpr,dpr).
+        const dpr = ctx.__dpr;
+        ctx.__renderer.transform.scale(dpr, dpr);
+        ctx.__renderer.cacheScale(); // cache scaleX = dpr for _push() performance
+
+        // Apply center origin (in CSS px)
         if (ctx.__canvasOrigin === 'center') {
           ctx.__renderer.transform.translate(ctx.width / 2, ctx.height / 2);
         }
@@ -60,8 +69,8 @@ function useAnimate(
         ctx.frame++;
         if (ctx.time > 1e7) ctx.time = 0;
         if (ctx.frame > 1e7) ctx.frame = 0;
-        (ctx as any).__lastTargetTime = timestamp;
-        (ctx as any).__lastRealTime = timestamp;
+        ctxEx.__lastTargetTime = timestamp;
+        ctxEx.__lastRealTime   = timestamp;
       }
 
       rafRef.current = requestAnimationFrame(animate);
@@ -79,6 +88,7 @@ export default function KlintGPU({
   preload,
   options = {},
   onResize,
+  onVisible,
 }: KlintGPUProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -111,9 +121,12 @@ export default function KlintGPU({
         canvas.style.width = `${width}px`;
         canvas.style.height = `${height}px`;
 
-        // Init shared renderer
+        // Init shared renderer (with user-specified AA and alpha modes)
         if (!rendererRef.current) {
-          rendererRef.current = await WebGPURenderer.init();
+          rendererRef.current = await WebGPURenderer.init({
+            aaMethod: opts.aaMethod,
+            alphaMode: opts.alphaMode,
+          });
         }
 
         if (cancelled) return;
@@ -130,8 +143,10 @@ export default function KlintGPU({
         // Setup
         if (setup) setup(ctx);
 
-        // First draw
+        // First draw — same transform setup as animate loop
         renderer.beginFrame();
+        renderer.transform.scale(dpr, dpr); // CSS px coordinate system
+        renderer.cacheScale();
         if (ctx.__canvasOrigin === 'center') {
           renderer.transform.translate(ctx.width / 2, ctx.height / 2);
         }
@@ -152,8 +167,10 @@ export default function KlintGPU({
       if (!contextRef.current || !rendererRef.current) return;
       const ctx = contextRef.current;
       const { width, height } = container.getBoundingClientRect();
-      canvas.width = ctx.width = Math.floor(width * ctx.__dpr);
-      canvas.height = ctx.height = Math.floor(height * ctx.__dpr);
+      canvas.width  = Math.floor(width  * ctx.__dpr);
+      canvas.height = Math.floor(height * ctx.__dpr);
+      ctx.width  = width;   // CSS pixels
+      ctx.height = height;  // CSS pixels
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
       ctx.__surface.width = canvas.width;
@@ -164,7 +181,10 @@ export default function KlintGPU({
 
     // Visibility observer
     const io = new IntersectionObserver(
-      ([entry]) => setIsVisible(entry.isIntersecting),
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+        if (contextRef.current) onVisible?.(contextRef.current);
+      },
       { threshold: 0.1, rootMargin: '50px' },
     );
     io.observe(container);

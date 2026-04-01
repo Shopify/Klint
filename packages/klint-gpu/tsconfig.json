@@ -12,6 +12,7 @@
     "outDir": "dist",
     "rootDir": "src",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "types": ["@webgpu/types"],
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true
