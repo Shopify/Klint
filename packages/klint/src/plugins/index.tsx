@@ -14,9 +14,11 @@ export type {
 } from "./FontParser";
 
 export { Delaunay } from "./Delaunay";
+export type { Triangle } from "./Delaunay";
 export { CatmullRom } from "./Catmull";
 export { Bezier } from "./Bezier";
-export type { Point as BezierPoint, BBox, CurvatureResult, Arc } from "./Bezier";
+export type { Point as BezierPoint, BBox, CurvatureResult, Arc, Shape, MinMax, OffsetPoint } from "./Bezier";
+export { Polyline, smoothPath, simplifyPath } from "./Polyline";
 
 export { Sprites } from "./Sprites";
 export { MatterPhysics } from "./MatterPhysics";

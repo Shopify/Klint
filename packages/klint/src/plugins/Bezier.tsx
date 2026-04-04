@@ -36,7 +36,7 @@ export interface Point {
   d?: number;
 }
 
-interface MinMax {
+export interface MinMax {
   min: number;
   mid: number;
   max: number;
@@ -55,7 +55,7 @@ export interface CurvatureResult {
   adk?: number;
 }
 
-interface OffsetPoint extends Point {
+export interface OffsetPoint extends Point {
   c: Point;
   n: Point;
 }
@@ -69,29 +69,25 @@ export interface Arc {
   interval: { start: number; end: number };
 }
 
-interface Shape {
-  startcap: Bezier;
-  forward: Bezier;
-  back: Bezier;
-  endcap: Bezier;
+export interface Shape {
+  startcap: any;
+  forward: any;
+  back: any;
+  endcap: any;
   bbox: BBox;
+  virtual?: boolean;
   intersections: (s2: Shape) => string[][];
 }
 
-// ─── Math helpers ────────────────────────────────────────────────────────────
+// ─── Constants ───────────────────────────────────────────────────────────────
 
-const { abs, cos, sin, acos, atan2, sqrt, pow, min, max, PI } = Math;
-const tau = 2 * PI;
+export const { abs, cos, sin, acos, atan2, sqrt, pow, min, max, PI } = Math;
+export const tau = 2 * PI;
 const quart = PI / 2;
 const epsilon = 0.000001;
 const nMax = Number.MAX_SAFE_INTEGER;
 const nMin = Number.MIN_SAFE_INTEGER;
 
-function crt(v: number): number {
-  return v < 0 ? -pow(-v, 1 / 3) : pow(v, 1 / 3);
-}
-
-// Legendre-Gauss quadrature (n=24)
 const Tvalues = [
   -0.0640568928626056, 0.0640568928626056, -0.1911188674736163,
   0.1911188674736163, -0.3150426796961634, 0.3150426796961634,
@@ -114,15 +110,45 @@ const Cvalues = [
   0.0285313886289337, 0.0123412297999872, 0.0123412297999872,
 ];
 
-// ─── Internal utils ──────────────────────────────────────────────────────────
+// ─── Small helpers ───────────────────────────────────────────────────────────
 
-function approximately(a: number, b: number, precision = epsilon): boolean {
+function crt(v: number): number {
+  return v < 0 ? -pow(-v, 1 / 3) : pow(v, 1 / 3);
+}
+
+export function approximately(a: number, b: number, precision = epsilon): boolean {
   return abs(a - b) <= precision;
 }
 
-function between(v: number, m: number, M: number): boolean {
+export function between(v: number, m: number, M: number): boolean {
   return (m <= v && v <= M) || approximately(v, m) || approximately(v, M);
 }
+
+export function dist(p1: Point, p2: Point): number {
+  const dx = p1.x - p2.x;
+  const dy = p1.y - p2.y;
+  return sqrt(dx * dx + dy * dy);
+}
+
+export function lerpPt(r: number, v1: Point, v2: Point): Point {
+  return { x: v1.x + r * (v2.x - v1.x), y: v1.y + r * (v2.y - v1.y) };
+}
+
+export function mapVal(v: number, ds: number, de: number, ts: number, te: number): number {
+  return ts + ((v - ds) / (de - ds)) * (te - ts);
+}
+
+function angle(o: Point, v1: Point, v2: Point): number {
+  const dx1 = v1.x - o.x, dy1 = v1.y - o.y,
+    dx2 = v2.x - o.x, dy2 = v2.y - o.y;
+  return atan2(dx1 * dy2 - dy1 * dx2, dx1 * dx2 + dy1 * dy2);
+}
+
+function numberSort(a: number, b: number) {
+  return a - b;
+}
+
+// ─── Arc-length integration ──────────────────────────────────────────────────
 
 function arcfn(t: number, derivativeFn: (t: number) => Point): number {
   const d = derivativeFn(t);
@@ -138,33 +164,7 @@ function arcLength(derivativeFn: (t: number) => Point): number {
   return z * sum;
 }
 
-function mapVal(
-  v: number,
-  ds: number,
-  de: number,
-  ts: number,
-  te: number,
-): number {
-  return ts + ((v - ds) / (de - ds)) * (te - ts);
-}
-
-function lerpPt(r: number, v1: Point, v2: Point): Point {
-  return { x: v1.x + r * (v2.x - v1.x), y: v1.y + r * (v2.y - v1.y) };
-}
-
-function dist(p1: Point, p2: Point): number {
-  const dx = p1.x - p2.x;
-  const dy = p1.y - p2.y;
-  return sqrt(dx * dx + dy * dy);
-}
-
-function angle(o: Point, v1: Point, v2: Point): number {
-  const dx1 = v1.x - o.x,
-    dy1 = v1.y - o.y,
-    dx2 = v2.x - o.x,
-    dy2 = v2.y - o.y;
-  return atan2(dx1 * dy2 - dy1 * dx2, dx1 * dx2 + dy1 * dy2);
-}
+// ─── Curve evaluation (de Casteljau) ─────────────────────────────────────────
 
 function compute(t: number, points: Point[]): Point {
   if (t === 0) return { ...points[0], t: 0 };
@@ -181,25 +181,17 @@ function compute(t: number, points: Point[]): Point {
   }
 
   if (order === 2) {
-    const mt2 = mt * mt,
-      t2 = t * t;
-    const a = mt2,
-      b = mt * t * 2,
-      c = t2;
+    const mt2 = mt * mt, t2 = t * t;
     return {
-      x: a * p[0].x + b * p[1].x + c * p[2].x,
-      y: a * p[0].y + b * p[1].y + c * p[2].y,
+      x: mt2 * p[0].x + mt * t * 2 * p[1].x + t2 * p[2].x,
+      y: mt2 * p[0].y + mt * t * 2 * p[1].y + t2 * p[2].y,
       t,
     };
   }
 
   if (order === 3) {
-    const mt2 = mt * mt,
-      t2 = t * t;
-    const a = mt2 * mt,
-      b = mt2 * t * 3,
-      c = mt * t2 * 3,
-      d = t * t2;
+    const mt2 = mt * mt, t2 = t * t;
+    const a = mt2 * mt, b = mt2 * t * 3, c = mt * t2 * 3, d = t * t2;
     return {
       x: a * p[0].x + b * p[1].x + c * p[2].x + d * p[3].x,
       y: a * p[0].y + b * p[1].y + c * p[2].y + d * p[3].y,
@@ -207,7 +199,6 @@ function compute(t: number, points: Point[]): Point {
     };
   }
 
-  // higher order: de Casteljau
   const dCpts = points.map((pt) => ({ ...pt }));
   let len = dCpts.length;
   while (len > 1) {
@@ -243,35 +234,28 @@ function derive(points: Point[]): Point[][] {
   return dpoints;
 }
 
+// ─── Root finding ────────────────────────────────────────────────────────────
+
 function droots(p: number[]): number[] {
   if (p.length === 3) {
-    const a = p[0],
-      b = p[1],
-      c = p[2],
-      d = a - 2 * b + c;
+    const a = p[0], b = p[1], c = p[2], d = a - 2 * b + c;
     if (d !== 0) {
-      const m1 = -sqrt(b * b - a * c),
-        m2 = -a + b;
+      const m1 = -sqrt(b * b - a * c), m2 = -a + b;
       return [-(m1 + m2) / d, -(-m1 + m2) / d];
     }
     if (b !== c && d === 0) return [(2 * b - c) / (2 * (b - c))];
     return [];
   }
   if (p.length === 2) {
-    const a = p[0],
-      b = p[1];
+    const a = p[0], b = p[1];
     if (a !== b) return [a / (a - b)];
     return [];
   }
   return [];
 }
 
-function align(
-  points: Point[],
-  line: { p1: Point; p2: Point },
-): Point[] {
-  const tx = line.p1.x,
-    ty = line.p1.y,
+function align(points: Point[], line: { p1: Point; p2: Point }): Point[] {
+  const tx = line.p1.x, ty = line.p1.y,
     a = -atan2(line.p2.y - ty, line.p2.x - tx);
   return points.map((v) => ({
     x: (v.x - tx) * cos(a) - (v.y - ty) * sin(a),
@@ -286,23 +270,16 @@ function roots(points: Point[], line?: { p1: Point; p2: Point }): number[] {
   const reduce = (t: number) => 0 <= t && t <= 1;
 
   if (order === 2) {
-    const a = al[0].y,
-      b = al[1].y,
-      c = al[2].y,
-      d = a - 2 * b + c;
+    const a = al[0].y, b = al[1].y, c = al[2].y, d = a - 2 * b + c;
     if (d !== 0) {
-      const m1 = -sqrt(b * b - a * c),
-        m2 = -a + b;
+      const m1 = -sqrt(b * b - a * c), m2 = -a + b;
       return [-(m1 + m2) / d, -(-m1 + m2) / d].filter(reduce);
     }
     if (b !== c && d === 0) return [(2 * b - c) / (2 * b - 2 * c)].filter(reduce);
     return [];
   }
 
-  const pa = al[0].y,
-    pb = al[1].y,
-    pc = al[2].y,
-    pd = al[3].y;
+  const pa = al[0].y, pb = al[1].y, pc = al[2].y, pd = al[3].y;
   let d = -pa + 3 * pb - 3 * pc + pd,
     a = 3 * pa - 6 * pb + 3 * pc,
     b = -3 * pa + 3 * pb,
@@ -313,29 +290,20 @@ function roots(points: Point[], line?: { p1: Point; p2: Point }): number[] {
       if (approximately(b, 0)) return [];
       return [-c / b].filter(reduce);
     }
-    const q = sqrt(b * b - 4 * a * c),
-      a2 = 2 * a;
+    const q = sqrt(b * b - 4 * a * c), a2 = 2 * a;
     return [(q - b) / a2, (-b - q) / a2].filter(reduce);
   }
 
-  a /= d;
-  b /= d;
-  c /= d;
-
-  const p = (3 * b - a * a) / 3,
-    p3 = p / 3,
-    q = (2 * a * a * a - 9 * a * b + 27 * c) / 27,
-    q2 = q / 2,
+  a /= d; b /= d; c /= d;
+  const p = (3 * b - a * a) / 3, p3 = p / 3,
+    q = (2 * a * a * a - 9 * a * b + 27 * c) / 27, q2 = q / 2,
     discriminant = q2 * q2 + p3 * p3 * p3;
 
   if (discriminant < 0) {
-    const mp3 = -p / 3,
-      r = sqrt(mp3 * mp3 * mp3),
+    const mp3 = -p / 3, r = sqrt(mp3 * mp3 * mp3),
       t = -q / (2 * r),
       cosphi = t < -1 ? -1 : t > 1 ? 1 : t,
-      phi = acos(cosphi),
-      crtr = crt(r),
-      t1 = 2 * crtr;
+      phi = acos(cosphi), crtr = crt(r), t1 = 2 * crtr;
     return [
       t1 * cos(phi / 3) - a / 3,
       t1 * cos((phi + tau) / 3) - a / 3,
@@ -355,10 +323,8 @@ function roots(points: Point[], line?: { p1: Point; p2: Point }): number[] {
 function inflections(points: Point[]): number[] {
   if (points.length < 4) return [];
   const p = align(points, { p1: points[0], p2: points[points.length - 1] });
-  const a = p[2].x * p[1].y,
-    b = p[3].x * p[1].y,
-    c = p[1].x * p[2].y,
-    d = p[3].x * p[2].y;
+  const a = p[2].x * p[1].y, b = p[3].x * p[1].y,
+    c = p[1].x * p[2].y, d = p[3].x * p[2].y;
   const v1 = 18 * (-3 * a + 2 * b + 3 * c - d),
     v2 = 18 * (3 * a - b - 3 * c),
     v3 = 18 * (c - a);
@@ -379,11 +345,10 @@ function inflections(points: Point[]): number[] {
   return [(sq - v2) / d2, -(v2 + sq) / d2].filter((r) => 0 <= r && r <= 1);
 }
 
+// ─── Curvature ───────────────────────────────────────────────────────────────
+
 function curvatureAt(
-  t: number,
-  d1: Point[],
-  d2: Point[],
-  kOnly = false,
+  t: number, d1: Point[], d2: Point[], kOnly = false,
 ): CurvatureResult {
   const d = compute(t, d1);
   const dd = compute(t, d2);
@@ -394,13 +359,14 @@ function curvatureAt(
 
   const k = num / dnm;
   const r = dnm / num;
-
   if (kOnly) return { k, r };
 
   const pk = curvatureAt(t - 0.001, d1, d2, true).k;
   const nk = curvatureAt(t + 0.001, d1, d2, true).k;
   return { k, r, dk: (nk - k + (k - pk)) / 2, adk: (abs(nk - k) + abs(k - pk)) / 2 };
 }
+
+// ─── Line-line intersection ──────────────────────────────────────────────────
 
 function lli8(
   x1: number, y1: number, x2: number, y2: number,
@@ -417,25 +383,9 @@ function lli4(p1: Point, p2: Point, p3: Point, p4: Point): Point | false {
   return lli8(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, p4.x, p4.y);
 }
 
-function getminmax(
-  curve: Bezier,
-  d: "x" | "y",
-  list: number[],
-): MinMax {
-  if (!list || list.length === 0) return { min: 0, mid: 0, max: 0, size: 0 };
-  let lo = nMax,
-    hi = nMin;
-  const values = list.includes(0) ? list : [0, ...list];
-  if (!values.includes(1)) values.push(1);
-  for (const t of values) {
-    const c = curve.get(t);
-    if (c[d] < lo) lo = c[d];
-    if (c[d] > hi) hi = c[d];
-  }
-  return { min: lo, mid: (lo + hi) / 2, max: hi, size: hi - lo };
-}
+// ─── Bounding box helpers ────────────────────────────────────────────────────
 
-function bboxoverlap(b1: BBox, b2: BBox): boolean {
+export function bboxoverlap(b1: BBox, b2: BBox): boolean {
   for (const dim of ["x", "y"] as const) {
     const d = (b1[dim].size + b2[dim].size) / 2;
     if (abs(b1[dim].mid - b2[dim].mid) >= d) return false;
@@ -454,14 +404,87 @@ function expandbox(bbox: BBox, _bbox: BBox): void {
   bbox.y.size = bbox.y.max - bbox.y.min;
 }
 
-function pairiteration(
-  c1: Bezier,
-  c2: Bezier,
-  threshold = 0.5,
-): string[] {
-  const c1b = c1.bbox(),
-    c2b = c2.bbox(),
-    r = 100000;
+// ─── Arc center ──────────────────────────────────────────────────────────────
+
+function getccenter(p1: Point, p2: Point, p3: Point) {
+  const dx1 = p2.x - p1.x, dy1 = p2.y - p1.y,
+    dx2 = p3.x - p2.x, dy2 = p3.y - p2.y;
+  const dx1p = dx1 * cos(quart) - dy1 * sin(quart),
+    dy1p = dx1 * sin(quart) + dy1 * cos(quart),
+    dx2p = dx2 * cos(quart) - dy2 * sin(quart),
+    dy2p = dx2 * sin(quart) + dy2 * cos(quart);
+  const mx1 = (p1.x + p2.x) / 2, my1 = (p1.y + p2.y) / 2,
+    mx2 = (p2.x + p3.x) / 2, my2 = (p2.y + p3.y) / 2;
+  const arc = lli8(mx1, my1, mx1 + dx1p, my1 + dy1p, mx2, my2, mx2 + dx2p, my2 + dy2p);
+  if (!arc) return { x: 0, y: 0, r: 0, s: 0, m: 0, e: 0 };
+  const r = dist(arc, p1);
+  let s = atan2(p1.y - arc.y, p1.x - arc.x),
+    m = atan2(p2.y - arc.y, p2.x - arc.x),
+    e = atan2(p3.y - arc.y, p3.x - arc.x);
+
+  if (s < e) {
+    if (s > m || m > e) s += tau;
+    if (s > e) { const tmp = e; e = s; s = tmp; }
+  } else {
+    if (e < m && m < s) { const tmp = e; e = s; s = tmp; }
+    else e += tau;
+  }
+
+  return { x: arc.x, y: arc.y, r, s, m, e };
+}
+
+// ─── Projection / ABC helpers ────────────────────────────────────────────────
+
+function abcratio(t: number, n: number): number | false {
+  if (n !== 2 && n !== 3) return false;
+  if (t === 0 || t === 1) return t;
+  const bottom = pow(t, n) + pow(1 - t, n);
+  return abs((bottom - 1) / bottom);
+}
+
+function projectionratio(t: number, n: number): number | false {
+  if (n !== 2 && n !== 3) return false;
+  if (t === 0 || t === 1) return t;
+  const top = pow(1 - t, n);
+  return top / (pow(t, n) + top);
+}
+
+// ─── Bezier-dependent utility functions ──────────────────────────────────────
+
+function getminmax(curve: Bezier, d: "x" | "y", list: number[]): MinMax {
+  if (!list || list.length === 0) return { min: 0, mid: 0, max: 0, size: 0 };
+  let lo = nMax, hi = nMin;
+  const values = list.includes(0) ? list : [0, ...list];
+  if (!values.includes(1)) values.push(1);
+  for (const t of values) {
+    const c = curve.get(t);
+    if (c[d] < lo) lo = c[d];
+    if (c[d] > hi) hi = c[d];
+  }
+  return { min: lo, mid: (lo + hi) / 2, max: hi, size: hi - lo };
+}
+
+export function makeline(p1: Point, p2: Point, ctx?: KlintContext): Bezier {
+  return new Bezier([p1, { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 }, p2], ctx);
+}
+
+export function findbbox(sections: Bezier[]): BBox {
+  let mx = nMax, my = nMax, MX = nMin, MY = nMin;
+  for (const s of sections) {
+    const bb = s.bbox();
+    if (mx > bb.x.min) mx = bb.x.min;
+    if (my > bb.y.min) my = bb.y.min;
+    if (MX < bb.x.max) MX = bb.x.max;
+    if (MY < bb.y.max) MY = bb.y.max;
+  }
+  return {
+    x: { min: mx, mid: (mx + MX) / 2, max: MX, size: MX - mx },
+    y: { min: my, mid: (my + MY) / 2, max: MY, size: MY - my },
+  };
+}
+
+export function pairiteration(c1: Bezier, c2: Bezier, threshold = 0.5): string[] {
+  const c1b = c1.bbox(), c2b = c2.bbox(), r = 100000;
 
   if (c1b.x.size + c1b.y.size < threshold && c2b.x.size + c2b.y.size < threshold) {
     return [
@@ -489,81 +512,45 @@ function pairiteration(
   return results.filter((v, i) => results.indexOf(v) === i);
 }
 
-function getccenter(p1: Point, p2: Point, p3: Point) {
-  const dx1 = p2.x - p1.x,
-    dy1 = p2.y - p1.y,
-    dx2 = p3.x - p2.x,
-    dy2 = p3.y - p2.y;
-  const dx1p = dx1 * cos(quart) - dy1 * sin(quart),
-    dy1p = dx1 * sin(quart) + dy1 * cos(quart),
-    dx2p = dx2 * cos(quart) - dy2 * sin(quart),
-    dy2p = dx2 * sin(quart) + dy2 * cos(quart);
-  const mx1 = (p1.x + p2.x) / 2,
-    my1 = (p1.y + p2.y) / 2,
-    mx2 = (p2.x + p3.x) / 2,
-    my2 = (p2.y + p3.y) / 2;
-  const arc = lli8(mx1, my1, mx1 + dx1p, my1 + dy1p, mx2, my2, mx2 + dx2p, my2 + dy2p);
-  if (!arc) return { x: 0, y: 0, r: 0, s: 0, m: 0, e: 0 };
-  const r = dist(arc, p1);
-  let s = atan2(p1.y - arc.y, p1.x - arc.x),
-    m = atan2(p2.y - arc.y, p2.x - arc.x),
-    e = atan2(p3.y - arc.y, p3.x - arc.x);
-
-  if (s < e) {
-    if (s > m || m > e) s += tau;
-    if (s > e) {
-      const tmp = e;
-      e = s;
-      s = tmp;
-    }
-  } else {
-    if (e < m && m < s) {
-      const tmp = e;
-      e = s;
-      s = tmp;
-    } else {
-      e += tau;
-    }
-  }
-
-  return { x: arc.x, y: arc.y, r, s, m, e };
-}
-
-function numberSort(a: number, b: number) {
-  return a - b;
-}
-
-function abcratio(t: number, n: number): number | false {
-  if (n !== 2 && n !== 3) return false;
-  if (t === 0 || t === 1) return t;
-  const bottom = pow(t, n) + pow(1 - t, n);
-  return abs((bottom - 1) / bottom);
-}
-
-function projectionratio(t: number, n: number): number | false {
-  if (n !== 2 && n !== 3) return false;
-  if (t === 0 || t === 1) return t;
-  const top = pow(1 - t, n);
-  return top / (pow(t, n) + top);
-}
-
-function makeline(p1: Point, p2: Point): Bezier {
-  return new Bezier([p1, { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 }, p2]);
-}
-
-function findbbox(sections: Bezier[]): BBox {
-  let mx = nMax, my = nMax, MX = nMin, MY = nMin;
-  for (const s of sections) {
-    const bb = s.bbox();
-    if (mx > bb.x.min) mx = bb.x.min;
-    if (my > bb.y.min) my = bb.y.min;
-    if (MX < bb.x.max) MX = bb.x.max;
-    if (MY < bb.y.max) MY = bb.y.max;
-  }
-  return {
-    x: { min: mx, mid: (mx + MX) / 2, max: MX, size: MX - mx },
-    y: { min: my, mid: (my + MY) / 2, max: MY, size: MY - my },
+export function makeshape(forward: Bezier, back: Bezier, threshold?: number): Shape {
+  const ctx = forward._ctx;
+  const start = makeline(back.points[back.points.length - 1], forward.points[0], ctx);
+  const end = makeline(forward.points[forward.points.length - 1], back.points[0], ctx);
+  const bbox = findbbox([start, forward, back, end]);
+  const shape: Shape = {
+    startcap: start,
+    forward,
+    back,
+    endcap: end,
+    bbox,
+    intersections: (s2: Shape) =>
+      shapeintersections(shape, shape.bbox, s2, s2.bbox, threshold),
   };
+  return shape;
+}
+
+function shapeintersections(
+  s1: Shape, bbox1: BBox, s2: Shape, bbox2: BBox, threshold?: number,
+): string[][] {
+  if (!bboxoverlap(bbox1, bbox2)) return [];
+  const intersections: string[][] = [];
+  const a1 = [s1.startcap, s1.forward, s1.back, s1.endcap];
+  const a2 = [s2.startcap, s2.forward, s2.back, s2.endcap];
+  for (const l1 of a1) {
+    if ((l1 as any).virtual) continue;
+    for (const l2 of a2) {
+      if ((l2 as any).virtual) continue;
+      const iss = l1.intersects(l2, threshold);
+      if (iss.length > 0) {
+        (iss as any).c1 = l1;
+        (iss as any).c2 = l2;
+        (iss as any).s1 = s1;
+        (iss as any).s2 = s2;
+        intersections.push(iss);
+      }
+    }
+  }
+  return intersections;
 }
 
 // ─── Bezier class ────────────────────────────────────────────────────────────
@@ -576,12 +563,12 @@ export class Bezier {
   _t1: number;
   _t2: number;
   _linear: boolean;
+  _ctx?: KlintContext;
 
   private dpoints: Point[][];
 
-  constructor(coords: Point[] | number[]) {
+  constructor(coords: Point[] | number[], ctx?: KlintContext) {
     let points: Point[];
-
     if (typeof coords[0] === "object") {
       points = (coords as Point[]).map((p) => ({ x: p.x, y: p.y }));
     } else {
@@ -597,6 +584,7 @@ export class Bezier {
     this._t1 = 0;
     this._t2 = 1;
     this._lut = [];
+    this._ctx = ctx;
 
     const al = align(points, { p1: points[0], p2: points[this.order] });
     const baseline = dist(points[0], points[this.order]);
@@ -606,43 +594,49 @@ export class Bezier {
     this.clockwise = angle(points[0], points[this.order], points[1]) > 0;
   }
 
+  private _make(coords: Point[]): Bezier {
+    return new Bezier(coords, this._ctx);
+  }
+
+  private _k(K?: KlintContext): KlintContext {
+    const ctx = K ?? this._ctx;
+    if (!ctx) throw new Error("No KlintContext — pass to constructor or draw method");
+    return ctx;
+  }
+
   // ─── Static constructors ──────────────────────────────────────────────
 
-  static quadratic(p1: Point, cp: Point, p2: Point): Bezier {
-    return new Bezier([p1, cp, p2]);
+  static quadratic(p1: Point, cp: Point, p2: Point, ctx?: KlintContext): Bezier {
+    return new Bezier([p1, cp, p2], ctx);
   }
 
-  static cubic(p1: Point, cp1: Point, cp2: Point, p2: Point): Bezier {
-    return new Bezier([p1, cp1, cp2, p2]);
+  static cubic(p1: Point, cp1: Point, cp2: Point, p2: Point, ctx?: KlintContext): Bezier {
+    return new Bezier([p1, cp1, cp2, p2], ctx);
   }
 
-  static quadraticFromPoints(p1: Point, p2: Point, p3: Point, t = 0.5): Bezier {
-    if (t === 0) return new Bezier([p2, p2, p3]);
-    if (t === 1) return new Bezier([p1, p2, p2]);
+  static quadraticFromPoints(p1: Point, p2: Point, p3: Point, t = 0.5, ctx?: KlintContext): Bezier {
+    if (t === 0) return new Bezier([p2, p2, p3], ctx);
+    if (t === 1) return new Bezier([p1, p2, p2], ctx);
     const abc = Bezier.getABC(2, p1, p2, p3, t);
-    return new Bezier([p1, abc.A, p3]);
+    return new Bezier([p1, abc.A, p3], ctx);
   }
 
-  static cubicFromPoints(S: Point, B: Point, E: Point, t = 0.5, d1?: number): Bezier {
+  static cubicFromPoints(S: Point, B: Point, E: Point, t = 0.5, d1?: number, ctx?: KlintContext): Bezier {
     const abc = Bezier.getABC(3, S, B, E, t);
     if (d1 === undefined) d1 = dist(B, abc.C);
     const d2 = (d1 * (1 - t)) / t;
-    const selen = dist(S, E),
-      lx = (E.x - S.x) / selen,
-      ly = (E.y - S.y) / selen;
+    const selen = dist(S, E), lx = (E.x - S.x) / selen, ly = (E.y - S.y) / selen;
     const e1 = { x: B.x - d1 * lx, y: B.y - d1 * ly },
-      e2 = { x: B.x + d2 * lx, y: B.y + d2 * ly },
-      A = abc.A;
+      e2 = { x: B.x + d2 * lx, y: B.y + d2 * ly }, A = abc.A;
     const v1 = { x: A.x + (e1.x - A.x) / (1 - t), y: A.y + (e1.y - A.y) / (1 - t) },
       v2 = { x: A.x + (e2.x - A.x) / t, y: A.y + (e2.y - A.y) / t };
     const nc1 = { x: S.x + (v1.x - S.x) / t, y: S.y + (v1.y - S.y) / t },
       nc2 = { x: E.x + (v2.x - E.x) / (1 - t), y: E.y + (v2.y - E.y) / (1 - t) };
-    return new Bezier([S, nc1, nc2, E]);
+    return new Bezier([S, nc1, nc2, E], ctx);
   }
 
   static getABC(order: number, S: Point, B: Point, E: Point, t = 0.5) {
-    const u = projectionratio(t, order) as number,
-      um = 1 - u,
+    const u = projectionratio(t, order) as number, um = 1 - u,
       C = { x: u * S.x + um * E.x, y: u * S.y + um * E.y },
       s = abcratio(t, order) as number,
       A = { x: B.x + (B.x - C.x) / s, y: B.y + (B.y - C.y) / s };
@@ -651,7 +645,7 @@ export class Bezier {
 
   // ─── Core ─────────────────────────────────────────────────────────────
 
-  private update(): void {
+  update(): void {
     this._lut = [];
     this.dpoints = derive(this.points);
     this.clockwise = angle(this.points[0], this.points[this.order], this.points[1]) > 0;
@@ -675,12 +669,10 @@ export class Bezier {
     return { t, x: -d.y / q, y: d.x / q };
   }
 
-  /** Arc length via Legendre-Gauss quadrature */
   length(): number {
     return arcLength(this.derivative.bind(this));
   }
 
-  /** Lookup table of evenly sampled points */
   getLUT(steps = 100): Point[] {
     if (this._lut.length === steps + 1) return this._lut;
     this._lut = [];
@@ -695,25 +687,17 @@ export class Bezier {
 
   // ─── Analysis ─────────────────────────────────────────────────────────
 
-  /** Curvature, radius of curvature, and rate of change at t */
   curvature(t: number): CurvatureResult {
     return curvatureAt(t, this.dpoints[0], this.dpoints[1]);
   }
 
-  /** Inflection points (cubic only) */
   inflections(): number[] {
     return inflections(this.points);
   }
 
-  /** Find extrema t-values per axis */
   extrema(): { x: number[]; y: number[]; values: number[] } {
-    const result: { x: number[]; y: number[]; values: number[] } = {
-      x: [],
-      y: [],
-      values: [],
-    };
+    const result: { x: number[]; y: number[]; values: number[] } = { x: [], y: [], values: [] };
     let allRoots: number[] = [];
-
     for (const dim of ["x", "y"] as const) {
       let p = this.dpoints[0].map((v) => v[dim]);
       result[dim] = droots(p);
@@ -724,26 +708,19 @@ export class Bezier {
       result[dim] = result[dim].filter((t) => t >= 0 && t <= 1);
       allRoots = allRoots.concat(result[dim].sort(numberSort));
     }
-
     result.values = allRoots.sort(numberSort).filter((v, i) => allRoots.indexOf(v) === i);
     return result;
   }
 
-  /** Bounding box */
   bbox(): BBox {
     const ext = this.extrema();
-    return {
-      x: getminmax(this, "x", ext.x),
-      y: getminmax(this, "y", ext.y),
-    };
+    return { x: getminmax(this, "x", ext.x), y: getminmax(this, "y", ext.y) };
   }
 
-  /** Bounding box overlap test */
   overlaps(curve: Bezier): boolean {
     return bboxoverlap(this.bbox(), curve.bbox());
   }
 
-  /** Is this a "simple" segment? (normals don't diverge > 60°) */
   simple(): boolean {
     if (this.order === 3) {
       const a1 = angle(this.points[0], this.points[3], this.points[1]);
@@ -755,20 +732,14 @@ export class Bezier {
     return abs(acos(n1.x * n2.x + n1.y * n2.y)) < PI / 3;
   }
 
-  /** Project a point onto the curve — returns closest point with t and distance */
   project(point: Point): Point & { t: number; d: number } {
     const LUT = this.getLUT();
     const l = LUT.length - 1;
-    let mdist = Infinity,
-      mpos = 0;
+    let mdist = Infinity, mpos = 0;
     for (let i = 0; i < LUT.length; i++) {
       const d = dist(LUT[i], point);
-      if (d < mdist) {
-        mdist = d;
-        mpos = i;
-      }
+      if (d < mdist) { mdist = d; mpos = i; }
     }
-
     const t1 = max(0, (mpos - 1) / l);
     const t2 = min(1, (mpos + 1) / l);
     const step = 0.1 / l;
@@ -778,10 +749,7 @@ export class Bezier {
     for (let t = t1; t < t2 + step; t += step) {
       const p = this.get(t);
       const d = dist(point, p);
-      if (d < mdist) {
-        mdist = d;
-        ft = t;
-      }
+      if (d < mdist) { mdist = d; ft = t; }
     }
     ft = ft < 0 ? 0 : ft > 1 ? 1 : ft;
     const p = this.get(ft);
@@ -790,7 +758,6 @@ export class Bezier {
 
   // ─── Splitting & reducing ─────────────────────────────────────────────
 
-  /** De Casteljau hull points at t */
   hull(t: number): Point[] {
     let p = this.points;
     const q: Point[] = [...p];
@@ -806,7 +773,6 @@ export class Bezier {
     return q;
   }
 
-  /** Split at t, returning { left, right } Bezier curves */
   split(t1: number, t2?: number): { left: Bezier; right: Bezier; span: Point[] } {
     if (t1 === 0 && t2 !== undefined) return this.split(t2).left as any;
     if (t2 === 1) return this.split(t1).right as any;
@@ -815,12 +781,12 @@ export class Bezier {
     const result = {
       left:
         this.order === 2
-          ? new Bezier([q[0], q[3], q[5]])
-          : new Bezier([q[0], q[4], q[7], q[9]]),
+          ? this._make([q[0], q[3], q[5]])
+          : this._make([q[0], q[4], q[7], q[9]]),
       right:
         this.order === 2
-          ? new Bezier([q[5], q[4], q[2]])
-          : new Bezier([q[9], q[8], q[6], q[3]]),
+          ? this._make([q[5], q[4], q[2]])
+          : this._make([q[9], q[8], q[6], q[3]]),
       span: q,
     };
 
@@ -830,16 +796,12 @@ export class Bezier {
     result.right._t2 = mapVal(1, 0, 1, this._t1, this._t2);
 
     if (t2 === undefined) return result;
-
     const mapped = mapVal(t2, t1, 1, 0, 1);
     return result.right.split(mapped).left as any;
   }
 
-  /** Degree elevation (quadratic → cubic) */
   raise(): Bezier {
-    const p = this.points,
-      np: Point[] = [p[0]],
-      k = p.length;
+    const p = this.points, np: Point[] = [p[0]], k = p.length;
     for (let i = 1; i < k; i++) {
       np[i] = {
         x: ((k - i) / k) * p[i].x + (i / k) * p[i - 1].x,
@@ -847,16 +809,11 @@ export class Bezier {
       };
     }
     np[k] = p[k - 1];
-    return new Bezier(np);
+    return this._make(np);
   }
 
-  /**
-   * Reduce to an array of "simple" Bezier segments.
-   * Foundation for scale(), offset(), and outline().
-   */
   reduce(): Bezier[] {
-    let t1 = 0,
-      t2 = 0;
+    let t1 = 0, t2 = 0;
     const step = 0.01;
     const pass1: Bezier[] = [];
     const pass2: Bezier[] = [];
@@ -866,17 +823,14 @@ export class Bezier {
     if (!ext.includes(1)) ext.push(1);
 
     for (let i = 0; i < ext.length - 1; i++) {
-      t1 = ext[i];
-      t2 = ext[i + 1];
+      t1 = ext[i]; t2 = ext[i + 1];
       const segment = this.split(t1, t2) as unknown as Bezier;
-      segment._t1 = t1;
-      segment._t2 = t2;
+      segment._t1 = t1; segment._t2 = t2;
       pass1.push(segment);
     }
 
     for (const p1 of pass1) {
-      t1 = 0;
-      t2 = 0;
+      t1 = 0; t2 = 0;
       while (t2 <= 1) {
         for (t2 = t1 + step; t2 <= 1 + step; t2 += step) {
           const segment = p1.split(t1, t2) as unknown as Bezier;
@@ -899,7 +853,6 @@ export class Bezier {
         pass2.push(seg);
       }
     }
-
     return pass2;
   }
 
@@ -907,7 +860,7 @@ export class Bezier {
 
   private translate(v: Point, d1: number, d2: number): Bezier {
     const o = this.order;
-    return new Bezier(
+    return this._make(
       this.points.map((p, i) => {
         const d = (1 - i / o) * d1 + (i / o) * d2;
         return { x: p.x + v.x * d, y: p.y + v.y * d };
@@ -915,10 +868,6 @@ export class Bezier {
     );
   }
 
-  /**
-   * Scale (offset) a simple bezier segment by distance d.
-   * Pass a function `(t: number) => number` for variable distance.
-   */
   scale(d: number | ((t: number) => number)): Bezier {
     const order = this.order;
     let distanceFn: ((t: number) => number) | false = false;
@@ -938,10 +887,7 @@ export class Bezier {
 
     const r1 = distanceFn ? distanceFn(0) : (d as number);
     const r2 = distanceFn ? distanceFn(1) : (d as number);
-    const v: OffsetPoint[] = [
-      this._offset(0, 10),
-      this._offset(1, 10),
-    ];
+    const v: OffsetPoint[] = [this._offset(0, 10), this._offset(1, 10)];
     const np: Point[] = [];
     const o = lli4(v[0], v[0].c, v[1], v[1].c);
     if (!o) throw new Error("Cannot scale this curve. Try reducing it first.");
@@ -963,20 +909,21 @@ export class Bezier {
         const intersection = lli4(p, p2, o as Point, points[t + 1]);
         if (intersection) np[t + 1] = intersection;
       });
-      return new Bezier(np);
+      return this._make(np);
     }
 
     const cw = this.clockwise;
+    const fn = distanceFn as (t: number) => number;
     [0, 1].forEach((t) => {
       if (order === 2 && t) return;
       const p = points[t + 1];
       const ov = { x: p.x - (o as Point).x, y: p.y - (o as Point).y };
-      let rc = distanceFn ? distanceFn((t + 1) / order) : (d as number);
-      if (distanceFn && !cw) rc = -rc;
+      let rc = fn((t + 1) / order);
+      if (!cw) rc = -rc;
       const m = sqrt(ov.x * ov.x + ov.y * ov.y);
       np[t + 1] = { x: p.x + (rc * ov.x) / m, y: p.y + (rc * ov.y) / m };
     });
-    return new Bezier(np);
+    return this._make(np);
   }
 
   private _offset(t: number, d: number): OffsetPoint {
@@ -985,38 +932,23 @@ export class Bezier {
     return { c, n, x: c.x + n.x * d, y: c.y + n.y * d };
   }
 
-  /**
-   * Offset the entire curve by distance d.
-   * Returns an array of Bezier segments forming the offset curve.
-   */
   offset(d: number): Bezier[];
-  /** Get a single offset point at t with distance d */
   offset(t: number, d: number): OffsetPoint;
   offset(t: number, d?: number): Bezier[] | OffsetPoint {
     if (d !== undefined) return this._offset(t, d);
     if (this._linear) {
       const nv = this.normal(0);
-      return [
-        new Bezier(
-          this.points.map((p) => ({ x: p.x + t * nv.x, y: p.y + t * nv.y })),
-        ),
-      ];
+      return [this._make(this.points.map((p) => ({ x: p.x + t * nv.x, y: p.y + t * nv.y })))];
     }
     return this.reduce().map((s) => (s._linear ? s.offset(t)[0] : s.scale(t)));
   }
 
-  /**
-   * Generate an outline (stroke shape) for the curve.
-   * d1/d2: distance on each side. d3/d4: optional graduated end distances.
-   * Returns an array of Bezier segments forming the closed outline.
-   */
   outline(d1: number, d2?: number, d3?: number, d4?: number): Bezier[] {
     d2 = d2 === undefined ? d1 : d2;
 
     if (this._linear) {
       const n = this.normal(0);
-      const start = this.points[0];
-      const end = this.points[this.points.length - 1];
+      const start = this.points[0], end = this.points[this.points.length - 1];
       if (d3 === undefined) { d3 = d1; d4 = d2; }
       const fs = { x: start.x + n.x * d1, y: start.y + n.y * d1 };
       const fe = { x: end.x + n.x * d3, y: end.y + n.y * d3 };
@@ -1024,12 +956,7 @@ export class Bezier {
       const bs = { x: start.x - n.x * d2, y: start.y - n.y * d2 };
       const be = { x: end.x - n.x * d4!, y: end.y - n.y * d4! };
       const bmid = { x: (bs.x + be.x) / 2, y: (bs.y + be.y) / 2 };
-      return [
-        makeline(bs, fs),
-        new Bezier([fs, fmid, fe]),
-        makeline(fe, be),
-        new Bezier([be, bmid, bs]),
-      ];
+      return [makeline(bs, fs, this._ctx), this._make([fs, fmid, fe]), makeline(fe, be, this._ctx), this._make([be, bmid, bs])];
     }
 
     const reduced = this.reduce();
@@ -1042,9 +969,7 @@ export class Bezier {
 
     function linearDist(s: number, e: number, tl: number, al: number, sl: number) {
       return (v: number) => {
-        const f1 = al / tl,
-          f2 = (al + sl) / tl,
-          dd = e - s;
+        const f1 = al / tl, f2 = (al + sl) / tl, dd = e - s;
         return mapVal(v, 0, 1, s + f1 * dd, s + f2 * dd);
       };
     }
@@ -1075,33 +1000,35 @@ export class Bezier {
     const bs = bcurves[len - 1].points[bcurves[len - 1].points.length - 1];
     const be = bcurves[0].points[0];
 
-    return [makeline(bs, fs), ...fcurves, makeline(fe, be), ...bcurves];
+    return [makeline(bs, fs, this._ctx), ...fcurves, makeline(fe, be, this._ctx), ...bcurves];
+  }
+
+  outlineshapes(d1: number, d2?: number, threshold?: number): Shape[] {
+    d2 = d2 ?? d1;
+    const outlineSegments = this.outline(d1, d2);
+    const shapes: Shape[] = [];
+    const len = outlineSegments.length;
+    const half = len / 2;
+    for (let i = 1; i < half; i++) {
+      const shape = makeshape(outlineSegments[i], outlineSegments[len - i], threshold);
+      (shape.startcap as any).virtual = i > 1;
+      (shape.endcap as any).virtual = i < half - 1;
+      shapes.push(shape);
+    }
+    return shapes;
   }
 
   // ─── Intersections ────────────────────────────────────────────────────
 
-  /**
-   * Find intersections.
-   * - No args: self-intersections
-   * - Bezier arg: curve-curve intersections
-   * - Line arg `{ p1, p2 }`: curve-line intersections
-   *
-   * Returns array of `"t1/t2"` strings (parseable with `parseFloat`).
-   */
-  intersects(
-    curve?: Bezier | { p1: Point; p2: Point },
-    threshold?: number,
-  ): string[] {
+  intersects(curve?: Bezier | { p1: Point; p2: Point }, threshold?: number): string[] {
     if (!curve) return this.selfintersects(threshold);
     if ("p1" in curve && "p2" in curve) return this.lineIntersects(curve);
     return this.curveIntersects(this.reduce(), (curve as Bezier).reduce(), threshold);
   }
 
   private lineIntersects(line: { p1: Point; p2: Point }): string[] {
-    const mx = min(line.p1.x, line.p2.x),
-      my = min(line.p1.y, line.p2.y),
-      MX = max(line.p1.x, line.p2.x),
-      MY = max(line.p1.y, line.p2.y);
+    const mx = min(line.p1.x, line.p2.x), my = min(line.p1.y, line.p2.y),
+      MX = max(line.p1.x, line.p2.x), MY = max(line.p1.y, line.p2.y);
     return roots(this.points, line)
       .filter((t) => {
         const p = this.get(t);
@@ -1137,7 +1064,6 @@ export class Bezier {
 
   // ─── Arc approximation ────────────────────────────────────────────────
 
-  /** Approximate the curve with circular arcs */
   arcs(errorThreshold = 0.5): Arc[] {
     return this._iterateArcs(errorThreshold, []);
   }
@@ -1151,46 +1077,30 @@ export class Bezier {
   }
 
   private _iterateArcs(errorThreshold: number, circles: Arc[]): Arc[] {
-    let t_s = 0,
-      t_e = 1,
-      safety: number;
+    let t_s = 0, t_e = 1, safety: number;
 
     do {
       safety = 0;
       t_e = 1;
-
-      let np1 = this.get(t_s),
-        np2: Point,
-        np3: Point;
-      let arc: any,
-        prev_arc: any;
-      let curr_good = false,
-        prev_good = false,
-        done: boolean;
-      let t_m: number,
-        prev_e = 1;
+      let np1 = this.get(t_s), np2: Point, np3: Point;
+      let arc: any, prev_arc: any;
+      let curr_good = false, prev_good = false, done: boolean;
+      let t_m: number, prev_e = 1;
 
       do {
         prev_good = curr_good;
         prev_arc = arc;
         t_m = (t_s + t_e) / 2;
         safety++;
-
         np2 = this.get(t_m);
         np3 = this.get(t_e);
         arc = getccenter(np1, np2, np3);
         arc.interval = { start: t_s, end: t_e };
-
         curr_good = this._arcError(arc, np1, t_s, t_e) <= errorThreshold;
         done = prev_good && !curr_good;
         if (!done) prev_e = t_e;
-
         if (curr_good) {
-          if (t_e >= 1) {
-            arc.interval.end = prev_e = 1;
-            prev_arc = arc;
-            break;
-          }
+          if (t_e >= 1) { arc.interval.end = prev_e = 1; prev_arc = arc; break; }
           t_e = t_e + (t_e - t_s) / 2;
         } else {
           t_e = t_m;
@@ -1198,7 +1108,6 @@ export class Bezier {
       } while (!done && safety < 100);
 
       if (safety >= 100) break;
-
       prev_arc = prev_arc || arc;
       circles.push(prev_arc);
       t_s = prev_e;
@@ -1209,17 +1118,13 @@ export class Bezier {
 
   // ─── Conversion ───────────────────────────────────────────────────────
 
-  /** Convert to SVG path string (e.g. "M x y C ...") */
   toSVG(): string {
     const p = this.points;
     const parts = ["M", p[0].x, p[0].y, this.order === 2 ? "Q" : "C"];
-    for (let i = 1; i < p.length; i++) {
-      parts.push(p[i].x as any, p[i].y as any);
-    }
+    for (let i = 1; i < p.length; i++) parts.push(p[i].x as any, p[i].y as any);
     return parts.join(" ");
   }
 
-  /** Convert to a Path2D object */
   toPath2D(): Path2D {
     const path = new Path2D();
     const p = this.points;
@@ -1232,7 +1137,6 @@ export class Bezier {
     return path;
   }
 
-  /** Convert an array of Bezier segments to a single continuous Path2D */
   static toPath2D(curves: Bezier[]): Path2D {
     const path = new Path2D();
     if (curves.length === 0) return path;
@@ -1252,78 +1156,93 @@ export class Bezier {
 
   // ─── Klint drawing helpers ────────────────────────────────────────────
 
-  /** Draw the curve onto a Klint canvas */
-  draw(K: KlintContext): void {
-    const path = this.toPath2D();
-    K.stroke(path);
+  draw(K?: KlintContext): void {
+    this._k(K).stroke(this.toPath2D());
   }
 
-  /** Draw with fill */
-  drawFilled(K: KlintContext): void {
-    const path = this.toPath2D();
-    K.fill(path);
+  drawFilled(K?: KlintContext): void {
+    this._k(K).fill(this.toPath2D());
   }
 
-  /** Draw the control-point skeleton (hull lines + control points) */
-  drawSkeleton(K: KlintContext, pointSize = 3): void {
-    K.save();
+  drawSkeleton(K: KlintContext, pointSize?: number): void;
+  drawSkeleton(pointSize?: number): void;
+  drawSkeleton(...args: unknown[]): void {
+    let ctx: KlintContext, ps: number;
+    if (typeof args[0] === "number" || args[0] == null) {
+      ctx = this._k(); ps = (args[0] as number) ?? 3;
+    } else {
+      ctx = this._k(args[0] as KlintContext); ps = (args[1] as number) ?? 3;
+    }
     const p = this.points;
-
-    K.beginPath();
-    K.moveTo(p[0].x, p[0].y);
-    for (let i = 1; i < p.length; i++) {
-      K.lineTo(p[i].x, p[i].y);
-    }
-    K.stroke();
-
-    for (const pt of p) {
-      K.beginPath();
-      K.arc(pt.x, pt.y, pointSize, 0, tau);
-      K.fill();
-    }
-
-    K.restore();
+    ctx.push();
+    ctx.beginPath();
+    ctx.moveTo(p[0].x, p[0].y);
+    for (let i = 1; i < p.length; i++) ctx.lineTo(p[i].x, p[i].y);
+    ctx.stroke();
+    for (const pt of p) ctx.circle(pt.x, pt.y, ps);
+    ctx.pop();
   }
 
-  /** Draw normal vectors along the curve */
-  drawNormals(K: KlintContext, count = 10, length = 20): void {
-    K.save();
-    for (let i = 0; i <= count; i++) {
-      const t = i / count;
+  drawNormals(K: KlintContext, count?: number, length?: number): void;
+  drawNormals(count?: number, length?: number): void;
+  drawNormals(...args: unknown[]): void {
+    let ctx: KlintContext, cnt: number, len: number;
+    if (typeof args[0] === "number" || args[0] == null) {
+      ctx = this._k(); cnt = (args[0] as number) ?? 10; len = (args[1] as number) ?? 20;
+    } else {
+      ctx = this._k(args[0] as KlintContext); cnt = (args[1] as number) ?? 10; len = (args[2] as number) ?? 20;
+    }
+    ctx.push();
+    for (let i = 0; i <= cnt; i++) {
+      const t = i / cnt;
       const p = this.get(t);
       const n = this.normal(t);
-      K.beginPath();
-      K.moveTo(p.x, p.y);
-      K.lineTo(p.x + n.x * length, p.y + n.y * length);
-      K.stroke();
+      ctx.line(p.x, p.y, p.x + n.x * len, p.y + n.y * len);
     }
-    K.restore();
+    ctx.pop();
   }
 
-  /** Draw the outline shape */
-  drawOutline(K: KlintContext, d1: number, d2?: number, d3?: number, d4?: number): void {
-    const segments = this.outline(d1, d2, d3, d4);
-    const path = Bezier.toPath2D(segments);
-    path.closePath();
-    K.stroke(path);
-  }
-
-  /** Draw the filled outline shape */
-  drawOutlineFilled(K: KlintContext, d1: number, d2?: number, d3?: number, d4?: number): void {
-    const segments = this.outline(d1, d2, d3, d4);
-    const path = Bezier.toPath2D(segments);
-    path.closePath();
-    K.fill(path);
-  }
-
-  /** Draw circular arc approximations */
-  drawArcs(K: KlintContext, errorThreshold = 0.5): void {
-    K.save();
-    for (const arc of this.arcs(errorThreshold)) {
-      K.beginPath();
-      K.arc(arc.x, arc.y, arc.r, arc.s, arc.e);
-      K.stroke();
+  drawOutline(K: KlintContext, d1: number, d2?: number, d3?: number, d4?: number): void;
+  drawOutline(d1: number, d2?: number, d3?: number, d4?: number): void;
+  drawOutline(...args: unknown[]): void {
+    let ctx: KlintContext, d1: number, d2: number | undefined, d3: number | undefined, d4: number | undefined;
+    if (typeof args[0] === "number") {
+      ctx = this._k(); d1 = args[0]; d2 = args[1] as number; d3 = args[2] as number; d4 = args[3] as number;
+    } else {
+      ctx = this._k(args[0] as KlintContext); d1 = args[1] as number; d2 = args[2] as number; d3 = args[3] as number; d4 = args[4] as number;
     }
-    K.restore();
+    const path = Bezier.toPath2D(this.outline(d1, d2, d3, d4));
+    path.closePath();
+    ctx.stroke(path);
+  }
+
+  drawOutlineFilled(K: KlintContext, d1: number, d2?: number, d3?: number, d4?: number): void;
+  drawOutlineFilled(d1: number, d2?: number, d3?: number, d4?: number): void;
+  drawOutlineFilled(...args: unknown[]): void {
+    let ctx: KlintContext, d1: number, d2: number | undefined, d3: number | undefined, d4: number | undefined;
+    if (typeof args[0] === "number") {
+      ctx = this._k(); d1 = args[0]; d2 = args[1] as number; d3 = args[2] as number; d4 = args[3] as number;
+    } else {
+      ctx = this._k(args[0] as KlintContext); d1 = args[1] as number; d2 = args[2] as number; d3 = args[3] as number; d4 = args[4] as number;
+    }
+    const path = Bezier.toPath2D(this.outline(d1, d2, d3, d4));
+    path.closePath();
+    ctx.fill(path);
+  }
+
+  drawArcs(K: KlintContext, errorThreshold?: number): void;
+  drawArcs(errorThreshold?: number): void;
+  drawArcs(...args: unknown[]): void {
+    let ctx: KlintContext, threshold: number;
+    if (typeof args[0] === "number" || args[0] == null) {
+      ctx = this._k(); threshold = (args[0] as number) ?? 0.5;
+    } else {
+      ctx = this._k(args[0] as KlintContext); threshold = (args[1] as number) ?? 0.5;
+    }
+    ctx.push();
+    for (const arc of this.arcs(threshold)) {
+      ctx.disk(arc.x, arc.y, arc.r, arc.s, arc.e, false);
+    }
+    ctx.pop();
   }
 }
