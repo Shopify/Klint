@@ -69,9 +69,7 @@ export default function PolylineDemo() {
     // ─── Draw raw points ──────────────────────────────────────────────
     K.fillColor("rgba(255,255,255,0.25)");
     for (const p of pts) {
-      K.beginPath();
-      K.arc(p.x, p.y, 4, 0, Math.PI * 2);
-      K.fill();
+      K.circle(p.x, p.y, 4);
     }
 
     // ─── Draw the linear polyline as reference ────────────────────────
@@ -108,9 +106,7 @@ export default function PolylineDemo() {
       K.lineTo(proj.x, proj.y);
       K.stroke();
       K.fillColor("#4ecdc4");
-      K.beginPath();
-      K.arc(proj.x, proj.y, 6, 0, Math.PI * 2);
-      K.fill();
+      K.circle(proj.x, proj.y, 6);
 
       // Split visualization
       const { left, right } = smooth.split(proj.t);
@@ -124,9 +120,7 @@ export default function PolylineDemo() {
       const lut = smooth.getLUT(60);
       K.fillColor("rgba(78, 205, 196, 0.2)");
       for (const p of lut) {
-        K.beginPath();
-        K.arc(p.x, p.y, 2, 0, Math.PI * 2);
-        K.fill();
+        K.circle(p.x, p.y, 2);
       }
 
       // BBox
@@ -145,9 +139,7 @@ export default function PolylineDemo() {
         const c = smooth.curvature(t);
         const radius = Math.min(Math.abs(c.r) * 0.005, 12);
         K.fillColor(c.k > 0 ? "rgba(255,107,107,0.3)" : "rgba(78,205,196,0.3)");
-        K.beginPath();
-        K.arc(p.x, p.y, radius, 0, Math.PI * 2);
-        K.fill();
+        K.circle(p.x, p.y, radius);
       }
 
       // Info
@@ -170,9 +162,7 @@ export default function PolylineDemo() {
       // Draw the dense cloud
       K.fillColor("rgba(255,255,255,0.05)");
       for (const p of dense) {
-        K.beginPath();
-        K.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
-        K.fill();
+        K.circle(p.x, p.y, 1.5);
       }
 
       // Simplify at different tolerances
@@ -279,11 +269,8 @@ export default function PolylineDemo() {
       const lineHits = smooth.intersects(line);
       K.fillColor("#ffe66d");
       for (const h of lineHits) {
-        const t = parseFloat(h);
-        const p = smooth.get(t);
-        K.beginPath();
-        K.arc(p.x, p.y, 6, 0, Math.PI * 2);
-        K.fill();
+        const p = smooth.get(parseFloat(h));
+        K.circle(p.x, p.y, 6);
       }
 
       // Second polyline for polyline-polyline intersection
@@ -303,23 +290,9 @@ export default function PolylineDemo() {
       const polyHits = smooth.intersects(smooth2);
       K.fillColor("#a882ff");
       for (const h of polyHits) {
-        const parts = h.split("/");
-        const t1 = parseFloat(parts[0]);
-        // Use t1 from curve1's _t range for the intersection point
-        const p = smooth.reduce();
-        // Find the point from the raw t value
-        const tVal = parseFloat(parts[0]);
-        // pairiteration returns t values in the reduced segment's _t1/_t2 space
-        // For display, project a nearby point
-        K.beginPath();
-        K.arc(
-          smooth.get(Math.min(1, Math.max(0, tVal))).x,
-          smooth.get(Math.min(1, Math.max(0, tVal))).y,
-          7,
-          0,
-          Math.PI * 2,
-        );
-        K.fill();
+        const t = Math.min(1, Math.max(0, parseFloat(h.split("/")[0])));
+        const p = smooth.get(t);
+        K.circle(p.x, p.y, 7);
       }
 
       // Single Bezier intersection
@@ -336,11 +309,9 @@ export default function PolylineDemo() {
       const bezHits = smooth.intersects(testBez);
       K.fillColor("#ff6b6b");
       for (const h of bezHits) {
-        const t1 = parseFloat(h.split("/")[0]);
-        const p = smooth.get(Math.min(1, Math.max(0, t1)));
-        K.beginPath();
-        K.arc(p.x, p.y, 6, 0, Math.PI * 2);
-        K.fill();
+        const t = Math.min(1, Math.max(0, parseFloat(h.split("/")[0])));
+        const p = smooth.get(t);
+        K.circle(p.x, p.y, 6);
       }
 
       K.fillColor("rgba(255,255,255,0.5)");

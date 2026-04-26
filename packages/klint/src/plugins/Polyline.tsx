@@ -28,10 +28,12 @@ import {
   type BBox,
   type CurvatureResult,
   type Shape,
-  sqrt, abs, dist, mapVal,
+  dist, mapVal,
   Bezier,
   makeline, findbbox, pairiteration, makeshape,
 } from "./Bezier";
+
+const { sqrt, abs } = Math;
 
 // ─── Smooth ──────────────────────────────────────────────────────────────────
 
@@ -554,8 +556,8 @@ export class Polyline {
     const len = outlineSegs.length, half = len / 2;
     for (let i = 1; i < half; i++) {
       const shape = makeshape(outlineSegs[i], outlineSegs[len - i], threshold);
-      (shape.startcap as any).virtual = i > 1;
-      (shape.endcap as any).virtual = i < half - 1;
+      shape.startcap.virtual = i > 1;
+      shape.endcap.virtual = i < half - 1;
       shapes.push(shape);
     }
     return shapes;
@@ -569,8 +571,9 @@ export class Polyline {
   ): string[] {
     if (!other) return this._selfIntersects(threshold);
     if ("p1" in other && "p2" in other) return this._lineIntersects(other);
-    if (other instanceof Bezier) return this._curveSetIntersects(this.reduce(), other.reduce(), threshold);
-    if (other instanceof Polyline) return this._curveSetIntersects(this.reduce(), other.reduce(), threshold);
+    if (other instanceof Bezier || other instanceof Polyline) {
+      return this._curveSetIntersects(this.reduce(), other.reduce(), threshold);
+    }
     return [];
   }
 
@@ -580,7 +583,7 @@ export class Polyline {
     for (let i = 0; i < reduced.length - 2; i++) {
       results.push(...this._curveSetIntersects(reduced.slice(i, i + 1), reduced.slice(i + 2), threshold));
     }
-    return results.filter((v, i) => results.indexOf(v) === i);
+    return Array.from(new Set(results));
   }
 
   private _lineIntersects(line: { p1: Point; p2: Point }): string[] {
@@ -600,11 +603,11 @@ export class Polyline {
         if (l.overlaps(r)) pairs.push({ left: l, right: r });
       }
     }
-    let results: string[] = [];
+    const results: string[] = [];
     for (const pair of pairs) {
-      results = results.concat(pairiteration(pair.left, pair.right, threshold));
+      results.push(...pairiteration(pair.left, pair.right, threshold));
     }
-    return results.filter((v, i) => results.indexOf(v) === i);
+    return Array.from(new Set(results));
   }
 
   // ─── Conversion ────────────────────────────────────────────────────────
@@ -665,7 +668,14 @@ export class Polyline {
   }
 
   simplify(tolerance = 2.5): Polyline {
-    const pts = this.getLUT(Math.max(200, this.segments.length * 30));
+    const steps = Math.max(200, this.segments.length * 30);
+    const pts: Point[] = [];
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const p = this.get(t);
+      p.t = t;
+      pts.push(p);
+    }
     return new Polyline(simplifyPath(pts, tolerance), this.closed, this._ctx);
   }
 

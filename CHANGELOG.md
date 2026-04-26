@@ -3,6 +3,10 @@
 ## v0.4.0 (Unreleased)
 
 ### Added
+- **Bezier plugin** — full Bézier curve library (construction, evaluation, splitting, offset, outline, intersections, arc approximation)
+- **Polyline plugin** — multi-segment curve paths with smooth/simplify operations
+- **Delaunay plugin** — proper Bowyer-Watson Delaunay triangulation (replaces previous stub), Voronoi diagram generation (`voronoi`), earcut polygon triangulation with holes (`earcut`, `triangulatePolygon`, `drawPolygon`, `flatten`, `deviation`)
+- Per-plugin deep imports (`@shopify/klint/plugins/Bezier`, `/Polyline`, etc.) with code splitting
 
 ### Changed
 - **FontParser plugin**: Refactored to lazy-loaded `.mjs` bundle (~13 KB / ~5 KB gzipped), no longer inlined in the main plugins bundle

@@ -1,29 +1,5 @@
-/**
- * Bezier Plugin for Klint
- *
- * Advanced 2D Bezier curve operations: offset, outline, reduce, scale,
- * intersections, curvature, normals, arc approximation, and more.
- *
- * Algorithms ported from bezier.js by Pomax (MIT).
- * https://github.com/Pomax/bezierjs
- *
- * @example
- * ```tsx
- * import { Bezier } from "@shopify/klint/plugins";
- *
- * const draw = (K) => {
- *   const curve = Bezier.cubic(
- *     { x: 100, y: 300 },
- *     { x: 150, y: 50 },
- *     { x: 350, y: 50 },
- *     { x: 400, y: 300 }
- *   );
- *   curve.draw(K);
- *   curve.drawOutline(K, 10);
- *   curve.drawNormals(K, 12, 30);
- * };
- * ```
- */
+// Bezier curve operations ported from bezier.js by Pomax (MIT).
+// https://github.com/Pomax/bezierjs
 
 import { KlintContext } from "../Klint";
 
@@ -69,20 +45,29 @@ export interface Arc {
   interval: { start: number; end: number };
 }
 
+export type ShapeSegment = Bezier & { virtual?: boolean };
+
 export interface Shape {
-  startcap: any;
-  forward: any;
-  back: any;
-  endcap: any;
+  startcap: ShapeSegment;
+  forward: ShapeSegment;
+  back: ShapeSegment;
+  endcap: ShapeSegment;
   bbox: BBox;
   virtual?: boolean;
-  intersections: (s2: Shape) => string[][];
+  intersections: (s2: Shape) => ShapeIntersection[];
+}
+
+export interface ShapeIntersection extends Array<string> {
+  c1: Bezier;
+  c2: Bezier;
+  s1: Shape;
+  s2: Shape;
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-export const { abs, cos, sin, acos, atan2, sqrt, pow, min, max, PI } = Math;
-export const tau = 2 * PI;
+const { abs, cos, sin, acos, atan2, sqrt, pow, min, max, PI } = Math;
+const tau = 2 * PI;
 const quart = PI / 2;
 const epsilon = 0.000001;
 const nMax = Number.MAX_SAFE_INTEGER;
@@ -505,11 +490,11 @@ export function pairiteration(c1: Bezier, c2: Bezier, threshold = 0.5): string[]
 
   if (pairs.length === 0) return [];
 
-  let results: string[] = [];
+  const results: string[] = [];
   for (const pair of pairs) {
-    results = results.concat(pairiteration(pair.left, pair.right, threshold));
+    results.push(...pairiteration(pair.left, pair.right, threshold));
   }
-  return results.filter((v, i) => results.indexOf(v) === i);
+  return Array.from(new Set(results));
 }
 
 export function makeshape(forward: Bezier, back: Bezier, threshold?: number): Shape {
@@ -531,21 +516,21 @@ export function makeshape(forward: Bezier, back: Bezier, threshold?: number): Sh
 
 function shapeintersections(
   s1: Shape, bbox1: BBox, s2: Shape, bbox2: BBox, threshold?: number,
-): string[][] {
+): ShapeIntersection[] {
   if (!bboxoverlap(bbox1, bbox2)) return [];
-  const intersections: string[][] = [];
+  const intersections: ShapeIntersection[] = [];
   const a1 = [s1.startcap, s1.forward, s1.back, s1.endcap];
   const a2 = [s2.startcap, s2.forward, s2.back, s2.endcap];
   for (const l1 of a1) {
-    if ((l1 as any).virtual) continue;
+    if (l1.virtual) continue;
     for (const l2 of a2) {
-      if ((l2 as any).virtual) continue;
-      const iss = l1.intersects(l2, threshold);
+      if (l2.virtual) continue;
+      const iss = l1.intersects(l2, threshold) as ShapeIntersection;
       if (iss.length > 0) {
-        (iss as any).c1 = l1;
-        (iss as any).c2 = l2;
-        (iss as any).s1 = s1;
-        (iss as any).s2 = s2;
+        iss.c1 = l1;
+        iss.c2 = l2;
+        iss.s1 = s1;
+        iss.s2 = s2;
         intersections.push(iss);
       }
     }
@@ -566,6 +551,8 @@ export class Bezier {
   _ctx?: KlintContext;
 
   private dpoints: Point[][];
+  private _bboxCache?: BBox;
+  private _extremaCache?: { x: number[]; y: number[]; values: number[] };
 
   constructor(coords: Point[] | number[], ctx?: KlintContext) {
     let points: Point[];
@@ -647,6 +634,8 @@ export class Bezier {
 
   update(): void {
     this._lut = [];
+    this._bboxCache = undefined;
+    this._extremaCache = undefined;
     this.dpoints = derive(this.points);
     this.clockwise = angle(this.points[0], this.points[this.order], this.points[1]) > 0;
   }
@@ -696,6 +685,7 @@ export class Bezier {
   }
 
   extrema(): { x: number[]; y: number[]; values: number[] } {
+    if (this._extremaCache) return this._extremaCache;
     const result: { x: number[]; y: number[]; values: number[] } = { x: [], y: [], values: [] };
     let allRoots: number[] = [];
     for (const dim of ["x", "y"] as const) {
@@ -708,13 +698,16 @@ export class Bezier {
       result[dim] = result[dim].filter((t) => t >= 0 && t <= 1);
       allRoots = allRoots.concat(result[dim].sort(numberSort));
     }
-    result.values = allRoots.sort(numberSort).filter((v, i) => allRoots.indexOf(v) === i);
+    result.values = Array.from(new Set(allRoots.sort(numberSort)));
+    this._extremaCache = result;
     return result;
   }
 
   bbox(): BBox {
+    if (this._bboxCache) return this._bboxCache;
     const ext = this.extrema();
-    return { x: getminmax(this, "x", ext.x), y: getminmax(this, "y", ext.y) };
+    this._bboxCache = { x: getminmax(this, "x", ext.x), y: getminmax(this, "y", ext.y) };
+    return this._bboxCache;
   }
 
   overlaps(curve: Bezier): boolean {
@@ -1011,8 +1004,8 @@ export class Bezier {
     const half = len / 2;
     for (let i = 1; i < half; i++) {
       const shape = makeshape(outlineSegments[i], outlineSegments[len - i], threshold);
-      (shape.startcap as any).virtual = i > 1;
-      (shape.endcap as any).virtual = i < half - 1;
+      shape.startcap.virtual = i > 1;
+      shape.endcap.virtual = i < half - 1;
       shapes.push(shape);
     }
     return shapes;
@@ -1055,11 +1048,11 @@ export class Bezier {
         if (l.overlaps(r)) pairs.push({ left: l, right: r });
       }
     }
-    let results: string[] = [];
+    const results: string[] = [];
     for (const pair of pairs) {
-      results = results.concat(pairiteration(pair.left, pair.right, threshold));
+      results.push(...pairiteration(pair.left, pair.right, threshold));
     }
-    return results.filter((v, i) => results.indexOf(v) === i);
+    return Array.from(new Set(results));
   }
 
   // ─── Arc approximation ────────────────────────────────────────────────

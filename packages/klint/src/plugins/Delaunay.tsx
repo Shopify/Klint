@@ -629,10 +629,10 @@ function earcutLinked(
   if (!ear) return;
   if (!pass && invSize) indexCurve(ear, minX, minY, invSize);
 
-  let stop = ear;
+  let stop: ENode = ear;
   while (ear!.prev !== ear!.next) {
-    const prev = ear!.prev;
-    const next: ENode | null = ear!.next;
+    const prev: ENode = ear!.prev;
+    const next: ENode = ear!.next;
 
     if (invSize ? isEarHashed(ear!, minX, minY, invSize) : isEar(ear!)) {
       triangles.push((prev.i / dim) | 0);
@@ -774,9 +774,9 @@ function bowyerWatson(points: Point2D[]): Triangle[] {
   for (const point of points) {
     const bad: BWTriangle[] = [];
     for (const tri of triangles) {
-      const dx = point.x - tri.cx;
-      const dy = point.y - tri.cy;
-      if (dx * dx + dy * dy < tri.cr2) bad.push(tri);
+      const pdx = point.x - tri.cx;
+      const pdy = point.y - tri.cy;
+      if (pdx * pdx + pdy * pdy < tri.cr2) bad.push(tri);
     }
 
     const boundary: Array<{ a: Point2D; b: Point2D }> = [];
@@ -1058,13 +1058,23 @@ export class Delaunay {
   static voronoi(
     triangles: Triangle[],
   ): Array<{ x1: number; y1: number; x2: number; y2: number }> {
-    const edges: Array<{ x1: number; y1: number; x2: number; y2: number }> =
-      [];
+    const edges: Array<{ x1: number; y1: number; x2: number; y2: number }> = [];
     const centers = triangles.map((t) => Delaunay.circumcenter(t));
+    const edgeMap = new Map<string, number>();
+    const key = (a: Point2D, b: Point2D) => {
+      const k1 = `${a.x},${a.y}`;
+      const k2 = `${b.x},${b.y}`;
+      return k1 < k2 ? `${k1}|${k2}` : `${k2}|${k1}`;
+    };
 
     for (let i = 0; i < triangles.length; i++) {
-      for (let j = i + 1; j < triangles.length; j++) {
-        if (sharesEdge(triangles[i], triangles[j])) {
+      const { p1, p2, p3 } = triangles[i];
+      for (const [a, b] of [[p1, p2], [p2, p3], [p3, p1]] as const) {
+        const k = key(a, b);
+        const j = edgeMap.get(k);
+        if (j === undefined) {
+          edgeMap.set(k, i);
+        } else {
           edges.push({
             x1: centers[i].x,
             y1: centers[i].y,
@@ -1076,19 +1086,4 @@ export class Delaunay {
     }
     return edges;
   }
-}
-
-function sharesEdge(a: Triangle, b: Triangle): boolean {
-  const av = [a.p1, a.p2, a.p3];
-  const bv = [b.p1, b.p2, b.p3];
-  let shared = 0;
-  for (const ap of av) {
-    for (const bp of bv) {
-      if (ap.x === bp.x && ap.y === bp.y) {
-        shared++;
-        if (shared >= 2) return true;
-      }
-    }
-  }
-  return false;
 }
