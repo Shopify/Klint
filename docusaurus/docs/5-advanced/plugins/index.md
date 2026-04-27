@@ -30,7 +30,7 @@ import { FontParser, Sprites, CatmullRom, Delaunay, MatterPhysics, Projector } f
 | **FontParser** | Load TTF fonts, convert text to vector paths or point arrays | [FontParser](./font-parser) |
 | **Sprites** | Sprite sheet loading, frame drawing, and animation | [Sprites](./sprites) |
 | **CatmullRom** | Smooth curve interpolation through control points | [CatmullRom](./catmull-rom) |
-| **Delaunay** | Delaunay triangulation for point sets | [Delaunay](./delaunay) |
+| **Delaunay** | Delaunay triangulation, earcut polygon triangulation with holes, Voronoi | [Delaunay](./delaunay) |
 | **MatterPhysics** | 2D physics via Matter.js (bodies, constraints, collisions) | [MatterPhysics](./matter-physics) |
 | **Projector** | 3D to 2D projection for pseudo-3D canvas drawing | [Projector](./projector) |
 

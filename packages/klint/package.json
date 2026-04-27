@@ -5,6 +5,7 @@
   "version": "0.4.0",
   "description": "A modern creative coding library",
   "type": "module",
+  "sideEffects": false,
   "main": "dist/index.cjs",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,6 +23,46 @@
       "types": "./dist/plugins/index.d.ts",
       "import": "./dist/plugins/index.js",
       "require": "./dist/plugins/index.cjs"
+    },
+    "./plugins/Bezier": {
+      "types": "./dist/plugins/Bezier.d.ts",
+      "import": "./dist/plugins/Bezier.js",
+      "require": "./dist/plugins/Bezier.cjs"
+    },
+    "./plugins/Polyline": {
+      "types": "./dist/plugins/Polyline.d.ts",
+      "import": "./dist/plugins/Polyline.js",
+      "require": "./dist/plugins/Polyline.cjs"
+    },
+    "./plugins/FontParser": {
+      "types": "./dist/plugins/FontParser.d.ts",
+      "import": "./dist/plugins/FontParser.js",
+      "require": "./dist/plugins/FontParser.cjs"
+    },
+    "./plugins/Catmull": {
+      "types": "./dist/plugins/Catmull.d.ts",
+      "import": "./dist/plugins/Catmull.js",
+      "require": "./dist/plugins/Catmull.cjs"
+    },
+    "./plugins/Delaunay": {
+      "types": "./dist/plugins/Delaunay.d.ts",
+      "import": "./dist/plugins/Delaunay.js",
+      "require": "./dist/plugins/Delaunay.cjs"
+    },
+    "./plugins/MatterPhysics": {
+      "types": "./dist/plugins/MatterPhysics.d.ts",
+      "import": "./dist/plugins/MatterPhysics.js",
+      "require": "./dist/plugins/MatterPhysics.cjs"
+    },
+    "./plugins/Sprites": {
+      "types": "./dist/plugins/Sprites.d.ts",
+      "import": "./dist/plugins/Sprites.js",
+      "require": "./dist/plugins/Sprites.cjs"
+    },
+    "./plugins/Projector": {
+      "types": "./dist/plugins/Projector.d.ts",
+      "import": "./dist/plugins/Projector.js",
+      "require": "./dist/plugins/Projector.cjs"
     }
   },
   "repository": {
