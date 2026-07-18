@@ -35,7 +35,7 @@ K.ellipse(200, 200, 150, 75)
 // In JSX component
 const draw = (K: KlintContext) => {
   // Animated pulsing ellipse
-  const pulse = Math.sin(K.frameCount * 0.05) * 20 + 50
+  const pulse = Math.sin(K.frame * 0.05) * 20 + 50
   K.fillColor("rgba(0, 150, 255, 0.6)")
   K.strokeColor("rgba(0, 0, 255, 0.8)")
   K.strokeWidth(2)

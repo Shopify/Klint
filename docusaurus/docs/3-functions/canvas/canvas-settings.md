@@ -168,7 +168,7 @@ const draw = (K: KlintContext) => {
   }
   
   // Export canvas to base64 on first frame
-  if (K.frameCount === 1) {
+  if (K.frame === 1) {
     const dataUrl = K.toBase64("image/png")
     console.log(dataUrl)
   }
