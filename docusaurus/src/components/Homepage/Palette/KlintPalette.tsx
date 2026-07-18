@@ -52,7 +52,7 @@ export default function KlintPalette() {
       context={context}
       setup={setup}
       draw={draw}
-      options={{ static: "true" }}
+      options={{ static: true }}
     />
   );
 }

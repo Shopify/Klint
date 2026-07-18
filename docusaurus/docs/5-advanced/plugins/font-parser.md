@@ -4,11 +4,11 @@ sidebar_position: 2
 
 # FontParser
 
-The FontParser plugin loads TrueType fonts and converts text into vector paths or point arrays, perfect for custom text rendering and animation.
+The FontParser plugin loads TTF, OTF, WOFF, and WOFF2 fonts and converts text into vector paths or point arrays, perfect for custom text rendering and animation. The universal parser auto-detects the format and is asynchronous.
 
 ## Features
 
-- Load TTF fonts from URLs or buffers
+- Load TTF, OTF, WOFF, and WOFF2 fonts from URLs or buffers
 - Convert text to Path2D objects for rendering
 - Convert text to point arrays for particle effects
 - Full layout control (alignment, spacing, baseline)
@@ -17,8 +17,23 @@ The FontParser plugin loads TrueType fonts and converts text into vector paths o
 
 ## Supported Formats
 
-- TTF (TrueType Font)
-- OTF, WOFF, WOFF2 are not supported — convert to TTF first (e.g. [convertio.co/otf-ttf](http://convertio.co/otf-ttf/))
+- TTF (TrueType outlines, including supported variable-font axes)
+- OTF (static CFF v1 outlines)
+- WOFF
+- WOFF2
+
+CFF2 variable outlines are not yet supported. WOFF2 decoding uses the browser's Brotli `DecompressionStream` when available and Node's Brotli implementation in Node.js. Other runtimes can pass a custom `{brotli}` decoder.
+
+For smaller format-specific bundles, import the parser directly:
+
+```ts
+import {parseTTF} from '@shopify/klint/plugins/FontParser/ttf';
+import {parseOTF} from '@shopify/klint/plugins/FontParser/otf';
+import {parseWOFF} from '@shopify/klint/plugins/FontParser/woff';
+import {parseWOFF2} from '@shopify/klint/plugins/FontParser/woff2';
+```
+
+TTF and OTF parsing is synchronous. WOFF, WOFF2, and the auto-detecting `FontParser` API are asynchronous.
 
 ## Basic Usage
 

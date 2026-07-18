@@ -72,7 +72,7 @@ export default memo(function KlintCanvas({ source, options, onError }: KlintCanv
         draw={wrappedDraw}
         setup={wrappedSetup}
         preload={wrappedPreload}
-        options={{ ...options, unsafemode: "true" }}
+        options={{ ...options, unsafemode: true }}
       />
     </div>
   );

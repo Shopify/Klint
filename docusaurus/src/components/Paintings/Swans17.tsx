@@ -28,7 +28,7 @@ export default function Swans17() {
     <Klint
       context={context}
       draw={draw}
-      options={{ origin: "center", static: "true" }}
+      options={{ origin: "center", static: true }}
     />
   );
 }

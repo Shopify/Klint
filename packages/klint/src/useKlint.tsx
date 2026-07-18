@@ -1,34 +1,19 @@
 import { useRef, useCallback, useEffect, useMemo } from "react";
-import { KlintFunctions, KlintCoreFunctions } from "./KlintFunctions";
-import { KlintCanvasOptions, KlintContext } from "./Klint";
-import {
-  Color,
-  Vector,
-  Easing,
-  Text,
-  Grid,
-  Strip,
-  Noise,
-  Hotspot,
-  Quadtree,
-  Pixels,
-  Timeline,
-} from "./elements";
+import { createKlintContext } from "./KlintContext";
+import type Vector from "./elements/Vector";
+import type {
+  KlintCanvasOptions,
+  KlintContext,
+  KlintContextWrapper,
+  KlintKeyboardState,
+  KlintPointerState,
+  KlintScrollState,
+} from "./KlintTypes";
 
 // Export Vector type as KlintVector
 export type KlintVector = Vector;
 
-export interface KlintMouse {
-  x: number;
-  y: number;
-  px: number;
-  py: number;
-  vx: number;
-  vy: number;
-  angle: number;
-  isPressed: boolean;
-  isHover: boolean;
-}
+export type KlintMouse = KlintPointerState;
 
 const DEFAULT_MOUSE_STATE: KlintMouse = {
   x: 0,
@@ -42,11 +27,7 @@ const DEFAULT_MOUSE_STATE: KlintMouse = {
   isHover: false,
 };
 
-export interface KlintScroll {
-  distance: number;
-  velocity: number;
-  lastTime: number;
-}
+export type KlintScroll = KlintScrollState;
 
 const DEFAULT_SCROLL_STATE: KlintScroll = {
   distance: 0,
@@ -63,8 +44,13 @@ export interface KlintGesture {
   scale: number;
   rotation: number;
   startTime: number;
+  startX: number;
+  startY: number;
+  startRotation: number;
   deltaX: number;
   deltaY: number;
+  totalX: number;
+  totalY: number;
   velocityX: number;
   velocityY: number;
   lastTime: number;
@@ -81,8 +67,13 @@ const DEFAULT_GESTURE_STATE: KlintGesture = {
   scale: 1,
   rotation: 0,
   startTime: 0,
+  startX: 0,
+  startY: 0,
+  startRotation: 0,
   deltaX: 0,
   deltaY: 0,
+  totalX: 0,
+  totalY: 0,
   velocityX: 0,
   velocityY: 0,
   lastTime: 0,
@@ -90,17 +81,7 @@ const DEFAULT_GESTURE_STATE: KlintGesture = {
   lastY: 0,
 };
 
-export interface KlintKeyboard {
-  pressedKeys: Set<string>;
-  modifiers: {
-    alt: boolean;
-    shift: boolean;
-    ctrl: boolean;
-    meta: boolean;
-  };
-  lastKey: string | null;
-  lastKeyTime: number;
-}
+export type KlintKeyboard = KlintKeyboardState;
 
 const DEFAULT_KEYBOARD_STATE: KlintKeyboard = {
   pressedKeys: new Set(),
@@ -120,13 +101,26 @@ export default function useKlint() {
   const scrollRef = useRef<KlintScroll | null>(null);
   const gestureRef = useRef<KlintGesture | null>(null);
   const keyboardRef = useRef<KlintKeyboard | null>(null);
+  const contextSubscribersRef = useRef(
+    new Set<(context: KlintContext | null) => void>(),
+  );
+
+  const subscribeContext = useCallback(
+    (listener: (context: KlintContext | null) => void) => {
+      contextSubscribersRef.current.add(listener);
+      return () => contextSubscribersRef.current.delete(listener);
+    },
+    [],
+  );
+
+  const notifyContextSubscribers = useCallback((value: KlintContext | null) => {
+    contextSubscribersRef.current.forEach((listener) => listener(value));
+  }, []);
 
   const useDev = () => {
-    // Re-enable drawing on every render (covers HMR re-renders)
+    // Re-enable drawing on every render when a sketch opts into HMR support.
     useEffect(() => {
-      if (process.env.NODE_ENV === "development" && contextRef.current) {
-        contextRef.current.__isReadyToDraw = true;
-      }
+      if (contextRef.current) contextRef.current.__isReadyToDraw = true;
     });
   };
 
@@ -205,105 +199,115 @@ export default function useKlint() {
   };
 
   const KlintMouse = () => {
-    if (!mouseRef.current) {
-      mouseRef.current = { ...DEFAULT_MOUSE_STATE };
-    }
-    const clickCallbackRef = useRef<
-      ((ctx: KlintContext, e: MouseEvent) => void) | null
-    >(null);
-    const mouseInCallbackRef = useRef<
-      ((ctx: KlintContext, e: MouseEvent) => void) | null
-    >(null);
-    const mouseOutCallbackRef = useRef<
-      ((ctx: KlintContext, e: MouseEvent) => void) | null
-    >(null);
-    const mouseDownCallbackRef = useRef<
-      ((ctx: KlintContext, e: MouseEvent) => void) | null
-    >(null);
-    const mouseUpCallbackRef = useRef<
-      ((ctx: KlintContext, e: MouseEvent) => void) | null
-    >(null);
+    if (!mouseRef.current) mouseRef.current = { ...DEFAULT_MOUSE_STATE };
+
+    type PointerCallback = (ctx: KlintContext, event: PointerEvent) => void;
+    const clickCallbackRef = useRef<PointerCallback | null>(null);
+    const mouseInCallbackRef = useRef<PointerCallback | null>(null);
+    const mouseOutCallbackRef = useRef<PointerCallback | null>(null);
+    const mouseDownCallbackRef = useRef<PointerCallback | null>(null);
+    const mouseUpCallbackRef = useRef<PointerCallback | null>(null);
 
     useEffect(() => {
-      if (!contextRef.current?.canvas) return;
-      const canvas = contextRef.current.canvas;
-      const ctx = contextRef.current;
-      const controller = new AbortController();
-      const { signal } = controller;
+      let controller: AbortController | undefined;
+      const attach = (nextContext: KlintContext | null) => {
+        controller?.abort();
+        if (!nextContext) return;
+        const canvas = nextContext.canvas;
+        const ctx = nextContext;
+        ctx.mouse = mouseRef.current!;
+        controller = new AbortController();
+        const { signal } = controller;
 
-      const updateMousePosition = (e: MouseEvent) => {
+      const updateMousePosition = (event: PointerEvent) => {
         const rect = canvas.getBoundingClientRect();
-        const dpr = window.devicePixelRatio || 1;
-        const origin = contextRef.current?.__canvasOrigin || "corner";
+        if (!mouseRef.current || rect.width === 0 || rect.height === 0) return;
 
-        const x =
-          origin === "center"
-            ? (e.clientX - rect.left) * dpr - canvas.width / 2
-            : (e.clientX - rect.left) * dpr;
-        const y =
-          origin === "center"
-            ? (e.clientY - rect.top) * dpr - canvas.height / 2
-            : (e.clientY - rect.top) * dpr;
-
-        if (mouseRef.current) {
-          mouseRef.current.px = mouseRef.current.x;
-          mouseRef.current.py = mouseRef.current.y;
-          mouseRef.current.x = x;
-          mouseRef.current.y = y;
-          mouseRef.current.vx = x - mouseRef.current.px;
-          mouseRef.current.vy = y - mouseRef.current.py;
-          mouseRef.current.angle = Math.atan2(
-            mouseRef.current.vy,
-            mouseRef.current.vx,
-          );
+        // Drawing coordinates are logical pixels. The ratio accounts for a
+        // transformed/scaled canvas without exposing backing-store pixels.
+        let x = (event.clientX - rect.left) * (ctx.width / rect.width);
+        let y = (event.clientY - rect.top) * (ctx.height / rect.height);
+        if (ctx.__canvasOrigin === "center") {
+          x -= ctx.width * 0.5;
+          y -= ctx.height * 0.5;
         }
+
+        const mouse = mouseRef.current;
+        mouse.px = mouse.x;
+        mouse.py = mouse.y;
+        mouse.x = x;
+        mouse.y = y;
+        mouse.vx = x - mouse.px;
+        mouse.vy = y - mouse.py;
+        mouse.angle = Math.atan2(mouse.vy, mouse.vx);
       };
 
-      const handleMouseDown = (e: MouseEvent) => {
-        if (mouseRef.current) mouseRef.current.isPressed = true;
-        if (mouseDownCallbackRef.current) mouseDownCallbackRef.current(ctx, e);
+      const handlePointerDown = (event: PointerEvent) => {
+        updateMousePosition(event);
+        mouseRef.current!.isPressed = true;
+        canvas.focus({ preventScroll: true });
+        canvas.setPointerCapture?.(event.pointerId);
+        mouseDownCallbackRef.current?.(ctx, event);
       };
 
-      const handleMouseUp = (e: MouseEvent) => {
-        if (mouseRef.current) mouseRef.current.isPressed = false;
-        if (mouseUpCallbackRef.current) mouseUpCallbackRef.current(ctx, e);
+      const handlePointerUp = (event: PointerEvent) => {
+        updateMousePosition(event);
+        mouseRef.current!.isPressed = false;
+        if (canvas.hasPointerCapture?.(event.pointerId)) {
+          canvas.releasePointerCapture(event.pointerId);
+        }
+        mouseUpCallbackRef.current?.(ctx, event);
       };
 
-      const handleMouseEnter = (e: MouseEvent) => {
-        if (mouseRef.current) mouseRef.current.isHover = true;
-        if (mouseInCallbackRef.current) mouseInCallbackRef.current(ctx, e);
+      const handlePointerCancel = (event: PointerEvent) => {
+        mouseRef.current!.isPressed = false;
+        mouseUpCallbackRef.current?.(ctx, event);
       };
 
-      const handleMouseLeave = (e: MouseEvent) => {
-        if (mouseRef.current) mouseRef.current.isHover = false;
-        if (mouseOutCallbackRef.current) mouseOutCallbackRef.current(ctx, e);
+      const handlePointerEnter = (event: PointerEvent) => {
+        updateMousePosition(event);
+        mouseRef.current!.isHover = true;
+        mouseInCallbackRef.current?.(ctx, event);
       };
 
-      const handleClick = (e: MouseEvent) => {
-        if (clickCallbackRef.current) clickCallbackRef.current(ctx, e);
+      const handlePointerLeave = (event: PointerEvent) => {
+        updateMousePosition(event);
+        mouseRef.current!.isHover = false;
+        mouseOutCallbackRef.current?.(ctx, event);
       };
 
-      canvas.addEventListener("mousemove", updateMousePosition, { signal });
-      canvas.addEventListener("mousedown", handleMouseDown, { signal });
-      canvas.addEventListener("mouseup", handleMouseUp, { signal });
-      canvas.addEventListener("mouseenter", handleMouseEnter, { signal });
-      canvas.addEventListener("mouseleave", handleMouseLeave, { signal });
+      const handleClick = (event: PointerEvent) => {
+        updateMousePosition(event);
+        clickCallbackRef.current?.(ctx, event);
+      };
+
+      canvas.addEventListener("pointermove", updateMousePosition, { signal });
+      canvas.addEventListener("pointerdown", handlePointerDown, { signal });
+      canvas.addEventListener("pointerup", handlePointerUp, { signal });
+      canvas.addEventListener("pointercancel", handlePointerCancel, { signal });
+      canvas.addEventListener("pointerenter", handlePointerEnter, { signal });
+      canvas.addEventListener("pointerleave", handlePointerLeave, { signal });
       canvas.addEventListener("click", handleClick, { signal });
+      };
 
-      return () => controller.abort();
+      const unsubscribe = subscribeContext(attach);
+      attach(contextRef.current);
+      return () => {
+        unsubscribe();
+        controller?.abort();
+      };
     }, []);
 
     return {
       mouse: mouseRef.current,
-      onClick: (callback: (ctx: KlintContext, e: MouseEvent) => void) =>
-        (clickCallbackRef.current = callback),
-      onMouseIn: (callback: (ctx: KlintContext, e: MouseEvent) => void) =>
+      onClick: (callback: PointerCallback) => (clickCallbackRef.current = callback),
+      onMouseIn: (callback: PointerCallback) =>
         (mouseInCallbackRef.current = callback),
-      onMouseOut: (callback: (ctx: KlintContext, e: MouseEvent) => void) =>
+      onMouseOut: (callback: PointerCallback) =>
         (mouseOutCallbackRef.current = callback),
-      onMouseDown: (callback: (ctx: KlintContext, e: MouseEvent) => void) =>
+      onMouseDown: (callback: PointerCallback) =>
         (mouseDownCallbackRef.current = callback),
-      onMouseUp: (callback: (ctx: KlintContext, e: MouseEvent) => void) =>
+      onMouseUp: (callback: PointerCallback) =>
         (mouseUpCallbackRef.current = callback),
     };
   };
@@ -317,30 +321,50 @@ export default function useKlint() {
     >(null);
 
     useEffect(() => {
-      if (!contextRef.current?.canvas) return;
-      const canvas = contextRef.current.canvas;
-      const ctx = contextRef.current;
-      const controller = new AbortController();
-      const { signal } = controller;
+      let controller: AbortController | undefined;
+      const attach = (nextContext: KlintContext | null) => {
+        controller?.abort();
+        if (!nextContext) return;
+        const canvas = nextContext.canvas;
+        const ctx = nextContext;
+        ctx.scroll = scrollRef.current!;
+        controller = new AbortController();
+        const { signal } = controller;
 
-      const handleScroll = (e: WheelEvent) => {
-        e.preventDefault();
+      const handleScroll = (event: WheelEvent) => {
+        event.preventDefault();
         if (!scrollRef.current) return;
 
+        const unit =
+          event.deltaMode === WheelEvent.DOM_DELTA_LINE
+            ? 16
+            : event.deltaMode === WheelEvent.DOM_DELTA_PAGE
+              ? Math.max(ctx.height, 1)
+              : 1;
+        const delta = event.deltaY * unit;
         const currentTime = performance.now();
-        const deltaTime = currentTime - scrollRef.current.lastTime;
+        const deltaTime = scrollRef.current.lastTime
+          ? currentTime - scrollRef.current.lastTime
+          : 0;
 
-        scrollRef.current.distance += e.deltaY;
-        scrollRef.current.velocity = deltaTime > 0 ? e.deltaY / deltaTime : 0;
+        scrollRef.current.distance += delta;
+        scrollRef.current.velocity = deltaTime > 0 ? delta / deltaTime : 0;
         scrollRef.current.lastTime = currentTime;
-
-        if (scrollCallbackRef.current) {
-          scrollCallbackRef.current(ctx, scrollRef.current, e);
-        }
+        scrollCallbackRef.current?.(ctx, scrollRef.current, event);
       };
 
-      canvas.addEventListener("wheel", handleScroll, { signal });
-      return () => controller.abort();
+      canvas.addEventListener("wheel", handleScroll, {
+        signal,
+        passive: false,
+      });
+      };
+
+      const unsubscribe = subscribeContext(attach);
+      attach(contextRef.current);
+      return () => {
+        unsubscribe();
+        controller?.abort();
+      };
     }, []);
 
     return {
@@ -387,206 +411,153 @@ export default function useKlint() {
     const touchEndCallbackRef = useRef<
       ((ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void) | null
     >(null);
+    const touchCancelCallbackRef = useRef<
+      ((ctx: KlintContext, e: TouchEvent, gesture: KlintGesture) => void) | null
+    >(null);
 
     useEffect(() => {
-      if (!contextRef.current?.canvas) return;
-      const canvas = contextRef.current.canvas;
-      const ctx = contextRef.current;
+      let controller: AbortController | undefined;
+      const attach = (nextContext: KlintContext | null) => {
+        controller?.abort();
+        if (!nextContext) return;
+        const canvas = nextContext.canvas;
+        const ctx = nextContext;
 
-      // Calculate distance between two touch points
-      const getDistance = (t1: Touch, t2: Touch): number => {
-        const dx = t1.clientX - t2.clientX;
-        const dy = t1.clientY - t2.clientY;
-        return Math.sqrt(dx * dx + dy * dy);
-      };
+      const getDistance = (first: Touch, second: Touch): number =>
+        Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY);
 
-      // Calculate angle/rotation between two touch points
-      const getAngle = (t1: Touch, t2: Touch): number => {
-        return (
-          (Math.atan2(t2.clientY - t1.clientY, t2.clientX - t1.clientX) * 180) /
-          Math.PI
-        );
-      };
+      const getAngle = (first: Touch, second: Touch): number =>
+        (Math.atan2(
+          second.clientY - first.clientY,
+          second.clientX - first.clientX,
+        ) *
+          180) /
+        Math.PI;
 
       const getTouchCenter = (touches: TouchList): { x: number; y: number } => {
-        if (touches.length === 1) {
-          return {
-            x: touches[0].clientX,
-            y: touches[0].clientY,
-          };
-        }
-
+        const rect = canvas.getBoundingClientRect();
         let sumX = 0;
         let sumY = 0;
-
-        for (let i = 0; i < touches.length; i++) {
-          sumX += touches[i].clientX;
-          sumY += touches[i].clientY;
+        for (let index = 0; index < touches.length; index++) {
+          sumX += touches[index].clientX;
+          sumY += touches[index].clientY;
         }
-
-        return {
-          x: sumX / touches.length,
-          y: sumY / touches.length,
-        };
+        const count = Math.max(1, touches.length);
+        let x = (sumX / count - rect.left) * (ctx.width / Math.max(rect.width, 1));
+        let y = (sumY / count - rect.top) * (ctx.height / Math.max(rect.height, 1));
+        if (ctx.__canvasOrigin === "center") {
+          x -= ctx.width * 0.5;
+          y -= ctx.height * 0.5;
+        }
+        return { x, y };
       };
 
-      const handleTouchStart = (e: TouchEvent) => {
-        if (!gestureRef.current) return;
+      const handleTouchStart = (event: TouchEvent) => {
+        event.preventDefault();
+        const gesture = gestureRef.current;
+        if (!gesture || event.touches.length === 0) return;
 
         const now = performance.now();
-        const touchCenter = getTouchCenter(e.touches);
+        const center = getTouchCenter(event.touches);
+        gesture.active = true;
+        gesture.touches = event.touches;
+        gesture.startTouches = event.touches;
+        gesture.startTime = now;
+        gesture.lastTime = now;
+        gesture.startX = gesture.lastX = center.x;
+        gesture.startY = gesture.lastY = center.y;
+        gesture.deltaX = gesture.deltaY = 0;
+        gesture.totalX = gesture.totalY = 0;
+        gesture.velocityX = gesture.velocityY = 0;
+        gesture.scale = 1;
+        gesture.rotation = 0;
 
-        gestureRef.current.active = true;
-        gestureRef.current.touches = e.touches;
-        gestureRef.current.startTouches = e.touches;
-        gestureRef.current.startTime = now;
-        gestureRef.current.lastTime = now;
-        gestureRef.current.lastX = touchCenter.x;
-        gestureRef.current.lastY = touchCenter.y;
-        gestureRef.current.deltaX = 0;
-        gestureRef.current.deltaY = 0;
-        gestureRef.current.velocityX = 0;
-        gestureRef.current.velocityY = 0;
-
-        // For pinch gesture
-        if (e.touches.length >= 2) {
-          gestureRef.current.startDistance = getDistance(
-            e.touches[0],
-            e.touches[1],
-          );
-          gestureRef.current.currentDistance = gestureRef.current.startDistance;
-          gestureRef.current.scale = 1;
-
-          // Initial rotation
-          gestureRef.current.rotation = getAngle(e.touches[0], e.touches[1]);
+        if (event.touches.length >= 2) {
+          gesture.startDistance = getDistance(event.touches[0], event.touches[1]);
+          gesture.currentDistance = gesture.startDistance;
+          gesture.startRotation = getAngle(event.touches[0], event.touches[1]);
         }
 
-        if (touchStartCallbackRef.current) {
-          touchStartCallbackRef.current(ctx, e, gestureRef.current);
-        }
+        touchStartCallbackRef.current?.(ctx, event, gesture);
       };
 
-      const handleTouchMove = (e: TouchEvent) => {
-        if (!gestureRef.current || !gestureRef.current.active) return;
+      const handleTouchMove = (event: TouchEvent) => {
+        event.preventDefault();
+        const gesture = gestureRef.current;
+        if (!gesture?.active || event.touches.length === 0) return;
 
         const now = performance.now();
-        const deltaTime = now - gestureRef.current.lastTime;
-        const touchCenter = getTouchCenter(e.touches);
-
-        // Update touch list
-        gestureRef.current.touches = e.touches;
-
-        // Calculate deltas and velocities
-        gestureRef.current.deltaX = touchCenter.x - gestureRef.current.lastX;
-        gestureRef.current.deltaY = touchCenter.y - gestureRef.current.lastY;
-
+        const deltaTime = now - gesture.lastTime;
+        const center = getTouchCenter(event.touches);
+        gesture.touches = event.touches;
+        gesture.deltaX = center.x - gesture.lastX;
+        gesture.deltaY = center.y - gesture.lastY;
+        gesture.totalX = center.x - gesture.startX;
+        gesture.totalY = center.y - gesture.startY;
         if (deltaTime > 0) {
-          gestureRef.current.velocityX = gestureRef.current.deltaX / deltaTime;
-          gestureRef.current.velocityY = gestureRef.current.deltaY / deltaTime;
+          gesture.velocityX = gesture.deltaX / deltaTime;
+          gesture.velocityY = gesture.deltaY / deltaTime;
         }
+        gesture.lastTime = now;
+        gesture.lastX = center.x;
+        gesture.lastY = center.y;
 
-        gestureRef.current.lastTime = now;
-        gestureRef.current.lastX = touchCenter.x;
-        gestureRef.current.lastY = touchCenter.y;
-
-        // For pinch gesture
-        if (e.touches.length >= 2) {
-          const currentDistance = getDistance(e.touches[0], e.touches[1]);
-          gestureRef.current.currentDistance = currentDistance;
-
-          // Calculate scale
-          if (gestureRef.current.startDistance > 0) {
-            gestureRef.current.scale =
-              currentDistance / gestureRef.current.startDistance;
+        if (event.touches.length >= 2) {
+          gesture.currentDistance = getDistance(event.touches[0], event.touches[1]);
+          if (gesture.startDistance > 0) {
+            gesture.scale = gesture.currentDistance / gesture.startDistance;
           }
-
-          // Calculate rotation
-          const currentAngle = getAngle(e.touches[0], e.touches[1]);
-          const startAngle = gestureRef.current.rotation;
-          gestureRef.current.rotation = currentAngle - startAngle;
-
-          if (pinchCallbackRef.current) {
-            pinchCallbackRef.current(ctx, e, gestureRef.current);
-          }
-
-          if (
-            rotateCallbackRef.current &&
-            Math.abs(gestureRef.current.rotation) > 5
-          ) {
-            rotateCallbackRef.current(ctx, e, gestureRef.current);
+          gesture.rotation =
+            getAngle(event.touches[0], event.touches[1]) - gesture.startRotation;
+          pinchCallbackRef.current?.(ctx, event, gesture);
+          if (Math.abs(gesture.rotation) > 5) {
+            rotateCallbackRef.current?.(ctx, event, gesture);
           }
         }
 
-        if (touchMoveCallbackRef.current) {
-          touchMoveCallbackRef.current(ctx, e, gestureRef.current);
-        }
+        touchMoveCallbackRef.current?.(ctx, event, gesture);
       };
 
-      const handleTouchEnd = (e: TouchEvent) => {
-        if (
-          !gestureRef.current ||
-          !gestureRef.current.active ||
-          !gestureRef.current.startTouches
-        )
-          return;
+      const handleTouchEnd = (event: TouchEvent) => {
+        const gesture = gestureRef.current;
+        if (!gesture?.active) return;
 
-        const now = performance.now();
-        const touchDuration = now - gestureRef.current.startTime;
+        const duration = performance.now() - gesture.startTime;
+        if (duration < 300 && Math.hypot(gesture.totalX, gesture.totalY) < 10) {
+          tapCallbackRef.current?.(ctx, event, gesture);
+        }
 
-        // Detect tap
-        if (
-          touchDuration < 300 &&
-          Math.abs(gestureRef.current.deltaX) < 10 &&
-          Math.abs(gestureRef.current.deltaY) < 10
-        ) {
-          if (tapCallbackRef.current) {
-            tapCallbackRef.current(ctx, e, gestureRef.current);
+        const horizontal = Math.abs(gesture.totalX) > Math.abs(gesture.totalY);
+        if (swipeCallbackRef.current && duration < 500) {
+          if (horizontal && Math.abs(gesture.totalX) > 50) {
+            swipeCallbackRef.current(
+              ctx,
+              event,
+              gesture,
+              gesture.totalX > 0 ? "right" : "left",
+            );
+          } else if (!horizontal && Math.abs(gesture.totalY) > 50) {
+            swipeCallbackRef.current(
+              ctx,
+              event,
+              gesture,
+              gesture.totalY > 0 ? "down" : "up",
+            );
           }
         }
 
-        // Detect swipe
-        const swipeThreshold = 50;
-        const isHorizontalSwipe =
-          Math.abs(gestureRef.current.deltaX) >
-          Math.abs(gestureRef.current.deltaY);
-
-        if (swipeCallbackRef.current && touchDuration < 300) {
-          if (
-            isHorizontalSwipe &&
-            Math.abs(gestureRef.current.deltaX) > swipeThreshold
-          ) {
-            const direction = gestureRef.current.deltaX > 0 ? "right" : "left";
-            swipeCallbackRef.current(ctx, e, gestureRef.current, direction);
-          } else if (
-            !isHorizontalSwipe &&
-            Math.abs(gestureRef.current.deltaY) > swipeThreshold
-          ) {
-            const direction = gestureRef.current.deltaY > 0 ? "down" : "up";
-            swipeCallbackRef.current(ctx, e, gestureRef.current, direction);
-          }
-        }
-
-        if (touchEndCallbackRef.current) {
-          touchEndCallbackRef.current(ctx, e, gestureRef.current);
-        }
-
-        // Reset state if no more touches
-        if (e.touches.length === 0) {
-          gestureRef.current.active = false;
-        }
+        touchEndCallbackRef.current?.(ctx, event, gesture);
+        if (event.touches.length === 0) gesture.active = false;
       };
 
-      const handleTouchCancel = (e: TouchEvent) => {
-        if (!gestureRef.current) return;
-
-        gestureRef.current.active = false;
-
-        if (touchEndCallbackRef.current) {
-          touchEndCallbackRef.current(ctx, e, gestureRef.current);
-        }
+      const handleTouchCancel = (event: TouchEvent) => {
+        const gesture = gestureRef.current;
+        if (!gesture) return;
+        gesture.active = false;
+        touchCancelCallbackRef.current?.(ctx, event, gesture);
       };
 
-      const controller = new AbortController();
+      controller = new AbortController();
       const { signal } = controller;
 
       canvas.addEventListener("touchstart", handleTouchStart, {
@@ -599,8 +570,14 @@ export default function useKlint() {
       });
       canvas.addEventListener("touchend", handleTouchEnd, { signal });
       canvas.addEventListener("touchcancel", handleTouchCancel, { signal });
+      };
 
-      return () => controller.abort();
+      const unsubscribe = subscribeContext(attach);
+      attach(contextRef.current);
+      return () => {
+        unsubscribe();
+        controller?.abort();
+      };
     }, []);
 
     return {
@@ -655,6 +632,13 @@ export default function useKlint() {
           gesture: KlintGesture,
         ) => void,
       ) => (touchEndCallbackRef.current = callback),
+      onTouchCancel: (
+        callback: (
+          ctx: KlintContext,
+          e: TouchEvent,
+          gesture: KlintGesture,
+        ) => void,
+      ) => (touchCancelCallbackRef.current = callback),
     };
   };
 
@@ -687,10 +671,15 @@ export default function useKlint() {
     };
 
     useEffect(() => {
-      if (!contextRef.current) return;
-      const ctx = contextRef.current;
-      const controller = new AbortController();
-      const { signal } = controller;
+      let controller: AbortController | undefined;
+      const attach = (nextContext: KlintContext | null) => {
+        controller?.abort();
+        if (!nextContext) return;
+        const ctx = nextContext;
+        const canvas = ctx.canvas;
+        ctx.keyboard = keyboardRef.current!;
+        controller = new AbortController();
+        const { signal } = controller;
 
       const updateModifiers = (e: KeyboardEvent) => {
         if (!keyboardRef.current) return;
@@ -744,11 +733,31 @@ export default function useKlint() {
         }
       };
 
-      // Listen on window for global keyboard events
-      window.addEventListener("keydown", handleKeyDown, { signal });
-      window.addEventListener("keyup", handleKeyUp, { signal });
+      const clearPressedKeys = () => {
+        if (!keyboardRef.current) return;
+        keyboardRef.current.pressedKeys.clear();
+        keyboardRef.current.modifiers = {
+          alt: false,
+          shift: false,
+          ctrl: false,
+          meta: false,
+        };
+      };
 
-      return () => controller.abort();
+      // Keyboard input is scoped to the focusable canvas instead of capturing
+      // keys globally from forms and assistive-technology controls.
+      canvas.addEventListener("keydown", handleKeyDown, { signal });
+      canvas.addEventListener("keyup", handleKeyUp, { signal });
+      canvas.addEventListener("blur", clearPressedKeys, { signal });
+      window.addEventListener("blur", clearPressedKeys, { signal });
+      };
+
+      const unsubscribe = subscribeContext(attach);
+      attach(contextRef.current);
+      return () => {
+        unsubscribe();
+        controller?.abort();
+      };
     }, []);
 
     return {
@@ -811,10 +820,13 @@ export default function useKlint() {
     >(null);
 
     useEffect(() => {
-      if (!contextRef.current) return;
-      const ctx = contextRef.current;
-      const controller = new AbortController();
-      const { signal } = controller;
+      let controller: AbortController | undefined;
+      const attach = (nextContext: KlintContext | null) => {
+        controller?.abort();
+        if (!nextContext) return;
+        const ctx = nextContext;
+        controller = new AbortController();
+        const { signal } = controller;
 
       const handleResize = () => {
         if (resizeCallbackRef.current) resizeCallbackRef.current(ctx);
@@ -841,8 +853,14 @@ export default function useKlint() {
       document.addEventListener("visibilitychange", handleVisibilityChange, {
         signal,
       });
+      };
 
-      return () => controller.abort();
+      const unsubscribe = subscribeContext(attach);
+      attach(contextRef.current);
+      return () => {
+        unsubscribe();
+        controller?.abort();
+      };
     }, []);
 
     return {
@@ -858,77 +876,39 @@ export default function useKlint() {
     };
   };
 
-  const buildKlintContext = (
-    ctx: CanvasRenderingContext2D,
-    options: KlintCanvasOptions,
-  ): KlintContext => {
-    const context = ctx as unknown as KlintContext;
-    // Initialize core properties
-    context.__isMainContext = true;
-    context.fps = 60;
-    context.frame = 0;
-    context.time = 0;
-    context.deltaTime = 0;
-
-    // Initialize defaults
-
-    context.__imageOrigin = options.origin === "center" ? "center" : "corner";
-    context.__rectangleOrigin =
-      options.origin === "center" ? "center" : "corner";
-    context.__canvasOrigin = options.origin === "center" ? "center" : "corner";
-    context.__textFont = "sans-serif";
-    context.__textWeight = "normal";
-    context.__textStyle = "normal";
-    context.__textSize = 72;
-    context.__textLeading = undefined;
-    context.__textAlignment = {
-      horizontal: "left" as CanvasTextAlign,
-      vertical: "top" as CanvasTextBaseline,
-    };
-    context.__fillRule = "nonzero";
-    context.__offscreens = new Map();
-    context.__isPlaying = true;
-    context.__currentContext = context;
-
-    // Add Klint Elements
-    context.Color = new Color();
-    context.createVector = (x = 0, y = 0) => new Vector(x, y);
-    context.Vector = new Vector();
-    context.Easing = new Easing();
-    context.Text = new Text(context);
-    context.Grid = new Grid(context);
-    context.Strip = new Strip(context);
-    context.Noise = new Noise(context);
-    context.Hotspot = new Hotspot(context);
-    context.Quadtree = Quadtree;
-    context.Pixels = new Pixels(context);
-    context.Timeline = new Timeline();
-
-    // Add Klint core functions
-    Object.entries(KlintCoreFunctions).forEach(([name, fn]) => {
-      context[name] = fn(context as unknown as KlintContext);
-    });
-    // Add Klint functions
-    Object.entries(KlintFunctions).forEach(([name, fn]) => {
-      context[name] = fn(context as unknown as KlintContext);
-    });
-
-    return context;
-  };
-
   const initCoreContext = useCallback(
     (canvas: HTMLCanvasElement, options: KlintCanvasOptions): KlintContext => {
-      if (!contextRef.current) {
-        const ctx = canvas.getContext("2d", {
-          alpha: options.alpha ?? true,
-          willReadFrequently: options.willreadfrequently ?? true,
-        }) as CanvasRenderingContext2D;
-        if (!ctx) throw new Error("Failed to get canvas context");
-        contextRef.current = buildKlintContext(ctx, options);
+      if (contextRef.current?.canvas !== canvas) {
+        if (contextRef.current) {
+          contextRef.current.__isPlaying = false;
+          contextRef.current.__offscreens.clear();
+        }
+        contextRef.current = createKlintContext(canvas, options);
+        notifyContextSubscribers(contextRef.current);
       }
       return contextRef.current;
     },
-    [],
+    [notifyContextSubscribers],
+  );
+
+  const releaseCoreContext = useCallback((canvas: HTMLCanvasElement) => {
+    if (contextRef.current?.canvas !== canvas) return;
+    contextRef.current.__isPlaying = false;
+    contextRef.current.__offscreens.clear();
+    contextRef.current = null;
+    notifyContextSubscribers(null);
+  }, [notifyContextSubscribers]);
+
+  const context = useMemo<KlintContextWrapper>(
+    () => ({
+      get context() {
+        return contextRef.current;
+      },
+      initCoreContext,
+      releaseCoreContext,
+      subscribe: subscribeContext,
+    }),
+    [initCoreContext, releaseCoreContext, subscribeContext],
   );
 
   const togglePlay = useCallback((playing?: boolean) => {
@@ -942,16 +922,19 @@ export default function useKlint() {
   }, []);
 
   return {
-    context: {
-      context: contextRef.current,
-      initCoreContext,
-    },
+    context,
     KlintMouse,
     KlintScroll,
     KlintGesture,
     KlintKeyboard,
     KlintWindow,
     KlintImage,
+    useMouse: KlintMouse,
+    useScroll: KlintScroll,
+    useGesture: KlintGesture,
+    useKeyboard: KlintKeyboard,
+    useWindow: KlintWindow,
+    useImage: KlintImage,
     togglePlay,
     useDev,
   };

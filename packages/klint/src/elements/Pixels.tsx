@@ -1,4 +1,4 @@
-import { KlintContexts } from "../Klint";
+import type { KlintContexts } from "../KlintTypes";
 
 /**
  * Pixels Element for Klint
@@ -30,7 +30,7 @@ export default class Pixels {
    * Read all pixels from the canvas as ImageData.
    */
   load(): ImageData {
-    return this.ctx.getImageData(0, 0, this.ctx.width, this.ctx.height);
+    return this.ctx.getImageData(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
   }
 
   /**
@@ -44,8 +44,8 @@ export default class Pixels {
         : new Uint8ClampedArray(pixels);
     const imageData = new ImageData(
       new Uint8ClampedArray(pixelArray.buffer as ArrayBuffer),
-      this.ctx.width,
-      this.ctx.height,
+      this.ctx.canvas.width,
+      this.ctx.canvas.height,
     );
     this.ctx.putImageData(imageData, 0, 0);
   }
@@ -60,7 +60,12 @@ export default class Pixels {
    * @param h - Height of region (default: 1)
    */
   read(x: number, y: number, w = 1, h = 1): number[] {
-    const imageData = this.ctx.getImageData(x, y, w, h);
+    const imageData = this.ctx.getImageData(
+      Math.round(x * this.ctx.dpr),
+      Math.round(y * this.ctx.dpr),
+      Math.max(1, Math.round(w * this.ctx.dpr)),
+      Math.max(1, Math.round(h * this.ctx.dpr)),
+    );
     return Array.from(imageData.data);
   }
 }

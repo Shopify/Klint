@@ -1,4 +1,4 @@
-import { KlintContexts } from "../Klint";
+import type { KlintContexts } from "../KlintTypes";
 
 type TextMetrics = {
   width: number;
@@ -73,36 +73,42 @@ class Text implements KlintText {
     text: string,
     dist: number,
     estimate?: number,
-    direction: "x" | "y" = "x"
+    direction: "x" | "y" = "x",
   ) => {
-    let low = 1;
-    let high = estimate || this.context.__textSize * 2;
-    let lastValidSize = low;
+    if (!Number.isFinite(dist) || dist <= 0) return 0;
 
-    // Binary search with a maximum of 16 iterations for performance
-    for (let i = 0; i < 16; i++) {
-      const mid = Math.floor((low + high) / 2);
-      this.context.__textSize = mid;
-
+    const context = this.context;
+    const originalSize = context.__textSize;
+    const measureAt = (size: number) => {
+      context.__textSize = size;
+      context.computeFont();
       const bounds = this.textBounds(text);
-      const size = direction === "x" ? bounds.width : bounds.height;
+      return direction === "x" ? bounds.width : bounds.height;
+    };
 
-      if (size === dist) {
-        return mid;
-      } else if (size < dist) {
-        lastValidSize = mid;
-        low = mid + 1;
+    let low = 1;
+    let high = Math.max(1, Math.ceil(estimate ?? originalSize));
+    while (measureAt(high) < dist && high < 1_000_000) high *= 2;
+    let result = 0;
+
+    while (low <= high) {
+      const middle = Math.floor((low + high) / 2);
+      if (measureAt(middle) <= dist) {
+        result = middle;
+        low = middle + 1;
       } else {
-        high = mid - 1;
+        high = middle - 1;
       }
     }
 
-    // Return the last known good size that fits
-    return lastValidSize;
+    context.__textSize = originalSize;
+    context.computeFont();
+    return result;
   };
 
   getTextMetrics = (text: string): TextMetrics => {
     const ctx = this.context;
+    ctx.computeFont();
     const metrics = ctx.measureText(text);
 
     return {
@@ -317,9 +323,7 @@ class Text implements KlintText {
   };
 
   textBounds = (text: string) => {
-    if (this.context.font !== this.context.__computedTextFont) {
-      this.context.font = this.context.__computedTextFont;
-    }
+    this.context.computeFont();
     const metrics = this.context.measureText(text);
     return {
       x: metrics.actualBoundingBoxLeft * -1,

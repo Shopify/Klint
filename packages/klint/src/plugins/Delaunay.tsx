@@ -1,4 +1,4 @@
-import { KlintContext } from "../Klint";
+import type { KlintContext } from "../KlintTypes";
 
 export interface Triangle {
   p1: { x: number; y: number };

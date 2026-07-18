@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.19"
+          cache: npm
+
+      - name: Install exact dependencies
+        run: npm ci
+
+      - name: Lint Klint
+        run: npm run lint --workspace=packages/klint
+
+      - name: Type-check packages and docs
+        run: npm run typecheck
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build release artifacts
+        run: npm run build
+
+      - name: Runtime-test built artifacts
+        run: npm run smoke --workspace=packages/klint
+
+      - name: Build documentation
+        run: npm run build:docs
+
+      - name: Smoke-test packed ESM, CommonJS, native, and plugin exports
+        shell: bash
+        run: |
+          set -euo pipefail
+          pack_dir="$RUNNER_TEMP/klint-pack"
+          smoke_dir="$RUNNER_TEMP/klint-smoke"
+          mkdir -p "$pack_dir" "$smoke_dir"
+
+          npm pack --workspace=packages/klint --pack-destination "$pack_dir"
+          package_tarball="$(find "$pack_dir" -name 'shopify-klint-*.tgz' -print -quit)"
+          test -n "$package_tarball"
+          tar -tzf "$package_tarball" | grep -q 'package/LICENSE'
+          tar -tzf "$package_tarball" | grep -q 'package/THIRD_PARTY_NOTICES.md'
+
+          cd "$smoke_dir"
+          npm init -y >/dev/null
+          npm install --ignore-scripts "$package_tarball" react@18 react-dom@18
+
+          node --input-type=module <<'NODE'
+          const core = await import('@shopify/klint');
+          const native = await import('@shopify/klint/native');
+          const fonts = await import('@shopify/klint/plugins/FontParser');
+          const ttf = await import('@shopify/klint/plugins/FontParser/ttf');
+          if (typeof core.Klint !== 'function') throw new Error('Missing ESM Klint export');
+          if (typeof native.createKlint !== 'function') throw new Error('Missing ESM native export');
+          if (typeof fonts.FontParser !== 'function') throw new Error('Missing ESM FontParser export');
+          if (typeof ttf.parseTTF !== 'function') throw new Error('Missing ESM TTF export');
+          NODE
+
+          node <<'NODE'
+          const core = require('@shopify/klint');
+          const native = require('@shopify/klint/native');
+          const fonts = require('@shopify/klint/plugins/FontParser');
+          const ttf = require('@shopify/klint/plugins/FontParser/ttf');
+          if (typeof core.Klint !== 'function') throw new Error('Missing CJS Klint export');
+          if (typeof native.createKlint !== 'function') throw new Error('Missing CJS native export');
+          if (typeof fonts.FontParser !== 'function') throw new Error('Missing CJS FontParser export');
+          if (typeof ttf.parseTTF !== 'function') throw new Error('Missing CJS TTF export');
+          NODE

@@ -1,6 +1,6 @@
 {
   "name": "klint-monorepo",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
   "description": "Klint - Modern creative coding library",
@@ -8,8 +8,7 @@
   "license": "MIT",
   "workspaces": [
     "packages/klint",
-    "docusaurus",
-    "klint-editor"
+    "docusaurus"
   ],
   "scripts": {
     "build": "npm run build --workspace=packages/klint",
@@ -17,20 +16,26 @@
     "dev": "npm run dev --workspaces --if-present",
     "dev:klint": "npm run dev --workspace=packages/klint",
     "dev:docs": "npm run start --workspace=docusaurus",
-    "dev:editor": "npm run dev --workspace=klint-editor",
     "test": "npm run test --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present",
+    "lint": "npm run lint --workspace=packages/klint",
+    "typecheck": "npm run typecheck --workspace=packages/klint && npm run typecheck --workspace=docusaurus",
+    "quality": "npm run lint && npm run typecheck && npm test && npm run build && npm run smoke --workspace=packages/klint && npm run build:docs",
     "clean": "npm run clean --workspaces --if-present",
     "publish:all": "npm run build && npm publish --workspace=packages/klint --access public",
     "sandbox": "npx @shopify/klint klint-create-sandbox"
   },
   "devDependencies": {
     "rimraf": "^5.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "webpack": "5.105.4"
+  },
+  "overrides": {
+    "serialize-javascript": "7.0.5",
+    "webpack": "5.105.4"
   },
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0"
+    "node": ">=20.19.0",
+    "npm": ">=10.0.0"
   },
   "repository": {
     "type": "git",

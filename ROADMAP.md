@@ -22,6 +22,7 @@
 - [ ] Text element : add animation callback
 
 ###  Plugins
+- [ ] Physics — revisit as a dependency-free 2D plugin after the 0.5 stabilization release; no scaffold ships in 0.5
 - [ ] Auto Responsive grid/Layout : CSS-like responsivenes - to think about
 - [ ] Rubber Band 
 - [ ] Layouts : divided grids
@@ -49,6 +50,7 @@
 - [ ] True SSR => return base64
 
 ### Considerations 
+- [ ] Native adapter touch-gesture callbacks with parity to the React gesture hook
 - [ ] a `center()` function
 - [ ] Await fontLoaded in preload()
 - [ ] From Bytes, From base64

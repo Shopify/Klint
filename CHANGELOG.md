@@ -1,19 +1,35 @@
 # Changelog
 
-## v0.4.0 (Unreleased)
+## v0.5.0 (Unreleased)
 
 ### Added
-- **Bezier plugin** — full Bézier curve library (construction, evaluation, splitting, offset, outline, intersections, arc approximation)
-- **Polyline plugin** — multi-segment curve paths with smooth/simplify operations
-- **Delaunay plugin** — proper Bowyer-Watson Delaunay triangulation (replaces previous stub), Voronoi diagram generation (`voronoi`), earcut polygon triangulation with holes (`earcut`, `triangulatePolygon`, `drawPolygon`, `flatten`, `deviation`)
-- Per-plugin deep imports (`@shopify/klint/plugins/Bezier`, `/Polyline`, etc.) with code splitting
+- **Vanilla JavaScript runtime** — `createKlint()` is available from `@shopify/klint/native` without loading React.
+- **Bezier plugin** — full Bézier curve construction, evaluation, splitting, offsets, outlines, intersections, and arc approximation.
+- **Polyline plugin** — multi-segment curve paths with smooth and simplify operations.
+- **Delaunay plugin** — Bowyer-Watson triangulation, Voronoi generation, and Earcut polygon triangulation with holes.
+- Format-specific, tree-shakeable font parser exports for TTF, OTF, WOFF, and WOFF2.
+- Canvas loading/error components, lifecycle callbacks, canvas attributes, `ResizeObserver` sizing, and focused keyboard input.
+- Root/package MIT licenses and third-party notices.
 
 ### Changed
-- **FontParser plugin**: Refactored to lazy-loaded `.mjs` bundle (~13 KB / ~5 KB gzipped), no longer inlined in the main plugins bundle
-- **Build**: Added `tsup.config.ts`, simplified build scripts in `package.json`
-- **FontParser tests**: Expanded test coverage with real font fixtures (Inter Variable, Jost Regular)
+- Canvas dimensions, drawing, pointer input, offscreens, text, and pixels now use a defined logical-pixel model with DPR-scaled backing stores.
+- Canvas options now use booleans instead of `"true"`/`"false"` strings. Legacy strings are normalized at runtime for migration safety.
+- The React adapter keeps one canvas/context across prop rerenders, updates callbacks through refs, and pauses timing while hidden or paused.
+- Font parsing now uses the readable `arthurcloche/font-parsers` sources. The universal `FontParser.loadFromBuffer()` is asynchronous; TTF/OTF deep imports retain synchronous parsing.
+- Tests now import production code and include React lifecycle, input, DPR, native-adapter, timeline, path, offscreen, and packed-artifact coverage.
+- Release builds are minified and code-split, with ESM/CommonJS/type exports checked in CI.
 
 ### Fixed
+- CommonJS no longer contains raw `import.meta`; FontParser chunks resolve in ESM, CommonJS, and browser production builds.
+- Fixed negative exact multiples in `fract()`, invalid units in approximate `distance()`, stale draw closures, terminal pause behavior, resize/remount context reuse, and resume timing jumps.
+- Fixed path/contour state leaks, `clipTo()` restoration on errors, logical offscreen sizing, static data-URL conversion, pixel DPR access, text sizing/font shorthand, paragraph line breaks, color transformations, and timeline loops/callbacks.
+- Pointer capture/cancellation, wheel delta normalization, gesture totals/rotation, keyboard focus scoping, and input listener reattachment now behave consistently.
+- Extension collisions now warn unless replacement is explicitly requested.
+
+### Removed
+- Physics scaffolds and MatterPhysics. Physics remains a future roadmap item and no throwing placeholder ships in 0.5.
+- The experimental WebGPU and web-component implementations.
+- The obsolete external `@shopify/klint-plugins` CLI installation flow.
 
 ---
 

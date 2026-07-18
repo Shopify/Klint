@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Bezier, dist, type Point } from "../../src/plugins/Bezier";
+import { Bezier, type Point } from "../../src/plugins/Bezier";
 import { Polyline, smoothPath, simplifyPath } from "../../src/plugins/Polyline";
 
 // ─── Construction ────────────────────────────────────────────────────────────

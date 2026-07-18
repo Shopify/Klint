@@ -22,7 +22,7 @@
  * ```
  */
 
-import { KlintContext } from "../Klint";
+import type { KlintContext } from "../KlintTypes";
 import {
   type Point,
   type BBox,
@@ -338,6 +338,14 @@ export class Polyline {
     return ctx;
   }
 
+  private _resolveDraw(args: unknown[]): [KlintContext, unknown[]] {
+    const first = args[0];
+    if (first != null && typeof first === "object") {
+      return [this._k(first as KlintContext), args.slice(1)];
+    }
+    return [this._k(), args];
+  }
+
   // ─── Static constructors ────────────────────────────────────────────────
 
   static fromPoints(points: Point[], closed = false, ctx?: KlintContext): Polyline {
@@ -425,10 +433,7 @@ export class Polyline {
     if (this._lut.length === steps + 1) return this._lut;
     this._lut = [];
     for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      const p = this.get(t);
-      p.t = t;
-      this._lut.push(p);
+      this._lut.push(this.get(i / steps));
     }
     return this._lut;
   }
@@ -512,16 +517,12 @@ export class Polyline {
     for (const segment of reduced) {
       const slen = segment.length();
       if (graduated) {
-        const fDist = (v: number) => {
-          const f1 = alen / tlen, f2 = (alen + slen) / tlen;
-          return mapVal(v, 0, 1, d1 + f1 * (d3! - d1), d1 + f2 * (d3! - d1));
-        };
-        const bDist = (v: number) => {
-          const f1 = alen / tlen, f2 = (alen + slen) / tlen;
-          return mapVal(v, 0, 1, -d2! + f1 * (-d4! + d2!), -d2! + f2 * (-d4! + d2!));
-        };
-        fcurves.push(segment.scale(fDist));
-        bcurves.push(segment.scale(bDist));
+        const f1 = alen / tlen, f2 = (alen + slen) / tlen;
+        const fdd = d3! - d1, bdd = -d4! + d2!;
+        const fLo = d1 + f1 * fdd, fHi = d1 + f2 * fdd;
+        const bLo = -d2! + f1 * bdd, bHi = -d2! + f2 * bdd;
+        fcurves.push(segment.scale((v: number) => mapVal(v, 0, 1, fLo, fHi)));
+        bcurves.push(segment.scale((v: number) => mapVal(v, 0, 1, bLo, bHi)));
       } else {
         fcurves.push(segment.scale(d1));
         bcurves.push(segment.scale(-d2));
@@ -696,12 +697,8 @@ export class Polyline {
   drawSkeleton(K: KlintContext, pointSize?: number): void;
   drawSkeleton(pointSize?: number): void;
   drawSkeleton(...args: unknown[]): void {
-    let ctx: KlintContext, ps: number;
-    if (typeof args[0] === "number" || args[0] == null) {
-      ctx = this._k(); ps = (args[0] as number) ?? 3;
-    } else {
-      ctx = this._k(args[0] as KlintContext); ps = (args[1] as number) ?? 3;
-    }
+    const [ctx, rest] = this._resolveDraw(args);
+    const ps = (rest[0] as number) ?? 3;
     ctx.push();
     for (const seg of this.segments) seg.drawSkeleton(ctx, ps);
     ctx.pop();
@@ -710,12 +707,9 @@ export class Polyline {
   drawNormals(K: KlintContext, count?: number, length?: number): void;
   drawNormals(count?: number, length?: number): void;
   drawNormals(...args: unknown[]): void {
-    let ctx: KlintContext, cnt: number, len: number;
-    if (typeof args[0] === "number" || args[0] == null) {
-      ctx = this._k(); cnt = (args[0] as number) ?? 20; len = (args[1] as number) ?? 20;
-    } else {
-      ctx = this._k(args[0] as KlintContext); cnt = (args[1] as number) ?? 20; len = (args[2] as number) ?? 20;
-    }
+    const [ctx, rest] = this._resolveDraw(args);
+    const cnt = (rest[0] as number) ?? 20;
+    const len = (rest[1] as number) ?? 20;
     ctx.push();
     for (let i = 0; i <= cnt; i++) {
       const t = i / cnt;
@@ -729,13 +723,10 @@ export class Polyline {
   drawOutline(K: KlintContext, d1: number, d2?: number, d3?: number, d4?: number): void;
   drawOutline(d1: number, d2?: number, d3?: number, d4?: number): void;
   drawOutline(...args: unknown[]): void {
-    let ctx: KlintContext, d1: number, d2: number | undefined, d3: number | undefined, d4: number | undefined;
-    if (typeof args[0] === "number") {
-      ctx = this._k(); d1 = args[0]; d2 = args[1] as number; d3 = args[2] as number; d4 = args[3] as number;
-    } else {
-      ctx = this._k(args[0] as KlintContext); d1 = args[1] as number; d2 = args[2] as number; d3 = args[3] as number; d4 = args[4] as number;
-    }
-    const path2d = this.outline(d1, d2, d3, d4).toPath2D();
+    const [ctx, rest] = this._resolveDraw(args);
+    const path2d = this.outline(
+      rest[0] as number, rest[1] as number, rest[2] as number, rest[3] as number,
+    ).toPath2D();
     path2d.closePath();
     ctx.stroke(path2d);
   }
@@ -743,13 +734,10 @@ export class Polyline {
   drawOutlineFilled(K: KlintContext, d1: number, d2?: number, d3?: number, d4?: number): void;
   drawOutlineFilled(d1: number, d2?: number, d3?: number, d4?: number): void;
   drawOutlineFilled(...args: unknown[]): void {
-    let ctx: KlintContext, d1: number, d2: number | undefined, d3: number | undefined, d4: number | undefined;
-    if (typeof args[0] === "number") {
-      ctx = this._k(); d1 = args[0]; d2 = args[1] as number; d3 = args[2] as number; d4 = args[3] as number;
-    } else {
-      ctx = this._k(args[0] as KlintContext); d1 = args[1] as number; d2 = args[2] as number; d3 = args[3] as number; d4 = args[4] as number;
-    }
-    const path2d = this.outline(d1, d2, d3, d4).toPath2D();
+    const [ctx, rest] = this._resolveDraw(args);
+    const path2d = this.outline(
+      rest[0] as number, rest[1] as number, rest[2] as number, rest[3] as number,
+    ).toPath2D();
     path2d.closePath();
     ctx.fill(path2d);
   }
@@ -757,12 +745,9 @@ export class Polyline {
   drawPoints(K: KlintContext, count?: number, radius?: number): void;
   drawPoints(count?: number, radius?: number): void;
   drawPoints(...args: unknown[]): void {
-    let ctx: KlintContext, cnt: number, r: number;
-    if (typeof args[0] === "number" || args[0] == null) {
-      ctx = this._k(); cnt = (args[0] as number) ?? 50; r = (args[1] as number) ?? 2;
-    } else {
-      ctx = this._k(args[0] as KlintContext); cnt = (args[1] as number) ?? 50; r = (args[2] as number) ?? 2;
-    }
+    const [ctx, rest] = this._resolveDraw(args);
+    const cnt = (rest[0] as number) ?? 50;
+    const r = (rest[1] as number) ?? 2;
     ctx.push();
     for (let i = 0; i <= cnt; i++) {
       const p = this.get(i / cnt);

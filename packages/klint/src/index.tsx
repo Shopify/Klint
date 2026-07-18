@@ -1,6 +1,12 @@
 import Klint from "./Klint";
 import useKlint, { useProps, useStorage } from "./useKlint";
-import { type KlintMouse, type KlintScroll } from "./useKlint";
+import type {
+  KlintGesture,
+  KlintKeyboard,
+  KlintMouse,
+  KlintScroll,
+  KlintVector,
+} from "./useKlint";
 
 import { KlintCoreFunctions, KlintFunctions } from "./KlintFunctions";
 
@@ -13,8 +19,11 @@ export {
   useProps,
   useStorage,
   // Types
+  type KlintGesture,
+  type KlintKeyboard,
   type KlintMouse,
   type KlintScroll,
+  type KlintVector,
   // Functions
   KlintCoreFunctions,
   KlintFunctions,

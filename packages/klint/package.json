@@ -1,23 +1,39 @@
 {
   "name": "@shopify/klint",
-  "author": "arthurcloche",
+  "version": "0.5.0",
+  "description": "A compact immediate-mode Canvas 2D toolkit for React and vanilla JavaScript",
   "license": "MIT",
-  "version": "0.4.0",
-  "description": "A modern creative coding library",
-  "type": "module",
-  "sideEffects": false,
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "bin": {
-    "klint-create-editor": "bin/create-editor",
-    "klint-create-sandbox": "bin/create-sandbox"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shopify/klint.git",
+    "directory": "packages/klint"
   },
+  "homepage": "https://shopify.github.io/klint/",
+  "bugs": "https://github.com/Shopify/klint/issues",
+  "author": "Shopify",
+  "keywords": [
+    "react",
+    "canvas",
+    "creative-coding",
+    "generative-art",
+    "graphics",
+    "animation",
+    "2d"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./native": {
+      "types": "./dist/native.d.ts",
+      "import": "./dist/native.js",
+      "require": "./dist/native.cjs"
     },
     "./plugins": {
       "types": "./dist/plugins/index.d.ts",
@@ -39,6 +55,26 @@
       "import": "./dist/plugins/FontParser.js",
       "require": "./dist/plugins/FontParser.cjs"
     },
+    "./plugins/FontParser/ttf": {
+      "types": "./dist/plugins/FontParserTTF.d.ts",
+      "import": "./dist/plugins/FontParserTTF.js",
+      "require": "./dist/plugins/FontParserTTF.cjs"
+    },
+    "./plugins/FontParser/otf": {
+      "types": "./dist/plugins/FontParserOTF.d.ts",
+      "import": "./dist/plugins/FontParserOTF.js",
+      "require": "./dist/plugins/FontParserOTF.cjs"
+    },
+    "./plugins/FontParser/woff": {
+      "types": "./dist/plugins/FontParserWOFF.d.ts",
+      "import": "./dist/plugins/FontParserWOFF.js",
+      "require": "./dist/plugins/FontParserWOFF.cjs"
+    },
+    "./plugins/FontParser/woff2": {
+      "types": "./dist/plugins/FontParserWOFF2.d.ts",
+      "import": "./dist/plugins/FontParserWOFF2.js",
+      "require": "./dist/plugins/FontParserWOFF2.cjs"
+    },
     "./plugins/Catmull": {
       "types": "./dist/plugins/Catmull.d.ts",
       "import": "./dist/plugins/Catmull.js",
@@ -49,11 +85,6 @@
       "import": "./dist/plugins/Delaunay.js",
       "require": "./dist/plugins/Delaunay.cjs"
     },
-    "./plugins/MatterPhysics": {
-      "types": "./dist/plugins/MatterPhysics.d.ts",
-      "import": "./dist/plugins/MatterPhysics.js",
-      "require": "./dist/plugins/MatterPhysics.cjs"
-    },
     "./plugins/Sprites": {
       "types": "./dist/plugins/Sprites.d.ts",
       "import": "./dist/plugins/Sprites.js",
@@ -63,62 +94,63 @@
       "types": "./dist/plugins/Projector.d.ts",
       "import": "./dist/plugins/Projector.js",
       "require": "./dist/plugins/Projector.cjs"
-    }
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Shopify/Klint"
-  },
-  "publishConfig": {
-    "access": "public",
-    "@shopify:registry": "https://registry.npmjs.org/"
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
-    "bin"
+    "bin",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
   ],
-  "keywords": [
-    "creative-coding",
-    "klint",
-    "javascript",
-    "2d",
-    "canvas",
-    "generative-art",
-    "processing",
-    "html5"
-  ],
-  "homepage": "https://github.com/Shopify/Klint",
-  "browserslist": [
-    "> 1%, not dead, not ie 11, not op_mini all"
-  ],
-  "bugs": {
-    "url": "https://github.com/Shopify/Klint/issues"
+  "sideEffects": false,
+  "bin": {
+    "klint": "./bin/klint",
+    "create-sandbox": "./bin/create-sandbox",
+    "create-editor": "./bin/create-editor"
   },
   "scripts": {
     "build": "tsup",
-    "build:minified": "tsup --minify",
+    "build:minify": "tsup --minify",
     "dev": "tsup --watch",
-    "test": "vitest run --environment jsdom",
-    "test:watch": "vitest --environment jsdom",
-    "lint": "eslint src --ext .ts,.tsx",
-    "clean": "rimraf dist",
-    "version": "yarn version"
+    "test": "vitest run --coverage",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src tests",
+    "smoke": "node scripts/smoke-dist.mjs",
+    "quality": "npm run lint && npm run typecheck && npm test && npm run build && npm run smoke"
   },
   "peerDependencies": {
-    "react": ">=16.8.0",
-    "react-dom": ">=16.8.0"
+    "react": ">=18 <20",
+    "react-dom": ">=18 <20"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
   },
   "devDependencies": {
-    "@types/react": "^16.0.0",
-    "@types/react-dom": "^16.0.0",
-    "concurrently": "^8.2.0",
-    "jsdom": "^26.0.0",
-    "rimraf": "^5.0.0",
+    "@types/node": "^22.15.3",
+    "@types/react": "^18.3.20",
+    "@types/react-dom": "^18.3.6",
+    "@vitest/coverage-v8": "^3.1.2",
+    "eslint": "^9.25.1",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "jsdom": "^26.1.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "tsup": "^8.4.0",
-    "typescript": "^5.0.0",
-    "vite": "^6.2.5",
-    "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.1.1",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.31.0",
+    "vitest": "^3.1.2",
     "vitest-canvas-mock": "^0.3.3"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

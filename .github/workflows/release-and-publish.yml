@@ -30,22 +30,30 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "20.19"
           registry-url: "https://registry.npmjs.org"
 
-      - name: Update npm to latest
-        run: npm install -g npm@latest
+      - name: Install trusted-publishing npm
+        run: npm install -g npm@11
 
-      - name: Clean install (workaround for rollup optional deps bug)
+      - name: Install exact dependencies
+        run: npm ci
+
+      - name: Verify release tag matches package versions
+        shell: bash
         run: |
-          rm -rf node_modules package-lock.json
-          npm install --workspace=packages/klint --include-workspace-root
+          set -euo pipefail
+          expected="${RELEASE_TAG#v}"
+          test "$(node -p "require('./packages/klint/package.json').version")" = "$expected"
 
-      - name: Run tests
-        run: npm run test --workspace=packages/klint
-
-      - name: Build packages
-        run: npm run build
+      - name: Run release quality gates
+        run: |
+          npm run lint --workspace=packages/klint
+          npm run typecheck
+          npm test
+          npm run build
+          npm run smoke --workspace=packages/klint
+          npm run build:docs
 
       - name: Sync README to package
         run: cp README.md packages/klint/README.md
@@ -75,7 +83,7 @@ jobs:
             core.setOutput('notes', notes);
             return notes;
 
-      - name: Publish to npm (OIDC / Trusted Publishing)
+      - name: Publish Klint to npm (OIDC / Trusted Publishing)
         run: npm publish --workspace=packages/klint --access public --provenance
         env:
           NPM_TOKEN: "" # Empty string forces OIDC

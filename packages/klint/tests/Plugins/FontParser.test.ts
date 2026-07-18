@@ -34,10 +34,10 @@ describe("FontParser", () => {
   let staticFont: FontData;
   let variableFont: FontData;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     parser = new FontParser();
-    staticFont = parser.loadFromBuffer(loadFixture("Jost-Regular.ttf"));
-    variableFont = parser.loadFromBuffer(loadFixture("Inter-Variable.ttf"));
+    staticFont = await parser.loadFromBuffer(loadFixture("Jost-Regular.ttf"));
+    variableFont = await parser.loadFromBuffer(loadFixture("Inter-Variable.ttf"));
   });
 
   // ── Class & Loading ──────────────────────────────────────────────
@@ -467,15 +467,7 @@ describe("FontParser", () => {
       const minWeight = weightAxis[1];
       const maxWeight = weightAxis[3];
 
-      const light = variableFont.toPaths("Test", 72, {
-        axisValues: [minWeight],
-      });
-      const bold = variableFont.toPaths("Test", 72, {
-        axisValues: [maxWeight],
-      });
-
-      // Bold text should typically be wider than light
-      // (or at minimum, the SVG paths should differ)
+      // Weight extremes should produce different outlines.
       const lightSVG = variableFont.toSVG("A", 72, {
         axisValues: [minWeight],
       });

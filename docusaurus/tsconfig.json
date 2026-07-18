@@ -4,7 +4,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@shopify/klint/plugins/FontParser": ["../packages/klint/src/plugins/FontParser"]
+      "@shopify/klint": ["../packages/klint/src/index.tsx"],
+      "@shopify/klint/plugins": ["../packages/klint/src/plugins/index.tsx"],
+      "@shopify/klint/plugins/*": ["../packages/klint/src/plugins/*"]
     }
   },
   "exclude": [".docusaurus", "build"]

@@ -82,7 +82,7 @@ function InteractiveDrawing() {
   const { mouse } = KlintMouse();
   
   const draw = (K) => {
-    if (mouse.pressed) {
+    if (mouse.isPressed) {
       K.fillColor('red');
       K.circle(mouse.x, mouse.y, 10);
     }
@@ -90,6 +90,24 @@ function InteractiveDrawing() {
   
   return <Klint context={context} draw={draw} />;
 }
+```
+
+## Vanilla JavaScript (no React)
+
+Use the tree-shakeable native entry directly:
+
+```js
+import { createKlint } from '@shopify/klint/native';
+
+const sketch = createKlint({
+  container: '#app',
+  draw(K) {
+    K.background('white');
+    K.circle(K.width / 2, K.height / 2, 40);
+  },
+});
+
+await sketch.ready;
 ```
 
 ## 🛠️ Development

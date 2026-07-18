@@ -11,8 +11,8 @@ export default function Draw() {
 
   const setup = (K: KlintContext) => {
     K.noStroke();
-    K.extend("hue", getRandNumber(K, 0, 350));
-    K.extend("black", K.Color.oklch(0.1, 0.1, K.hue));
+    K.extend("hueValue", getRandNumber(K, 0, 350));
+    K.extend("black", K.Color.oklch(0.1, 0.1, K.hueValue));
     K.extend("white", K.Color.oklch(1, 0.1, getRandNumber(K, 0, 350)));
     K.background(K.black);
     K.extend("petals", getRandNumber(K, 5, 25));
@@ -122,8 +122,8 @@ export default function Draw() {
     K.vals.d += s * 10;
     K.vals.e += s * 10;
     K.vals.f += s * 10;
-    K.hue = (K.hue + 1 + s) % 360;
-    K.black = K.Color.oklch(0.1, 0.2, K.hue);
+    K.hueValue = (K.hueValue + 1 + s) % 360;
+    K.black = K.Color.oklch(0.1, 0.2, K.hueValue);
   };
 
   return (

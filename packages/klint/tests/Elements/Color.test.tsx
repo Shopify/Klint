@@ -1,14 +1,10 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { Color } from "../../src/elements";
-import { KlintContext } from "../../src/Klint";
 
 describe("Color Element", () => {
   let C: Color;
 
   beforeEach(() => {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d")!;
-    // Mock minimal context required by Color
     C = new Color();
   });
 
@@ -94,20 +90,20 @@ describe("Color Element", () => {
       expect(palette[2]).toBe("#FF0000"); // middle is the base color
     });
 
-    it("should create complementary colors", () => {
-      const complement = C.complementary("hsl(0, 100%, 50%)"); // Red
-      expect(complement).toBe(
-        "color-mix(in hsl, hsl(0, 100%, 50%), hsl(180deg 100% 50%) 100%)"
+    it("uses relative colors for hue transformations", () => {
+      expect(C.complementary("red")).toBe(
+        "hsl(from red calc(h + 180) s l / alpha)",
       );
-    });
-
-    it("should create analogous colors", () => {
-      const [color1, color2] = C.analogous("hsl(120, 100%, 50%)", 30);
-      expect(color1).toBe(
-        "color-mix(in hsl, hsl(120, 100%, 50%), hsl(-30deg 100% 50%) 100%)"
-      );
-      expect(color2).toBe(
-        "color-mix(in hsl, hsl(120, 100%, 50%), hsl(30deg 100% 50%) 100%)"
+      expect(C.analogous("red", 30)).toEqual([
+        "hsl(from red calc(h - 30) s l / alpha)",
+        "hsl(from red calc(h + 30) s l / alpha)",
+      ]);
+      expect(C.triadic("red")).toEqual([
+        "hsl(from red calc(h + 120) s l / alpha)",
+        "hsl(from red calc(h + 240) s l / alpha)",
+      ]);
+      expect(C.saturate("red", 20)).toBe(
+        "hsl(from red h clamp(0, calc(s + 20), 100) l / alpha)",
       );
     });
 

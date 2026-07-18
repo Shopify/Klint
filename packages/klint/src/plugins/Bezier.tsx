@@ -1,7 +1,7 @@
 // Bezier curve operations ported from bezier.js by Pomax (MIT).
 // https://github.com/Pomax/bezierjs
 
-import { KlintContext } from "../Klint";
+import type { KlintContext } from "../KlintTypes";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -265,8 +265,8 @@ function roots(points: Point[], line?: { p1: Point; p2: Point }): number[] {
   }
 
   const pa = al[0].y, pb = al[1].y, pc = al[2].y, pd = al[3].y;
-  let d = -pa + 3 * pb - 3 * pc + pd,
-    a = 3 * pa - 6 * pb + 3 * pc,
+  const d = -pa + 3 * pb - 3 * pc + pd;
+  let a = 3 * pa - 6 * pb + 3 * pc,
     b = -3 * pa + 3 * pb,
     c = pa;
 
@@ -378,17 +378,6 @@ export function bboxoverlap(b1: BBox, b2: BBox): boolean {
   return true;
 }
 
-function expandbox(bbox: BBox, _bbox: BBox): void {
-  if (_bbox.x.min < bbox.x.min) bbox.x.min = _bbox.x.min;
-  if (_bbox.y.min < bbox.y.min) bbox.y.min = _bbox.y.min;
-  if (_bbox.x.max > bbox.x.max) bbox.x.max = _bbox.x.max;
-  if (_bbox.y.max > bbox.y.max) bbox.y.max = _bbox.y.max;
-  bbox.x.mid = (bbox.x.min + bbox.x.max) / 2;
-  bbox.y.mid = (bbox.y.min + bbox.y.max) / 2;
-  bbox.x.size = bbox.x.max - bbox.x.min;
-  bbox.y.size = bbox.y.max - bbox.y.min;
-}
-
 // ─── Arc center ──────────────────────────────────────────────────────────────
 
 function getccenter(p1: Point, p2: Point, p3: Point) {
@@ -403,9 +392,9 @@ function getccenter(p1: Point, p2: Point, p3: Point) {
   const arc = lli8(mx1, my1, mx1 + dx1p, my1 + dy1p, mx2, my2, mx2 + dx2p, my2 + dy2p);
   if (!arc) return { x: 0, y: 0, r: 0, s: 0, m: 0, e: 0 };
   const r = dist(arc, p1);
-  let s = atan2(p1.y - arc.y, p1.x - arc.x),
-    m = atan2(p2.y - arc.y, p2.x - arc.x),
-    e = atan2(p3.y - arc.y, p3.x - arc.x);
+  let s = atan2(p1.y - arc.y, p1.x - arc.x);
+  const m = atan2(p2.y - arc.y, p2.x - arc.x);
+  let e = atan2(p3.y - arc.y, p3.x - arc.x);
 
   if (s < e) {
     if (s > m || m > e) s += tau;
@@ -439,7 +428,8 @@ function projectionratio(t: number, n: number): number | false {
 function getminmax(curve: Bezier, d: "x" | "y", list: number[]): MinMax {
   if (!list || list.length === 0) return { min: 0, mid: 0, max: 0, size: 0 };
   let lo = nMax, hi = nMin;
-  const values = list.includes(0) ? list : [0, ...list];
+  const values = [...list];
+  if (!values.includes(0)) values.unshift(0);
   if (!values.includes(1)) values.push(1);
   for (const t of values) {
     const c = curve.get(t);
@@ -591,6 +581,14 @@ export class Bezier {
     return ctx;
   }
 
+  private _resolveDraw(args: unknown[]): [KlintContext, unknown[]] {
+    const first = args[0];
+    if (first != null && typeof first === "object") {
+      return [this._k(first as KlintContext), args.slice(1)];
+    }
+    return [this._k(), args];
+  }
+
   // ─── Static constructors ──────────────────────────────────────────────
 
   static quadratic(p1: Point, cp: Point, p2: Point, ctx?: KlintContext): Bezier {
@@ -666,10 +664,7 @@ export class Bezier {
     if (this._lut.length === steps + 1) return this._lut;
     this._lut = [];
     for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      const p = this.get(t);
-      p.t = t;
-      this._lut.push(p);
+      this._lut.push(this.get(i / steps));
     }
     return this._lut;
   }
@@ -961,10 +956,10 @@ export class Bezier {
     const graduated = d3 !== undefined && d4 !== undefined;
 
     function linearDist(s: number, e: number, tl: number, al: number, sl: number) {
-      return (v: number) => {
-        const f1 = al / tl, f2 = (al + sl) / tl, dd = e - s;
-        return mapVal(v, 0, 1, s + f1 * dd, s + f2 * dd);
-      };
+      const dd = e - s;
+      const lo = s + (al / tl) * dd;
+      const hi = s + ((al + sl) / tl) * dd;
+      return (v: number) => mapVal(v, 0, 1, lo, hi);
     }
 
     for (const segment of reduced) {
@@ -1075,7 +1070,8 @@ export class Bezier {
     do {
       safety = 0;
       t_e = 1;
-      let np1 = this.get(t_s), np2: Point, np3: Point;
+      const np1 = this.get(t_s);
+      let np2: Point, np3: Point;
       let arc: any, prev_arc: any;
       let curr_good = false, prev_good = false, done: boolean;
       let t_m: number, prev_e = 1;
@@ -1160,12 +1156,8 @@ export class Bezier {
   drawSkeleton(K: KlintContext, pointSize?: number): void;
   drawSkeleton(pointSize?: number): void;
   drawSkeleton(...args: unknown[]): void {
-    let ctx: KlintContext, ps: number;
-    if (typeof args[0] === "number" || args[0] == null) {
-      ctx = this._k(); ps = (args[0] as number) ?? 3;
-    } else {
-      ctx = this._k(args[0] as KlintContext); ps = (args[1] as number) ?? 3;
-    }
+    const [ctx, rest] = this._resolveDraw(args);
+    const ps = (rest[0] as number) ?? 3;
     const p = this.points;
     ctx.push();
     ctx.beginPath();
@@ -1179,12 +1171,9 @@ export class Bezier {
   drawNormals(K: KlintContext, count?: number, length?: number): void;
   drawNormals(count?: number, length?: number): void;
   drawNormals(...args: unknown[]): void {
-    let ctx: KlintContext, cnt: number, len: number;
-    if (typeof args[0] === "number" || args[0] == null) {
-      ctx = this._k(); cnt = (args[0] as number) ?? 10; len = (args[1] as number) ?? 20;
-    } else {
-      ctx = this._k(args[0] as KlintContext); cnt = (args[1] as number) ?? 10; len = (args[2] as number) ?? 20;
-    }
+    const [ctx, rest] = this._resolveDraw(args);
+    const cnt = (rest[0] as number) ?? 10;
+    const len = (rest[1] as number) ?? 20;
     ctx.push();
     for (let i = 0; i <= cnt; i++) {
       const t = i / cnt;
@@ -1198,13 +1187,10 @@ export class Bezier {
   drawOutline(K: KlintContext, d1: number, d2?: number, d3?: number, d4?: number): void;
   drawOutline(d1: number, d2?: number, d3?: number, d4?: number): void;
   drawOutline(...args: unknown[]): void {
-    let ctx: KlintContext, d1: number, d2: number | undefined, d3: number | undefined, d4: number | undefined;
-    if (typeof args[0] === "number") {
-      ctx = this._k(); d1 = args[0]; d2 = args[1] as number; d3 = args[2] as number; d4 = args[3] as number;
-    } else {
-      ctx = this._k(args[0] as KlintContext); d1 = args[1] as number; d2 = args[2] as number; d3 = args[3] as number; d4 = args[4] as number;
-    }
-    const path = Bezier.toPath2D(this.outline(d1, d2, d3, d4));
+    const [ctx, rest] = this._resolveDraw(args);
+    const path = Bezier.toPath2D(
+      this.outline(rest[0] as number, rest[1] as number, rest[2] as number, rest[3] as number),
+    );
     path.closePath();
     ctx.stroke(path);
   }
@@ -1212,13 +1198,10 @@ export class Bezier {
   drawOutlineFilled(K: KlintContext, d1: number, d2?: number, d3?: number, d4?: number): void;
   drawOutlineFilled(d1: number, d2?: number, d3?: number, d4?: number): void;
   drawOutlineFilled(...args: unknown[]): void {
-    let ctx: KlintContext, d1: number, d2: number | undefined, d3: number | undefined, d4: number | undefined;
-    if (typeof args[0] === "number") {
-      ctx = this._k(); d1 = args[0]; d2 = args[1] as number; d3 = args[2] as number; d4 = args[3] as number;
-    } else {
-      ctx = this._k(args[0] as KlintContext); d1 = args[1] as number; d2 = args[2] as number; d3 = args[3] as number; d4 = args[4] as number;
-    }
-    const path = Bezier.toPath2D(this.outline(d1, d2, d3, d4));
+    const [ctx, rest] = this._resolveDraw(args);
+    const path = Bezier.toPath2D(
+      this.outline(rest[0] as number, rest[1] as number, rest[2] as number, rest[3] as number),
+    );
     path.closePath();
     ctx.fill(path);
   }
@@ -1226,12 +1209,8 @@ export class Bezier {
   drawArcs(K: KlintContext, errorThreshold?: number): void;
   drawArcs(errorThreshold?: number): void;
   drawArcs(...args: unknown[]): void {
-    let ctx: KlintContext, threshold: number;
-    if (typeof args[0] === "number" || args[0] == null) {
-      ctx = this._k(); threshold = (args[0] as number) ?? 0.5;
-    } else {
-      ctx = this._k(args[0] as KlintContext); threshold = (args[1] as number) ?? 0.5;
-    }
+    const [ctx, rest] = this._resolveDraw(args);
+    const threshold = (rest[0] as number) ?? 0.5;
     ctx.push();
     for (const arc of this.arcs(threshold)) {
       ctx.disk(arc.x, arc.y, arc.r, arc.s, arc.e, false);

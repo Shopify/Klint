@@ -1,13 +1,22 @@
-import {
+import type {
   KlintContexts,
   KlintContext,
   KlintOffscreenContext,
   KlintCanvasOptions,
+  KlintConfig,
+  CurveVertex,
+} from "./KlintTypes";
+import {
   CONFIG_PROPS,
   EPSILON,
-  KlintConfig,
-} from "./Klint";
-import { Vector } from "./elements";
+  normalizeKlintOptions,
+} from "./KlintTypes";
+import { applyKlintBaseTransform, resolveDpr } from "./KlintRuntime";
+import {
+  initializeKlintContextState,
+  installKlintElements,
+  installKlintFunctions,
+} from "./KlintContext";
 
 // Klint Core functions
 export type KlintCoreFunctions = {
@@ -31,15 +40,20 @@ export const KlintCoreFunctions = {
     ctx.canvas.requestFullscreen?.();
   },
   play: (ctx: KlintContext) => () => {
-    if (!ctx.__isPlaying) ctx.__isPlaying = true;
+    ctx.__lastTargetTime = -1;
+    ctx.__lastRealTime = -1;
+    ctx.__isPlaying = true;
   },
   pause: (ctx: KlintContext) => () => {
-    if (ctx.__isPlaying) ctx.__isPlaying = false;
+    ctx.__isPlaying = false;
   },
-  // to do
-  redraw: () => () => {},
+  redraw: (ctx: KlintContext) => () => {
+    ctx.__redraw?.();
+  },
   describe: (ctx: KlintContext) => (description: string) => {
     ctx.__description = description;
+    ctx.canvas.setAttribute("aria-label", description);
+    if (!ctx.canvas.hasAttribute("role")) ctx.canvas.setAttribute("role", "img");
   },
 
   createOffscreen:
@@ -51,71 +65,36 @@ export const KlintCoreFunctions = {
       options?: KlintCanvasOptions,
       callback?: (ctx: KlintOffscreenContext) => void,
     ) => {
+      if (!Number.isFinite(width) || !Number.isFinite(height) || width < 0 || height < 0) {
+        throw new RangeError("Offscreen dimensions must be finite, non-negative numbers");
+      }
+
+      const normalized = normalizeKlintOptions(options);
       const offscreen = document.createElement("canvas");
-      offscreen.width = width * ctx.__dpr;
-      offscreen.height = height * ctx.__dpr;
+      const dpr = options?.dpr !== undefined ? resolveDpr(normalized) : ctx.dpr;
+      offscreen.width = Math.round(width * dpr);
+      offscreen.height = Math.round(height * dpr);
 
       const context = offscreen.getContext("2d", {
-        alpha: options?.alpha ?? true,
-        willReadFrequently: options?.willreadfrequently ?? false,
-      }) as unknown as KlintOffscreenContext;
-
+        alpha: normalized.alpha,
+        willReadFrequently: normalized.willreadfrequently,
+      }) as KlintOffscreenContext | null;
       if (!context) throw new Error("Failed to create offscreen context");
 
-      // Initialize basic properties
-      context.__dpr = ctx.__dpr;
-      context.width = width * ctx.__dpr;
-      context.height = height * ctx.__dpr;
-      context.__isMainContext = false;
-
-      context.__imageOrigin = "corner";
-      context.__rectangleOrigin = "corner";
-      context.__canvasOrigin = "corner";
-      context.__textFont = "sans-serif";
-      context.__textWeight = "normal";
-      context.__textStyle = "normal";
-      context.__textSize = 120;
-      context.__textLeading = undefined;
-      context.__textAlignment = {
-        horizontal: "left" as CanvasTextAlign,
-        vertical: "top" as CanvasTextBaseline,
-      };
-      context.__fillRule = "nonzero";
-
-      // Add KlintFunctions if not ignored
-      if (!options?.ignoreFunctions) {
-        // Add Klint Elements
-        context.Color = ctx.Color;
-        context.createVector = (x = 0, y = 0) => new Vector(x, y);
-        context.Easing = ctx.Easing;
-        context.Text = ctx.Text;
-
-        Object.entries(KlintFunctions).forEach(([name, fn]) => {
-          context[name] = fn(context as KlintOffscreenContext);
-        });
+      initializeKlintContextState(context, normalized, false);
+      context.width = width;
+      context.height = height;
+      context.__dpr = dpr;
+      context.dpr = dpr;
+      if (!normalized.ignoreFunctions) {
+        installKlintElements(context);
+        installKlintFunctions(context);
       }
+      applyKlintBaseTransform(context);
+      callback?.(context);
 
-      // Set origin if specified
-      if (options?.origin) {
-        context.__canvasOrigin = options.origin;
-        if (options.origin === "center") {
-          context.translate(context.width * 0.5, context.height * 0.5);
-        }
-      }
-      if (callback) {
-        callback(context);
-      }
-
-      // If static option is true, convert to base64 and store that instead
-      if (options?.static === "true") {
-        const base64 = offscreen.toDataURL();
-        const img = new Image();
-        img.src = base64;
-        ctx.__offscreens.set(id, img);
-        // console.log(img);
-        return img;
-      }
-
+      // Static offscreens remain canvas-backed. Avoiding data URLs removes a
+      // synchronous encode/decode and preserves alpha/color fidelity.
       ctx.__offscreens.set(id, context);
       return context;
     },
@@ -140,29 +119,39 @@ export const KlintFunctions = {
   extend:
     (ctx: KlintContexts) =>
     (name: string, data: unknown, enforceReplace = false) => {
-      if (name in ctx && !enforceReplace) return;
-      (ctx as KlintContexts)[name] = data;
+      if (name in ctx && !enforceReplace) {
+        console.warn(
+          `Klint.extend("${name}") was ignored because that property already exists. Pass true as the third argument to replace it intentionally.`,
+        );
+        return ctx[name];
+      }
+      ctx[name] = data;
+      return data;
     },
 
   background: (ctx: KlintContexts) => (color?: string) => {
-    ctx.resetTransform();
-    ctx.push();
+    ctx.save();
+    ctx.setTransform(ctx.dpr, 0, 0, ctx.dpr, 0, 0);
     if (color && color !== "transparent") {
       ctx.fillStyle = color;
       ctx.fillRect(0, 0, ctx.width, ctx.height);
     } else {
       ctx.clearRect(0, 0, ctx.width, ctx.height);
     }
-    ctx.pop();
-    if (ctx.__canvasOrigin === "center")
-      ctx.translate(ctx.width * 0.5, ctx.height * 0.5);
+    ctx.restore();
   },
   reset: (ctx: KlintContexts) => () => {
+    ctx.save();
+    ctx.setTransform(ctx.dpr, 0, 0, ctx.dpr, 0, 0);
     ctx.clearRect(0, 0, ctx.width, ctx.height);
-    ctx.resetTransform();
+    ctx.restore();
+    applyKlintBaseTransform(ctx);
   },
   clear: (ctx: KlintContexts) => () => {
+    ctx.save();
+    ctx.setTransform(ctx.dpr, 0, 0, ctx.dpr, 0, 0);
     ctx.clearRect(0, 0, ctx.width, ctx.height);
+    ctx.restore();
   },
   fillColor: (ctx: KlintContexts) => (color: string | CanvasGradient) => {
     ctx.fillStyle = color;
@@ -354,7 +343,12 @@ export const KlintFunctions = {
   endContour:
     (ctx: KlintContexts) =>
     (forceRevert = true) => {
-      if (!ctx.__startedContour || !ctx.__currentContour?.length) return;
+      if (!ctx.__startedContour) return;
+      if (!ctx.__currentContour?.length) {
+        ctx.__currentContour = null;
+        ctx.__startedContour = false;
+        return;
+      }
       const contourPoints = [...ctx.__currentContour];
       if (forceRevert) {
         contourPoints.reverse();
@@ -370,9 +364,16 @@ export const KlintFunctions = {
       if (ctx.__startedContour) ctx.endContour();
 
       const points = ctx.__currentShape;
-      if (!points?.length) return;
+      if (!points?.length) {
+        ctx.__currentShape = null;
+        ctx.__currentContours = null;
+        ctx.__currentContour = null;
+        ctx.__startedShape = false;
+        ctx.__startedContour = false;
+        return;
+      }
 
-      const drawPath = (points: any[], close = false) => {
+      const drawPath = (points: CurveVertex[], close = false) => {
         if (points.length === 0) return;
 
         const firstPoint = points[0];
@@ -428,14 +429,13 @@ export const KlintFunctions = {
 
       ctx.beginPath();
       drawPath(points, close);
-      ctx.__currentContours?.forEach((contour: any[]) =>
-        drawPath(contour, true),
-      );
+      ctx.__currentContours?.forEach((contour) => drawPath(contour, true));
       ctx.drawIfVisible();
-      // and we are out of the shape
       ctx.__currentShape = null;
       ctx.__currentContours = null;
+      ctx.__currentContour = null;
       ctx.__startedShape = false;
+      ctx.__startedContour = false;
     },
   gradient:
     (ctx: KlintContexts) =>
@@ -482,21 +482,14 @@ export const KlintFunctions = {
     (
       n: number,
       mod: number,
-      mode: "precise" | "fast" | "faster" = "precise",
+      _mode: "precise" | "fast" | "faster" = "precise",
     ) => {
-      if (mode === "faster") {
-        // only works reliably for positive numbers < 2^31
-        const floor = (x: number) => x >> 0;
-        return n - floor(n / mod) * mod;
-      }
-      if (mode === "fast") {
-        return n - ~~(n / mod) * mod;
-      }
-      if (n >= 0) return n % mod;
-      return mod - (-n % mod);
+      const size = Math.abs(mod);
+      if (size === 0) return Number.NaN;
+      return ((n % size) + size) % size;
     },
   distance:
-    (ctx: KlintContexts) =>
+    (_ctx: KlintContexts) =>
     (
       x1: number,
       y1: number,
@@ -507,10 +500,13 @@ export const KlintFunctions = {
       if (mode === "faster") {
         const dx = Math.abs(x2 - x1);
         const dy = Math.abs(y2 - y1);
-        return dx + dy - Math.min(dx, dy) * 0.3;
+        return Math.max(dx, dy) + Math.min(dx, dy) * 0.375;
       }
-      if (mode === "fast")
-        return ctx.squareDistance(x1, y1, x2, y2) * Math.SQRT1_2;
+      if (mode === "fast") {
+        const dx = Math.abs(x2 - x1);
+        const dy = Math.abs(y2 - y1);
+        return Math.max(dx, dy) + Math.min(dx, dy) * (Math.SQRT2 - 1);
+      }
       return Math.hypot(x2 - x1, y2 - y1);
     },
   squareDistance: () => (x1: number, y1: number, x2: number, y2: number) => {
@@ -549,7 +545,7 @@ export const KlintFunctions = {
     ctx.__textFont = font;
   },
   textSize: (ctx: KlintContexts) => (size: number) => {
-    ctx.__textSize = size * ctx.__dpr || ctx.__textSize;
+    if (Number.isFinite(size) && size > 0) ctx.__textSize = size;
   },
   textStyle: (ctx: KlintContexts) => (style: string) => {
     ctx.__textStyle = style || "normal";
@@ -576,7 +572,7 @@ export const KlintFunctions = {
     },
   // TO DO : add variable axis handling
   computeTextStyle: (ctx: KlintContexts) => () => {
-    ctx.__computedTextFont = `${ctx.__textWeight} ${ctx.__textStyle} ${ctx.__textSize}px ${ctx.__textFont}`;
+    ctx.__computedTextFont = `${ctx.__textStyle} ${ctx.__textWeight} ${ctx.__textSize}px ${ctx.__textFont}`;
   },
   alignText:
     (ctx: KlintContexts) =>
@@ -694,37 +690,27 @@ export const KlintFunctions = {
       }
       ctx.textBaseline = "top";
 
-      // Split text into words or characters based on break mode
-      const tokens =
-        breakMode === "letters"
-          ? textString.split("")
-          : textString.split(/\s+/);
-
       const lines: string[] = [];
-      let currentLine = "";
+      for (const explicitLine of textString.split("\n")) {
+        const tokens =
+          breakMode === "letters"
+            ? explicitLine.split("")
+            : explicitLine.trim().split(/\s+/).filter(Boolean);
+        let currentLine = "";
 
-      // Build lines based on width constraint
-      for (let i = 0; i < tokens.length; i++) {
-        const token = tokens[i];
-        const testLine = currentLine
-          ? breakMode === "letters"
-            ? currentLine + token
-            : currentLine + " " + token
-          : token;
-
-        const metrics = ctx.measureText(testLine);
-
-        if (metrics.width > width && currentLine !== "") {
-          // Line exceeds width, save current line and start new one
-          lines.push(currentLine);
-          currentLine = token;
-        } else {
-          currentLine = testLine;
+        for (const token of tokens) {
+          const candidate = currentLine
+            ? breakMode === "letters"
+              ? currentLine + token
+              : `${currentLine} ${token}`
+            : token;
+          if (ctx.measureText(candidate).width > width && currentLine) {
+            lines.push(currentLine);
+            currentLine = token;
+          } else {
+            currentLine = candidate;
+          }
         }
-      }
-
-      // Add remaining text as last line
-      if (currentLine) {
         lines.push(currentLine);
       }
 
@@ -762,7 +748,7 @@ export const KlintFunctions = {
 
             // Draw each word individually with calculated spacing
             let currentX = x;
-            words.forEach((word, wordIndex) => {
+            words.forEach((word) => {
               if (ctx.checkTransparency("fill")) {
                 ctx.fillText(word, currentX, lineY);
               }
@@ -807,7 +793,8 @@ export const KlintFunctions = {
       arg7?: number,
       arg8?: number,
     ) => {
-      const sourceImage = "canvas" in image ? image.canvas : image;
+      const isKlintContext = "canvas" in image;
+      const sourceImage = isKlintContext ? image.canvas : image;
 
       // 9-argument syntax: drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
       if (arg5 !== undefined) {
@@ -824,12 +811,13 @@ export const KlintFunctions = {
         const adjustedX = ctx.__imageOrigin === "center" ? dx - dWidth / 2 : dx;
         const adjustedY =
           ctx.__imageOrigin === "center" ? dy - dHeight / 2 : dy;
+        const sourceScale = isKlintContext ? image.dpr : 1;
         ctx.drawImage(
           sourceImage,
-          sx,
-          sy,
-          sWidth,
-          sHeight,
+          sx * sourceScale,
+          sy * sourceScale,
+          sWidth * sourceScale,
+          sHeight * sourceScale,
           adjustedX,
           adjustedY,
           dWidth,
@@ -850,18 +838,20 @@ export const KlintFunctions = {
 
       // 3-argument syntax: drawImage(image, dx, dy)
       const [dx, dy] = [x, y];
-      const width =
-        sourceImage instanceof HTMLImageElement
+      const width = isKlintContext
+        ? image.width
+        : sourceImage instanceof HTMLImageElement
           ? sourceImage.naturalWidth
           : sourceImage.width;
-      const height =
-        sourceImage instanceof HTMLImageElement
+      const height = isKlintContext
+        ? image.height
+        : sourceImage instanceof HTMLImageElement
           ? sourceImage.naturalHeight
           : sourceImage.height;
       const adjustedX = ctx.__imageOrigin === "center" ? dx - width / 2 : dx;
       const adjustedY = ctx.__imageOrigin === "center" ? dy - height / 2 : dy;
 
-      ctx.drawImage(sourceImage, adjustedX, adjustedY);
+      ctx.drawImage(sourceImage, adjustedX, adjustedY, width, height);
     },
   scaleTo:
     () =>
@@ -926,16 +916,18 @@ export const KlintFunctions = {
       Object.assign(ctx, config);
     },
   resizeCanvas: (ctx: KlintContexts) => (width: number, height: number) => {
-    // Ignore if this is the main canvas
     if (ctx.__isMainContext) return;
+    if (!Number.isFinite(width) || !Number.isFinite(height) || width < 0 || height < 0) {
+      throw new RangeError("Canvas dimensions must be finite, non-negative numbers");
+    }
 
     const config = ctx.saveConfig();
-    ctx.canvas.width = ctx.width = width;
-    ctx.canvas.height = ctx.height = height;
+    ctx.canvas.width = Math.round(width * ctx.dpr);
+    ctx.canvas.height = Math.round(height * ctx.dpr);
+    ctx.width = width;
+    ctx.height = height;
     ctx.restoreConfig(config);
-    if (ctx.__canvasOrigin === "center") {
-      ctx.translate(ctx.width * 0.5, ctx.height * 0.5);
-    }
+    applyKlintBaseTransform(ctx);
   },
   clipTo:
     (ctx: KlintContexts) =>
@@ -963,42 +955,34 @@ export const KlintFunctions = {
         }
       };
 
-      // Initialize the path
-      ctx.beginPath();
-
-      // Let user define the clipping shape(s)
-      callback(ctx);
-
-      // Apply the clipping region with specified fillRule or default to nonzero
-      ctx.clip(fillRule || ctx.__fillRule || "nonzero");
-
-      // Restore patched methods
-      ctx.beginPath = originalBeginPath;
-      ctx.drawIfVisible = originalDrawIfVisible;
-      ctx.fill = originalFill;
-      ctx.stroke = originalStroke;
+      try {
+        ctx.beginPath();
+        callback(ctx);
+        ctx.clip(fillRule || ctx.__fillRule || "nonzero");
+      } finally {
+        ctx.beginPath = originalBeginPath;
+        ctx.drawIfVisible = originalDrawIfVisible;
+        ctx.fill = originalFill;
+        ctx.stroke = originalStroke;
+      }
     },
 
   screenToWorld:
     (ctx: KlintContexts) =>
     (screenX: number, screenY: number): { x: number; y: number } => {
-      const isCenter = ctx.__canvasOrigin === "center";
-      const deviceX = isCenter ? screenX + ctx.width * 0.5 : screenX;
-      const deviceY = isCenter ? screenY + ctx.height * 0.5 : screenY;
       const inverse = ctx.getTransform().inverse();
-      const pt = inverse.transformPoint(new DOMPoint(deviceX, deviceY));
+      const pt = inverse.transformPoint(
+        new DOMPoint(screenX * ctx.dpr, screenY * ctx.dpr),
+      );
       return { x: pt.x, y: pt.y };
     },
 
   worldToScreen:
     (ctx: KlintContexts) =>
     (worldX: number, worldY: number): { x: number; y: number } => {
-      const isCenter = ctx.__canvasOrigin === "center";
       const matrix = ctx.getTransform();
-      const pt = matrix.transformPoint(new DOMPoint(worldX, worldY));
-      const screenX = isCenter ? pt.x - ctx.width * 0.5 : pt.x;
-      const screenY = isCenter ? pt.y - ctx.height * 0.5 : pt.y;
-      return { x: screenX, y: screenY };
+      const point = matrix.transformPoint(new DOMPoint(worldX, worldY));
+      return { x: point.x / ctx.dpr, y: point.y / ctx.dpr };
     },
 
   getVisibleBounds:
@@ -1012,10 +996,12 @@ export const KlintFunctions = {
       height: number;
     } => {
       const inverse = ctx.getTransform().inverse();
+      const pixelWidth = ctx.width * ctx.dpr;
+      const pixelHeight = ctx.height * ctx.dpr;
       const c0 = inverse.transformPoint(new DOMPoint(0, 0));
-      const c1 = inverse.transformPoint(new DOMPoint(ctx.width, 0));
-      const c2 = inverse.transformPoint(new DOMPoint(ctx.width, ctx.height));
-      const c3 = inverse.transformPoint(new DOMPoint(0, ctx.height));
+      const c1 = inverse.transformPoint(new DOMPoint(pixelWidth, 0));
+      const c2 = inverse.transformPoint(new DOMPoint(pixelWidth, pixelHeight));
+      const c3 = inverse.transformPoint(new DOMPoint(0, pixelHeight));
       const left = Math.min(c0.x, c1.x, c2.x, c3.x);
       const right = Math.max(c0.x, c1.x, c2.x, c3.x);
       const top = Math.min(c0.y, c1.y, c2.y, c3.y);
