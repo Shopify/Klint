@@ -25,9 +25,16 @@ const OTF_FLAVOR = 0x4f54544f; // "OTTO"
 // Returns Promise<Uint8Array> of decompressed data. `format` is 'deflate' (zlib) or
 // 'deflate-raw'. WOFF uses zlib (deflate with header).
 async function inflate(bytes, format = "deflate") {
-  // Universal path: DecompressionStream is in Node 17+ and all modern browsers.
+  // DecompressionStream is available in Node 17+ and modern browsers. Build the
+  // stream directly instead of relying on Blob.stream(), which is absent in
+  // some DOM implementations such as jsdom.
   const ds = new DecompressionStream(format);
-  const stream = new Blob([bytes]).stream().pipeThrough(ds);
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(bytes);
+      controller.close();
+    },
+  }).pipeThrough(ds);
   const ab = await new Response(stream).arrayBuffer();
   return new Uint8Array(ab);
 }

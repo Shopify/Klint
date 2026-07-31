@@ -20,21 +20,34 @@ for (const [label, value] of [
   if (typeof value !== "function") throw new Error(`${label} export is missing`);
 }
 
-const fixture = await readFile(
-  new URL("../tests/Plugins/fixtures/Jost-Regular.ttf", import.meta.url),
-);
-const buffer = fixture.buffer.slice(
-  fixture.byteOffset,
-  fixture.byteOffset + fixture.byteLength,
-);
-for (const [label, Parser] of [
+const fontFixtures = [
+  ["TTF", "Jost-Regular.ttf"],
+  ["OTF", "Marcel-Semibold.otf"],
+  ["WOFF", "Jost-Regular.woff"],
+  ["WOFF2", "Jost-Regular.woff2"],
+];
+for (const [moduleFormat, Parser] of [
   ["ESM", esmFonts.FontParser],
-  ["CJS", cjsFonts.FontParser],
+  ["CommonJS", cjsFonts.FontParser],
 ]) {
-  const font = await new Parser().loadFromBuffer(buffer);
-  if (font.toSVG("A").letters.length !== 1) {
-    throw new Error(`${label} FontParser artifact failed to parse TTF`);
+  for (const [fontFormat, filename] of fontFixtures) {
+    const fixture = await readFile(
+      new URL(`../tests/Plugins/fixtures/${filename}`, import.meta.url),
+    );
+    const buffer = fixture.buffer.slice(
+      fixture.byteOffset,
+      fixture.byteOffset + fixture.byteLength,
+    );
+    const font = await new Parser().loadFromBuffer(buffer);
+    const letter = font.toSVG("A").letters[0];
+    if (!letter?.d) {
+      throw new Error(
+        `${moduleFormat} FontParser artifact failed to parse ${fontFormat}`,
+      );
+    }
   }
 }
 
-console.log("Artifact smoke test passed for ESM, CommonJS, native, and FontParser.");
+console.log(
+  "Artifact smoke test passed for ESM, CommonJS, native, and all font formats.",
+);

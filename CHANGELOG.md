@@ -2,21 +2,28 @@
 
 ## v0.5.0 (Unreleased)
 
+### Compatibility and migration
+- The React adapter now requires React and React DOM 18 or 19. Use `@shopify/klint/native` for vanilla JavaScript without React; both React peer dependencies are optional for native-only consumers.
+- The published package requires Node.js 18 or newer. Repository development and release automation require Node.js 20.19 or newer.
+- Canvas option types now use booleans instead of `"true"`/`"false"` strings. Legacy strings are still normalized at runtime for migration safety.
+- Canvas, pointer, offscreen, text, and pixel coordinates are now consistently expressed in logical CSS pixels. Code that previously compensated manually for `devicePixelRatio` should remove that compensation.
+- The old `klint-create-editor` and `klint-create-sandbox` executable names are replaced by `klint create-editor`, `klint create-sandbox`, and the direct `create-editor`/`create-sandbox` binaries.
+
 ### Added
 - **Vanilla JavaScript runtime** — `createKlint()` is available from `@shopify/klint/native` without loading React.
 - **Bezier plugin** — full Bézier curve construction, evaluation, splitting, offsets, outlines, intersections, and arc approximation.
 - **Polyline plugin** — multi-segment curve paths with smooth and simplify operations.
-- **Delaunay plugin** — Bowyer-Watson triangulation, Voronoi generation, and Earcut polygon triangulation with holes.
-- Format-specific, tree-shakeable font parser exports for TTF, OTF, WOFF, and WOFF2.
-- Canvas loading/error components, lifecycle callbacks, canvas attributes, `ResizeObserver` sizing, and focused keyboard input.
+- **Delaunay expansion** — Bowyer-Watson triangulation, Voronoi generation, and Earcut polygon triangulation with holes.
+- Auto-detecting TTF, OTF, WOFF, and WOFF2 parsing from binary signatures, plus format-specific tree-shakeable exports.
+- Public deep exports for Bezier, Polyline, FontParser formats, Catmull, Delaunay, Sprites, and Projector.
+- Canvas loading/error components, lifecycle callbacks, canvas attributes, grouped `options`, `ResizeObserver` sizing, and focused keyboard input. Flattened canvas options remain supported.
 - Root/package MIT licenses and third-party notices.
 
 ### Changed
-- Canvas dimensions, drawing, pointer input, offscreens, text, and pixels now use a defined logical-pixel model with DPR-scaled backing stores.
-- Canvas options now use booleans instead of `"true"`/`"false"` strings. Legacy strings are normalized at runtime for migration safety.
 - The React adapter keeps one canvas/context across prop rerenders, updates callbacks through refs, and pauses timing while hidden or paused.
-- Font parsing now uses the readable `arthurcloche/font-parsers` sources. The universal `FontParser.loadFromBuffer()` is asynchronous; TTF/OTF deep imports retain synchronous parsing.
-- Tests now import production code and include React lifecycle, input, DPR, native-adapter, timeline, path, offscreen, and packed-artifact coverage.
+- Font decoders now live directly in TypeScript under the FontParser plugin. The universal `FontParser.loadFromBuffer()` is asynchronous and lazy-loads the detected decoder; TTF/OTF deep imports retain synchronous parsing.
+- Internal context, function, runtime, type, and native modules are consolidated under `src/core` without changing the public root or `@shopify/klint/native` imports.
+- Tests now import production code and include React lifecycle, input, DPR, native-adapter, timeline, path, offscreen, all four real font formats, and packed-artifact coverage.
 - Release builds are minified and code-split, with ESM/CommonJS/type exports checked in CI.
 
 ### Fixed

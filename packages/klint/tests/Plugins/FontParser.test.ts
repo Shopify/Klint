@@ -86,6 +86,24 @@ describe("FontParser", () => {
       expect(variableFont.fvar).toBeDefined();
     });
 
+    it.each([
+      ["TTF", "Jost-Regular.ttf", "ttf"],
+      ["OTF", "Marcel-Semibold.otf", "otf"],
+      ["WOFF", "Jost-Regular.woff", "woff"],
+      ["WOFF2", "Jost-Regular.woff2", "woff2"],
+    ] as const)(
+      "auto-detects and parses a real %s font",
+      async (_label, fixture, expectedFormat) => {
+        const buffer = loadFixture(fixture);
+        expect(detectFontFormat(buffer)).toBe(expectedFormat);
+
+        const font = await parser.loadFromBuffer(buffer);
+        const result = font.toSVG("A");
+        expect(result.letters).toHaveLength(1);
+        expect(result.letters[0].d.length).toBeGreaterThan(0);
+      },
+    );
+
     it("load() should call fetch and return a promise", async () => {
       const mockBuffer = loadFixture("Jost-Regular.ttf");
       global.fetch = vi.fn().mockResolvedValue({

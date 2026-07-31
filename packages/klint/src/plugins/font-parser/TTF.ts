@@ -8,7 +8,7 @@
 //   default class { load, loadFromBuffer } (drop-in compatible with Klint)
 
 import {
-  u16, i16, u32, f2dot14, fixed,
+  u16, i16, u32, f2dot14,
   parseCmap, parseFvar, parseAvar, parseHVAR,
   parseHead, parseHhea, parseMaxp, parseHmtx, parseKern,
   regionScalar, makeFont, readSfntDirectory,
@@ -161,7 +161,7 @@ function parseGvar(b, off, sb /* signed bytes view */) {
   for (let g = 0; g < glyphCount; g++) {
     const glyphBase = off + dataOff + offsets[g];
     p = glyphBase;
-    let header = u16(b, p); p += 2;
+    const header = u16(b, p); p += 2;
     const hasSharedPoints = header & 0x8000;
     const tupleCount = header & 0x0fff;
     const dataStart = u16(b, p); p += 2;

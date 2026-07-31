@@ -38,9 +38,15 @@ const KNOWN_TAGS = [
 
 // ───────────── platform brotli ─────────────
 // Keep the optional Node fallback opaque to browser bundlers. A literal
-// import("node:zlib") makes webpack try to bundle a Node builtin even though
+// import("node:zlib") makes bundlers try to resolve a Node builtin even though
 // this branch never runs in browsers.
-const importNodeModule = new Function("specifier", "return import(specifier)");
+const loadNodeZlib = () => {
+  // Node 20.16+ exposes built-ins without an import. Keep an opaque dynamic
+  // import as the Node 18 fallback so browser bundlers never resolve `zlib`.
+  const builtin = process.getBuiltinModule?.("node:zlib");
+  if (builtin) return builtin;
+  return new Function("return import('node:zlib')")();
+};
 
 async function brotliDecompress(bytes, custom) {
   if (custom) return custom(bytes);
@@ -53,7 +59,7 @@ async function brotliDecompress(bytes, custom) {
     } catch { /* fall through */ }
   }
   if (typeof process !== "undefined" && process.versions?.node) {
-    const { brotliDecompressSync } = await importNodeModule("node:zlib");
+    const { brotliDecompressSync } = await loadNodeZlib();
     return brotliDecompressSync(bytes);
   }
   throw new Error(
@@ -140,7 +146,7 @@ function readTriplet(gS, code) {
 function reconstructGlyf(transformed) {
   const r = new Reader(transformed);
   /* reserved */ r.u16();
-  const optionFlags     = r.u16();
+  const _optionFlags    = r.u16();
   const numGlyphs       = r.u16();
   const indexFormat     = r.u16();
   const nContourSize    = r.u32();

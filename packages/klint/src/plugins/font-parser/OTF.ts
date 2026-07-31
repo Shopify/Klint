@@ -11,7 +11,7 @@
 // OTF (the common case), this is byte-equivalent to TTF in the path-stream sense.
 
 import {
-  u16, u32,
+  u16,
   parseCmap, parseFvar, parseAvar, parseHVAR,
   parseHead, parseHhea, parseMaxp, parseHmtx, parseKern,
   makeFont, readSfntDirectory,
@@ -448,7 +448,7 @@ function getGlyph(font, gid /* normCoords ignored — CFF1 is non-variable */) {
   if (cs && cs.length) {
     try {
       execCharString(cs, cff.gsubrs, lsubrs, out);
-    } catch (e) {
+    } catch {
       // Bad charstring → empty glyph (matches Klint behaviour for missing glyphs).
       out.length = 0;
     }
