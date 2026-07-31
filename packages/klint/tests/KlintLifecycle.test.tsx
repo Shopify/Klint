@@ -2,7 +2,7 @@ import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Klint from "../src/Klint";
-import type { KlintContext } from "../src/KlintTypes";
+import type { KlintContext } from "../src/core/KlintTypes";
 
 class TestResizeObserver {
   static instances: TestResizeObserver[] = [];

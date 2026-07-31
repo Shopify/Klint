@@ -59,7 +59,8 @@ const draw = (K: KlintContext) => {
     // Apply transformations
     K.translate(100 + i * 80, K.height/2)
     K.rotate(K.time + i * 0.5)
-    K.scale(0.5 + Math.sin(K.time * 2 + i) * 0.3)
+    const scale = 0.5 + Math.sin(K.time * 2 + i) * 0.3
+    K.scale(scale, scale)
     
     // Draw transformed object
     K.fillColor(`hsl(${i * 72}, 70%, 60%)`)
@@ -250,7 +251,7 @@ const draw = (K: KlintContext) => {
 K.push()
 K.translate(x, y)
 K.rotate(angle)
-K.scale(size)
+K.scale(size, size)
 // Draw multiple related objects
 K.pop()
 

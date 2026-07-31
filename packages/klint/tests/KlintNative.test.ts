@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createKlint } from "../src/native";
+import { createKlint } from "../src/core/native";
 
 class Observer {
   constructor(_callback: unknown) {}

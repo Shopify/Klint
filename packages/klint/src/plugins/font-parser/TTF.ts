@@ -1,3 +1,4 @@
+// @ts-nocheck -- Parser internals retain the compact upstream data structures.
 // TTF (TrueType) parser — glyf/loca outlines, gvar variations.
 // Port of Shopify/Klint FontParser, structured as a tree-shakeable ES module.
 //
@@ -11,7 +12,8 @@ import {
   parseCmap, parseFvar, parseAvar, parseHVAR,
   parseHead, parseHhea, parseMaxp, parseHmtx, parseKern,
   regionScalar, makeFont, readSfntDirectory,
-} from "./_common.mjs";
+} from "./Common";
+import type { FontData } from "../FontParser";
 
 // ───────────── glyf — single glyph parse ─────────────
 // Parses the simple/composite glyph at loca[idx] and returns either:
@@ -378,7 +380,7 @@ function getGlyph(font, gid, normCoords) {
 }
 
 // ───────────── parser entry point ─────────────
-export function parseTTF(buffer) {
+export function parseTTF(buffer: ArrayBuffer): FontData {
   const data = new Uint8Array(buffer);
   const sb = new Int8Array(buffer);
   const { tables } = readSfntDirectory(data);
@@ -406,9 +408,17 @@ export function parseTTF(buffer) {
   return makeFont(font, getGlyph);
 }
 
-export const loadTTF = url => fetch(url).then(r => r.arrayBuffer()).then(parseTTF);
+export const loadTTF = (url: string): Promise<FontData> =>
+  fetch(url).then((response) => response.arrayBuffer()).then(parseTTF);
 
-export default class TTFFontParser {
-  load = loadTTF;
-  loadFromBuffer = parseTTF;
+export class FontParserTTF {
+  load(url: string): Promise<FontData> {
+    return loadTTF(url);
+  }
+
+  loadFromBuffer(buffer: ArrayBuffer): FontData {
+    return parseTTF(buffer);
+  }
 }
+
+export default FontParserTTF;

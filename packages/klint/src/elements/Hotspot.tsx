@@ -1,4 +1,4 @@
-import type { KlintContext } from "../KlintTypes";
+import type { KlintContext } from "../core/KlintTypes";
 
 /**
  * Point interface for hotspot detection

@@ -48,7 +48,7 @@ const draw = (K: KlintContext) => {
   });
   
   // Draw image - clipped to shape
-  const img = K.images.get("photo");
+  const img = images.photo; // from KlintImage()
   if (img) {
     K.image(img, 0, 0, K.width, K.height);
   }
@@ -128,7 +128,7 @@ const draw = (K: KlintContext) => {
   });
   
   // Draw image - clipped to star shape
-  const img = K.images.get("texture");
+  const img = images.texture; // from KlintImage()
   if (img) {
     K.image(img, 0, 0, K.width, K.height);
   }

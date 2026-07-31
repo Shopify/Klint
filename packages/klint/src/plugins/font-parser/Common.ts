@@ -1,6 +1,8 @@
+// @ts-nocheck -- Parser internals retain the compact upstream data structures.
+// Public parser entry points are strictly typed in the format-specific modules.
 // Shared helpers for TTF / OTF / WOFF / WOFF2 parsers.
 // Format-agnostic: binary IO, cmap, fvar/avar/HVAR, hmtx, kern, layout, paths.
-// Path command stream encoding (used by both ttf.mjs and otf.mjs glyph builders):
+// Path command stream encoding (used by both TTF and OTF glyph builders):
 //   0, x, y                  → moveTo
 //   1, x, y                  → lineTo
 //   2, cx, cy, x, y          → quadraticCurveTo

@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createKlintContext } from "../../src/KlintContext";
-import { resizeKlintCanvas } from "../../src/KlintRuntime";
+import { createKlintContext } from "../../src/core/KlintContext";
+import { resizeKlintCanvas } from "../../src/core/KlintRuntime";
 import {
   normalizeKlintOptions,
   type KlintContext,
-} from "../../src/KlintTypes";
+} from "../../src/core/KlintTypes";
 
 const createContext = (options = {}): KlintContext => {
   const canvas = document.createElement("canvas");

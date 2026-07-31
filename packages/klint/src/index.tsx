@@ -8,7 +8,7 @@ import type {
   KlintVector,
 } from "./useKlint";
 
-import { KlintCoreFunctions, KlintFunctions } from "./KlintFunctions";
+import { KlintCoreFunctions, KlintFunctions } from "./core/KlintFunctions";
 
 export * from "./Klint";
 export * from "./elements";

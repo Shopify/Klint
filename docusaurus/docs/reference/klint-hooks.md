@@ -4,214 +4,162 @@ sidebar_position: 2
 
 # Klint Hooks
 
-Klint provides React hooks for managing state, handling input, and loading resources.
-
-## useKlint
+`useKlint()` creates the stable bridge shared by `<Klint>` and the optional input/resource hook factories.
 
 ```tsx
-const { 
-  context,          // KlintContext instance 
-  KlintMouse,       // Mouse tracking hook factory
-  KlintKeyboard,    // Keyboard tracking hook factory
-  KlintImage,       // Image loading hook factory
-  KlintWindow,      // Window/resize events hook factory
-  KlintScroll,      // Scroll handling hook factory
-  KlintGesture,     // Touch gesture handling hook factory
-  KlintTimeline,    // Animation timeline hook factory
-  KlintPerformance, // Performance monitoring hook factory
-  useDev,           // Development utilities
-  togglePlay,       // Play/pause control
-} = useKlint()
+const {
+  context,
+  KlintMouse,
+  KlintScroll,
+  KlintGesture,
+  KlintKeyboard,
+  KlintWindow,
+  KlintImage,
+  togglePlay,
+  useDev,
+} = useKlint();
 ```
 
-The main hook that initializes Klint and provides access to sub-hook factories.
+The aliases `useMouse`, `useScroll`, `useGesture`, `useKeyboard`, `useWindow`, and `useImage` are also available.
+
+Call each factory unconditionally at the top level of your component, like any other React hook. Pass `context` to `<Klint>` so the factory can attach to the current canvas.
+
+## Mouse and pointer input
+
+```tsx
+const {mouse, onClick, onMouseIn, onMouseOut, onMouseDown, onMouseUp} =
+  KlintMouse();
+```
+
+`mouse` contains `x`, `y`, previous coordinates `px`, `py`, velocity `vx`, `vy`, movement `angle`, `isPressed`, and `isHover`. Coordinates are logical canvas pixels and account for CSS scaling and the configured canvas origin.
+
+Handlers receive `(K, PointerEvent)`. Pointer capture keeps a press active when the pointer moves outside the canvas.
+
+## Scroll input
+
+```tsx
+const {scroll, onScroll} = KlintScroll();
+
+onScroll((K, state, event) => {
+  console.log(state.distance, state.velocity);
+});
+```
+
+Wheel line/page deltas are normalized to logical pixel values. The listener is intentionally non-passive so scrolling over the sketch does not also scroll the page.
+
+## Gestures
+
+```tsx
+const {
+  gesture,
+  onTap,
+  onSwipe,
+  onPinch,
+  onRotate,
+  onTouchStart,
+  onTouchMove,
+  onTouchEnd,
+  onTouchCancel,
+} = KlintGesture();
+```
+
+The gesture state includes the current scale and rotation, per-event `deltaX`/`deltaY`, full-gesture `totalX`/`totalY`, velocity, touch lists, and timing values. Gesture callbacks receive `(K, TouchEvent, gesture)`; `onSwipe` also receives a direction.
+
+## Keyboard input
+
+Keyboard events are attached to the focusable canvas, not the whole document. Clicking or pressing the canvas focuses it.
+
+```tsx
+const {
+  keyboard,
+  keyPressed,
+  keyReleased,
+  keyCombo,
+  isPressed,
+  arePressed,
+  clearCallbacks,
+} = KlintKeyboard();
+
+keyPressed('Space', (K, event) => K.pause());
+keyCombo(['Ctrl', 's'], (K, event) => {
+  event.preventDefault();
+  K.saveCanvas();
+});
+```
+
+`keyboard.pressedKeys` is a `Set`; modifier state, the last key, and its timestamp are also available. `Space`, `Ctrl`, and `Esc` use normalized names.
+
+## Images
+
+```tsx
+const {
+  images,
+  loadImage,
+  loadImages,
+  getImage,
+  hasImage,
+  clearImages,
+} = KlintImage();
+
+await loadImages({logo: '/img/logo.png'});
+K.image(images.logo, 0, 0);
+```
+
+`images.key`, `images['key']`, and `images.get('key')` are supported. Loading defaults to `crossOrigin: 'anonymous'`; pass `{crossOrigin}` to override it.
+
+## Window lifecycle
+
+```tsx
+const {onResize, onBlur, onFocus, onVisibilityChange} = KlintWindow();
+```
+
+Callbacks attach after the canvas context exists and receive that context. Automatic canvas sizing itself is handled by `<Klint>`'s `ResizeObserver`.
+
+## Play and pause
+
+```tsx
+const {togglePlay} = useKlint();
+
+togglePlay();      // toggle
+togglePlay(true);  // play
+togglePlay(false); // pause
+```
+
+Inside lifecycle callbacks, the equivalent context methods are `K.play()`, `K.pause()`, and `K.redraw()`.
 
 ## useStorage
 
+`useStorage` keeps mutable sketch state in a ref without triggering React renders.
+
 ```tsx
-const P = useStorage<StorageType>(initialValues)
+const particles = useStorage({items: [] as Particle[]});
+
+particles.get('items');
+particles.set('items', nextItems);
+particles.has('items');
+particles.remove('items');
 ```
 
-Provides persistent storage across renders that survives component re-renders.
-
-### Methods
-- `get(key)`: Get a stored value
-- `set(key, value)`: Store a value
-- `has(key)`: Check if key exists
-- `remove(key)`: Remove a stored value
+The current backing object is also exposed as `store`. Mutating it is appropriate for frame-local creative-coding state, but it does not update React UI.
 
 ## useProps
 
-```tsx
-const P = useProps<PropsType>(props)
-```
-
-Provides reactive access to props that can be updated and accessed consistently.
-
-## KlintMouse
+`useProps` lets a long-running draw callback read the latest React props without recreating the canvas.
 
 ```tsx
-const { 
-  mouse,          // Current mouse state
-  onClick,        // Register click handler
-  onMouseIn,      // Register mouse enter handler
-  onMouseOut,     // Register mouse leave handler
-  onMouseDown,    // Register mousedown handler
-  onMouseUp       // Register mouseup handler
-} = KlintMouse()
+const values = useProps(props);
+
+const draw = (K: KlintContext) => {
+  K.circle(0, 0, values.get('radius'));
+};
 ```
 
-Tracks mouse state and registers event handlers.
+Use `get(key)` for the current value and `has(key)` for presence. The `props` field is the render-time snapshot; prefer `get()` inside lifecycle callbacks.
 
-### Mouse properties
-- `x`, `y`: Current position (relative to canvas origin)
-- `px`, `py`: Previous position
-- `vx`, `vy`: Velocity (change in position)
-- `angle`: Angle of movement
-- `isPressed`: Boolean indicating mouse pressed state
-- `isHover`: Boolean indicating if mouse is over canvas
+## Development refreshes
 
-## KlintImage
+`useDev()` opts a sketch into re-enabling drawing after development renders. Call it unconditionally alongside the other factories when your editor/HMR integration needs it.
 
-```tsx
-const { 
-  images,          // Proxy object containing loaded images
-  loadImage,       // Function to load a single image
-  loadImages,      // Function to load multiple images
-  getImage,        // Get image by key
-  hasImage,        // Check if image exists
-  clearImages      // Clear all loaded images
-} = KlintImage()
-```
+## Cleanup
 
-Handles image loading with promise-based API.
-
-### Methods
-- `loadImage(key, url, options?)`: Load a single image
-- `loadImages(imageMap, options?)`: Load multiple images from URL map
-- `images[key]` or `images.get(key)`: Access loaded images
-
-## KlintWindow
-
-```tsx
-const { 
-  onResize,        // Register resize handler
-  onBlur,          // Register window blur handler
-  onFocus,         // Register window focus handler
-  onVisibilityChange, // Register visibility change handler
-  window           // Window state
-} = KlintWindow()
-```
-
-Tracks window state and handles window events.
-
-## KlintScroll
-
-```tsx
-const { 
-  scroll,          // Current scroll state
-  onScroll         // Register scroll handler
-} = KlintScroll()
-```
-
-Tracks scroll events and provides scroll state.
-
-### Scroll properties
-- `distance`: Total scroll distance
-- `velocity`: Scroll velocity
-- `lastTime`: Last scroll event timestamp
-
-## KlintGesture
-
-```tsx
-const { 
-  gesture,         // Current gesture state
-  onTouchStart,    // Register touch start handler
-  onTouchMove,     // Register touch move handler
-  onTouchEnd,      // Register touch end handler
-  onTouchCancel    // Register touch cancel handler
-} = KlintGesture()
-```
-
-Handles touch gestures for mobile devices.
-
-### Gesture properties
-- `active`: Boolean indicating if gesture is active
-- `touches`: Current touch list
-- `scale`: Pinch scale factor
-- `rotation`: Rotation angle
-- `deltaX`, `deltaY`: Movement delta
-- `velocityX`, `velocityY`: Movement velocity
-
-## Example
-
-```tsx
-import { Klint, useKlint, useStorage, type KlintContext } from "@shopify/klint";
-
-export function KlintCanvas() {
-  // Initialize hooks
-  const { context, KlintMouse, KlintImage, KlintWindow } = useKlint();
-  const { mouse, onClick } = KlintMouse();
-  const { onResize } = KlintWindow();
-  const { images, loadImages } = KlintImage();
-  
-  // Set up storage
-  const P = useStorage({
-    clickCount: 0,
-    lastPosition: { x: 0, y: 0 }
-  });
-
-  // Set up event handlers
-  onClick((ctx, e) => {
-    P.set("clickCount", P.get("clickCount") + 1);
-    P.set("lastPosition", { x: mouse.x, y: mouse.y });
-  });
-  
-  onResize(() => {
-    console.log("Canvas resized");
-  });
-
-  const preload = async (K: KlintContext) => {
-    await loadImages({
-      icon: "path/to/icon.png"
-    });
-  };
-
-  const draw = (K: KlintContext) => {
-    K.background("#222");
-    
-    // Use mouse state
-    K.fillColor(mouse.isPressed ? "red" : "white");
-    K.circle(mouse.x, mouse.y, 20);
-    
-    // Use storage
-    K.fillColor("white");
-    K.text(`Clicks: ${P.get("clickCount")}`, 20, 30);
-    
-    // Use loaded images
-    if (images.icon) {
-      K.image(images.icon, 50, 50);
-    }
-  };
-
-  return (
-    <div style={{ width: "100vw", height: "100vh" }}>
-      <Klint
-        context={context}
-        preload={preload}
-        draw={draw}
-      />
-    </div>
-  );
-}
-```
-
-## Notes
-- All hooks must be used within a React component
-- `useKlint()` should be called only once per component
-- Pass the context from `useKlint()` to the `<Klint>` component
-- Storage persists between renders without triggering re-renders
-- Event handlers are automatically cleaned up on component unmount
-- The `loadImages` function returns a promise that resolves when all images are loaded
-- Mouse coordinates are relative to the canvas origin setting
-- Touch gestures work on mobile devices and touch-enabled screens 
+All listeners use abortable subscriptions and are detached when the component unmounts or the underlying canvas changes. Input refs remain stable across React rerenders.

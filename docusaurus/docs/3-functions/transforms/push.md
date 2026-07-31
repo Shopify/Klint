@@ -117,7 +117,7 @@ const draw = (K: KlintContext) => {
 K.push()
 K.translate(x, y)
 K.rotate(angle)
-K.scale(size)
+K.scale(size, size)
 drawComplexObject(K)
 K.pop() // Everything returns to normal
 ```

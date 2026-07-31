@@ -13,7 +13,7 @@ import type {
 import { normalizeKlintOptions } from "./KlintTypes";
 
 export * from "./KlintTypes";
-export * from "./elements";
+export * from "../elements";
 
 export interface KlintNativeOptions extends KlintCanvasOptions {
   canvas?: HTMLCanvasElement;

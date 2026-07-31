@@ -170,6 +170,6 @@ function GameSketch() {
 
 ## Next Steps
 
-- [Core Concepts](../2-core-concepts/lifecycle) — Deep dive into Klint architecture
-- [Function Reference](../3-functions/drawing/circle) — Explore typed function signatures
-- [React Integration](../2-core-concepts/react-integration) — TypeScript with React patterns
+- [Core Concepts](/docs/core-concepts/lifecycle) — Deep dive into Klint architecture
+- [Function Reference](/docs/functions/drawing/circle) — Explore typed function signatures
+- [React Integration](/docs/core-concepts/react-integration) — TypeScript with React patterns

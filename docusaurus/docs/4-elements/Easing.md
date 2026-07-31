@@ -291,7 +291,8 @@ const draw = (K: KlintContext) => {
   
   K.push();
   K.translate(buttonX + buttonW/2, buttonY + buttonH/2);
-  K.scale(1 + easedHover * 0.1);
+  const hoverScale = 1 + easedHover * 0.1;
+  K.scale(hoverScale, hoverScale);
   K.roundedRectangle(-buttonW/2, -buttonH/2, buttonW, 10, buttonH);
   K.pop();
   

@@ -1,6 +1,6 @@
 import type { KlintCoreFunctions, KlintFunctions } from "./KlintFunctions";
-import type { KlintElements } from "./elements";
-import type Vector from "./elements/Vector";
+import type { KlintElements } from "../elements";
+import type Vector from "../elements/Vector";
 
 export const DEFAULT_FPS = 60;
 export const EPSILON = 0.0001;

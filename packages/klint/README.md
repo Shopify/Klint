@@ -51,10 +51,10 @@ This creates a Monaco-based editor with live preview - perfect for learning and 
 
 ## 📚 Documentation
 
-- **[Getting Started Guide](https://shopify.github.io/Klint/)** - Learn the basics
-- **[API Reference](https://shopify.github.io/Klint/docs/Functions/introduction)** - Complete function reference  
+- **[Getting Started Guide](https://shopify.github.io/Klint/docs/getting-started/quick-start)** - Learn the basics
+- **[API Reference](https://shopify.github.io/Klint/docs/reference/api-reference)** - Complete function reference
 - **[Examples](https://shopify.github.io/Klint/experiments)** - See Klint in action
-- **[Lifecycle](https://shopify.github.io/Klint/docs/klint-introduction)** - Understand how Klint works with React
+- **[Lifecycle](https://shopify.github.io/Klint/docs/core-concepts/lifecycle)** - Understand initialization and drawing
 
 ## 🌟 Examples
 

@@ -4,103 +4,117 @@ sidebar_position: 1
 
 # Klint Component
 
-The `Klint` component is the main entry point for rendering canvas graphics in React applications.
-The `context` prop comes from `useKlint()` hook.
+`Klint` owns the canvas, lifecycle, sizing, visibility handling, and animation loop. A context bridge from `useKlint()` is optional, but required when you use Klint's React input or resource hooks.
 
 ```tsx
-<Klint
-  context={context}           // Optional KlintContext from useKlint()
-  preload={preloadFunction}   // Optional async setup before first frame
-  setup={setupFunction}       // Optional one-time setup function
-  draw={drawFunction}         // Required drawing function
-  options={{                  // Optional configuration
-    origin: "center",         // "center" or "corner" (default)
-    fps: 60,                  // Target frame rate (default: 60)
-    static: "true",           // Static render, no animation loop (default: undefined)
-    alpha: "true",            // Canvas with alpha channel (default: "true")
-    willreadfrequently: "false" // Optimize for pixel manipulation (default: "false")
-  }}
-/>
-```
+import {Klint, useKlint, type KlintContext} from '@shopify/klint';
 
-## Lifecycle Functions
-
-### preload
-```ts
-preload: (K: KlintContext) => Promise<void>
-```
-Asynchronous function called before the first frame. Use for loading assets like images, fonts, etc.
-
-### setup
-```ts
-setup: (K: KlintContext) => void
-```
-Called once after preload and before the first frame. Use for one-time initialization.
-
-### draw
-```ts
-draw: (K: KlintContext) => void
-```
-Called every frame (or once in static mode). Contains your drawing logic.
-
-## Example
-```tsx
-import { Klint, useKlint, useStorage, type KlintContext } from "@shopify/klint";
-
-export function KlintCanvas() {
-  const { context, KlintMouse, KlintImage } = useKlint();
-  const { images, loadImages } = KlintImage();
-  const P = useStorage({
-    hello: "world",
-  });
-
-  const preload = async (K: KlintContext) => {
-    await loadImages({
-      lamp: "path/to/lamp.png",
-    });
-  };
-
-  const setup = (K: KlintContext) => {
-    K.textFont("Inter")
-    K.textSize(36)
-    K.noStroke()
-    K.alignText("center", "middle")
-    K.setImageOrigin("center")
-  };
-
-  const draw = (K: KlintContext) => {
-    K.background("#FFF");
-    
-    K.push();
-    const lamp = images["lamp"];
-    const fit = K.scaleTo(lamp.width, lamp.height, K.width, K.height);
-    K.scale(fit, fit);
-    K.image(lamp, 0, 0);
-    K.pop();
-    
-    K.push();
-    K.text(P.get("hello"), 0, 0);
-    K.pop();
-  };
+function Sketch() {
+  const {context} = useKlint();
 
   return (
-    <div style={{ width: "100vw", height: "100vh" }}>
-      <Klint
-        context={context}
-        preload={preload}
-        setup={setup}
-        draw={draw}
-        options={{
-          origin: "center",
-        }}
-      />
-    </div>
+    <Klint
+      context={context}
+      preload={async (K) => {/* load resources */}}
+      setup={(K) => {/* initialize once */}}
+      draw={(K) => {/* draw a frame */}}
+      options={{
+        origin: 'corner',
+        fps: 60,
+        alpha: true,
+        willreadfrequently: false,
+        dpr: 'default',
+        maxDpr: 3,
+      }}
+    />
   );
 }
 ```
 
-## Notes
-- For static rendering (non-animated), set `options.static` to "true"
-- The KlintContext provides access to canvas dimensions via `K.width` and `K.height`
-- Canvas automatically resizes with its container
-- Setting `origin` to "center" places the coordinate origin at the center of the canvas 
+## Lifecycle props
+
+| Prop | Type | Behavior |
+| --- | --- | --- |
+| `preload` | `(K) => void \| Promise<void>` | Runs once before setup. Drawing waits for it. |
+| `setup` | `(K) => void \| Promise<void>` | Runs once after preload. Drawing waits for it. |
+| `draw` | `(K) => void` | Runs at the requested frame rate, or once in static/no-loop mode. |
+
+The canvas and its 2D context survive React rerenders. The latest `draw` and event callbacks are read from refs, so changing a callback does not recreate the canvas or animation loop. Canvas options are initialization options; remount the component to change them.
+
+## Canvas options
+
+Options can be passed through the grouped `options` prop. Flattened options remain supported for compatibility.
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `origin` | `'corner'` | Canvas origin: `'corner'` or `'center'`. |
+| `fps` | `60` | Target draw rate. |
+| `autoplay` | `true` | Start the animation after setup. |
+| `static` | `false` | Draw once after setup. |
+| `noloop` | `false` | Draw once without continuing the loop. |
+| `alpha` | `true` | Request an alpha-enabled 2D context. |
+| `willreadfrequently` | `false` | Optimize the context for frequent pixel reads. |
+| `ignoreResize` | `false` | Disable automatic `ResizeObserver` sizing. |
+| `dpr` | `'default'` | Device-pixel ratio or a positive number. |
+| `maxDpr` | `3` | Cap used when `dpr` is `'default'`. |
+| `nocanvas` | `false` | Keep the canvas mounted but hidden. |
+| `ignoreFunctions` | `false` | Do not install Klint helpers on offscreen contexts. |
+| `unsafemode` | `false` | Disable selected safety checks. |
+
+Boolean options use actual booleans in 0.5. Legacy `'true'` and `'false'` strings are normalized at runtime only to ease migration.
+
+## Presentation and lifecycle callbacks
+
+```tsx
+<Klint
+  loadingComponent={<p>Loading sketch…</p>}
+  errorComponent={(error) => <p role="alert">{error.message}</p>}
+  onError={(error) => console.error(error)}
+  onReady={(K) => console.log('ready', K.width, K.height)}
+  onResize={(K) => console.log('resized', K.width, K.height)}
+  onVisible={(K, visible) => console.log({visible})}
+/>
+```
+
+- `loadingComponent` is displayed while preload/setup runs.
+- `errorComponent` is displayed if initialization or drawing throws.
+- `onError`, `onReady`, `onResize`, and `onVisible` observe lifecycle changes.
+- Drawing pauses while the document or canvas is not visible, without adding hidden time to `deltaTime`.
+
+## Container and canvas props
+
+The outer element fills its parent. Control canvas size by sizing that parent or by passing `className`/`style` to the outer element.
+
+Use `canvasProps` for standard canvas attributes and handlers:
+
+```tsx
+<div style={{width: 640, height: 360}}>
+  <Klint
+    draw={draw}
+    className="sketch"
+    canvasProps={{
+      'aria-label': 'Animated particle field',
+      tabIndex: 0,
+    }}
+  />
+</div>
+```
+
+The canvas is focusable by default so keyboard input is scoped to the active sketch rather than captured globally.
+
+## Extensions and children
+
+`extensionFunction` installs custom context values before preload. `children` render inside the canvas container, which is useful for overlays.
+
+```tsx
+<Klint
+  draw={draw}
+  extensionFunction={{
+    randomSign: () => () => Math.random() < 0.5 ? -1 : 1,
+  }}
+>
+  <button className="overlay">Reset</button>
+</Klint>
+```
+
+For runtime extensions, `K.extend(name, value, enforceReplace?)` warns on collisions unless replacement is explicitly allowed.

@@ -18,7 +18,7 @@ import {
   Text,
   Timeline,
   Vector,
-} from "./elements";
+} from "../elements";
 
 export function installKlintElements(context: KlintContexts): void {
   context.Color = new Color();

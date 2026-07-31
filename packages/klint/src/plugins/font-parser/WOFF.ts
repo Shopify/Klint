@@ -1,3 +1,4 @@
+// @ts-nocheck -- Parser internals retain the compact upstream data structures.
 // WOFF (Web Open Font Format, version 1) parser.
 //
 // WOFF is a thin, per-table-zlib-compressed wrapper around a regular SFNT (TTF/OTF).
@@ -12,7 +13,8 @@
 // `parseWOFF` is async because we use the platform `DecompressionStream('deflate')`
 // for portable, dependency-free zlib support (Node 17+, all modern browsers).
 
-import { u16, u32 } from "./_common.mjs";
+import { u16, u32 } from "./Common";
+import type { FontData, FontParserOptions } from "../FontParser";
 
 // ───────────── header constants ─────────────
 const WOFF_SIG   = 0x774f4646; // "wOFF"
@@ -31,7 +33,9 @@ async function inflate(bytes, format = "deflate") {
 }
 
 // ───────────── WOFF → SFNT ─────────────
-export async function decompressWOFF(buffer) {
+export async function decompressWOFF(
+  buffer: ArrayBuffer,
+): Promise<{ flavor: "ttf" | "otf"; sfnt: ArrayBuffer }> {
   const b = new Uint8Array(buffer);
   if (u32(b, 0) !== WOFF_SIG) throw new Error("WOFF: bad signature");
   const flavorRaw = u32(b, 4);
@@ -118,19 +122,38 @@ export async function decompressWOFF(buffer) {
 }
 
 // ───────────── parse + auto-delegate ─────────────
-export async function parseWOFF(buffer) {
+export async function parseWOFF(
+  buffer: ArrayBuffer,
+  _options: FontParserOptions = {},
+): Promise<FontData> {
   const { flavor, sfnt } = await decompressWOFF(buffer);
   if (flavor === "otf") {
-    const { parseOTF } = await import("./otf.mjs");
+    const { parseOTF } = await import("./OTF");
     return parseOTF(sfnt);
   }
-  const { parseTTF } = await import("./ttf.mjs");
+  const { parseTTF } = await import("./TTF");
   return parseTTF(sfnt);
 }
 
-export const loadWOFF = url => fetch(url).then(r => r.arrayBuffer()).then(parseWOFF);
+export const loadWOFF = (
+  url: string,
+  options?: FontParserOptions,
+): Promise<FontData> =>
+  fetch(url)
+    .then((response) => response.arrayBuffer())
+    .then((buffer) => parseWOFF(buffer, options));
 
-export default class WOFFFontParser {
-  load = loadWOFF;
-  loadFromBuffer = parseWOFF;
+export class FontParserWOFF {
+  load(url: string, options?: FontParserOptions): Promise<FontData> {
+    return loadWOFF(url, options);
+  }
+
+  loadFromBuffer(
+    buffer: ArrayBuffer,
+    options?: FontParserOptions,
+  ): Promise<FontData> {
+    return parseWOFF(buffer, options);
+  }
 }
+
+export default FontParserWOFF;

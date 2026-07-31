@@ -9,7 +9,9 @@
 import { describe, it, expect, beforeAll, vi } from "vitest";
 import { readFileSync } from "fs";
 import { resolve } from "path";
-import FontParser from "../../src/plugins/FontParser";
+import FontParser, {
+  detectFontFormat,
+} from "../../src/plugins/FontParser";
 import type {
   FontData,
   FontPathsResult,
@@ -43,6 +45,27 @@ describe("FontParser", () => {
   // ── Class & Loading ──────────────────────────────────────────────
 
   describe("Class", () => {
+    it.each([
+      [0x00010000, "ttf"],
+      [0x74727565, "ttf"],
+      [0x4f54544f, "otf"],
+      [0x774f4646, "woff"],
+      [0x774f4632, "woff2"],
+    ] as const)("detects the 0x%s signature as %s", (signature, format) => {
+      const buffer = new ArrayBuffer(4);
+      new DataView(buffer).setUint32(0, signature);
+      expect(detectFontFormat(buffer)).toBe(format);
+    });
+
+    it("rejects truncated and unsupported font files", () => {
+      expect(() => detectFontFormat(new ArrayBuffer(3))).toThrow(
+        "expected at least 4 bytes",
+      );
+      expect(() => detectFontFormat(new ArrayBuffer(4))).toThrow(
+        "Unknown font magic",
+      );
+    });
+
     it("should instantiate", () => {
       expect(parser).toBeInstanceOf(FontParser);
     });

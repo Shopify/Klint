@@ -1,7 +1,7 @@
 // Bezier curve operations ported from bezier.js by Pomax (MIT).
 // https://github.com/Pomax/bezierjs
 
-import type { KlintContext } from "../KlintTypes";
+import type { KlintContext } from "../core/KlintTypes";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 

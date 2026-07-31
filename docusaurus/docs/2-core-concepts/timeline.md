@@ -1,280 +1,143 @@
+---
+sidebar_position: 5
+---
+
 # Timeline
 
-The Timeline provides advanced animation sequencing capabilities with keyframe-based animations. Unlike other elements, Timeline is accessed through the `useKlint` hook for optimal performance.
-
-## Access
+Every Klint context includes `K.Timeline`, a numeric keyframe timeline. It is an element on the context, not a React hook.
 
 ```tsx
-function MyCanvas() {
-  const { KlintTimeline } = useKlint();
-  const { Timeline, onStart, onEnd } = KlintTimeline();
+const animation = K.Timeline.create((timeline) => ({
+  x: timeline.track((keyframes) => {
+    keyframes
+      .start(0)
+      .then(100, 0.5, (t) => K.Easing.out(t, 3))
+      .then(0, 0.5);
+  }),
+  scale: timeline.track((keyframes) => {
+    keyframes.start(1).then(2, 1);
+  }),
+}));
 
-  // Create timeline once (outside draw function)
-  const { scaleIn, scaleOut, staggerTracks } = Timeline.create((timeline) => {
-    const scaleIn = timeline.track((kf) =>
-      kf.start(0)
-        .then(1, 0.5)
-        .then(0, 1)
-    );
-
-    const scaleOut = timeline.track((kf) =>
-      kf.start(0.5)
-        .then(1.5, 0.3)
-        .then(1, 0.2)
-    );
-
-    const staggerTracks = timeline.stagger(5, 0.1, (keyframes) => {
-      keyframes.start(0).at(0.5, 1).at(1, 0);
-    });
-
-    return { scaleIn, scaleOut, staggerTracks };
-  });
-
-  const draw = (K: KlintContext) => {
-    const progress = K.time % 1; // 0-1 over 1 second
-
-    // Update timeline
-    scaleIn.update(progress);
-    
-    // Use timeline values
-    const a = scaleIn.current - scaleOut.current;
-    K.circle(100, 100, a * 50);
-  };
-}
+animation.update(0.25);
+K.circle(animation.x.current, 100, animation.scale.current * 20);
 ```
 
-## Core Methods
+A timeline does not own a clock. Call `update(progress)` with whatever progress model your sketch needs. A single pass normally runs from 0 to 1; looped tracks can consume progress beyond 1.
 
-### Timeline.create(setup, options?)
+## Keyframes
 
-Creates a timeline with tracks and returns an object with your tracks and an update method.
+### `start(value, delay?, callback?)`
 
-```tsx
-const { fadeIn, slideIn } = Timeline.create((timeline) => {
-  const fadeIn = timeline.track((kf) =>
-    kf.start(0)
-      .then(1, 0.5)
-      .at(1, 0)
-  );
+Sets the initial value and optional normalized delay.
 
-  const slideIn = timeline.track((kf) =>
-    kf.start(-100)
-      .then(0, 0.8, K.Easing.elasticOut)
-  );
+```ts
+keyframes.start(0);
+keyframes.start(0, 0.2); // hold until progress 0.2
+```
 
-  return { fadeIn, slideIn };
+### `then(value, duration, easing?, callback?)`
+
+Adds a tween relative to the previous keyframe.
+
+```ts
+keyframes
+  .start(0)
+  .then(100, 0.4, (t) => K.Easing.out(t, 3))
+  .then(50, 0.6);
+```
+
+### `at(progress, value, easing?, callback?)`
+
+Adds a tween ending at an absolute progress position.
+
+```ts
+keyframes
+  .start(0)
+  .at(0.25, 20)
+  .at(1, 100, (t) => K.Easing.inout(t, 3));
+```
+
+### `loop(count?)`
+
+Repeats a track after its initial pass. `count` is the number of additional repeats; omitting it loops forever.
+
+```ts
+keyframes.start(0).then(1, 1).loop(2); // three total passes
+```
+
+## Read track values
+
+```ts
+animation.update(progress);
+animation.x.current;
+animation.x.value();
+animation.x.getValue(0.75); // sample without changing current
+animation.progress();       // most recently supplied progress
+```
+
+## Reuse keyframes
+
+Compile a definition once and bind it to multiple tracks:
+
+```ts
+const animation = K.Timeline.create((timeline) => {
+  const fade = timeline.keyframes((keyframes) => {
+    keyframes.start(0).then(1, 1);
+  });
+
+  return {
+    opacity: timeline.track(fade),
+    items: timeline.stagger(5, 0.1, (keyframes) => {
+      keyframes.start(0).then(1, 1);
+    }),
+  };
 });
 ```
 
-### track.current / track.value()
+`stagger(count, offset, build)` creates tracks with progressively delayed starts.
 
-Access the current value of a track. Both methods return the same value.
+## Defaults and callbacks
 
-```tsx
-// Using .current property
-const alpha = fadeIn.current;
+```ts
+K.Timeline.onStart(() => console.log('started'));
+K.Timeline.onLoop(() => console.log('loop boundary'));
+K.Timeline.onEnd(() => console.log('finished'));
 
-// Using .value() method  
-const position = slideIn.value();
-
-// Combined values
-const scale = fadeIn.current * slideIn.value();
+const animation = K.Timeline.create(
+  (timeline) => ({
+    x: timeline.track((keyframes) => {
+      keyframes
+        .start(0, 0, () => console.log('first frame'))
+        .then(100, 1, () => console.log('keyframe reached'));
+    }),
+  }),
+  {
+    defaultEasing: (t) => K.Easing.inout(t, 3),
+    defaultLoop: 1,
+  },
+);
 ```
 
-### track.update(progress)
+Callbacks run when forward progress crosses their boundary. Rewinding progress resets start/end state so the timeline can be played again. Callback errors are reported as warnings without stopping other tracks.
 
-Updates the timeline with progress (0-1). Call this once per frame.
+## Driving a timeline with Klint time
 
 ```tsx
+let animation;
+
+const setup = (K: KlintContext) => {
+  animation = K.Timeline.create((timeline) => ({
+    x: timeline.track((keyframes) => {
+      keyframes.start(0).then(K.width, 1).loop();
+    }),
+  }));
+};
+
 const draw = (K: KlintContext) => {
-  const progress = K.time % 1;
-  fadeIn.update(progress);
-  
-  K.globalAlpha(fadeIn.current);
-  K.circle(100, 100, 50);
+  animation.update(K.time / 2); // one pass every two seconds
+  K.circle(animation.x.current, K.height / 2, 20);
 };
 ```
 
-## Advanced Methods
-
-### timeline.stagger(count, offset, keyframes)
-
-Creates multiple tracks with staggered timing offsets.
-
-```tsx
-const { staggeredItems } = Timeline.create((timeline) => {
-  const staggeredItems = timeline.stagger(10, 0.1, (kf) => {
-    kf.start(0)
-      .then(1, 0.3)
-      .then(0, 0.7);
-  });
-
-  return { staggeredItems };
-});
-
-const draw = (K: KlintContext) => {
-  const progress = K.time % 1;
-  staggeredItems.update(progress);
-
-  staggeredItems.forEach((track, i) => {
-    const value = track.current;
-    K.fillColor(`hsl(${i * 36}, 70%, 60%)`);
-    K.circle(50 + i * 80, 200 + value * 100, 20);
-  });
-};
-```
-
-### Keyframe Builder Methods
-
-#### start(value, delay?, callback?)
-Sets the starting value of a track.
-
-#### then(value, duration, easing?, callback?)
-Animates to a value over a duration.
-
-#### at(position, value, easing?, callback?)
-Sets a value at a specific position (0-1).
-
-```tsx
-const { complexAnim } = Timeline.create((timeline) => {
-  const complexAnim = timeline.track((kf) =>
-    kf.start(0, 0.1)           // Start at 0 after 0.1 delay
-      .then(100, 0.3)          // Move to 100 over 0.3 duration
-      .at(0.8, 50)             // At position 0.8, be at value 50
-      .then(0, 0.2)            // End at 0 over 0.2 duration
-  );
-
-  return { complexAnim };
-});
-```
-
-## Animation Patterns
-
-### Sequential Animation
-
-```tsx
-function SequenceCanvas() {
-  const { KlintTimeline } = useKlint();
-  const { Timeline } = KlintTimeline();
-
-  const { fadeIn, scaleUp, rotateAnim, fadeOut } = Timeline.create((timeline) => {
-    const fadeIn = timeline.track((kf) =>
-      kf.start(0).at(0.25, 1)
-    );
-    
-    const scaleUp = timeline.track((kf) =>
-      kf.start(1).at(0.25, 1).at(0.5, 1.5)
-    );
-    
-    const rotateAnim = timeline.track((kf) =>
-      kf.start(0).at(0.5, 0).at(0.75, Math.PI * 2)
-    );
-    
-    const fadeOut = timeline.track((kf) =>
-      kf.start(1).at(0.75, 1).at(1, 0)
-    );
-
-    return { fadeIn, scaleUp, rotateAnim, fadeOut };
-  });
-
-  const draw = (K: KlintContext) => {
-    K.background("#222");
-    
-    const progress = (K.time / 8) % 1; // 8-second cycle
-    fadeIn.update(progress);
-
-    K.push();
-    K.translate(K.width / 2, K.height / 2);
-    
-    // Apply all animations
-    K.globalAlpha(fadeIn.current * fadeOut.current);
-    K.scale(scaleUp.current, scaleUp.current);
-    K.rotate(rotateAnim.current);
-    
-    K.fillColor("white");
-    K.alignText("center", "middle");
-    K.textSize(48);
-    K.text("Animated", 0, 0);
-    
-    K.pop();
-  };
-}
-```
-
-### Callbacks and Events
-
-```tsx
-function CallbackCanvas() {
-  const { KlintTimeline } = useKlint();
-  const { Timeline, onStart, onEnd } = KlintTimeline();
-
-  // Setup global callbacks
-  onStart(() => console.log("Animation started!"));
-  onEnd(() => console.log("Animation completed!"));
-
-  const { bounce } = Timeline.create((timeline) => {
-    const bounce = timeline.track((kf) =>
-      kf.start(0)
-        .then(100, 0.5, K.Easing.bounceOut, () => console.log("Bounced!"))
-        .then(0, 0.5)
-    );
-
-    return { bounce };
-  });
-
-  const draw = (K: KlintContext) => {
-    const progress = K.time % 1;
-    bounce.update(progress);
-    
-    K.circle(K.width / 2, K.height / 2 + bounce.current, 20);
-  };
-}
-```
-
-## Best Practices
-
-### ✅ **DO: Create timelines outside draw function**
-```tsx
-// ✅ Good - created once
-const { anim } = Timeline.create((timeline) => { ... });
-
-const draw = (K) => {
-  anim.update(progress);
-  K.circle(100, 100, anim.current);
-};
-```
-
-### ❌ **DON'T: Create timelines inside draw function**
-```tsx
-// ❌ Bad - creates new timeline every frame
-const draw = (K) => {
-  const { anim } = Timeline.create(...); // Performance issue!
-  K.circle(100, 100, anim.current);
-};
-```
-
-### ✅ **DO: Use meaningful track names**
-```tsx
-const { fadeIn, slideOut, pulseEffect } = Timeline.create(...);
-```
-
-### ✅ **DO: Combine tracks for complex animations**
-```tsx
-const opacity = fadeIn.current * fadeOut.current;
-const position = slideIn.current + offsetTrack.current;
-```
-
-### ✅ **DO: Use callbacks for synchronization**
-```tsx
-onStart(() => setState("animating"));
-onEnd(() => setState("complete"));
-```
-
-## Performance Notes
-
-- **Timeline creation is expensive** - Always create outside draw function
-- **Updates are cheap** - Call `track.update(progress)` every frame
-- **Value access is instant** - `track.current` and `track.value()` are O(1)
-- **Memory efficient** - Tracks persist between frames, no recreation
-- **Callback safe** - Error handling prevents crashes from user callbacks
-
+Use `K.frame`, `K.time`, scroll distance, pointer distance, or any other finite number as progress. `update()` rejects `NaN` and infinite values.

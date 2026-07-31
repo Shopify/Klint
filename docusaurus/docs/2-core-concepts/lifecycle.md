@@ -103,8 +103,8 @@ const preload = async (K) => {
 Key characteristics:
 - **Runs once** when the component mounts
 - **Asynchronous** - can use `await` for loading resources
-- **Blocks rendering** until completed, if you are loading a lot of stuff and expect a loading time, see the `loading` props.
-- **Automatically cleaned up** when component unmounts.
+- **Blocks drawing** until completed. Use `loadingComponent` to render a placeholder in the canvas container.
+- **Stops safely on unmount**. Resources you create outside Klint still need their own cleanup.
 
 Use preload for:
 - Loading images, fonts, and other external resources
@@ -127,8 +127,8 @@ const setup = (K) => {
 
 Key characteristics:
 - **Runs once** after preload completes
-- **Synchronous** - does not `await`
-- **Cached** - values set here persist across frames
+- **May be asynchronous** - drawing waits if setup returns a promise
+- **Runs once per mount** - values stored outside React state can persist across frames
 
 Use setup for:
 - Setting the initial configuration (font, text alignment, etc.)
@@ -162,37 +162,39 @@ Use draw for:
 
 ## Static Mode vs Animation
 
-Klint supports both static rendering and animation. The static mode will render the canvas onto an image and nuke everything else :
+Klint supports both static rendering and animation. Static mode draws one frame after preload and setup, then leaves the canvas and context available:
 
 ```jsx
 // Animated sketch (default)
 <Klint draw={myDrawFunction} />
 
 // Static sketch (renders once)
-<Klint draw={myDrawFunction} options={{ static: "true" }} />
+<Klint draw={myDrawFunction} options={{ static: true }} />
 ```
 
 In static mode:
-- The `draw` function runs only once and convert the canvas to an image before removing it completly.
-- No animation loop is started, if you need a specific state of something, you will need to hardcode it.
-- Perfect for non-animated visualizations
+- `draw` runs once after initialization.
+- The canvas remains mounted, can resize, and can be redrawn with `K.redraw()`.
+- It is suitable for non-animated visualizations and generated artwork.
+
+`noloop: true` has the same initial one-frame behavior. `autoplay: false` initializes an animated sketch in a paused state so it can later be started with `K.play()`.
 
 ## Lifecycle and React Rendering
 
-**Important:** Preload and setup functions are cached and run only once when the component mounts. They will not re-run on React re-renders unless the component is unmounted and remounted.
+**Important:** Preload and setup run once when the component mounts. They do not re-run on React rerenders unless the component is unmounted and remounted. Klint keeps the same canvas/context, while the draw and lifecycle callback refs are updated to their latest values.
 
 If you need to respond to changing React props, you should:
 1. Pass them as additional props to your Klint component using the `useProps`
 2. Access them in your draw function
 
-For more advanced React integration patterns, see our [Using Klint with React](/docs/using-react) guide.
+For more advanced patterns, see [React Integration](./react-integration).
 
 ## Cleanup and Unmounting
 
 Klint automatically cleans up resources when the component unmounts, including:
 - Stopping the animation loop
 - Removing event listeners
-- Cleaning up any resources loaded in preload
-- Reset completely the context, nothing is preserved.
+- Disconnecting resize and visibility observers
+- Releasing Klint offscreen references
 
-For custom cleanup, you can use React's `useEffect` hook with a cleanup function, it won't be peak efficiency, but you will unsure that it does what you want it to do.
+Klint cannot infer how to dispose arbitrary resources loaded in `preload`. Use a React `useEffect` cleanup for object URLs, workers, sockets, audio nodes, or plugin-owned resources.

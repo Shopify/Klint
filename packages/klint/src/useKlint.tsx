@@ -1,5 +1,5 @@
 import { useRef, useCallback, useEffect, useMemo } from "react";
-import { createKlintContext } from "./KlintContext";
+import { createKlintContext } from "./core/KlintContext";
 import type Vector from "./elements/Vector";
 import type {
   KlintCanvasOptions,
@@ -8,7 +8,7 @@ import type {
   KlintKeyboardState,
   KlintPointerState,
   KlintScrollState,
-} from "./KlintTypes";
+} from "./core/KlintTypes";
 
 // Export Vector type as KlintVector
 export type KlintVector = Vector;

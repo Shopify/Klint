@@ -69,7 +69,8 @@ function ImageSketch() {
       K.push();
       K.translate(K.width/2, K.height/2);
       K.rotate(K.frame * 0.01);
-      K.scale(0.5 + Math.sin(K.frame * 0.05) * 0.1);
+      const imageScale = 0.5 + Math.sin(K.frame * 0.05) * 0.1;
+      K.scale(imageScale, imageScale);
       
       // Draw image centered (set image origin to center)
       K.setImageOrigin('center');

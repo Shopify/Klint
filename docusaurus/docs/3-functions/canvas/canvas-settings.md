@@ -162,7 +162,7 @@ const draw = (K: KlintContext) => {
   K.rectangle(0, 0, 100, 100)
   
   // Draw image from its center
-  const img = K.images["logo"]
+  const img = images.logo // from KlintImage()
   if (img) {
     K.image(img, 0, -150)
   }

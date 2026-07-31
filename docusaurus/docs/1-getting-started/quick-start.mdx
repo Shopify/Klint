@@ -48,8 +48,8 @@ Make it move by using the `K.frame` property — it represents the number of fra
     K.background('#000');
 
     // Animate position with sine wave
-    const x = K.width / 2 + Math.sin(K.frame * 0.001) * 100;
-    const y = K.height / 2 + Math.cos(K.frame * 0.001) * 100;
+    const x = K.width / 2 + Math.sin(K.frame * 0.02) * 100;
+    const y = K.height / 2 + Math.cos(K.frame * 0.02) * 100;
 
     K.fillColor('#ff6b6b');
     K.circle(x, y, 30);
@@ -114,7 +114,7 @@ function draw(K) {
 
     // Draw animated circles
     for (let i = 0; i < 5; i++) {
-        const angle = (K.time * 0.001) + (i * Math.PI * 2 / 5);
+        const angle = K.time + (i * Math.PI * 2 / 5);
         const radius = 100;
 
         const x = K.width / 2 + Math.cos(angle) * radius;
@@ -138,5 +138,5 @@ function draw(K) {
 ## What's Next?
 
 - [useKlint Pattern](./useKlint-pattern) - Deep dive into the core pattern
-- [Core Concepts](../2-core-concepts/lifecycle) - Understand lifecycle functions
-- [Function Reference](../3-functions/drawing/circle) - Explore all available functions
+- [Core Concepts](/docs/core-concepts/lifecycle) - Understand lifecycle functions
+- [Function Reference](/docs/functions/drawing/circle) - Explore all available functions

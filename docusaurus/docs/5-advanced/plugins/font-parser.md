@@ -24,7 +24,9 @@ The FontParser plugin loads TTF, OTF, WOFF, and WOFF2 fonts and converts text in
 
 CFF2 variable outlines are not yet supported. WOFF2 decoding uses the browser's Brotli `DecompressionStream` when available and Node's Brotli implementation in Node.js. Other runtimes can pass a custom `{brotli}` decoder.
 
-For smaller format-specific bundles, import the parser directly:
+`FontParser`, `loadFontFile()`, and `parseFontBuffer()` inspect the first four bytes of the font data and load only the matching parser chunk. You can inspect the signature yourself with `detectFontFormat()` from the direct `FontParser` entry.
+
+For a known format, use a smaller synchronous/asynchronous deep import:
 
 ```ts
 import {parseTTF} from '@shopify/klint/plugins/FontParser/ttf';
@@ -38,10 +40,13 @@ TTF and OTF parsing is synchronous. WOFF, WOFF2, and the auto-detecting `FontPar
 ## Basic Usage
 
 ```tsx
-import { FontParser } from '@shopify/klint/plugins';
+import {useEffect, useState} from 'react';
+import {Klint, useKlint, type KlintContext} from '@shopify/klint';
+import {FontParser, type FontData} from '@shopify/klint/plugins';
 
 function TextSketch() {
-  const [font, setFont] = useState(null);
+  const {context} = useKlint();
+  const [font, setFont] = useState<FontData | null>(null);
 
   useEffect(() => {
     const parser = new FontParser();
@@ -104,7 +109,7 @@ const draw = (K) => {
 ```tsx
 const options = {
   align: 'left' | 'center' | 'right',
-  baseline: 'top' | 'center' | 'bottom',
+  baseline: 'top' | 'center' | 'bottom' | 'baseline',
   anchor: 'default' | 'center',
   letterSpacing: 10,
   lineSpacing: 20,
@@ -133,11 +138,9 @@ if (font.fvar) {
 
 ```tsx
 const metadata = {
-  unitsPerEm: font.head.unitsPerEm,
-  ascender: font.hhea.ascender,
-  descender: font.hhea.descender,
-  fontFamily: font.name?.fontFamily,
-  postScriptName: font.name?.postScriptName
+  unitsPerEm: font.head?.unitsPerEm,
+  ascender: font.hhea?.asc,
+  descender: font.hhea?.desc,
 };
 ```
 

@@ -1,5 +1,6 @@
+// @ts-nocheck -- Parser internals retain the compact upstream data structures.
 // OTF (OpenType / CFF) parser — CFF v1 outlines via Type 2 charstrings.
-// Reuses _common.mjs for everything except glyph extraction.
+// Reuses Common for everything except glyph extraction.
 //
 // Public API:
 //   parseOTF(arrayBuffer)         → font instance ({ toPaths, toSVG, toPoints, toGlyphPath, … })
@@ -14,7 +15,8 @@ import {
   parseCmap, parseFvar, parseAvar, parseHVAR,
   parseHead, parseHhea, parseMaxp, parseHmtx, parseKern,
   makeFont, readSfntDirectory,
-} from "./_common.mjs";
+} from "./Common";
+import type { FontData } from "../FontParser";
 
 // ───────────── CFF INDEX reader ─────────────
 // Returns [items: Uint8Array[], endOffset]
@@ -456,7 +458,7 @@ function getGlyph(font, gid /* normCoords ignored — CFF1 is non-variable */) {
 }
 
 // ───────────── parser entry point ─────────────
-export function parseOTF(buffer) {
+export function parseOTF(buffer: ArrayBuffer): FontData {
   const data = new Uint8Array(buffer);
   const sb = new Int8Array(buffer);
   const { tables } = readSfntDirectory(data);
@@ -481,12 +483,20 @@ export function parseOTF(buffer) {
   return makeFont(font, getGlyph);
 }
 
-export const loadOTF = url => fetch(url).then(r => r.arrayBuffer()).then(parseOTF);
+export const loadOTF = (url: string): Promise<FontData> =>
+  fetch(url).then((response) => response.arrayBuffer()).then(parseOTF);
 
-export default class OTFFontParser {
-  load = loadOTF;
-  loadFromBuffer = parseOTF;
+export class FontParserOTF {
+  load(url: string): Promise<FontData> {
+    return loadOTF(url);
+  }
+
+  loadFromBuffer(buffer: ArrayBuffer): FontData {
+    return parseOTF(buffer);
+  }
 }
+
+export default FontParserOTF;
 
 // TODO(CFF2): add `blend` + `vsindex` ops and ItemVariationStore parsing if you ever
 // need variable OpenType-CFF outlines. The shaping/cmap/HVAR side is already wired.

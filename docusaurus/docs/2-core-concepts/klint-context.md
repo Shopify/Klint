@@ -14,9 +14,9 @@ The `K` parameter passed to your `setup`, `draw`, and `preload` functions is an 
 - Klint's creative coding functions
 - Canvas properties (width, height)
 - Animation properties (time, frame, deltaTime)
-- [Elements](../4-elements/Color) (Color, Vector, Easing, Noise, etc.)
-- Anything attached to it with the [useStorage or useProps](../1-getting-started/useKlint-pattern) hook
-- (Most) of the [plugins](/plugins)
+- [Elements](/docs/elements/Color) (Color, Vector, Easing, Noise, etc.)
+- Anything attached to it with the [useStorage or useProps](/docs/getting-started/useKlint-pattern) hook
+- (Most) of the [plugins](/docs/plugins)
 
 ## Enhanced 2D context
 
@@ -37,14 +37,14 @@ const draw = (K) => {
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `K.width` | number | Canvas width in device pixels |
-| `K.height` | number | Canvas height in device pixels |
+| `K.width` | number | Logical canvas width in CSS pixels |
+| `K.height` | number | Logical canvas height in CSS pixels |
 | `K.time` | number | Elapsed time in **seconds** since start |
 | `K.deltaTime` | number | Time since last frame in **milliseconds** |
 | `K.frame` | number | Frame count since start |
 | `K.dpr` | number | Device pixel ratio |
 
-With `origin: "center"`, `(0,0)` is canvas center. `K.width`/`K.height` are device pixels (CSS pixels × DPR). The visible area spans from `-K.width/2` to `K.width/2`.
+With `origin: "center"`, `(0,0)` is the canvas center. `K.width`/`K.height` remain logical CSS pixels; only `K.canvas.width`/`K.canvas.height` expose the DPR-scaled backing store. The visible X range spans from `-K.width / 2` to `K.width / 2`.
 
 ```tsx
 const draw = (K) => {
@@ -66,30 +66,30 @@ const draw = (K) => {
 
 The Klint context organizes its API into several categories. Each has its own detailed documentation:
 
-- **[Drawing functions](../3-functions/drawing/circle)** — `circle`, `rectangle`, `line`, `point`, `polygon`, `disk`, etc.
-- **[Styling](../3-functions/styling/fillColor)** — `fillColor`, `strokeColor`, `strokeWidth`, `noFill`, `noStroke`, `opacity`, `blend`
-- **[Transforms](../3-functions/transforms/push)** — `push`, `pop`, `translate`, `rotate`, `scale`, `screenToWorld`, `worldToScreen`
-- **[Paths](../3-functions/paths/beginShape)** — `beginShape`, `vertex`, `bezierVertex`, `endShape`, `clipTo`
-- **[Text](../3-functions/text/text)** — `text`, `paragraph`, `textFont`, `textSize`, `alignText`
-- **[Gradients](../3-functions/gradients/gradient)** — `gradient`, `radialGradient`, `conicGradient`
-- **[Images](../3-functions/images/image)** — `image`, `createOffscreen`, `loadPixels`, `updatePixels`
-- **[Canvas control](../3-functions/canvas/canvas-settings)** — `background`, `clear`, `reset`, `setCanvasOrigin`
-- **[Math utilities](../3-functions/utilities/math-utils)** — `lerp`, `remap`, `constrain`, `distance`, `fract`
-- **[Time](../3-functions/utilities/time-management)** — `K.time`, `K.deltaTime`, `K.frame`
+- **[Drawing functions](/docs/functions/drawing/circle)** — `circle`, `rectangle`, `line`, `point`, `polygon`, `disk`, etc.
+- **[Styling](/docs/functions/styling/fillColor)** — `fillColor`, `strokeColor`, `strokeWidth`, `noFill`, `noStroke`, `opacity`, `blend`
+- **[Transforms](/docs/functions/transforms/push)** — `push`, `pop`, `translate`, `rotate`, `scale`, `screenToWorld`, `worldToScreen`
+- **[Paths](/docs/functions/paths/beginShape)** — `beginShape`, `vertex`, `bezierVertex`, `endShape`, `clipTo`
+- **[Text](/docs/functions/text/)** — `text`, `paragraph`, `textFont`, `textSize`, `alignText`
+- **[Gradients](/docs/functions/gradients/gradient)** — `gradient`, `radialGradient`, `conicGradient`
+- **[Images](/docs/functions/images/image)** — `image`, `createOffscreen`, and `K.Pixels`
+- **[Canvas control](/docs/klintfunctions-canvas)** — `background`, `clear`, `reset`, `setCanvasOrigin`
+- **[Math utilities](/docs/functions/utilities/math-utils)** — `lerp`, `remap`, `constrain`, `distance`, `fract`
+- **[Time](/docs/klintfunctions-time)** — `K.time`, `K.deltaTime`, `K.frame`
 
 ### Elements (accessed as K.ElementName)
 
-- **[K.Color](../4-elements/Color)** — Color creation and manipulation (`K.Color.hsl()`, `K.Color.oklch()`, `K.Color.blendColors()`)
-- **[K.Easing](../4-elements/Easing)** — Animation easing functions (`K.Easing.in()`, `K.Easing.bounceOut()`, `K.Easing.spring()`)
-- **[K.Vector](../4-elements/Vector)** — 3D vector math (`K.createVector(x, y)` or `new K.Vector(x, y)`)
-- **[K.Noise](../4-elements/Noise)** — Seedable noise generation (`K.Noise.perlin()`, `K.Noise.simplex()`, `K.Noise.hash()`)
-- **[K.Text](../4-elements/Text)** — Advanced text layout (`K.Text.splitTo()`, `K.Text.circularText()`)
-- **[K.Grid](../4-elements/Grid)** — Grid generators (`K.Grid.rect()`, `K.Grid.radial()`, `K.Grid.hex()`, `K.Grid.triangle()`)
-- **[K.Hotspot](../4-elements/Hotspot)** — Hit testing (`K.Hotspot.circle()`, `K.Hotspot.rect()`, `K.Hotspot.polygon()`)
-- **[K.Strip](../4-elements/Strip)** — Triangle/quad strips, hulls, and ribbons from point arrays
-- **[K.Pixels](../4-elements/Pixels)** — Pixel-level read/write (`K.Pixels.load()`, `K.Pixels.update()`, `K.Pixels.read()`)
-- **[K.Quadtree](../4-elements/Quadtree)** — Spatial partitioning
-- **[K.Timeline](../2-core-concepts/timeline)** — Keyframe-based animation with tracks and stagger
+- **[K.Color](/docs/elements/Color)** — Color creation and manipulation (`K.Color.hsl()`, `K.Color.oklch()`, `K.Color.blendColors()`)
+- **[K.Easing](/docs/elements/Easing)** — Animation easing functions (`K.Easing.in()`, `K.Easing.bounceOut()`, `K.Easing.spring()`)
+- **[K.Vector](/docs/elements/Vector)** — 3D vector math (`K.createVector(x, y)` or `new K.Vector(x, y)`)
+- **[K.Noise](/docs/elements/Noise)** — Seedable noise generation (`K.Noise.perlin()`, `K.Noise.simplex()`, `K.Noise.hash()`)
+- **[K.Text](/docs/elements/Text)** — Advanced text layout (`K.Text.splitTo()`, `K.Text.circularText()`)
+- **[K.Grid](/docs/elements/Grid)** — Grid generators (`K.Grid.rect()`, `K.Grid.radial()`, `K.Grid.hex()`, `K.Grid.triangle()`)
+- **[K.Hotspot](/docs/elements/Hotspot)** — Hit testing (`K.Hotspot.circle()`, `K.Hotspot.rect()`, `K.Hotspot.polygon()`)
+- **[K.Strip](/docs/elements/Strip)** — Triangle/quad strips, hulls, and ribbons from point arrays
+- **[K.Pixels](/docs/elements/Pixels)** — Pixel-level read/write (`K.Pixels.load()`, `K.Pixels.update()`, `K.Pixels.read()`)
+- **[K.Quadtree](/docs/elements/Quadtree)** — Spatial partitioning
+- **[K.Timeline](/docs/core-concepts/timeline)** — Keyframe-based animation with tracks and stagger
 
 ## Accessing Native Canvas
 
@@ -168,7 +168,7 @@ The rule of thumb in terms of efficiency on the 2D canvas is:
 - An image is extremely cheap to render. If you can, draw on an offscreen canvas and render it.
 - A stroke is cheaper than a shape. If you need to draw circles or rectangles in batch, use short lines with a thick stroke.
 - A shape is more flexible but generally more expensive, especially in large quantities.
-- Text is the most expensive. Unless you need to animate your text, draw it to a texture and render that texture. For fast text, consider rasterized text using the [FontParser plugin](../5-advanced/plugins/font-parser).
+- Text is the most expensive. Unless you need to animate your text, draw it to a texture and render that texture. For fast text, consider rasterized text using the [FontParser plugin](/docs/advanced/plugins/font-parser).
 
 ## Best Practices
 
@@ -181,4 +181,4 @@ The rule of thumb in terms of efficiency on the 2D canvas is:
 
 - [Lifecycle Functions](./lifecycle) — Understanding setup, draw, and preload
 - [React Integration](./react-integration) — Using Klint with React
-- [Function Reference](../3-functions/drawing/circle) — Explore all K functions
+- [Function Reference](/docs/functions/drawing/circle) — Explore all K functions

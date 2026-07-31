@@ -1,7 +1,6 @@
-import UniversalFontParser, {
-  loadFont,
-  parseFont,
-} from "../vendor/font-parsers/index.mjs";
+import { decodeFont, detectFontFormat } from "./font-parser";
+
+export { detectFontFormat };
 
 export interface FontPoint {
   x: number;
@@ -16,6 +15,7 @@ export interface FontLetter {
   lineIndex: number;
   width: number;
   height: number;
+  gid: number;
   char?: string;
 }
 
@@ -66,7 +66,8 @@ export interface FontData {
   toPaths(text: string, size?: number, options?: FontTextOptions): FontPathsResult;
   toSVG(text: string, size?: number, options?: FontTextOptions): FontSVGResult;
   toPoints(text: string, size?: number, options?: FontTextOptions): FontPointsResult;
-  toGlyphPath?(glyphId: number, axisValues?: number[]): FontPoint[];
+  /** Raw numeric path-command stream for a glyph. */
+  toGlyphPath?(glyphId: number, axisValues?: number[]): number[];
   head?: {
     unitsPerEm: number;
     locFmt?: number;
@@ -88,31 +89,40 @@ export interface FontData {
   [key: string]: unknown;
 }
 
-export type FontParserOptions = Record<string, unknown>;
+export interface FontParserOptions {
+  brotli?: (bytes: Uint8Array) => Uint8Array | Promise<Uint8Array>;
+  [key: string]: unknown;
+}
 
-export const parseFontBuffer = (
+export type FontFormat = "ttf" | "otf" | "woff" | "woff2";
+
+/** Parse a TTF, OTF, WOFF, or WOFF2 buffer, selected by its binary signature. */
+export function parseFontBuffer(
   buffer: ArrayBuffer,
-  options?: FontParserOptions,
-): Promise<FontData> => parseFont(buffer, options) as Promise<FontData>;
+  options: FontParserOptions = {},
+): Promise<FontData> {
+  return decodeFont(buffer, options);
+}
 
-export const loadFontFile = (
+export async function loadFontFile(
   url: string,
   options?: FontParserOptions,
-): Promise<FontData> => loadFont(url, options) as Promise<FontData>;
+): Promise<FontData> {
+  const response = await fetch(url);
+  return parseFontBuffer(await response.arrayBuffer(), options);
+}
 
-/** Auto-detecting TTF, OTF, WOFF and WOFF2 parser. */
+/** Auto-detecting TTF, OTF, WOFF, and WOFF2 parser. */
 export class FontParser {
-  private readonly parser = new UniversalFontParser();
-
   load(url: string, options?: FontParserOptions): Promise<FontData> {
-    return this.parser.load(url, options) as Promise<FontData>;
+    return loadFontFile(url, options);
   }
 
   loadFromBuffer(
     buffer: ArrayBuffer,
     options?: FontParserOptions,
   ): Promise<FontData> {
-    return this.parser.loadFromBuffer(buffer, options) as Promise<FontData>;
+    return parseFontBuffer(buffer, options);
   }
 }
 

@@ -61,7 +61,7 @@ function HomepageHeader() {
             </Link>
           </li>
           <li>
-            <Link className="button" to="/experiments/Stripes">
+            <Link className="button" to="/experiments/stripes">
               Hi Josh
             </Link>
           </li>

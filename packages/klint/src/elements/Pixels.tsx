@@ -1,4 +1,4 @@
-import type { KlintContexts } from "../KlintTypes";
+import type { KlintContexts } from "../core/KlintTypes";
 
 /**
  * Pixels Element for Klint

@@ -1,48 +1,40 @@
 # ellipse
 
+Klint draws an ellipse through the fourth argument of `circle()`:
+
 ```ts
-ellipse(
-  x: number, 
-  y: number, 
-  width: number, 
-  height: number
-) => void
+K.circle(
+  x: number,
+  y: number,
+  radiusX: number,
+  radiusY: number,
+): void
 ```
 
-Draws an ellipse (oval) on the canvas.
+The two size values are radii, not full width and height.
 
-## Parameters
-- `x`: The x-coordinate of the center of the ellipse
-- `y`: The y-coordinate of the center of the ellipse
-- `width`: The width of the ellipse
-- `height`: The height of the ellipse
-
-## Returns
-- `void`
-
-## Example
 ```tsx
-// Basic ellipse
-K.ellipse(200, 200, 100, 50)
-
-// Styled ellipse with rotation
-K.fillColor("purple")
-K.strokeColor("orange")
-K.strokeWidth(3)
-K.rotate(Math.PI / 4)
-K.ellipse(200, 200, 150, 75)
-
-// In JSX component
-const draw = (K: KlintContext) => {
-  // Animated pulsing ellipse
-  const pulse = Math.sin(K.frame * 0.05) * 20 + 50
-  K.fillColor("rgba(0, 150, 255, 0.6)")
-  K.strokeColor("rgba(0, 0, 255, 0.8)")
-  K.strokeWidth(2)
-  K.ellipse(K.width/2, K.height/2, pulse*1.5, pulse)
-}
+K.fillColor('purple');
+K.strokeColor('orange');
+K.strokeWidth(3);
+K.circle(200, 200, 100, 50);
 ```
 
-## Notes
-- If width and height are equal, it will draw a circle
-- Ellipses are drawn from center point, unlike rectangles which are drawn from top-left 
+For a rotated or partial ellipse, use the native Canvas 2D path API and then fill/stroke it:
+
+```tsx
+K.beginPath();
+K.ellipse(
+  200,
+  200,
+  100,
+  50,
+  Math.PI / 4, // rotation
+  0,
+  Math.PI * 2,
+);
+K.fill();
+K.stroke();
+```
+
+`K.ellipse()` itself is the native Canvas method. It requires rotation, start angle, and end angle, and only adds to the current path; it is not Klint's four-argument drawing helper.

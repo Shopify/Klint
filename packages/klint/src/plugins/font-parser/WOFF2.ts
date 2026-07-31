@@ -1,3 +1,4 @@
+// @ts-nocheck -- Parser internals retain the compact upstream data structures.
 // WOFF2 parser.
 //
 // Differences from WOFF:
@@ -15,7 +16,8 @@
 //
 // `parseWOFF2` is async.
 
-import { u16, u32 } from "./_common.mjs";
+import { u16, u32 } from "./Common";
+import type { FontData, FontParserOptions } from "../FontParser";
 
 // ───────────── header / signature ─────────────
 const WOFF2_SIG  = 0x774f4632; // "wOF2"
@@ -334,7 +336,10 @@ function buildCompositeGlyph(componentBytes, instLen, instrBytes, bboxBytes) {
 }
 
 // ───────────── WOFF2 → SFNT ─────────────
-export async function decompressWOFF2(buffer, opts = {}) {
+export async function decompressWOFF2(
+  buffer: ArrayBuffer,
+  opts: FontParserOptions = {},
+): Promise<{ flavor: "ttf" | "otf"; sfnt: ArrayBuffer }> {
   const b = new Uint8Array(buffer);
   if (u32(b, 0) !== WOFF2_SIG) throw new Error("WOFF2: bad signature");
   const flavorRaw = u32(b, 4);
@@ -435,19 +440,38 @@ export async function decompressWOFF2(buffer, opts = {}) {
   return { flavor, sfnt: sfnt.buffer };
 }
 
-export async function parseWOFF2(buffer, opts = {}) {
-  const { flavor, sfnt } = await decompressWOFF2(buffer, opts);
+export async function parseWOFF2(
+  buffer: ArrayBuffer,
+  options: FontParserOptions = {},
+): Promise<FontData> {
+  const { flavor, sfnt } = await decompressWOFF2(buffer, options);
   if (flavor === "otf") {
-    const { parseOTF } = await import("./otf.mjs");
+    const { parseOTF } = await import("./OTF");
     return parseOTF(sfnt);
   }
-  const { parseTTF } = await import("./ttf.mjs");
+  const { parseTTF } = await import("./TTF");
   return parseTTF(sfnt);
 }
 
-export const loadWOFF2 = url => fetch(url).then(r => r.arrayBuffer()).then(parseWOFF2);
+export const loadWOFF2 = (
+  url: string,
+  options?: FontParserOptions,
+): Promise<FontData> =>
+  fetch(url)
+    .then((response) => response.arrayBuffer())
+    .then((buffer) => parseWOFF2(buffer, options));
 
-export default class WOFF2FontParser {
-  load = loadWOFF2;
-  loadFromBuffer = parseWOFF2;
+export class FontParserWOFF2 {
+  load(url: string, options?: FontParserOptions): Promise<FontData> {
+    return loadWOFF2(url, options);
+  }
+
+  loadFromBuffer(
+    buffer: ArrayBuffer,
+    options?: FontParserOptions,
+  ): Promise<FontData> {
+    return parseWOFF2(buffer, options);
+  }
 }
+
+export default FontParserWOFF2;

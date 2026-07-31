@@ -4,14 +4,14 @@ import type {
   KlintCanvasOptions,
   KlintContext,
   KlintContextWrapper,
-} from "./KlintTypes";
-import { normalizeKlintOptions } from "./KlintTypes";
+} from "./core/KlintTypes";
+import { normalizeKlintOptions } from "./core/KlintTypes";
 import {
   KlintAnimationLoop,
   resizeKlintCanvas,
-} from "./KlintRuntime";
+} from "./core/KlintRuntime";
 
-export * from "./KlintTypes";
+export * from "./core/KlintTypes";
 
 export interface KlintProps extends KlintCanvasOptions {
   /** Context bridge returned by useKlint(). Retained for input/resource hooks. */

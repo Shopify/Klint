@@ -22,7 +22,7 @@
  * ```
  */
 
-import type { KlintContext } from "../KlintTypes";
+import type { KlintContext } from "../core/KlintTypes";
 import {
   type Point,
   type BBox,

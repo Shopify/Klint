@@ -2,76 +2,60 @@
 
 ```ts
 createOffscreen(
-  id: string, 
-  width: number, 
-  height: number, 
+  id: string,
+  width: number,
+  height: number,
   options?: KlintCanvasOptions,
-  callback?: (ctx: KlintOffscreenContext) => void
-) => KlintOffscreenContext | HTMLImageElement
+  callback?: (O: KlintOffscreenContext) => void,
+): KlintOffscreenContext
 ```
 
-Creates an offscreen canvas for drawing operations outside the main canvas. The best way to think about it is a transparent layer. 
+Creates a canvas-backed Klint context for caching and layered rendering. Public dimensions and drawing coordinates use logical pixels.
 
 ## Parameters
-- `id`: Unique identifier for accessing the offscreen canvas later
-- `width`: Width of the offscreen canvas
-- `height`: Height of the offscreen canvas
-- `options`: Optional configuration
-  - `alpha`: Boolean, enable alpha channel (default: true)
-  - `willReadFrequently`: Boolean, optimize for frequent pixel reads (default: false)
-  - `ignoreFunctions`: Boolean, don't add Klint functions to context
-  - `origin`: "corner" | "center", coordinate system origin
-  - `static`: "true" | undefined, convert to image after creation
-- `callback`: Optional function to initialize the offscreen canvas
 
-## Returns
-- `KlintOffscreenContext | HTMLImageElement`: The created offscreen context or image (if static)
+- `id`: Unique key used by `getOffscreen(id)`.
+- `width`, `height`: Finite, non-negative logical dimensions.
+- `options`: Canvas options for this context.
+  - `alpha`: Request an alpha-enabled context.
+  - `willreadfrequently`: Optimize for frequent pixel reads.
+  - `ignoreFunctions`: Skip Klint functions/elements on the offscreen context.
+  - `origin`: `'corner'` or `'center'`.
+  - `dpr`, `maxDpr`: Override backing-store density.
+- `callback`: Optional initializer called after Klint installs the context.
+
+The offscreen inherits the main context's DPR unless `options.dpr` is provided. It always remains canvas-backed and mutable; `static` does not convert it to an image.
 
 ## Example
+
 ```tsx
-// Basic usage
-const offscreen = Klint.createOffscreen("buffer", 200, 200)
-offscreen.fillColor("red")
-offscreen.circle(100, 100, 50)
-
-// Draw to offscreen in callback
-Klint.createOffscreen("text", 300, 100, {}, (ctx) => {
-  ctx.fillColor("black")
-  ctx.textSize(48)
-  ctx.text("Hello World", 10, 50)
-})
-
-// Static offscreen for performance
-Klint.createOffscreen("static", 400, 400, { static: "true" }, (ctx) => {
-  ctx.fillColor("blue")
-  ctx.rectangle(0, 0, 400, 400)
-})
-
-// Use offscreen in draw function
-const draw = (K: KlintContext) => {
-  const buffer = K.getOffscreen("buffer")
-  // Draw on the buffer
-  buffer.background('coral')
-  K.image(buffer, 100, 100)
-}
-
-// In JSX component
 const preload = (K: KlintContext) => {
-  K.createOffscreen("buffer", 200, 200, {}, (O) => {
-    O.textFont("Inter")
-    O.textSize(36)
-    O.fillColor("white")
-    O.text("Offscreen Text", 10, 100)
-  })
-}
+  K.createOffscreen('label', 300, 100, {}, (O) => {
+    O.background('transparent');
+    O.textFont('Inter');
+    O.textSize(36);
+    O.fillColor('white');
+    O.text('Offscreen Text', 10, 60);
+  });
+};
 
-return <Klint preload={preload} draw={draw} />
+const draw = (K: KlintContext) => {
+  const label = K.getOffscreen('label');
+  K.image(label, 100, 100);
+};
+```
+
+You can also keep and update the returned context:
+
+```ts
+const buffer = K.createOffscreen('buffer', 200, 200);
+buffer.background('coral');
+buffer.circle(100, 100, 50);
 ```
 
 ## Notes
-- Access created offscreens with `getOffscreen(id)`
-- Static offscreens convert to images and can't be modified after creation
-- Offscreens inherit the device pixel ratio from main canvas
-- Useful for caching complex drawings or pre-rendering content
-- In static mode, returns an HTMLImageElement instead of a context 
-- You can draw on the `Offscreen` at init time using the callback or during the `draw`. Drawing on the offscreen doesn't make the drawing operation cheaper.
+
+- Calling `createOffscreen()` again with the same ID replaces the stored entry.
+- `getOffscreen()` throws when the ID does not exist.
+- Rendering a cached offscreen is cheap; redrawing complex content into it every frame has the same drawing cost as drawing directly.
+- Offscreen contexts expose drawing functions but not main-loop controls such as `play()`, `pause()`, or nested `createOffscreen()`.

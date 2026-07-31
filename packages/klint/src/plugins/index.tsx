@@ -1,18 +1,23 @@
-export { FontParser, loadFontFile, parseFontBuffer } from "./FontParser";
-export { FontParserTTF, loadTTF, parseTTF } from "./FontParserTTF";
-export { FontParserOTF, loadOTF, parseOTF } from "./FontParserOTF";
+export {
+  FontParser,
+  detectFontFormat,
+  loadFontFile,
+  parseFontBuffer,
+} from "./FontParser";
+export { FontParserTTF, loadTTF, parseTTF } from "./font-parser/TTF";
+export { FontParserOTF, loadOTF, parseOTF } from "./font-parser/OTF";
 export {
   FontParserWOFF,
   decompressWOFF,
   loadWOFF,
   parseWOFF,
-} from "./FontParserWOFF";
+} from "./font-parser/WOFF";
 export {
   FontParserWOFF2,
   decompressWOFF2,
   loadWOFF2,
   parseWOFF2,
-} from "./FontParserWOFF2";
+} from "./font-parser/WOFF2";
 export type {
   FontData,
   FontPoint,
@@ -26,6 +31,7 @@ export type {
   FontPointsResult,
   FontTextOptions,
   FontParserOptions,
+  FontFormat,
 } from "./FontParser";
 
 export { Delaunay } from "./Delaunay";
