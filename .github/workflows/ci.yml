@@ -12,9 +12,9 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: "20.19"
           cache: npm
@@ -51,8 +51,10 @@ jobs:
           npm pack --workspace=packages/klint --pack-destination "$pack_dir"
           package_tarball="$(find "$pack_dir" -name 'shopify-klint-*.tgz' -print -quit)"
           test -n "$package_tarball"
-          tar -tzf "$package_tarball" | grep -q 'package/LICENSE'
-          tar -tzf "$package_tarball" | grep -q 'package/THIRD_PARTY_NOTICES.md'
+          tar_contents="$pack_dir/contents.txt"
+          tar -tzf "$package_tarball" > "$tar_contents"
+          grep -q 'package/LICENSE' "$tar_contents"
+          grep -q 'package/THIRD_PARTY_NOTICES.md' "$tar_contents"
 
           cd "$smoke_dir"
           npm init -y >/dev/null
