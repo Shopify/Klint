@@ -41,7 +41,7 @@ function MySketch() {
 Want to experiment with Klint interactively? Create a live editor environment:
 
 ```bash
-npx @shopify/klint klint-create-editor my-klint-project
+npx @shopify/klint create-editor my-klint-project
 cd my-klint-project
 npm install
 npm run dev
@@ -127,5 +127,5 @@ MIT
 
 ---
 
-**Ready to create?** Start with `npx @shopify/klint klint-create-editor my-project` 🎨
+**Ready to create?** Start with `npx @shopify/klint create-editor my-project` 🎨
 

@@ -13,7 +13,7 @@ The Klint Interactive Editor is the fastest way to learn, experiment, and protot
 Create a new editor project:
 
 ```bash
-npx @shopify/klint klint-create-editor my-klint-project
+npx @shopify/klint create-editor my-klint-project
 cd my-klint-project
 npm install
 npm run dev

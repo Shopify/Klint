@@ -21,8 +21,9 @@
     "typecheck": "npm run typecheck --workspace=packages/klint && npm run typecheck --workspace=docusaurus",
     "quality": "npm run lint && npm run typecheck && npm test && npm run build && npm run smoke --workspace=packages/klint && npm run build:docs",
     "clean": "npm run clean --workspaces --if-present",
-    "publish:all": "npm run build && npm publish --workspace=packages/klint --access public",
-    "sandbox": "npx @shopify/klint klint-create-sandbox"
+    "release:check": "node scripts/release.mjs --check",
+    "release": "node scripts/release.mjs",
+    "sandbox": "npx @shopify/klint create-sandbox"
   },
   "devDependencies": {
     "rimraf": "^5.0.0",

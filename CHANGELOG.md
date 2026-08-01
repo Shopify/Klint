@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.5.0 (Unreleased)
+## v0.5.0 (2026-08-01)
 
 ### Compatibility and migration
 - The React adapter now requires React and React DOM 18 or 19. Use `@shopify/klint/native` for vanilla JavaScript without React; both React peer dependencies are optional for native-only consumers.

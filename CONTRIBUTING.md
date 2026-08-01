@@ -140,11 +140,10 @@ npm run build   # Production build
 - **Plugin System**: Extensible through `K.extend()` and plugins
 - **Performance Focus**: Minimal overhead, direct canvas access
 
-### Editor System
+### Editor generator
 
-- **Working Version**: `klint-editor/` is the source of truth
-- **Template Generation**: `update-template.sh` embeds files into `packages/klint/bin/create-editor`
-- **User Experience**: One command (`npx @shopify/klint klint-create-editor`) creates everything
+- **Packaged generator**: `packages/klint/bin/create-editor` contains the editor scaffold.
+- **User experience**: One command (`npx @shopify/klint create-editor`) creates everything.
 
 ## 🎯 Areas for Contribution
 
@@ -182,5 +181,19 @@ Klint prioritizes:
 - **Flexibility** over opinionated patterns
 
 Keep this in mind when contributing!
+
+## 🚢 Release process
+
+Klint is published only by the `Release and Publish` GitHub Actions workflow.
+Maintainers should:
+
+1. Confirm the root package, `packages/klint`, lockfile, and changelog all use the release version.
+2. Run `npm run release:check` on the release branch.
+3. Merge the release branch into `main`, then update a clean local `main` from origin.
+4. Run `npm run release` and confirm the version tag when prompted.
+
+The release script creates and pushes the annotated `vX.Y.Z` tag. That tag
+triggers the workflow, which reruns all quality gates, publishes to npm, and
+creates the GitHub release. Do not publish from a local checkout.
 
 Thanks for helping make Klint better! 🎉 
