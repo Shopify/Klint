@@ -1,3 +1,5 @@
+import KlintVisualExample from '@site/src/components/Documentation/KlintVisualExample';
+
 # circle
 
 ```ts
@@ -10,6 +12,8 @@ circle(
 ```
 
 Draws a circle or an ellipse on the canvas.
+
+<KlintVisualExample scene="circles" />
 
 ## Parameters
 - `x`: The x-coordinate of the center of the circle

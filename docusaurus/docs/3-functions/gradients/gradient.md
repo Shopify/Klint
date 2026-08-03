@@ -1,3 +1,5 @@
+import KlintVisualExample from '@site/src/components/Documentation/KlintVisualExample';
+
 # gradient
 
 ```ts
@@ -5,6 +7,8 @@ gradient(x1?: number, y1?: number, x2?: number, y2?: number) => CanvasGradient
 ```
 
 Creates a linear gradient for fills or strokes.
+
+<KlintVisualExample scene="gradient" />
 
 ## Parameters
 - `x1`: Start x-coordinate (default: 0)

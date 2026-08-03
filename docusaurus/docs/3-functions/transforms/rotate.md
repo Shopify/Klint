@@ -1,3 +1,5 @@
+import KlintVisualExample from '@site/src/components/Documentation/KlintVisualExample';
+
 # rotate
 
 ```ts
@@ -5,6 +7,8 @@ rotate(angle: number) => void
 ```
 
 Rotates the coordinate system by the specified angle (in radians). The rotation takes place around the (0,0), use `translate()` before `rotate()` to rotate around a different point.
+
+<KlintVisualExample scene="transforms" />
 
 ## Parameters
 - `angle`: The rotation angle in radians (not degrees)

@@ -1,3 +1,5 @@
+import KlintVisualExample from '@site/src/components/Documentation/KlintVisualExample';
+
 # line
 
 ```ts
@@ -5,6 +7,8 @@ line(x1: number, y1: number, x2: number, y2: number) => void
 ```
 
 Draws a straight line between two points.
+
+<KlintVisualExample scene="lines" />
 
 ## Parameters
 - `x1`: First point x-coordinate

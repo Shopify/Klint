@@ -1,3 +1,5 @@
+import KlintVisualExample from '@site/src/components/Documentation/KlintVisualExample';
+
 # rectangle
 
 ```ts
@@ -10,6 +12,8 @@ rectangle(
 ```
 
 Draws a rectangle on the canvas.
+
+<KlintVisualExample scene="rectangles" />
 
 ## Parameters
 - `x`: The x-coordinate (position depends on rectangle origin setting)

@@ -1,0 +1,49 @@
+.example {
+  margin: 1.5rem 0 2rem;
+  overflow: hidden;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 1rem;
+  background: var(--ifm-background-surface-color);
+  box-shadow: 0 0.75rem 2.5rem color-mix(in srgb, var(--ifm-color-emphasis-900) 10%, transparent);
+}
+
+.canvas {
+  width: 100%;
+  height: clamp(13rem, 38vw, 18rem);
+  overflow: hidden;
+  contain: layout paint;
+}
+
+.caption {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0.25rem 0.75rem;
+  align-items: baseline;
+  padding: 0.8rem 1rem 0.9rem;
+  border-top: 1px solid var(--ifm-color-emphasis-300);
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.caption strong {
+  color: var(--ifm-font-color-base);
+  font-family: var(--ifm-heading-font-family);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 576px) {
+  .example {
+    border-radius: 0.75rem;
+  }
+
+  .caption {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .example {
+    scroll-behavior: auto;
+  }
+}

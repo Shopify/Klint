@@ -1,3 +1,5 @@
+import KlintVisualExample from '@site/src/components/Documentation/KlintVisualExample';
+
 # polygon
 
 ```ts
@@ -5,6 +7,8 @@ polygon(x: number, y: number, radius: number, sides: number, radius2?: number, r
 ```
 
 Draws a regular polygon centered at the specified coordinates.
+
+<KlintVisualExample scene="polygons" />
 
 ## Parameters
 - `x`: Center x-coordinate
