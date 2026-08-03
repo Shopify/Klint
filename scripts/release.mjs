@@ -9,12 +9,14 @@ const args = new Set(process.argv.slice(2));
 const checkOnly = args.has("--check") || args.has("--dry-run");
 const assumeYes = args.has("--yes");
 
-const run = (command, commandArgs, options = {}) =>
-  execFileSync(command, commandArgs, {
+const run = (command, commandArgs, options = {}) => {
+  const output = execFileSync(command, commandArgs, {
     cwd: process.cwd(),
     encoding: "utf8",
     stdio: options.capture === false ? "inherit" : ["ignore", "pipe", "pipe"],
-  }).trim();
+  });
+  return typeof output === "string" ? output.trim() : "";
+};
 
 const fail = (message) => {
   console.error(`Release check failed: ${message}`);
