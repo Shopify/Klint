@@ -11,7 +11,6 @@ const config: Config = {
   url: "https://shopify.github.io",
   baseUrl: "/Klint/",
   onBrokenLinks: "throw",
-  onBrokenMarkdownLinks: "throw",
   favicon: "img/favicon.ico",
   organizationName: "Shopify",
   projectName: "klint",
@@ -72,6 +71,9 @@ const config: Config = {
   ],
   markdown: {
     mermaid: true,
+    hooks: {
+      onBrokenMarkdownLinks: "throw",
+    },
   },
   themeConfig: {
     colorMode: {
