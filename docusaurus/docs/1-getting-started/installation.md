@@ -4,12 +4,14 @@ sidebar_position: 1
 
 # Installation
 
-Add Klint to your React project in seconds.
+Add Klint to a React or vanilla JavaScript project in seconds.
 
 ## Requirements
 
-- React 16.8+ (requires hooks support)
-- Node.js 14+
+- Node.js 18 or newer for development and server-side tooling
+- React 18 or 19 when using the React entry point
+
+React is an optional peer dependency. It is not required when importing `@shopify/klint/native`.
 
 ## Install via npm
 
@@ -17,9 +19,11 @@ Add Klint to your React project in seconds.
 npm install @shopify/klint
 ```
 
-## Install via yarn
+## Install with another package manager
 
 ```bash
+pnpm add @shopify/klint
+# or
 yarn add @shopify/klint
 ```
 
@@ -56,3 +60,4 @@ If you see a red circle on a black background, you're ready to go!
 - [Quick Start](./quick-start) — Create your first interactive sketch
 - [useKlint Pattern](./useKlint-pattern) — Understand the core pattern
 - [TypeScript Setup](./typescript) — Configure TypeScript for Klint
+- [Vanilla JavaScript](./vanilla-javascript) — Use Klint without React

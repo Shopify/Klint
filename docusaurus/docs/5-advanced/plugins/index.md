@@ -20,28 +20,39 @@ npm install @shopify/klint
 Import plugins as needed:
 
 ```tsx
-import { FontParser, Sprites, CatmullRom, Delaunay, MatterPhysics, Projector } from '@shopify/klint/plugins';
+import {
+  Bezier,
+  Polyline,
+  FontParser,
+  Sprites,
+  CatmullRom,
+  Delaunay,
+  Projector,
+} from '@shopify/klint/plugins';
 ```
 
 ## Available Plugins
 
 | Plugin | Description | Docs |
 |--------|-------------|------|
-| **FontParser** | Load TTF fonts, convert text to vector paths or point arrays | [FontParser](./font-parser) |
-| **Sprites** | Sprite sheet loading, frame drawing, and animation | [Sprites](./sprites) |
-| **CatmullRom** | Smooth curve interpolation through control points | [CatmullRom](./catmull-rom) |
-| **Delaunay** | Delaunay triangulation for point sets | [Delaunay](./delaunay) |
-| **MatterPhysics** | 2D physics via Matter.js (bodies, constraints, collisions) | [MatterPhysics](./matter-physics) |
-| **Projector** | 3D to 2D projection for pseudo-3D canvas drawing | [Projector](./projector) |
+| **Bezier** | Construct, analyze, offset, intersect, and render quadratic/cubic curves | [Bezier](/docs/advanced/plugins/bezier) |
+| **Polyline** | Build, smooth, simplify, analyze, and render multi-segment paths | [Polyline](/docs/advanced/plugins/polyline) |
+| **FontParser** | Load TTF, OTF, WOFF, and WOFF2 fonts; convert text to vector paths or point arrays | [FontParser](/docs/advanced/plugins/font-parser) |
+| **Sprites** | Sprite sheet loading, frame drawing, and animation | [Sprites](/docs/advanced/plugins/sprites) |
+| **CatmullRom** | Smooth curve interpolation through control points | [CatmullRom](/docs/advanced/plugins/catmull-rom) |
+| **Delaunay** | Delaunay triangulation, earcut polygon triangulation with holes, Voronoi | [Delaunay](/docs/advanced/plugins/delaunay) |
+| **Projector** | 3D to 2D projection for pseudo-3D canvas drawing | [Projector](/docs/advanced/plugins/projector) |
 
 ## Creating Your Own
 
-Plugins are static utility classes that manage their own state and accept `KlintContext` only for drawing. See [Creating Custom Plugins](./custom-plugins) for the architecture guide and templates.
+Plugins are static utility classes that manage their own state and accept `KlintContext` only for drawing. See [Creating Custom Plugins](/docs/advanced/plugins/custom-plugins) for the architecture guide and templates.
 
 ## Type Imports
 
 ```tsx
 import type {
+  BezierPoint,
+  BBox,
   FontPathsResult,
   FontPointsResult,
   FontTextOptions,
@@ -56,7 +67,7 @@ import type {
 
 ## Best Practices
 
-- **Load assets during initialization** — fonts, sprites, and physics setup belong in `useEffect` or `preload`, not in `draw`
+- **Load assets during initialization** — fonts and sprites belong in `useEffect` or `preload`, not in `draw`
 - **Cache results** — pre-compute expensive operations outside the draw loop
 - **Clean up on unmount** — call `.clear()` or `.destroy()` in your cleanup function
 
@@ -64,7 +75,6 @@ import type {
 useEffect(() => {
   return () => {
     Sprites.clear();
-    MatterPhysics.destroy();
   };
 }, []);
 ```

@@ -41,7 +41,7 @@ function MySketch() {
 Want to experiment with Klint interactively? Create a live editor environment:
 
 ```bash
-npx @shopify/klint klint-create-editor my-klint-project
+npx @shopify/klint create-editor my-klint-project
 cd my-klint-project
 npm install
 npm run dev
@@ -51,10 +51,10 @@ This creates a Monaco-based editor with live preview - perfect for learning and 
 
 ## 📚 Documentation
 
-- **[Getting Started Guide](https://shopify.github.io/Klint/)** - Learn the basics
-- **[API Reference](https://shopify.github.io/Klint/docs/Functions/introduction)** - Complete function reference  
+- **[Getting Started Guide](https://shopify.github.io/Klint/docs/getting-started/quick-start)** - Learn the basics
+- **[API Reference](https://shopify.github.io/Klint/docs/reference/api-reference)** - Complete function reference
 - **[Examples](https://shopify.github.io/Klint/experiments)** - See Klint in action
-- **[Lifecycle](https://shopify.github.io/Klint/docs/klint-introduction)** - Understand how Klint works with React
+- **[Lifecycle](https://shopify.github.io/Klint/docs/core-concepts/lifecycle)** - Understand initialization and drawing
 
 ## 🌟 Examples
 
@@ -82,7 +82,7 @@ function InteractiveDrawing() {
   const { mouse } = KlintMouse();
   
   const draw = (K) => {
-    if (mouse.pressed) {
+    if (mouse.isPressed) {
       K.fillColor('red');
       K.circle(mouse.x, mouse.y, 10);
     }
@@ -90,6 +90,24 @@ function InteractiveDrawing() {
   
   return <Klint context={context} draw={draw} />;
 }
+```
+
+## Vanilla JavaScript (no React)
+
+Use the tree-shakeable native entry directly:
+
+```js
+import { createKlint } from '@shopify/klint/native';
+
+const sketch = createKlint({
+  container: '#app',
+  draw(K) {
+    K.background('white');
+    K.circle(K.width / 2, K.height / 2, 40);
+  },
+});
+
+await sketch.ready;
 ```
 
 ## 🛠️ Development
@@ -109,5 +127,5 @@ MIT
 
 ---
 
-**Ready to create?** Start with `npx @shopify/klint klint-create-editor my-project` 🎨
+**Ready to create?** Start with `npx @shopify/klint create-editor my-project` 🎨
 

@@ -1,55 +1,37 @@
 # point
 
 ```ts
-point(
-  x: number, 
-  y: number, 
-  size?: number
-) => void
+K.point(x: number, y: number): void
 ```
 
-Draws a point (dot) on the canvas.
+Draws a one-unit stroked point using the current stroke color. It does not use the fill color.
 
-## Parameters
-- `x`: The x-coordinate of the point
-- `y`: The y-coordinate of the point
-- `size` (optional): The size of the point in pixels (default: 1)
-
-## Returns
-- `void`
-
-## Example
 ```tsx
-// Single point
-K.point(100, 100)
-
-// Larger point with color
-K.strokeColor("red")
-K.point(200, 150, 5)
-
-// In JSX component
-const draw = (K: KlintContext) => {
-  // Random point cloud
-  K.strokeColor("rgba(0, 100, 255, 0.7)")
-  
-  for (let i = 0; i < 200; i++) {
-    const x = Math.random() * K.width
-    const y = Math.random() * K.height
-    const size = Math.random() * 3 + 1
-    K.point(x, y, size)
-  }
-  
-  // Highlight point under mouse
-  K.strokeColor("yellow")
-  K.point(K.mouseX, K.mouseY, 8)
-}
+K.strokeColor('red');
+K.point(100, 100);
 ```
-A point is a one pixel long line. It's technically more efficient that drawing a circle, or a square with the appropriate stroke end, but it's less customizable and won't work with some functions like `Klint.clip` and scaling it will most likely create alliasing. It's more suited for particle system where you have to draw a lot.
 
+For a configurable dot size, draw a circle instead:
 
-## Notes
-- Points use the current stroke color (not fill color)
-- For very small points, use size 1 (default), which will draw a one pixel dot.
-- For larger points, consider using `K.circle()` with `K.noStroke()`
-- Useful for particle systems, stars, or data visualization
-- For many points, consider batch rendering for better performance 
+```tsx
+K.noStroke();
+K.fillColor('red');
+K.circle(100, 100, 4);
+```
+
+## Mouse example
+
+```tsx
+const {context, KlintMouse} = useKlint();
+const {mouse} = KlintMouse();
+
+const draw = (K: KlintContext) => {
+  K.background('#111');
+  K.strokeColor('yellow');
+  K.point(mouse.x, mouse.y);
+};
+
+return <Klint context={context} draw={draw} />;
+```
+
+Because `point()` uses a one-unit `strokeRect`, its physical size follows the current transform. Use paths or circles when you need more control over appearance.

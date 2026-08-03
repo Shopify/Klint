@@ -156,7 +156,8 @@ class Color implements KlintColor {
    * @returns RGB color string
    */
   rgb(r: number, g: number, b: number) {
-    return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+    const channel = (value: number) => Math.round(Math.max(0, Math.min(255, value)));
+    return `rgb(${channel(r)}, ${channel(g)}, ${channel(b)})`;
   }
 
   /**
@@ -168,9 +169,11 @@ class Color implements KlintColor {
    * @returns RGBA color string
    */
   rgba(r: number, g: number, b: number, alpha: number) {
-    return `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(
-      b
-    )}, ${alpha})`;
+    const channel = (value: number) => Math.round(Math.max(0, Math.min(255, value)));
+    return `rgba(${channel(r)}, ${channel(g)}, ${channel(b)}, ${Math.max(
+      0,
+      Math.min(1, alpha),
+    )})`;
   }
 
   /**
@@ -195,7 +198,11 @@ class Color implements KlintColor {
    * @returns HSL color string
    */
   hsl(h: number, s: number, l: number) {
-    return `hsl(${h % 360}, ${Math.max(0, s)}%, ${Math.max(0, l)}%)`;
+    const hue = ((h % 360) + 360) % 360;
+    return `hsl(${hue}, ${Math.max(0, Math.min(100, s))}%, ${Math.max(
+      0,
+      Math.min(100, l),
+    )}%)`;
   }
 
   /**
@@ -207,7 +214,11 @@ class Color implements KlintColor {
    * @returns HSLA color string
    */
   hsla(h: number, s: number, l: number, alpha: number) {
-    return `hsla(${h % 360}, ${Math.max(0, s)}%, ${Math.max(0, l)}%, ${alpha})`;
+    const hue = ((h % 360) + 360) % 360;
+    return `hsla(${hue}, ${Math.max(0, Math.min(100, s))}%, ${Math.max(
+      0,
+      Math.min(100, l),
+    )}%, ${Math.max(0, Math.min(1, alpha))})`;
   }
 
   /**
@@ -349,7 +360,7 @@ class Color implements KlintColor {
    * @returns Complementary color string
    */
   complementary(color: string): string {
-    return this.blendColors(color, "hsl(180deg 100% 50%)", 1, "hsl");
+    return `hsl(from ${color} calc(h + 180) s l / alpha)`;
   }
 
   /**
@@ -360,8 +371,8 @@ class Color implements KlintColor {
    */
   analogous(color: string, angle: number = 30): [string, string] {
     return [
-      this.blendColors(color, `hsl(${-angle}deg 100% 50%)`, 1, "hsl"),
-      this.blendColors(color, `hsl(${angle}deg 100% 50%)`, 1, "hsl"),
+      `hsl(from ${color} calc(h - ${Math.abs(angle)}) s l / alpha)`,
+      `hsl(from ${color} calc(h + ${Math.abs(angle)}) s l / alpha)`,
     ];
   }
 
@@ -372,8 +383,8 @@ class Color implements KlintColor {
    */
   triadic(color: string): [string, string] {
     return [
-      this.blendColors(color, "hsl(120deg 100% 50%)", 1, "hsl"),
-      this.blendColors(color, "hsl(240deg 100% 50%)", 1, "hsl"),
+      `hsl(from ${color} calc(h + 120) s l / alpha)`,
+      `hsl(from ${color} calc(h + 240) s l / alpha)`,
     ];
   }
 
@@ -384,12 +395,7 @@ class Color implements KlintColor {
    * @returns Saturated color string
    */
   saturate(color: string, amount: number): string {
-    return this.blendColors(
-      color,
-      "hsl(0deg 100% 50% / 0%)",
-      amount / 100,
-      "hsl"
-    );
+    return `hsl(from ${color} h clamp(0, calc(s + ${amount}), 100) l / alpha)`;
   }
 
   /**

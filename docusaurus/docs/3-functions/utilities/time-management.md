@@ -30,7 +30,7 @@ You can disable the animation loop using the `static` option, which causes the `
 
 ```jsx
 // Static mode - draw runs only once
-<Klint draw={myDrawFunction} options={{ static: "true" }} />
+<Klint draw={myDrawFunction} options={{ static: true }} />
 ```
 
 ## Time Properties

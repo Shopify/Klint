@@ -1,4 +1,4 @@
-import { KlintContext } from "../Klint";
+import type { KlintContext } from "../core/KlintTypes";
 
 /**
  * Noise — Perlin (1-4D), Simplex (1-4D), Hash (1-4D), Gaussian random

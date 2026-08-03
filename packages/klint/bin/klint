@@ -1,146 +1,39 @@
 #!/usr/bin/env node
 
-const args = process.argv.slice(2);
-const command = args[0];
-const subArgs = args.slice(1);
+const [command] = process.argv.slice(2);
 
-if (command === "mcp") {
-  // Run the MCP server
-  import("../../../mcp-server/dist/index.js").catch((err) => {
-    console.error("Failed to start MCP server:", err);
-    process.exit(1);
+const plugins = [
+  ["Bezier", "@shopify/klint/plugins/Bezier"],
+  ["Polyline", "@shopify/klint/plugins/Polyline"],
+  ["FontParser", "@shopify/klint/plugins/FontParser"],
+  ["Delaunay", "@shopify/klint/plugins/Delaunay"],
+  ["CatmullRom", "@shopify/klint/plugins/Catmull"],
+  ["Sprites", "@shopify/klint/plugins/Sprites"],
+  ["Projector", "@shopify/klint/plugins/Projector"],
+];
+
+if (command === "create-editor") {
+  import("./create-editor").catch((error) => {
+    console.error("Failed to run create-editor:", error);
+    process.exitCode = 1;
   });
-} else if (command === "create-editor") {
-  // Run the create-editor command
-  import("./create-editor").catch((err) => {
-    console.error("Failed to run create-editor:", err);
-    process.exit(1);
+} else if (command === "create-sandbox") {
+  import("./create-sandbox").catch((error) => {
+    console.error("Failed to run create-sandbox:", error);
+    process.exitCode = 1;
   });
-} else if (command === "add-plugin" || command === "add-plugins") {
-  // Add plugin(s)
-  const pluginName = subArgs[0];
-  const isAll = pluginName === "all" || pluginName === "--all" || subArgs.includes("--all");
-  
-  if (!pluginName && !isAll) {
-    console.error("Please specify a plugin name or use --all");
-    console.log("Usage: klint add-plugin <plugin-name>");
-    console.log("       klint add-plugin --all");
-    console.log("\nAvailable plugins:");
-    console.log("  font-parser    - Parse and render font files");
-    console.log("  delaunay       - Delaunay triangulation");
-    console.log("  catmull        - Catmull-Rom spline interpolation");
-    console.log("  things         - Template plugin for collections");
-    console.log("  particle-system - Particle effects system");
-    console.log("  --all          - Install all plugins");
-    process.exit(1);
+} else if (command === "list-plugins" || command === "plugins") {
+  console.log("Built-in Klint plugin exports (no extra package installation required):\n");
+  for (const [name, specifier] of plugins) {
+    console.log(`  ${name.padEnd(12)} import { ${name} } from "${specifier}"`);
   }
-  
-  // Simple plugin installer
-  const { execSync } = require("child_process");
-  const fs = require("fs");
-  const path = require("path");
-  
-  // Check if package.json exists
-  if (!fs.existsSync("package.json")) {
-    console.error("Error: No package.json found in current directory");
-    process.exit(1);
-  }
-  
-  // Check if @shopify/klint-plugins is already installed
-  const pkg = JSON.parse(fs.readFileSync("package.json", "utf-8"));
-  const hasPlugins = 
-    (pkg.dependencies && pkg.dependencies["@shopify/klint-plugins"]) ||
-    (pkg.devDependencies && pkg.devDependencies["@shopify/klint-plugins"]);
-  
-  if (!hasPlugins) {
-    console.log("Installing @shopify/klint-plugins package...");
-    execSync("npm install @shopify/klint-plugins", { stdio: "inherit" });
-    console.log("✓ @shopify/klint-plugins installed successfully!");
-  } else {
-    console.log("✓ @shopify/klint-plugins already installed");
-  }
-  
-  // Show usage based on what was requested
-  if (isAll) {
-    console.log("\n✓ All plugins are now available!");
-    console.log('\nUsage example:');
-    console.log(`
-import { useKlint } from '@shopify/klint';
-import { 
-  fontParserPlugin, 
-  delaunayPlugin, 
-  catmullPlugin,
-  thingsPlugin,
-  particleSystemPlugin 
-} from '@shopify/klint-plugins';
-
-const { context, addPlugin } = useKlint();
-
-// In your setup function:
-const setup = (ctx) => {
-  // Add all plugins at once
-  const plugins = addPlugin(
-    fontParserPlugin,
-    delaunayPlugin,
-    catmullPlugin,
-    thingsPlugin,
-    particleSystemPlugin
-  );
-  
-  // Or destructure specific ones you need
-  const { FontParser, ParticleSystem } = plugins;
-  
-  // Use your plugins
-  ParticleSystem.createEmitter({ x: 100, y: 100 });
-};
-`);
-  } else {
-    // Show specific plugin usage
-    const pluginExamples = {
-      "font-parser": "FontParser",
-      "delaunay": "Delaunay",
-      "catmull": "Catmull",
-      "things": "Things",
-      "particle-system": "ParticleSystem"
-    };
-    
-    const className = pluginExamples[pluginName] || pluginName;
-    const pluginVarName = pluginName.replace(/-/g, "");
-    
-    console.log(`\n✓ Plugin "${pluginName}" is available!`);
-    console.log('\nUsage example:');
-    console.log(`
-import { useKlint } from '@shopify/klint';
-import { ${pluginVarName}Plugin } from '@shopify/klint-plugins';
-
-const { context, addPlugin } = useKlint();
-
-// In your setup function:
-const setup = (ctx) => {
-  const { ${className} } = addPlugin(${pluginVarName}Plugin);
-  
-  // Use the plugin
-  // ${className} is now available with all its methods
-};
-`);
-  }
-  
-} else if (command === "list-plugins") {
-  console.log("\nAvailable Klint Plugins:");
-  console.log("------------------------");
-  console.log("  font-parser     - Parse and render font files");
-  console.log("  delaunay        - Delaunay triangulation");
-  console.log("  catmull         - Catmull-Rom spline interpolation");
-  console.log("  things          - Template plugin for managing collections");
-  console.log("  particle-system - Complete particle effects system");
-  console.log("  --all           - Install all plugins\n");
 } else {
-  console.log("Klint CLI");
-  console.log("");
-  console.log("Commands:");
-  console.log("  klint mcp            - Start the MCP server for AI assistants");
-  console.log("  klint create-editor  - Create a new Klint editor project");
-  console.log("  klint add-plugin     - Add a Klint plugin to your project");
-  console.log("  klint list-plugins   - List available Klint plugins");
-  console.log("");
+  console.log(`Klint CLI\n
+Commands:
+  klint create-editor   Create a Klint editor project
+  klint create-sandbox  Create a Klint sandbox project
+  klint list-plugins    List built-in plugin import paths
+
+Vanilla JavaScript:
+  import { createKlint } from "@shopify/klint/native";`);
 }

@@ -200,16 +200,20 @@ function draw() {
 }
 ```
 
-**Klint**:
-```javascript
-const preload = async (K) => {
-  const img = await K.loadImage('image.jpg');
-  return { img };
+**Klint (React)**:
+```tsx
+const {context, KlintImage} = useKlint();
+const {images, loadImage} = KlintImage();
+
+const preload = async () => {
+  await loadImage('photo', 'image.jpg');
 };
 
-const draw = (K, assets) => {
-  K.image(assets.img, 0, 0);
+const draw = (K) => {
+  K.image(images.photo, 0, 0);
 };
+
+return <Klint context={context} preload={preload} draw={draw} />;
 ```
 
 ## Feature Comparison
@@ -299,6 +303,6 @@ const draw = (K) => {
 
 ## Getting Help
 
-- [Quick Start](../1-getting-started/quick-start) - Get up and running
+- [Quick Start](/docs/getting-started/quick-start) - Get up and running
 - [API Reference](./api-reference) - Complete function list
 - [Examples](/experiments) - See Klint in action

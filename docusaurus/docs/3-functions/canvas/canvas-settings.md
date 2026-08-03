@@ -162,13 +162,13 @@ const draw = (K: KlintContext) => {
   K.rectangle(0, 0, 100, 100)
   
   // Draw image from its center
-  const img = K.images["logo"]
+  const img = images.logo // from KlintImage()
   if (img) {
     K.image(img, 0, -150)
   }
   
   // Export canvas to base64 on first frame
-  if (K.frameCount === 1) {
+  if (K.frame === 1) {
     const dataUrl = K.toBase64("image/png")
     console.log(dataUrl)
   }

@@ -1,4 +1,4 @@
-import { KlintContext } from "../Klint";
+import type { KlintContext } from "../core/KlintTypes";
 
 /**
  * Static CatmullRom Plugin

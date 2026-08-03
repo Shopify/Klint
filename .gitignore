@@ -2,6 +2,7 @@ node_modules
 .DS_Store
 dist/
 build/
+coverage/
 .env
 .env.local
 sandbox/

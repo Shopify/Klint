@@ -11,6 +11,7 @@ const sidebars: SidebarsConfig = {
         'getting-started/quick-start',
         'getting-started/useKlint-pattern',
         'getting-started/typescript',
+        'getting-started/vanilla-javascript',
       ],
     },
     {
@@ -40,6 +41,7 @@ const sidebars: SidebarsConfig = {
             'functions/drawing/disk',
             'functions/drawing/ellipse',
             'functions/drawing/roundedRectangle',
+            'functions/drawing/strip',
           ],
         },
         {
@@ -54,6 +56,7 @@ const sidebars: SidebarsConfig = {
             'functions/paths/arcVertex',
             'functions/paths/beginContour',
             'functions/paths/endContour',
+            'functions/paths/clipTo',
           ],
         },
         {
@@ -69,6 +72,7 @@ const sidebars: SidebarsConfig = {
             'functions/styling/noStroke',
             'functions/styling/opacity',
             'functions/styling/blend',
+            'functions/styling/filters',
           ],
         },
         {
@@ -90,6 +94,9 @@ const sidebars: SidebarsConfig = {
             'functions/transforms/scale',
             'functions/transforms/push',
             'functions/transforms/pop',
+            'functions/transforms/transform',
+            'functions/transforms/coordinates',
+            'functions/transforms/resetTransform',
           ],
         },
         {
@@ -98,6 +105,7 @@ const sidebars: SidebarsConfig = {
           items: [
             'functions/text/text',
             'functions/text/klintfunctions-text-styling',
+            'functions/text/paragraph',
           ],
         },
         {
@@ -152,16 +160,16 @@ const sidebars: SidebarsConfig = {
           label: 'Plugins',
           items: [
             'advanced/plugins/plugins-overview',
+            'advanced/plugins/bezier',
+            'advanced/plugins/polyline',
             'advanced/plugins/font-parser',
             'advanced/plugins/sprites',
             'advanced/plugins/catmull-rom',
             'advanced/plugins/delaunay',
-            'advanced/plugins/matter-physics',
             'advanced/plugins/projector',
             'advanced/plugins/custom-plugins',
           ],
         },
-        'advanced/web-components',
         'advanced/klint-editor',
       ],
     },
@@ -179,7 +187,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'link',
       label: 'Download AI Skill',
-      href: '/SKILL.md',
+      href: 'pathname:///Klint/SKILL.md',
     },
   ],
 };

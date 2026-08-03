@@ -4,11 +4,11 @@ sidebar_position: 2
 
 # FontParser
 
-The FontParser plugin loads TrueType fonts and converts text into vector paths or point arrays, perfect for custom text rendering and animation.
+The FontParser plugin loads TTF, OTF, WOFF, and WOFF2 fonts and converts text into vector paths or point arrays, perfect for custom text rendering and animation. The universal parser auto-detects the format and is asynchronous.
 
 ## Features
 
-- Load TTF fonts from URLs or buffers
+- Load TTF, OTF, WOFF, and WOFF2 fonts from URLs or buffers
 - Convert text to Path2D objects for rendering
 - Convert text to point arrays for particle effects
 - Full layout control (alignment, spacing, baseline)
@@ -17,16 +17,36 @@ The FontParser plugin loads TrueType fonts and converts text into vector paths o
 
 ## Supported Formats
 
-- TTF (TrueType Font)
-- OTF, WOFF, WOFF2 are not supported — convert to TTF first (e.g. [convertio.co/otf-ttf](http://convertio.co/otf-ttf/))
+- TTF (TrueType outlines, including supported variable-font axes)
+- OTF (static CFF v1 outlines)
+- WOFF
+- WOFF2
+
+CFF2 variable outlines are not yet supported. WOFF2 decoding uses the browser's Brotli `DecompressionStream` when available and Node's Brotli implementation in Node.js. Other runtimes can pass a custom `{brotli}` decoder.
+
+`FontParser`, `loadFontFile()`, and `parseFontBuffer()` inspect the first four bytes of the font data and load only the matching parser chunk. You can inspect the signature yourself with `detectFontFormat()` from the direct `FontParser` entry.
+
+For a known format, use a smaller synchronous/asynchronous deep import:
+
+```ts
+import {parseTTF} from '@shopify/klint/plugins/FontParser/ttf';
+import {parseOTF} from '@shopify/klint/plugins/FontParser/otf';
+import {parseWOFF} from '@shopify/klint/plugins/FontParser/woff';
+import {parseWOFF2} from '@shopify/klint/plugins/FontParser/woff2';
+```
+
+TTF and OTF parsing is synchronous. WOFF, WOFF2, and the auto-detecting `FontParser` API are asynchronous.
 
 ## Basic Usage
 
 ```tsx
-import { FontParser } from '@shopify/klint/plugins';
+import {useEffect, useState} from 'react';
+import {Klint, useKlint, type KlintContext} from '@shopify/klint';
+import {FontParser, type FontData} from '@shopify/klint/plugins';
 
 function TextSketch() {
-  const [font, setFont] = useState(null);
+  const {context} = useKlint();
+  const [font, setFont] = useState<FontData | null>(null);
 
   useEffect(() => {
     const parser = new FontParser();
@@ -89,7 +109,7 @@ const draw = (K) => {
 ```tsx
 const options = {
   align: 'left' | 'center' | 'right',
-  baseline: 'top' | 'center' | 'bottom',
+  baseline: 'top' | 'center' | 'bottom' | 'baseline',
   anchor: 'default' | 'center',
   letterSpacing: 10,
   lineSpacing: 20,
@@ -118,11 +138,9 @@ if (font.fvar) {
 
 ```tsx
 const metadata = {
-  unitsPerEm: font.head.unitsPerEm,
-  ascender: font.hhea.ascender,
-  descender: font.hhea.descender,
-  fontFamily: font.name?.fontFamily,
-  postScriptName: font.name?.postScriptName
+  unitsPerEm: font.head?.unitsPerEm,
+  ascender: font.hhea?.asc,
+  descender: font.hhea?.desc,
 };
 ```
 

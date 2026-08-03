@@ -10,8 +10,7 @@ const config: Config = {
   tagline: "The manual to a modern 2D Canvas made for React",
   url: "https://shopify.github.io",
   baseUrl: "/Klint/",
-  onBrokenLinks: "warn",
-  onBrokenMarkdownLinks: "warn",
+  onBrokenLinks: "throw",
   favicon: "img/favicon.ico",
   organizationName: "Shopify",
   projectName: "klint",
@@ -48,9 +47,9 @@ const config: Config = {
       },
     ],
     "./plugins/api-docs-plugin.js",
-    function fontParserAlias() {
+    function pluginAliases() {
       return {
-        name: "font-parser-alias",
+        name: "klint-plugin-aliases",
         configureWebpack() {
           return {
             resolve: {
@@ -58,6 +57,10 @@ const config: Config = {
                 "@shopify/klint/plugins/FontParser": path.resolve(
                   __dirname,
                   "../packages/klint/src/plugins/FontParser.tsx",
+                ),
+                "@shopify/klint/plugins": path.resolve(
+                  __dirname,
+                  "../packages/klint/dist/plugins/index.js",
                 ),
               },
             },
@@ -68,6 +71,9 @@ const config: Config = {
   ],
   markdown: {
     mermaid: true,
+    hooks: {
+      onBrokenMarkdownLinks: "throw",
+    },
   },
   themeConfig: {
     colorMode: {

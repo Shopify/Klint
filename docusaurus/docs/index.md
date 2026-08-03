@@ -53,7 +53,7 @@ Klint fills its container — wrap it in a div with explicit dimensions.
 The fastest way to learn Klint is with the interactive editor:
 
 ```bash
-npx @shopify/klint klint-create-editor my-klint-project
+npx @shopify/klint create-editor my-klint-project
 cd my-klint-project
 npm install
 npm run dev
@@ -61,8 +61,8 @@ npm run dev
 
 ## Next Steps
 
-- **[Quick Start](./1-getting-started/quick-start)** — Create your first sketch with interactive examples
-- **[Installation](./1-getting-started/installation)** — Setup and requirements
-- **[Core Concepts](./2-core-concepts/lifecycle)** — Understand lifecycle, context, and React integration
-- **[Function Reference](./3-functions/drawing/circle)** — Complete API documentation
+- **[Quick Start](/docs/getting-started/quick-start)** — Create your first sketch with interactive examples
+- **[Installation](/docs/getting-started/installation)** — Setup and requirements
+- **[Core Concepts](/docs/core-concepts/lifecycle)** — Understand lifecycle, context, and React integration
+- **[Function Reference](/docs/functions/drawing/circle)** — Complete API documentation
 - **[Coming from p5.js?](./reference/from-p5js)** — Migration guide

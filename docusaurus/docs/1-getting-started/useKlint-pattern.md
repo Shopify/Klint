@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # The useKlint Pattern
 
-The `useKlint` hook is the foundation of every Klint sketch. Understanding this pattern is crucial for building with Klint.
+The `useKlint` hook connects a React sketch to Klint's input and resource hooks. A plain `<Klint draw={draw} />` works without it, but interactive React sketches will usually use this pattern.
 
 ## Basic Pattern
 
@@ -36,16 +36,14 @@ The `useKlint` hook returns several utilities:
 
 ```tsx
 const {
-  context,          // Canvas context (required for Klint component)
+  context,          // Stable bridge passed to the Klint component
   KlintMouse,       // Mouse tracking hook
   KlintKeyboard,    // Keyboard tracking hook
   KlintImage,       // Image loading hook
   KlintWindow,      // Window events hook
   KlintScroll,      // Scroll handling hook
   KlintGesture,     // Touch gesture hook
-  KlintTimeline,    // Animation timeline hook
-  KlintPerformance, // Performance monitoring hook
-  useDev,           // Development utilities
+  useDev,           // Opt into editor/HMR drawing refreshes
   togglePlay,       // Play/pause control
 } = useKlint();
 ```
@@ -54,7 +52,7 @@ Each of these is documented in detail in [Klint Hooks](../reference/klint-hooks)
 
 ## The Context Object
 
-The `context` is a wrapped canvas context that must be passed to the `<Klint>` component:
+`context` is a stable bridge. Pass it to `<Klint>` whenever you use one of the hook factories:
 
 ```tsx
 const { context } = useKlint();
@@ -90,7 +88,7 @@ function MouseSketch() {
 }
 ```
 
-The mouse object provides `x`, `y`, `px`, `py` (previous position), `vx`, `vy` (velocity), `isPressed`, `isHover`, and `angle`. See [KlintMouse](../reference/klint-hooks#klintmouse) for the full API.
+The mouse object provides `x`, `y`, `px`, `py` (previous position), `vx`, `vy` (velocity), `isPressed`, `isHover`, and `angle`. See [Mouse and pointer input](../reference/klint-hooks#mouse-and-pointer-input) for the full API.
 
 ## State Without Re-renders
 
@@ -141,8 +139,8 @@ function ParticleSketch() {
 
 ## Key Takeaways
 
-1. **Always use `useKlint()`** — It's the entry point to all Klint functionality
-2. **Pass `context` to `<Klint>`** — This connects your functions to the canvas
+1. **Use `useKlint()` for React integrations** — Basic drawing does not require it
+2. **Pass `context` to `<Klint>` when using hook factories** — This connects listeners and resources to the current canvas
 3. **Wrap in a sized container** — Klint fills its parent element
 4. **Use provided hooks** — KlintMouse, KlintKeyboard, etc. for interactivity
 5. **Prefer `useStorage`** — For state that changes frequently without needing React re-renders
@@ -151,6 +149,6 @@ function ParticleSketch() {
 ## Next Steps
 
 - [TypeScript Setup](./typescript) — Type-safe Klint development
-- [Lifecycle Functions](../2-core-concepts/lifecycle) — Understanding setup, draw, and preload
+- [Lifecycle Functions](/docs/core-concepts/lifecycle) — Understanding setup, draw, and preload
 - [Klint Hooks](../reference/klint-hooks) — Full hook API reference
-- [React Integration](../2-core-concepts/react-integration) — Advanced React patterns
+- [React Integration](/docs/core-concepts/react-integration) — Advanced React patterns

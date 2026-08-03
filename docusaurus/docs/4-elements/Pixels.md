@@ -132,6 +132,6 @@ const draw = (K) => {
 ## Notes
 
 - Pixel manipulation is expensive — avoid calling `load()` + `update()` every frame on large canvases if possible
-- Consider using `willreadfrequently: "true"` in canvas options if you read pixels often
+- Consider using `willreadfrequently: true` in canvas options if you read pixels often
 - `read()` returns device-pixel coordinates, so multiply by `K.dpr` if needed
 - For heavy pixel work, consider using an offscreen canvas via `K.createOffscreen()`

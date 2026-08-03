@@ -8,10 +8,12 @@ Understanding the canvas coordinate system is essential for positioning elements
 
 ## Coordinate System Basics
 
-The canvas uses a coordinate system where:
+With the default `origin: 'corner'`, the canvas uses a coordinate system where:
 - **(0, 0)** is the **top-left corner**
 - **X** increases to the **right**
 - **Y** increases **downward**
+
+With `origin: 'center'`, `(0, 0)` is the center, while X still increases right and Y still increases down.
 
 ```tsx
 const draw = (K) => {
@@ -39,6 +41,14 @@ const draw = (K) => {
   K.text('Center', K.width/2 - 25, K.height/2 - 15);
 };
 ```
+
+## Logical pixels and DPR
+
+`K.width`, `K.height`, drawing coordinates, pointer coordinates, offscreen dimensions, and pixel helper coordinates are all expressed in logical CSS pixels. Klint scales the backing store and base transform internally using `K.dpr`.
+
+For example, a 400 × 300 logical canvas at DPR 2 has an 800 × 600 backing store, but you still draw its bottom-right corner at `(400, 300)`. Do not multiply coordinates by `devicePixelRatio` yourself.
+
+Use `dpr: 'default'` to follow the device (capped by `maxDpr`, which defaults to 3), or pass a positive number for a fixed DPR.
 
 ## Common Positions
 
@@ -105,11 +115,12 @@ const draw = (K) => {
 };
 ```
 
-### Rectangles - Top-Left Corner
+### Rectangles - Configurable origin
 
 ```tsx
 const draw = (K) => {
-  // Rectangle is drawn from top-left corner
+  // Rectangle uses the top-left corner by default.
+  // K.setRectOrigin('center') changes its anchor to the center.
   const x = 100;
   const y = 100;
   const width = 100;
@@ -319,13 +330,15 @@ const draw = (K) => {
 
 ## Common Pitfalls
 
-1. **Y-axis direction** - Remember Y increases downward, not upward
-2. **Rectangle anchor** - Rectangles draw from top-left, not center
-3. **Rotation origin** - Rotation happens around (0,0) unless you translate first
-4. **Text baseline** - Default text baseline is 'alphabetic', not 'top'
+1. **Manual DPR scaling** - Coordinates are already logical pixels; do not multiply them by `K.dpr`.
+2. **Y-axis direction** - Y increases downward in both origin modes.
+3. **Origin mode** - With `origin: 'center'`, canvas coordinates range roughly from `-width / 2` to `width / 2`.
+4. **Rectangle anchor** - Rectangles use the corner unless changed with `setRectOrigin()`.
+5. **Rotation origin** - Rotation happens around the current `(0,0)` unless you translate first.
+6. **Text baseline** - Text anchoring follows the current `alignText()` setting.
 
 ## Next Steps
 
-- [Function Reference](../3-functions/drawing/circle) - Learn shape drawing functions
-- [Transformations](../3-functions/transforms/translate) - Master coordinate transformations
+- [Function Reference](/docs/functions/drawing/circle) - Learn shape drawing functions
+- [Transformations](/docs/functions/transforms/translate) - Master coordinate transformations
 - [React Integration](./react-integration) - Handle responsive canvases

@@ -1,424 +1,284 @@
-import React, { useRef, useEffect, useState, useCallback } from "react";
-import { KlintFunctions, KlintCoreFunctions } from "./KlintFunctions";
-import { type KlintElements, Vector } from "./elements";
+import React, { CSSProperties, ReactNode, useEffect, useRef, useState } from "react";
+import useKlint from "./useKlint";
+import type {
+  KlintCanvasOptions,
+  KlintContext,
+  KlintContextWrapper,
+} from "./core/KlintTypes";
+import { normalizeKlintOptions } from "./core/KlintTypes";
+import {
+  KlintAnimationLoop,
+  resizeKlintCanvas,
+} from "./core/KlintRuntime";
 
-const DEFAULT_FPS = 60.0;
-const DEFAULT_ALT = "A beautiful artwork made with Klint Canvas";
-export const EPSILON = 0.0001;
+export * from "./core/KlintTypes";
 
-export type KlintContexts = KlintContext | KlintOffscreenContext;
-
-export type CurveVertex =
-  | { type: "line"; x: number; y: number }
-  | {
-      type: "bezier";
-      cp1x: number;
-      cp1y: number;
-      cp2x: number;
-      cp2y: number;
-      x: number;
-      y: number;
-    }
-  | { type: "quadratic"; cpx: number; cpy: number; x: number; y: number }
-  | {
-      type: "arc";
-      x1: number;
-      y1: number;
-      x2: number;
-      y2: number;
-      radius: number;
-    };
-
-export interface KlintOffscreenContext
-  extends CanvasRenderingContext2D, KlintFunctions, KlintElements {
-  width: number;
-  height: number;
-  __dpr: number;
-  __startedShape: boolean;
-  __currentShape: CurveVertex[] | null;
-  __startedContour: boolean;
-  __currentContours: CurveVertex[][] | null;
-  __currentContour: CurveVertex[] | null;
-  __isReadyToDraw: boolean;
-  __isMainContext: boolean;
-  __imageOrigin: "corner" | "center";
-  __rectangleOrigin: "corner" | "center";
-  __canvasOrigin: "corner" | "center";
-  __computedTextFont: string;
-  __textFont: string;
-  __textSize: number;
-  __textLeading: number | undefined;
-  __textStyle: string;
-  __textWeight: string;
-  __textAlignment: {
-    horizontal: CanvasTextAlign;
-    vertical: CanvasTextBaseline;
-  };
-  __fillRule: CanvasFillRule;
-  createVector: (x: number, y: number) => Vector;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
-}
-
-export interface KlintContext
-  extends KlintOffscreenContext, KlintCoreFunctions {
-  frame: number;
-  time: number;
-  deltaTime: number;
-  fps: number;
-  __lastTargetTime: number;
-  __lastRealTime: number;
-  __isPlaying: boolean;
-  __offscreens: Map<string, KlintOffscreenContext | HTMLImageElement>;
-}
-
-export interface KlintCanvasOptions {
-  alpha?: string;
-  willreadfrequently?: string;
-  autoplay?: string;
-  ignoreResize?: string;
-  noloop?: string;
-  ignoreFunctions?: string;
-  static?: string;
-  nocanvas?: string;
-  fps?: number;
-  unsafemode?: string;
-  dpr?: number | "default";
-  origin?: "corner" | "center";
-}
-
-const DEFAULT_OPTIONS: KlintCanvasOptions = {
-  alpha: "true",
-  ignoreResize: "false",
-  noloop: "false",
-  static: "false",
-  nocanvas: "false",
-  unsafemode: "false",
-  willreadfrequently: "false",
-  fps: DEFAULT_FPS,
-  dpr: "default",
-  origin: "corner",
-};
-
-export type KlintConfig = Partial<
-  Pick<KlintContext, (typeof CONFIG_PROPS)[number]>
->;
-
-export interface KlintContextWrapper {
-  context: KlintContext | null;
-  initCoreContext: (
-    canvas: HTMLCanvasElement,
-    options: KlintCanvasOptions,
-  ) => KlintContext;
-}
-
-export const CONFIG_PROPS = [
-  "lineWidth",
-  "strokeStyle",
-  "lineJoin",
-  "lineCap",
-  "fillStyle",
-  "font",
-  "textAlign",
-  "textBaseline",
-  "textRendering",
-  "wordSpacing",
-  "letterSpacing",
-  "globalAlpha",
-  "globalCompositeOperation",
-  "origin",
-  "transform",
-  "__imageOrigin",
-  "__rectangleOrigin",
-  "__textFont",
-  "__textWeight",
-  "__textStyle",
-  "__textSize",
-  "__textLeading",
-  "__textAlignment",
-  "__fillRule",
-  "__isPlaying",
-] as const;
-
-export interface KlintProps {
-  context: KlintContextWrapper;
-  draw: (ctx: KlintContext) => void;
-  setup?: (ctx: KlintContext) => void;
-  preload?: (ctx: KlintContext) => Promise<void>;
+export interface KlintProps extends KlintCanvasOptions {
+  /** Context bridge returned by useKlint(). Retained for input/resource hooks. */
+  context?: KlintContextWrapper;
+  /** Preferred grouped canvas options; flattened options remain supported. */
   options?: KlintCanvasOptions;
-  onResize?: (ctx: KlintContext) => void;
-  onVisible?: (ctx: KlintContext) => void;
+  preload?: (context: KlintContext) => void | Promise<void>;
+  setup?: (context: KlintContext) => void | Promise<void>;
+  draw?: (context: KlintContext) => void;
+  loadingComponent?: ReactNode;
+  errorComponent?: ReactNode | ((error: Error) => ReactNode);
+  onError?: (error: Error) => void;
+  onReady?: (context: KlintContext) => void;
+  onResize?: (context: KlintContext) => void;
+  onVisible?: (context: KlintContext, visible: boolean) => void;
+  extensionFunction?: Record<
+    string,
+    (context: KlintContext) => unknown
+  >;
+  children?: ReactNode;
+  className?: string;
+  style?: CSSProperties;
+  canvasProps?: Omit<
+    React.CanvasHTMLAttributes<HTMLCanvasElement>,
+    "ref" | "width" | "height"
+  >;
 }
 
-function useAnimate(
-  contextRef: React.RefObject<KlintContext | null>,
-  draw: (context: KlintContext) => void,
-  isVisible: boolean,
-) {
-  const animationFrameId = useRef<number>(0);
+type KlintStatus = "loading" | "ready" | "error";
 
-  const animate = useCallback(
-    (timestamp = 0) => {
-      if (!contextRef.current || !isVisible) return;
-      if (!contextRef.current.__isReadyToDraw) return;
-      if (!contextRef.current.__isPlaying) return;
-
-      const context = contextRef.current;
-      const now = timestamp;
-      const target = 1000 / context.fps;
-
-      if (!context.__lastTargetTime) {
-        context.__lastTargetTime = now;
-        context.__lastRealTime = now;
-      }
-
-      const sinceLast = now - context.__lastTargetTime;
-      const epsilon = 5;
-
-      if (sinceLast >= target - epsilon) {
-        context.deltaTime = now - context.__lastRealTime;
-        draw(context);
-        if (context.time > 1e7) context.time = 0;
-        if (context.frame > 1e7) context.frame = 0;
-        context.time += context.deltaTime / 1000;
-        context.frame++;
-        context.__lastTargetTime = now;
-        context.__lastRealTime = now;
-      }
-
-      animationFrameId.current = requestAnimationFrame(animate);
-    },
-    [draw, isVisible, contextRef],
-  );
-
-  return {
-    animate,
-    animationFrameId,
-  };
-}
-
-// Entry point
-export default function Klint({
-  context,
-  setup,
-  draw,
-  options = {},
-  preload,
-  onVisible,
-}: KlintProps) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const contextRef = useRef<KlintContext | null>(null); // KlintCoreContext | undefined
-  const intersectionObserverRef = useRef<IntersectionObserver | null>(null);
-  const resizeCallbackRef = useRef<((this: Window, ev: UIEvent) => any) | null>(
-    null,
-  );
-  const [isVisible, setIsVisible] = useState(true);
-
-  // HMR cleanup for development
-  useEffect(() => {
-    const resetContext = () => {
-      if (contextRef.current) {
-        const ctx = contextRef.current;
-        ctx.__isPlaying = false;
-        ctx.frame = 0;
-        ctx.time = 0;
-        ctx.__offscreens?.clear();
-        ctx.__startedShape = false;
-        ctx.__currentShape = null;
-        ctx.__startedContour = false;
-        ctx.__currentContours = null;
-        ctx.__currentContour = null;
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      }
-    };
-
-    // Vite HMR
-    if (typeof import.meta !== "undefined" && (import.meta as any).hot) {
-      (import.meta as any).hot.dispose(resetContext);
-    }
-
-    // Webpack HMR fallback
-    if (typeof module !== "undefined" && (module as any).hot) {
-      (module as any).hot.dispose(resetContext);
-    }
-  }, []);
-  const __options = {
-    ...DEFAULT_OPTIONS,
-    ...options,
-  };
-  const [toStaticImage, setStaticImage] = useState<string | null>(null);
-
-  const initContext = context?.initCoreContext;
-  const { animate, animationFrameId } = useAnimate(contextRef, draw, isVisible);
-
-  const updateCanvasSize = (shouldRedraw = false) => {
-    if (!containerRef.current || !contextRef.current || !canvasRef.current)
-      return;
-    const container = containerRef.current;
-    const context = contextRef.current;
-    const canvas = canvasRef.current;
-
-    const { width, height } = container.getBoundingClientRect();
-    const config = context.saveConfig();
-    context.dpr = context.__dpr;
-    canvas.width = context.width = ~~(width * context.__dpr);
-    canvas.height = context.height = ~~(height * context.__dpr);
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-    context.restoreConfig(config);
-    if (__options.origin === "center") {
-      context.translate(canvas.width * 0.5, canvas.height * 0.5);
-    }
-    if (shouldRedraw) draw(context);
-  };
-
-  useEffect(() => {
-    if (!canvasRef.current || !containerRef.current) return;
-
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
-    const defaultDPR = window.devicePixelRatio || 3;
-    const dpr = __options.dpr
-      ? __options.dpr === "default"
-        ? defaultDPR
-        : __options.dpr
-      : defaultDPR;
-
-    contextRef.current = initContext ? initContext(canvas, __options) : null;
-    const context = contextRef.current;
-    if (!context) return;
-
-    context.__dpr = dpr;
-
-    if (__options.fps && __options.fps !== context.fps) {
-      context.fps = __options.fps;
-    }
-
-    updateCanvasSize();
-
-    if (__options.ignoreResize !== "true") {
-      const handleResize = () => {
-        updateCanvasSize(context.__isReadyToDraw);
-      };
-      window.addEventListener("resize", handleResize);
-
-      resizeCallbackRef.current = handleResize;
-    }
-
-    intersectionObserverRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          setIsVisible(entry.isIntersecting);
-          onVisible?.(context);
-        });
-      },
-      { threshold: 0.1, root: null, rootMargin: "50px" },
-    );
-    intersectionObserverRef.current.observe(container);
-
-    const initializeKlint = async () => {
-      if (!context) return;
-
-      const handleStaticMode = () => {
-        try {
-          const imageUrl = canvas.toDataURL("image/png");
-          setStaticImage(imageUrl);
-        } catch (error: unknown) {
-          const message =
-            error instanceof Error ? error.message : String(error);
-          throw new Error(`Klint draw error in static mode: ${message}`);
-        }
-      };
-
-      const initializeContext = async (unsafeReset = false) => {
-        // Preload phase
-        if (preload && (unsafeReset || !context.__isPreloaded)) {
-          try {
-            await preload(context);
-            if (!unsafeReset) context.__isPreloaded = true;
-          } catch (error) {
-            const message =
-              error instanceof Error ? error.message : String(error);
-            throw new Error(`Klint error in the preload: ${message}`);
-          }
-        }
-
-        // Setup phase
-        if (setup && (unsafeReset || !context.__isSetup)) {
-          try {
-            setup(context);
-            if (!unsafeReset) context.__isSetup = true;
-          } catch (error) {
-            const message =
-              error instanceof Error ? error.message : String(error);
-            throw new Error(`Klint error in the setup: ${message}`);
-          }
-        }
-
-        if (draw && !context.__isReadyToDraw) {
-          try {
-            draw(context);
-            context.__isReadyToDraw = true;
-          } catch (error) {
-            const message =
-              error instanceof Error ? error.message : String(error);
-            throw new Error(`Klint error in the draw: ${message}`);
-          }
-        }
-      };
-
-      const unsafeMode = __options.unsafemode === "true";
-      if (!unsafeMode && context.__isReadyToDraw) return;
-
-      await initializeContext(unsafeMode);
-
-      if (__options.static === "true") {
-        handleStaticMode();
-      } else {
-        if (__options.noloop !== "true") animate();
-      }
-    };
-
-    initializeKlint();
-
-    return () => {
-      if (resizeCallbackRef.current) {
-        window.removeEventListener("resize", resizeCallbackRef.current);
-      }
-
-      intersectionObserverRef.current?.disconnect();
-      if (animationFrameId.current) {
-        cancelAnimationFrame(animationFrameId.current);
-      }
-    };
-    // Not ideal, but without an empty array, everything get recomputed unnecesseraly.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+const renderError = (
+  component: KlintProps["errorComponent"],
+  error: Error,
+): ReactNode => {
+  if (typeof component === "function") return component(error);
+  if (component) return component;
   return (
-    <div ref={containerRef} style={{ width: "100%", height: "100%" }}>
-      {toStaticImage ? (
-        <img
-          src={toStaticImage}
-          alt={contextRef.current?.__description || DEFAULT_ALT}
-          style={{
-            display: "block",
-            width: "100%",
-            height: "100%",
-            objectFit: "contain",
-          }}
-        />
-      ) : (
-        <canvas
-          ref={canvasRef}
-          style={{
-            display: __options.nocanvas === "true" ? "none" : "block",
-          }}
-          aria-label={contextRef.current?.__description || DEFAULT_ALT}
-          role="img"
-        />
-      )}
+    <div role="alert" style={{ color: "#b42318", padding: 16 }}>
+      {error.message}
     </div>
   );
-}
+};
+
+const Klint = (props: KlintProps) => {
+  const {
+    context: providedContext,
+    preload,
+    setup,
+    draw,
+    loadingComponent,
+    errorComponent,
+    onError,
+    onReady,
+    onResize,
+    onVisible,
+    extensionFunction,
+    children,
+    className,
+    style,
+    canvasProps,
+  } = props;
+
+  const hooks = useKlint();
+
+  const callbacksRef = useRef({
+    preload,
+    setup,
+    draw,
+    onError,
+    onReady,
+    onResize,
+    onVisible,
+  });
+  callbacksRef.current = {
+    preload,
+    setup,
+    draw,
+    onError,
+    onReady,
+    onResize,
+    onVisible,
+  };
+
+  const extensionsRef = useRef(extensionFunction);
+  extensionsRef.current = extensionFunction;
+
+  const contextBridgeRef = useRef(providedContext ?? hooks.context);
+  const initialOptionsRef = useRef(
+    normalizeKlintOptions({ ...props.options, ...props }),
+  );
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [status, setStatus] = useState<KlintStatus>("loading");
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+    const contextBridge = contextBridgeRef.current;
+
+    let disposed = false;
+    const options = initialOptionsRef.current;
+    let context: KlintContext;
+    try {
+      context = contextBridge.initCoreContext(canvas, options);
+    } catch (cause) {
+      const initError = new Error(
+        `Klint failed to initialize: ${cause instanceof Error ? cause.message : String(cause)}`,
+        { cause },
+      );
+      setError(initError);
+      setStatus("error");
+      callbacksRef.current.onError?.(initError);
+      return;
+    }
+
+    const reportError = (runtimeError: Error) => {
+      if (disposed) return;
+      setError(runtimeError);
+      setStatus("error");
+      callbacksRef.current.onError?.(runtimeError);
+    };
+
+    const renderFrame = (current: KlintContext) => {
+      callbacksRef.current.draw?.(current);
+    };
+    const loop = new KlintAnimationLoop(context, renderFrame, reportError);
+
+    context.__redraw = () => {
+      if (!context.__isReadyToDraw) return;
+      try {
+        renderFrame(context);
+      } catch (cause) {
+        reportError(
+          new Error(
+            `Klint error in redraw: ${cause instanceof Error ? cause.message : String(cause)}`,
+            { cause },
+          ),
+        );
+      }
+    };
+
+    const measureAndResize = () => {
+      if (disposed) return;
+      const rect = container.getBoundingClientRect();
+      const width = rect.width || container.clientWidth || canvas.clientWidth || 300;
+      const height = rect.height || container.clientHeight || canvas.clientHeight || 150;
+      const changed = resizeKlintCanvas(canvas, context, width, height, options);
+      if (!changed) return;
+      callbacksRef.current.onResize?.(context);
+      if (context.__isReadyToDraw && (options.static || options.noloop)) {
+        context.__redraw?.();
+      }
+    };
+
+    measureAndResize();
+    let resizeObserver: ResizeObserver | undefined;
+    if (!options.ignoreResize && typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(measureAndResize);
+      resizeObserver.observe(container);
+    }
+
+    let intersecting = true;
+    let documentVisible = document.visibilityState !== "hidden";
+    const updateVisibility = () => {
+      const visible = intersecting && documentVisible;
+      loop.setVisible(visible);
+      callbacksRef.current.onVisible?.(context, visible);
+    };
+
+    let intersectionObserver: IntersectionObserver | undefined;
+    if (typeof IntersectionObserver !== "undefined") {
+      intersectionObserver = new IntersectionObserver((entries) => {
+        intersecting = entries[0]?.isIntersecting ?? true;
+        updateVisibility();
+      });
+      intersectionObserver.observe(canvas);
+    }
+    const handleVisibilityChange = () => {
+      documentVisible = document.visibilityState !== "hidden";
+      updateVisibility();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    loop.start();
+
+    const initialize = async () => {
+      try {
+        const extensions = extensionsRef.current;
+        if (extensions) {
+          for (const [name, factory] of Object.entries(extensions)) {
+            context.extend(name, factory(context));
+          }
+        }
+
+        await callbacksRef.current.preload?.(context);
+        if (disposed) return;
+        context.__isPreloaded = true;
+
+        await callbacksRef.current.setup?.(context);
+        if (disposed) return;
+        context.__isSetup = true;
+        context.__isReadyToDraw = true;
+        setStatus("ready");
+        callbacksRef.current.onReady?.(context);
+
+        if (options.static || options.noloop) {
+          context.__redraw?.();
+          context.__isPlaying = false;
+        } else {
+          context.__isPlaying = options.autoplay;
+          loop.resetClock();
+        }
+      } catch (cause) {
+        context.__isPlaying = false;
+        reportError(
+          new Error(
+            `Klint lifecycle failed: ${cause instanceof Error ? cause.message : String(cause)}`,
+            { cause },
+          ),
+        );
+      }
+    };
+    void initialize();
+
+    return () => {
+      disposed = true;
+      loop.stop();
+      resizeObserver?.disconnect();
+      intersectionObserver?.disconnect();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      context.__redraw = undefined;
+      contextBridge.releaseCoreContext(canvas);
+    };
+  }, []);
+
+  const canvasStyle: CSSProperties = {
+    display: initialOptionsRef.current.nocanvas ? "none" : "block",
+    touchAction: "none",
+    ...(canvasProps?.style ?? {}),
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className={className}
+      style={{ position: "relative", width: "100%", height: "100%", ...style }}
+      data-klint-status={status}
+    >
+      {status === "loading" && loadingComponent}
+      {status === "error" && error && renderError(errorComponent, error)}
+      <canvas
+        {...canvasProps}
+        ref={canvasRef}
+        tabIndex={canvasProps?.tabIndex ?? 0}
+        style={canvasStyle}
+        role={canvasProps?.role ?? "img"}
+        aria-label={canvasProps?.["aria-label"] ?? "Klint canvas"}
+        aria-busy={status === "loading"}
+      >
+        {canvasProps?.children ?? "Your browser does not support HTML canvas."}
+      </canvas>
+      {children}
+    </div>
+  );
+};
+
+export type { KlintContextWrapper };
+export default Klint;

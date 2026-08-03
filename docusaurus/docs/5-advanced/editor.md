@@ -13,7 +13,7 @@ The Klint Interactive Editor is the fastest way to learn, experiment, and protot
 Create a new editor project:
 
 ```bash
-npx @shopify/klint klint-create-editor my-klint-project
+npx @shopify/klint create-editor my-klint-project
 cd my-klint-project
 npm install
 npm run dev
@@ -242,16 +242,16 @@ The editor includes full TypeScript support. Modify `tsconfig.json` for custom t
 
 ### Getting Help
 
-- 📚 [Function Reference](/docs/Functions/introduction) - Complete API documentation
+- 📚 [Function Reference](/docs/reference/api-reference) - Complete API documentation
 - 🎯 [Examples](/experiments) - Working examples and demos  
 - 💬 [GitHub Issues](https://github.com/Shopify/Klint/issues) - Report bugs or request features
 
 ## 🎉 Next Steps
 
 Ready to move beyond the editor?
-- **[Basic Usage](/docs/klint-introduction)** - Learn to use Klint in React projects
-- **[Lifecycle Functions](/docs/lifecycle)** - Understand setup, draw, and preload
-- **[Mouse Interaction](/docs/klint-hooks)** - Add interactivity to your sketches
-- **[Function Reference](/docs/Functions/introduction)** - Explore all available functions
+- **[Basic Usage](/docs/getting-started/quick-start)** - Learn to use Klint in React projects
+- **[Lifecycle Functions](/docs/core-concepts/lifecycle)** - Understand setup, draw, and preload
+- **[Mouse Interaction](/docs/reference/klint-hooks)** - Add interactivity to your sketches
+- **[Function Reference](/docs/reference/api-reference)** - Explore all available functions
 
 Happy creative coding! 🎨 
