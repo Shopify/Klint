@@ -147,7 +147,7 @@
     "tsup": "^8.4.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.31.0",
-    "vitest": "^3.2.7",
+    "vitest": "^4.1.11",
     "vitest-canvas-mock": "^0.3.3"
   },
   "engines": {
